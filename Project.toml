@@ -1,2 +1,21 @@
+name = "NodeOnTropicalMIS"
+uuid = "d4aabf2d-879b-4247-9de2-d35f7a63c991"
+authors = ["GiggleLiu <cacate0129@gmail.com> and contributors"]
+version = "0.1.0"
+
 [deps]
-TropicalMIS = "30ce92b6-de37-4d2e-b06c-14c6e6075481"
+AbstractTrees = "1520ce14-60c1-5f80-bbc7-55ef81b5835c"
+Compose = "a81c6b42-2e10-5240-aca2-a61377ecd94b"
+OMEinsum = "ebe7aa44-baf0-506c-a96f-8464559b3922"
+TropicalGEMM = "a4ad3063-64a7-4bad-8738-34ed09bc0236"
+TropicalNumbers = "b3a74e9c-7526-4576-a4eb-79c0d4c32334"
+Viznet = "52a3aca4-6234-47fd-b74a-806bdf78ede9"
+
+[compat]
+julia = "1"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]

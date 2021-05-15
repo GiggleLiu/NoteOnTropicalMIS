@@ -1,82 +1,5 @@
-### A Pluto.jl notebook ###
-# v0.12.21
-
-using Markdown
-using InteractiveUtils
-
-# This Pluto notebook uses @bind for interactivity. When running this notebook outside of Pluto, the following 'mock version' of @bind gives bound variables a default value (instead of an error).
-macro bind(def, element)
-    quote
-        local el = $(esc(element))
-        global $(esc(def)) = Core.applicable(Base.get, el) ? Base.get(el) : missing
-        el
-    end
-end
-
-# ╔═╡ 53ce616e-8055-11eb-0caf-e968c041ff4f
 using Revise, Viznet, Compose, TropicalNumbers, OMEinsum
-
-# ╔═╡ fadb61d5-0aac-496e-83e5-da89be0589ba
 using ForwardDiff
-
-# ╔═╡ a4faf523-31f2-4446-82d2-059e39793e62
-using PlutoUI
-
-# ╔═╡ 448c3e6a-8203-11eb-2c9e-fd7d2a3db9d2
-using Profile
-
-# ╔═╡ 69180ced-3729-4cf7-9fb4-db89de76469e
-function b(::Type{T}) where T
-	res = ones(T, 2, 2)
-	res[2, 2] = zero(T)
-	return res
-end
-
-# ╔═╡ 5df8b62e-8357-11eb-2322-f54c02f1dc6c
-b(TropicalF64)
-
-# ╔═╡ f005035b-b982-47f8-b292-28aac5b5c00d
-function v(::Type{T}, n::Int, val) where T
-	res = zeros(T, fill(2, n)...)
-	res[1] = one(T)
-	res[end] = T(val)
-	return res
-end
-
-# ╔═╡ 6c50f6de-8357-11eb-1a29-4f742afaeaa2
-v(TropicalF64, 3, 1.0)
-
-# ╔═╡ bb36b716-8357-11eb-1007-536e94c427c9
-zero(TropicalF64)
-
-# ╔═╡ bfda24e2-8357-11eb-1fb9-7390cc2b0988
-one(TropicalF64)
-
-# ╔═╡ c18e8111-16a8-42a8-8fa8-67ac76f4a13e
-begin
-	⪰(a, b) = b ⪯ a
-	⪯(a, b) = (a & b) == a
-end
-
-# ╔═╡ 0086090b-a61f-42c5-b210-c4d7d53e8e25
-function compress!(a::AbstractArray{T}) where T
-	for (ind_a, val_a) in enumerate(a)
-		for (ind_b, val_b) in enumerate(a)
-			bs_a = ind_a - 1
-			bs_b = ind_b - 1
-			if bs_a != bs_b && val_a <= val_b && bs_a ⪰ bs_b
-				a[ind_a] = zero(T)
-			end
-		end
-	end
-	return a
-end
-
-# ╔═╡ db52bcdc-1a89-4e24-898f-d3fdbbed27ea
-res1 = let
-	T = TropicalF64
-	ein"a,b,c,d,ac,bd->abcd"([v(T, 1, 1.0) for i=1:4]..., b(T), b(T))
-end
 
 # ╔═╡ 4053c327-43d2-4203-aa60-48b02a8c4dac
 nodes = let
@@ -134,11 +57,6 @@ end
 
 # ╔═╡ b57d89c7-b46a-474b-a701-b8632338a01b
 vizconfig(nodes, edges)
-
-# ╔═╡ d583d1ef-5f72-4331-95f5-2aa4693cdca9
-function contract_a(::Type{T}, x) where T
-	ein"a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,ae,bf,cg,dh,ei,ej,ek,el,fi,fm,gm,gn,go,gp,hl,hp,ij,im,in,jk,jm,jn,jo,kl,kn,ko,kp,lo,lp,mn,no,op->abcd"([v(T, 1, xi) for xi in x]..., [b(T) for i=1:32]...)
-end
 
 # ╔═╡ efed2d39-25e3-4b15-a184-c33789949aa6
 res2 = contract_a(TropicalF64, ones(16))
