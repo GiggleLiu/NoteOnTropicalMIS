@@ -1,4 +1,4 @@
-using NodeOnTropicalMIS
+using NoteOnTropicalMIS
 using Test
 
 @testset "tensors.jl" begin

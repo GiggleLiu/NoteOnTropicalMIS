@@ -1,6 +1,6 @@
-name = "NodeOnTropicalMIS"
-uuid = "d4aabf2d-879b-4247-9de2-d35f7a63c991"
-authors = ["GiggleLiu <cacate0129@gmail.com> and contributors"]
+name = "NoteOnTropicalMIS"
+uuid = "c1dc120e-21d9-4a68-bdee-287fbe414cee"
+authors = ["GiggleLiu <cacate0129@gmail.com>"]
 version = "0.1.0"
 
 [deps]

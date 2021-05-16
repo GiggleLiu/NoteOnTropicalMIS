@@ -1,3 +1,4 @@
+using OMEinsum: NestedEinsum
 export misb, misv
 
 function misb(::Type{T}) where T
@@ -31,6 +32,22 @@ end
 
 function cross(::Type{T}) where T
 	ein"((((a,c),b),d),bd,ac)->abcd"([misv(T, 1, 1.0) for i=1:4]..., misb(T), misb(T))
+end
+
+function generate_xs!(::Type{T}, codeInt, out, xs) where {T, ixs, iy}
+    if length(ix) == 1
+        push!(xs, misv(T, 1, 1.0))
+    elseif length(ix)==2
+        push!(xs, misb(T))
+    else
+        error("")
+    end
+end
+
+function generate_xs!(::Type{T}, code::NestedEinsum, out, xs) where {T}
+    for (ix, arg) in zip(OMEinsum.getixs(code.eins), code.args)
+        generate_xs!(T, arg, ix, xs)
+    end
 end
 
 function widget1(::Type{T}, x) where T

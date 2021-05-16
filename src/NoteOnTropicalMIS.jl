@@ -1,4 +1,4 @@
-module NodeOnTropicalMIS
+module NoteOnTropicalMIS
 
 using TropicalGEMM, TropicalNumbers
 using OMEinsum

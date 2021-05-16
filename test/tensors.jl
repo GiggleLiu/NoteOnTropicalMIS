@@ -1,4 +1,4 @@
-using Test, NodeOnTropicalMIS
+using Test, NoteOnTropicalMIS
 using TropicalNumbers
 
 @testset "bond and vertex tensor" begin
