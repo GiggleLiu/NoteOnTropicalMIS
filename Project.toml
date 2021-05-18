@@ -4,7 +4,6 @@ authors = ["GiggleLiu <cacate0129@gmail.com>"]
 version = "0.1.0"
 
 [deps]
-AbstractTrees = "1520ce14-60c1-5f80-bbc7-55ef81b5835c"
 Compose = "a81c6b42-2e10-5240-aca2-a61377ecd94b"
 OMEinsum = "ebe7aa44-baf0-506c-a96f-8464559b3922"
 TropicalGEMM = "a4ad3063-64a7-4bad-8738-34ed09bc0236"

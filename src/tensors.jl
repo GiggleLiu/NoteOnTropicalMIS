@@ -50,9 +50,21 @@ function generate_xs!(::Type{T}, code::NestedEinsum, out, xs) where {T}
     end
 end
 
-function widget1(::Type{T}, x) where T
-	code = ein"a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,ae,bf,cg,dh,ei,ej,ek,el,fi,fm,gm,gn,go,gp,hl,hp,ij,im,in,jk,jm,jn,jo,kl,kn,ko,kp,lo,lp,mn,no,op->abcd"
-    code = greedy_order(code)
-    code([v(T, 1, xi) for xi in x]..., [b(T) for i=1:32]...)
+function is_diff_by_const(t1::AbstractArray{T}, t2::AbstractArray{T}) where T
+	x = NaN
+	for (a, b) in zip(t1, t2)
+		if isinf(a) && isinf(b)
+			continue
+		end
+		if isinf(a) || isinf(b)
+			return false, 0
+		end
+		if isnan(x)
+			x = (a - b)
+		elseif x != a - b
+			return false, 0
+		end
+	end
+	return true, x
 end
 

@@ -212,7 +212,21 @@ Harvard University\\
 \end{description}
 
 \section{Computing degeneracy}
-\section{The contraction of a widget}
+\section{Utilizing the sparsity}
+Tensor network compression is an important tool to utilize sparsity.
+\subsection{The equivalence between branching and compression}
+We contract the tensors in a subregion $R \subseteq G$ of a graph $G$, and obtain a resulting tensor $A$ of rank $|C|$, where $C$ is the set of vertice tensors at the cut.
+The maximum independant set size in this region with boundary configuration $\sigma \in \{0,1\}\otimes |C|$ is $A_{\sigma}$.
+We say an entry $A_{\sigma_a}$ is ``better'' than $A_{\sigma_b}$ if
+\begin{align}
+(\sigma_a \land \sigma_b = \sigma_a) \land (A_{\sigma_a} \geq A_{\sigma_b}),\label{eq:compress}
+\end{align}
+where $\land$ is a bitwise and operations.
+The first term means that whenever a bit in $\sigma_a$ has boolean value $1$, the corresponding bit in $\sigma_b$ is also $1$.
+While the second term means the maximum independant set size with boundary configuration fixed to $\sigma_a$ is not less than that fixed to $\sigma_b$.
+The word ``better'' means the best solution with boundary configuration $\sigma_a$ is never worse than that with $\sigma_b$.
+When Eq. \ref{eq:compress} holds, It is easy to see that if $\sigma_b \cup \overline{\sigma_b}$ is one of the solutions for maximum independant sets in $G$, $\sigma_a \cup \overline{\sigma_b}$ is also a solution.
+\section{Vertifying a widget}
 
 \section{}
 
