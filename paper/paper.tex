@@ -182,7 +182,7 @@ Listing \thelstlisting: #1\hfill%\hfill%
 \newcommand{\material}[1]{\iffalse[{\bf  \color{cyan}{Material: #1}}]\fi}
 \newcommand{\orange}[1]{\iffalse[{\bf  \color{orange}{Jo: #1}}]\fi}
 
-\newtheorem{theorem}{\textit{Theorem}}
+\newtheorem{theorem}{\textit{Rule}}
 \theoremstyle{definition}\newtheorem{definition}{\textit{Definition}}
 
 \makeatother
@@ -214,7 +214,7 @@ Harvard University\\
 \section{Computing degeneracy}
 \section{Utilizing the sparsity}
 Tensor network compression is an important tool to utilize sparsity.
-\subsection{The equivalence between branching and compression}
+
 We contract the tensors in a subregion $R \subseteq G$ of a graph $G$, and obtain a resulting tensor $A$ of rank $|C|$, where $C$ is the set of vertice tensors at the cut.
 The maximum independant set size in this region with boundary configuration $\sigma \in \{0,1\}\otimes |C|$ is $A_{\sigma}$.
 We say an entry $A_{\sigma_a}$ is ``better'' than $A_{\sigma_b}$ if
@@ -226,9 +226,102 @@ The first term means that whenever a bit in $\sigma_a$ has boolean value $1$, th
 While the second term means the maximum independant set size with boundary configuration fixed to $\sigma_a$ is not less than that fixed to $\sigma_b$.
 The word ``better'' means the best solution with boundary configuration $\sigma_a$ is never worse than that with $\sigma_b$.
 When Eq. \ref{eq:compress} holds, It is easy to see that if $\sigma_b \cup \overline{\sigma_b}$ is one of the solutions for maximum independant sets in $G$, $\sigma_a \cup \overline{\sigma_b}$ is also a solution.
-\section{Vertifying a widget}
 
-\section{}
+
+\subsection{The equivalence between branching and compression}
+We are going the verify the Lemmas used in branching algorithm in book~\cite{Fomin2013}.
+\begin{theorem} % basic
+  If a vertex $v$ is in an independent set $I$, then none of its neighbors can be in $I$.
+On the other hand, if $I$ is a maximum (and thus maximal) independent set,
+and thus if $v$ is not in $I$ then at least one of its neighbors is in $I$.
+\end{theorem}
+\begin{theorem} % 2.6
+Let $G=(V,E)$ be a graph, let $v$ and $w$ be adjacent vertices of $G$ such that $N[v] \subseteq N[w]$. Then
+\begin{equation}
+\alpha(G)=\alpha(G\backslash w).
+\end{equation}
+\end{theorem}
+
+\begin{theorem} % 2.7
+  Let $G = (V, E)$ be a graph and let $v$ be a vertex of $G$. If no maximum
+independent set of $G$ contains $v$ then every maximum independent set of $G$ contains
+at least two vertices of $N(v)$.
+\end{theorem}
+
+\begin{theorem} % 2.8
+Let $G = (V, E)$ be a graph and $v$ a vertex of $G$. Then
+\begin{equation}
+\alpha(G) = \max(1 + \alpha(G \backslash N[v]), \alpha(G \backslash (M(v) \cup \{v\})).
+\end{equation}
+\end{theorem}
+
+\begin{theorem} % 2.9
+Let $G = (V, E)$ be a graph and $v$ be a vertex of $G$ such that $N[v]$ is a
+clique. Then
+\begin{equation}
+\alpha(G) = 1 + \alpha(G \backslash N[v]).
+\end{equation}
+\end{theorem}
+
+
+\begin{theorem}  %2.10
+Let $G$ be a graph, let $S$ be a separator of $G$ and let $I(S)$ be the set of
+all subsets of $S$ being an independent set of $G$. Then
+\begin{equation}
+\alpha(G) = \max_{A\in I(S)} |A| + \alpha(G \backslash (S \cup N[A])).
+\end{equation}
+\end{theorem}
+
+\begin{theorem}  %2.11
+Let $G = (V, E)$ be a disconnected graph and $C \subseteq V$ a connected com-
+ponent of $G$. Then
+\begin{equation}
+\alpha(G) = \alpha(G[C]) + \alpha(G \backslash C)).
+\end{equation}
+\end{theorem}
+
+\begin{align}
+if |V| = 0 then
+return 0
+if \exists v \in V with d(v) \leq 1 then
+return 1 + mis2(G \backslash N[v])
+if \exists v \in V with d(v) = 2 then
+(let u 1 and u 2 be the neighbors of v)
+if {u 1 , u 2 } \in E then
+return 1 + mis2(G \backslash N[v])
+if {u 1 , u 2 } \in
+/ E then
+if |N 2 (v)| = 1 then
+(let N 2 (v) = {w})
+return max(2 + mis2(G \backslash (N 2 [v] \cup N[w])), 2 + mis2(G \backslash N 2 [v]))
+if |N 2 (v)| > 1 then
+return max(mis2(G \backslash N[v]), mis2(G \backslash (M(v) \cup cup))
+if \exists v \in V with d(v) = 3 then
+(let u 1 u 2 and u 3 be the neighbors of v)
+if G[N(v)] has no edge then
+if v has a mirror then
+return max(1 + mis2(G \backslash N[v]), mis2(G \backslash (M(v) \cup {v}))
+if v has no mirror then
+return max(1 + mis2(G \backslash N[v]), 2 + mis2(G \backslash N[{u 1 , u 2 }]), 2 + mis2(G \backslash
+(N[{u_1 , u_3 }] \cup \{u_2\})), 2 + mis2(G \backslash (N[{u_2 , u_3 }] \cup \{1\})))
+if G[N(v)] has one or two edges then
+return max(1 + mis2(G \backslash N[v]), mis2(G \backslash (M(v) \cup cup))
+if G[N(v)] has three edges then
+return 1 + mis2(G \backslash N[v])
+if \Delta (G) \geq 6 then
+choose a vertex v of maximum degree in G
+return max(1 + mis2(G \backslash N[v]), mis2(G \backslash v))
+if G is disconnected then
+(let C \subseteq V be a component of G)
+return mis2(G[C]) + mis2(G \backslash C)
+if G is 4 or 5-regular then
+choose any vertex v of G
+return max(1 + mis2(G \backslash N[v]), mis2(G \backslash (M(v) \cup \{v\}))
+if \Delta (G) = 5 and \delta (G) = 4 then
+choose adjacent vertices v and w with d(v) = 5 and d(w) = 4 in G
+return
+\max(1 + mis2(G \backslash N[v]), 1 + mis2(G \backslash (\{v\} \cup M(v) \cup N[w])), mis2(G \backslash (M(v) \cup \{v, w\})))
+\end{align}
 
 \bibliographystyle{iclr2021_conference}
 \bibliography{refs}

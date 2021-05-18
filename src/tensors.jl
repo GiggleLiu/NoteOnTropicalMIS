@@ -1,5 +1,5 @@
 using OMEinsum: NestedEinsum
-export misb, misv
+export misb, misv, compress!
 
 function misb(::Type{T}) where T
 	res = ones(T, 2, 2)
@@ -34,21 +34,33 @@ function cross(::Type{T}) where T
 	ein"((((a,c),b),d),bd,ac)->abcd"([misv(T, 1, 1.0) for i=1:4]..., misb(T), misb(T))
 end
 
-function generate_xs!(::Type{T}, codeInt, out, xs) where {T, ixs, iy}
-    if length(ix) == 1
-        push!(xs, misv(T, 1, 1.0))
-    elseif length(ix)==2
-        push!(xs, misb(T))
-    else
-        error("")
+_auto_mistensor(::Type{T}, ix::NTuple{2}) where T = misb(T)
+_auto_mistensor(::Type{T}, ix::NTuple{1}) where T = misv(T, 1, 1.0)
+function generate_xs!(::Type{T}, code::NestedEinsum, xs=[]) where {T}
+    for (ix, arg) in zip(OMEinsum.getixs(code.eins), code.args)
+		if arg isa Integer
+			push!(_auto_mistensor(T, ix), xs)
+		else
+        	generate_xs!(T, arg, xs)
+		end
     end
+	return xs
 end
 
-function generate_xs!(::Type{T}, code::NestedEinsum, out, xs) where {T}
-    for (ix, arg) in zip(OMEinsum.getixs(code.eins), code.args)
-        generate_xs!(T, arg, ix, xs)
+function generate_xs!(::Type{T}, code::EinCode, xs=[]) where {T}
+    for ix in OMEinsum.getixs(code)
+		push!(xs, _auto_mistensor(T, ix))
     end
+	return xs
 end
+
+export mis_solve, mis_count
+function mis_contract(::Type{T}, code) where {T}
+	xs = generate_xs!(T, code, [])
+	code(xs...)
+end
+mis_solve(code) = mis_contract(TropicalF64, code)
+mis_count(code) = mis_contract(CountingTropical{Float64}, code)
 
 function is_diff_by_const(t1::AbstractArray{T}, t2::AbstractArray{T}) where T
 	x = NaN
