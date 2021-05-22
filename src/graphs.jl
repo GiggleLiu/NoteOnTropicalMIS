@@ -1,4 +1,4 @@
-export widget16, widget12, unitdisk_edges
+export widget16, widget12, unitdisk_edges, uniformsize
 
 struct UnitdiskWidget{LT}
     nodes::Vector{Pair{LT,Tuple{Float64,Float64}}}

@@ -36,10 +36,10 @@ end
 
 _auto_mistensor(::Type{T}, ix::NTuple{2}) where T = misb(T)
 _auto_mistensor(::Type{T}, ix::NTuple{1}) where T = misv(T, 1, 1.0)
-function generate_xs!(::Type{T}, code::NestedEinsum, xs=[]) where {T}
+function generate_xs!(::Type{T}, code::NestedEinsum, xs) where {T}
     for (ix, arg) in zip(OMEinsum.getixs(code.eins), code.args)
 		if arg isa Integer
-			push!(_auto_mistensor(T, ix), xs)
+			xs[arg] = _auto_mistensor(T, ix)
 		else
         	generate_xs!(T, arg, xs)
 		end
@@ -47,16 +47,22 @@ function generate_xs!(::Type{T}, code::NestedEinsum, xs=[]) where {T}
 	return xs
 end
 
-function generate_xs!(::Type{T}, code::EinCode, xs=[]) where {T}
-    for ix in OMEinsum.getixs(code)
-		push!(xs, _auto_mistensor(T, ix))
+function generate_xs!(::Type{T}, code::EinCode, xs) where {T}
+    for (i,ix) in enumerate(OMEinsum.getixs(code))
+		xs[i] = _auto_mistensor(T, ix)
     end
 	return xs
 end
 
+ninput(::EinCode{ixs}) where ixs = length(ixs)
+ninput(ne::Int) = 1
+function ninput(ne::NestedEinsum)
+    mapreduce(ninput, +, ne.args, init=0)
+end
+
 export mis_solve, mis_count
 function mis_contract(::Type{T}, code) where {T}
-	xs = generate_xs!(T, code, [])
+	xs = generate_xs!(T, code, Vector{Any}(undef, ninput(code)))
 	code(xs...)
 end
 mis_solve(code) = mis_contract(TropicalF64, code)

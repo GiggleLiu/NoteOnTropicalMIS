@@ -39,11 +39,11 @@ function vizeinsum(nodes, edges; config=zeros(Int, length(nodes)), unit=1.0, gra
     XMAX = maximum(x->x.second[1], nodes)
     YMAX = maximum(x->x.second[2], nodes)
 	tb = textstyle(:default, fill(textcolor), fontsize(3pt*unit))
-	nb = nodestyle(:circle, fill("black"), linewidth(0mm); r=0.005*unit)
-	bt = nodestyle(:square, fill("black"), linewidth(0mm); r=0.015*unit)
-	bt1 = nodestyle(:circle, fill("transparent"), stroke("black"), linewidth(0.08mm*unit); r=0.009*unit)
-	nb2 = nodestyle(:circle, fill("red"), linewidth(0mm); r=0.005*unit)
-	eb = bondstyle(:default, linewidth(0.08mm*unit))
+	nb = nodestyle(:circle, fill("black"), linewidth(0); r=0.005*unit)
+	bt = nodestyle(:square, fill("black"), linewidth(0); r=0.010*unit)
+	bt1 = nodestyle(:circle, fill("transparent"), stroke("black"), linewidth(0.08*unit); r=0.009*unit)
+	nb2 = nodestyle(:circle, fill("red"), linewidth(0); r=0.005*unit)
+	eb = bondstyle(:default, linewidth(0.08*unit))
 	img = canvas() do
 		for (i, (t, p)) in enumerate(nodes)
 			(config[i]==1 ? nb2 : nb) >> p

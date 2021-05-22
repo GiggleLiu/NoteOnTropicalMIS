@@ -1,2 +1,2 @@
-using NoteOnTropicalMIS: widget12, widget16
-nodes = widget12()
+using NoteOnTropicalMIS
+w = widget12()
