@@ -212,6 +212,96 @@ Harvard University\\
 \end{description}
 
 \section{Computing degeneracy}
+Consider the following 5 node graph.
+
+\begin{figure}[H]
+    \centerline{\includegraphics[width=0.4\columnwidth,trim={0 0cm 0 0},clip]{../notebooks/fig1.pdf}}
+\end{figure}
+
+If put a vector of size $2$ at each vertex
+\begin{equation}
+    \left(\begin{matrix}
+        1 \\
+        x
+    \end{matrix}\right),
+\end{equation}
+
+and a matrix of size $2 \times 2$ at each edge
+\begin{equation}
+    \left(\begin{matrix}
+        1  & 1\\
+        1 & 0
+    \end{matrix}\right).
+\end{equation}
+
+\begin{figure}[H]
+    \centerline{\includegraphics[width=0.4\columnwidth,trim={0 0cm 0 0},clip]{../notebooks/fig2.pdf}}
+\end{figure}
+
+Here $x$ is a variable. Then we contract this graph with einsum \texttt{a,b,c,d,ab,ad,bc,bd,cd,ce->}.
+The result is a scalar function of $x$, it corresponds to the independance polynomial~\cite{}.
+\begin{equation}
+I(G, x) = \sum_{k=1}^{\alpha(G)} a_k x^k,
+\end{equation}
+where $a_k$ is the the degeneracy for independant set size $k$.
+
+\subsection{Symbolic computing}
+The most straight forward approach is the symbolic computing, where we store a polynomial of $x$ as a vector of factors.
+We define the algebra between these vectors of factors and insert them to the original tensor network contraction algorithm.
+However, this method suffers from a space overhead that propotional to the maximum independant set size.
+
+\subsection{Polynomial fitting}
+Let $m$ be the maximum independent set size and $X$ be a set of $m+1$ random real numbers, e.g. $\{0, 1, 2, \ldots, m\}$.
+We compute the einsum contraction for each $x \in X$ and obtain the following relations
+\begin{align}
+a_0 + a_1 x_1 + a_1 x_1^2 + \ldots + a_m x_1^m &= y_0\\
+a_0 + a_1 x_2 + a_2 x_2^2 + \ldots + a_m x_2^m &= y_1\\
+\ldots&\\
+a_0 + a_1 x_m + a_2 x_m^2 + \ldots + a_m x_m^m& = y_m
+\end{align}
+The polynomial fitting between $X$ and $Y = \{y_0, y_1, \ldots, y_m\}$ gives us the factors.
+
+\subsection{Fourier transformation}
+\begin{align}
+\left(\begin{matrix}
+1 & x_1 & x_1^2 & \ldots & x_1^m \\
+1 & x_2 & x_2^2 & \ldots & x_2^m \\
+\vdots & \vdots & \vdots &\ddots & \vdots \\
+1 & x_m & x_m^2 & \ldots & x_m^m
+\end{matrix}\right)
+\left(\begin{matrix}
+a_0 \\ a_1 \\ \vdots \\ a_m
+\end{matrix}\right)
+= \left(\begin{matrix}
+y_0 \\ y_1 \\ \vdots \\ y_m
+\end{matrix}\right)
+\end{align}
+
+\begin{align}
+\left(\begin{matrix}
+1 & r\omega & r^2\omega^2 & \ldots & r^m\omega^m \\
+1 & r\omega^2 & r^2\omega^4 & \ldots & r^m\omega^{2m} \\
+\vdots & \vdots & \vdots &\ddots & \vdots \\
+1 & r\omega^m & r^2\omega^{2m} & \ldots & r^m\omega^{m^2}
+\end{matrix}\right)
+\left(\begin{matrix}
+a_0 \\ a_1 \\ \vdots \\ a_m
+\end{matrix}\right)
+= \left(\begin{matrix}
+y_0 \\ y_1 \\ \vdots \\ y_m
+\end{matrix}\right)
+\end{align}
+
+When $r=1$, the left side is a DFT matrix. We can obtain the factors using the relation $\vec a = {\rm FFT^{-1}}(\omega) \cdot \vec y$.
+In the special case that $\omega = e^{-2\pi i/(m+1)}$, it is directly solvable with inverse fast fourier transformation algorithm in package \texttt{FFTW}.
+
+\begin{equation}
+{\rm FFT}(\omega) \cdot \vec a_r = \vec y
+\end{equation}
+where $(\vec a_r)_k = a_k r ^k$, by choosing diferent $r$, we can obtain better precision in low independant set size region  ($\omega<1$) and high independant set size region ($\omega>1$).
+
+\subsection{Finite field algebra}
+
 \section{Utilizing the sparsity}
 Tensor network compression is an important tool to utilize sparsity.
 
@@ -228,32 +318,54 @@ The word ``better'' means the best solution with boundary configuration $\sigma_
 When Eq. \ref{eq:compress} holds, It is easy to see that if $\sigma_b \cup \overline{\sigma_b}$ is one of the solutions for maximum independant sets in $G$, $\sigma_a \cup \overline{\sigma_b}$ is also a solution.
 
 
-\subsection{The equivalence between branching and compression}
+\subsection{The tensor network compression detects branching rules automatically}
+
+\textit{max-size rule} The resulting tensor of Tropical tensor contraction stores only the local independant set size that maximizes the internal degrees on freedom.
+Where the internal degree of freedom are edges that does not connect to tensors not contracted.
+
+\textit{max-interior rule} The resulting tensor of Tropical tensor contraction stores only the local independant set size that maximizes the internal degrees on freedom.
+
 We are going the verify the Lemmas used in branching algorithm in book~\cite{Fomin2013}.
-\begin{theorem} % basic
+\begin{theorem}\label{rule:one} % basic
   If a vertex $v$ is in an independent set $I$, then none of its neighbors can be in $I$.
 On the other hand, if $I$ is a maximum (and thus maximal) independent set,
 and thus if $v$ is not in $I$ then at least one of its neighbors is in $I$.
 \end{theorem}
-\begin{theorem} % 2.6
+
+Contract $N[v]$, each entry of the resulting tensor of rank $|N(v)|$ corresponds to a locally maximized independant set size with fixed boundary configuration.
+If the boundary configuration is a bit string of 0s, $\sigma_v$ will takes value $1$ to maximize the local independant set size.
+
+\begin{theorem} % 2.5
 Let $G=(V,E)$ be a graph, let $v$ and $w$ be adjacent vertices of $G$ such that $N[v] \subseteq N[w]$. Then
 \begin{equation}
 \alpha(G)=\alpha(G\backslash w).
 \end{equation}
 \end{theorem}
 
-\begin{theorem} % 2.7
+Contract $N[w]$, both $\{v, w\}$ disapear from the tensor indices because they are inner degrees of freedom.
+If $w$ is one, then $N[v]$ are all zeros, the resulting tensor element can not be larger than setting $v=1$ and $w=0$.
+By the maximization rule, the local tensor does not change if we remove $w$.
+
+\begin{theorem} % 2.6
   Let $G = (V, E)$ be a graph and let $v$ be a vertex of $G$. If no maximum
 independent set of $G$ contains $v$ then every maximum independent set of $G$ contains
 at least two vertices of $N(v)$.
 \end{theorem}
 
-\begin{theorem} % 2.8
+\begin{theorem} % 2.7
 Let $G = (V, E)$ be a graph and $v$ a vertex of $G$. Then
 \begin{equation}
 \alpha(G) = \max(1 + \alpha(G \backslash N[v]), \alpha(G \backslash (M(v) \cup \{v\})).
 \end{equation}
 \end{theorem}
+
+Here, $M(v)$ is the set of mirrors of $v$ in $G$.
+A vertex $w \in N^2(v)$ is called a mirror of $v$ if $N(v) \backslash N(w)$ is a clique.
+This rule states that if $v$ is not in $M$, there exists an MIS $I$ that $M(v)\notin I$.
+otherwise, there must be one of $N(v)$ in the MIS (maximization rule).
+If $w$ is in $I$, then none of $N(v) \cap N(w)$ is in $I$, then there must be one of node in the clique $N(v)\backslash N(w)$ in $I$ (maximization rule),
+since clique has at most one node in the MIS, the tensor compression will eliminate this solution by moving the occuppied node to the interior.
+Hence, the tensor compression rule do captures the mirror rule.
 
 \begin{theorem} % 2.9
 Let $G = (V, E)$ be a graph and $v$ be a vertex of $G$ such that $N[v]$ is a

@@ -14,16 +14,22 @@ macro bind(def, element)
 end
 
 # ╔═╡ c8c14900-b7f5-11eb-3dbe-4390dd0fcc0a
-using Revise, OMEinsum, TropicalNumbers, NoteOnTropicalMIS, Compose, Viznet
+begin
+	using Revise, OMEinsum, OMEinsumContractionOrders, TropicalNumbers, NoteOnTropicalMIS, Compose, Viznet
+	using OMEinsumContractionOrders: uniformsize
+	function savetodisk(obj, filename)
+		obj |> SVG(filename*".svg")
+	end
+end;
+
+# ╔═╡ e56f2ba7-6a50-4400-b761-9f587076778f
+using Polynomials
 
 # ╔═╡ d1a8f940-c8b8-4ce6-af68-dee3a286e632
 using LightGraphs
 
 # ╔═╡ 8e2263d2-ffbf-4aa5-bf7e-29f16b2dbade
 using PlutoUI
-
-# ╔═╡ e56f2ba7-6a50-4400-b761-9f587076778f
-using Polynomials
 
 # ╔═╡ f2c1633a-0e2b-4ecc-81bf-f54fa0efcb44
 using FFTW
@@ -50,6 +56,26 @@ using Test
 # ╔═╡ a97d1c41-fb19-42ce-a412-68491f02a3fa
 using Primes
 
+# ╔═╡ d13e65e9-0cbb-42f7-b7e9-72237e353528
+using ProfileSVG
+
+# ╔═╡ 2a37780e-53b6-4a40-9738-5daba20c1001
+begin
+	node_black = nodestyle(:circle, r=0.03)
+	node_white = nodestyle(:circle, fill("white"), r=0.08)
+	edge_black = bondstyle(:default)
+	text_black = textstyle(:default)
+	text_white = textstyle(:default, fill("white"))
+	
+	function save_pdf(img, fname, save)
+		if save
+			img |> SVG("$fname.svg")
+		end
+		run(`rsvg-convert -f pdf -o $fname.pdf $fname.svg`)
+		return img
+	end
+end;
+
 # ╔═╡ b91528fe-6aa1-4c58-968e-a8997e895af3
 md"## Rule 0"
 
@@ -64,6 +90,9 @@ mis_solve(code1)
 
 # ╔═╡ 10737ca0-5419-432b-ba10-6e63d6ddddf0
 vizeinsum(code1, ['v'=>(0.0, 0.0), 'a'=>(0.0, 0.5), 'b'=>(0.5, 0.0), 'c'=>(0.5, 0.5)], graphsize=5cm, unit=5.0, textoffset=(0.07, 0.0), rescale=0.9)
+
+# ╔═╡ 06f4c475-685d-4127-bb1b-e2ed1b9a5cd4
+md" $(@bind x CheckBox()) save to disk"
 
 # ╔═╡ 57033470-7163-4c10-bf2b-5126f059a1eb
 let
@@ -316,6 +345,87 @@ md"This is a combination of mirror rule 0 and mirror rule by deviding the proble
 # ╔═╡ c8dbb330-efdd-4067-acd7-ed0fc1facf48
 md"## Independance polynomial"
 
+# ╔═╡ 29e224b6-0b4c-4a83-811e-6d6cde561278
+md" $(@bind save_fig12 CheckBox()) save fig1"
+
+# ╔═╡ e2082ba8-bc1a-4114-a43a-c8b430d303fd
+let
+	img = canvas() do
+		Compose.set_default_graphic_size(8cm, 8cm)
+		locs = [(0.2, 0.2), (0.2, 0.6), (0.6,0.6), (0.6, 0.2), (0.9, 0.9)]
+		for loc in locs
+			node_black >> loc
+		end
+		for (loc, t) in zip(locs, "abcde")
+			text_white >> (loc, string(t))
+		end
+		for (i,j) in [(1, 2), (2, 3), (3,4), (4,1), (3,5), (2,4)]
+			edge_black >> (locs[i], locs[j])
+		end
+	end
+	save_pdf(img, "fig1", save_fig12)
+end
+
+# ╔═╡ b91a8b8e-8bc5-4ebc-addc-0893144f2b1a
+let
+	img = canvas() do
+		Compose.set_default_graphic_size(8cm, 8cm)
+		locs = [(0.2, 0.2), (0.2, 0.6), (0.6,0.6), (0.6, 0.2), (0.9, 0.9)]
+		for loc in locs
+			text_black >> (loc, "[1, x]")
+		end
+		for (i,j) in [(1, 2), (2, 3), (3,4), (4,1), (3,5), (2,4)]
+			text_black >> ((locs[i] .+ locs[j]) ./ 2, "[1 1\n1 0]")
+		end
+		for loc in locs
+			node_white >> loc
+		end
+		for (i,j) in [(1, 2), (2, 3), (3,4), (4,1), (3,5), (2,4)]
+			node_white >> ((locs[i] .+ locs[j]) ./ 2)
+		end
+		for (i,j) in [(1, 2), (2, 3), (3,4), (4,1), (3,5), (2,4)]
+			edge_black >> (locs[i], locs[j])
+		end
+	end
+	save_pdf(img, "fig2", save_fig12)
+end
+
+# ╔═╡ c1910146-a9bb-472a-814c-419aa75b077e
+md"""
+The result is
+```math
+I(G, x) = \sum_{k=1}^{\alpha(G)} c_k x^k,
+```
+where ``c_k`` is the the degeneracy for independant set size $k$.
+
+[Computing the Independence Polynomial: from the Tree Threshold down to the Roots](https://arxiv.org/abs/1608.02282)
+
+
+[[Ferrin, Gregory Matthew. "Independence polynomials." (2014)]](https://scholarcommons.sc.edu/cgi/viewcontent.cgi?article=3632&context=etd).
+"""
+
+# ╔═╡ c5d0d8c7-0fc2-4f32-803b-a15d836e80bb
+democode = ein"a,b,c,d,ab,ad,bc,bd,cd,ce->"
+
+# ╔═╡ 8b4b532e-f149-49e0-be60-7b3d674ba4d8
+demo_xs = NoteOnTropicalMIS.generate_polyxs!(2.0, democode)
+
+# ╔═╡ 1e1c2e60-8c8f-4b2c-b615-1ad4497c0e5a
+f_2 = democode(demo_xs...)
+
+# ╔═╡ 598c0ff3-786e-4911-a6f7-1f1d4956e154
+let
+	xs = (0:2)
+	ys = map(xs) do x
+		demo_xs = NoteOnTropicalMIS.generate_polyxs!(x, democode)
+		democode(demo_xs...)[]
+	end
+	fit(xs, ys, 2)
+end
+
+# ╔═╡ 0daab8e4-f099-414f-aca3-51b845ef88bd
+md"# Random 3 regular graph"
+
 # ╔═╡ 08b92a4a-3db4-4548-9516-e5a513f78237
 function random_regular_eincode(n, k)
 	g = LightGraphs.random_regular_graph(n, k)
@@ -330,7 +440,7 @@ end
 code = random_regular_eincode(n, 3)
 
 # ╔═╡ db7e73f2-d1e8-4c77-b4c4-3f1f936915f2
-optcode = optimize_greedy(code, NoteOnTropicalMIS.uniformsize(code, 2))
+optcode = optimize_kahypar(code, uniformsize(code, 2); sc_target=20, max_group_size=30)
 
 # ╔═╡ 6781f8f5-97b5-43ae-9afc-f914f53e170e
 OMEinsum.timespace_complexity(optcode, uniformsize(optcode, 2))
@@ -341,37 +451,20 @@ mis_result = mis_solve(optcode)[].n |> Int
 # ╔═╡ 916ed7f0-c98f-4f4e-b5c9-32e4eeef2ccd
 mis_count(optcode)
 
-# ╔═╡ 99609748-c999-4903-b31b-d883a2ce3250
-begin
-_auto_mispolytensor(x::T, ix::NTuple{2}) where T = T[1 1; 1 0]
-_auto_mispolytensor(x::T, ix::NTuple{1}) where T = T[1, x]
-function generate_polyxs!(x::T, code::OMEinsum.NestedEinsum, xs) where {T}
-    for (ix, arg) in zip(OMEinsum.getixs(code.eins), code.args)
-		if arg isa Integer
-			xs[arg] = _auto_mispolytensor(x, ix)
-		else
-        	generate_polyxs!(x, arg, xs)
-		end
-    end
-	return xs
-end
-
-function generate_polyxs!(x::T, code::EinCode, xs) where {T}
-    for (i,ix) in enumerate(OMEinsum.getixs(code))
-		xs[i] = _auto_mispolytensor(x, ix)
-    end
-	return xs
-end
-end
-
-# ╔═╡ f48bf3da-acfd-4d07-ac72-daaacbe987b7
-function mis_polysolve(code, x::T) where {T}
-	xs = generate_polyxs!(x, code, Vector{Any}(undef, NoteOnTropicalMIS.ninput(code)))
-	code(xs...)
-end
-
 # ╔═╡ 52077825-a293-4bd7-91bc-8bed0c3a447a
 md"## Polynomial fit"
+
+# ╔═╡ 25544e9e-7b20-41d2-932d-7557389defbe
+md"""
+```math
+\begin{align}
+a_0 + a_1 x_1 + a_1 x_1^2 + \ldots + a_m x_1^m &= y_0\\
+a_0 + a_1 x_2 + a_2 x_2^2 + \ldots + a_m x_2^m &= y_1\\
+\ldots&\\
+a_0 + a_1 x_m + a_2 x_m^2 + \ldots + a_m x_m^m& = y_m
+\end{align}
+```
+"""
 
 # ╔═╡ 75e06a22-7107-45fb-adb7-7f3888b2f6f1
 let
@@ -384,12 +477,70 @@ end
 # ╔═╡ daa47c15-207d-49c1-aa1c-fd5e148d5a55
 md"## Fourier"
 
+# ╔═╡ 003bd44a-b0be-4f84-94b6-7e1ae9490bcd
+md"""
+
+```math
+\begin{align}
+\left(\begin{matrix}
+1 & x_1 & x_1^2 & \ldots & x_1^m \\
+1 & x_2 & x_2^2 & \ldots & x_2^m \\
+\vdots & \vdots & \vdots &\ddots & \vdots \\
+1 & x_m & x_m^2 & \ldots & x_m^m
+\end{matrix}\right)
+\left(\begin{matrix}
+a_0 \\ a_1 \\ \vdots \\ a_m
+\end{matrix}\right)
+= \left(\begin{matrix}
+y_0 \\ y_1 \\ \vdots \\ y_m
+\end{matrix}\right)\\
+\end{align}
+```
+"""
+
+# ╔═╡ 00ba67fe-7f53-4b47-ad98-cfd6171c8bfe
+md"""
+Let $x_k = r\omega^k$
+"""
+
+# ╔═╡ 0537b8ea-8007-4428-b46a-1a7b91ba30c7
+md"""
+```math
+\begin{align}
+\left(\begin{matrix}
+1 & r\omega & r^2\omega^2 & \ldots & r^m\omega^m \\
+1 & r\omega^2 & r^2\omega^4 & \ldots & r^m\omega^{2m} \\
+\vdots & \vdots & \vdots &\ddots & \vdots \\
+1 & r\omega^m & r^2\omega^{2m} & \ldots & r^m\omega^{m^2}
+\end{matrix}\right)
+\left(\begin{matrix}
+a_0 \\ a_1 \\ \vdots \\ a_m
+\end{matrix}\right)
+= \left(\begin{matrix}
+y_0 \\ y_1 \\ \vdots \\ y_m
+\end{matrix}\right)\\
+\end{align}
+```
+"""
+
+# ╔═╡ 8502b87f-3e59-4b58-ab4b-2814537d4979
+md"When $r=1$, the left side is a DFT matrix. We can obtain the factors using the relation $\vec a = {\rm FFT^{-1}}(\omega) \cdot \vec y$. In the special case that $\omega = e^{-2πi/(m+1)}$, it is directly solvable with inverse fast fourier transformation algorithm in package `FFTW`."
+
+# ╔═╡ 2c5c9e61-2e1b-43f2-a33e-9ea621f8c092
+md"""
+```math
+{\rm FFT}(\omega) \cdot \vec a_r = \vec y
+```
+where $(\vec a_r)_k = a_k r ^k$, by choosing diferent $r$, we can obtain better precision in low independant set size region  (``\omega<1``) and high independant set size region (``\omega>1``).
+"""
+
 # ╔═╡ 826e6fd6-3a7c-4aef-896a-667582b744b7
 let
+	r = 1.2
 	ω = exp(-2im*π/(mis_result+1))
-	xs = 5.0 .* collect(ω .^ (0:mis_result))
+	xs = r .* collect(ω .^ (0:mis_result))
 	ys = [mis_polysolve(optcode, x)[] for x in xs]
-	ifft(ys) ./ (5.0 .^ (0:mis_result))
+	ifft(ys) ./ (r .^ (0:mis_result))
 end
 
 # ╔═╡ b9f15328-a0f2-4538-9758-fe7e2a2190d7
@@ -466,16 +617,27 @@ r1 = map(yi->chinese_remainder(BigInt.(Mods.value.(yi)), BigInt.(Mods.modulus.(y
 # ╔═╡ bb42928b-0589-425a-bcbd-346ed9a5ef76
 r4 == r3
 
-# ╔═╡ c13f5fe7-3a2c-4369-a18b-a7388190bd4a
-md"## Ring arithemetics"
-
-# ╔═╡ 02918811-f120-4291-809b-caeef49468f2
-function gaussian_eliminate(A, b)
-	A \ b
+# ╔═╡ 8a7d7bf7-3816-4619-a75e-5ee03777add7
+let
+	xs = (0:mis_result)
+	A = zeros(BigInt, mis_result+1, mis_result+1)
+	for j=1:mis_result+1, i=1:mis_result+1
+		A[j,i] = BigInt(xs[j])^(i-1)
+	end
+	A \ r3
 end
 
+# ╔═╡ c13f5fe7-3a2c-4369-a18b-a7388190bd4a
+md"## Finite field arithemetics"
+
+# ╔═╡ a458b905-9434-43ab-b62d-c653c276b9f5
+Base.abs(x::Mod) = x
+
+# ╔═╡ d30c76c8-2bde-405a-aed2-11b46f919394
+Base.isless(x::Mod{N}, y::Mod{N}) where N = mod(x.val, N) < mod(y.val, N)
+
 # ╔═╡ f8b0dffb-a6af-4f7d-a608-013c50ffda75
-A, b = let
+let
 	xs = 0:mis_result
 	N = prevprime(typemax(Int))
 	T = Mod{N,Int}
@@ -484,25 +646,59 @@ A, b = let
 	for j=1:mis_result+1, i=1:mis_result+1
 		A[j,i] = T(xs[j])^(i-1)
 	end
-	A, T.(ys)
+	A \ T.(ys)
 end
 
-# ╔═╡ a458b905-9434-43ab-b62d-c653c276b9f5
-Base.abs(x::Mod) = x
+# ╔═╡ 04563702-ddb0-437a-8ae5-4132a13d1f49
+prevprime(1000)
 
-# ╔═╡ d30c76c8-2bde-405a-aed2-11b46f919394
-Base.isless(x::Mod{N}, y::Mod{N}) where N = mod(x.val, N) < mod(y.val, N)
+# ╔═╡ c69f3eb5-aec6-496b-8872-3f92d295f93b
+prevprime(typemax(Int))
 
-# ╔═╡ 0319a259-4bcc-4ad2-a2e7-bb07882a5670
-A \ b
+# ╔═╡ bd980a2e-f60a-4bde-9275-0737ab20d3c2
+Mod{997}(40) + Mod{997}(2341234)
+
+# ╔═╡ 01177d08-50ba-4b6a-8a46-bd446ba8c56e
+Mod{997}(40) * Mod{997}(2341234)
+
+# ╔═╡ 5eee76e3-d8f4-4ab6-bf8f-8493d91b4a50
+Mod{997}(1) == Mod{997}(998)
+
+# ╔═╡ 0ec2b495-07f3-40c8-833a-01223514521f
+Mod{997}(40) / Mod{997}(2341234)
+
+# ╔═╡ f14b15c2-f066-4a2e-a4fe-5e5fbe9cf987
+md"# Contraction order comparison"
+
+# ╔═╡ ba163c37-011c-455b-9899-38e9a108b6a6
+md"number of nodes = $(@bind number_of_nodes Slider(4:2:500; show_value=true))"
+
+# ╔═╡ 33c23f29-6e7f-4a8e-b164-69b5605a3f3b
+let
+	code = random_regular_eincode(number_of_nodes, 3)
+	optcode = optimize_kahypar(code, uniformsize(code, 2); sc_target=number_of_nodes^0.7, max_group_size=50)
+	OMEinsum.timespace_complexity(optcode, uniformsize(optcode, 2))
+end
+
+# ╔═╡ b1fcf86d-6e2c-4f1c-8ad5-910310b08165
+let
+	code = random_regular_eincode(number_of_nodes, 3)
+	optcode = optimize_greedy(code, uniformsize(code, 2); nrepeat=10, method=OMEinsum.MinSpaceOut())
+	OMEinsum.timespace_complexity(optcode, uniformsize(optcode, 2))
+end
+
+# ╔═╡ e31cd630-e972-4a1e-9c40-06f0bd63731d
+mis_solve(ein"i,j,v,vi,vj,ij->ijv")
 
 # ╔═╡ Cell order:
 # ╠═c8c14900-b7f5-11eb-3dbe-4390dd0fcc0a
+# ╠═2a37780e-53b6-4a40-9738-5daba20c1001
 # ╟─b91528fe-6aa1-4c58-968e-a8997e895af3
 # ╟─8d10a46a-99ab-4847-8fcb-51318c3f15a0
 # ╠═3d08e981-b041-4cbf-a808-76532ccc9359
 # ╠═83fb52ab-634e-48e5-8231-6196c240fb1e
 # ╠═10737ca0-5419-432b-ba10-6e63d6ddddf0
+# ╟─06f4c475-685d-4127-bb1b-e2ed1b9a5cd4
 # ╟─57033470-7163-4c10-bf2b-5126f059a1eb
 # ╠═327414f7-7e8d-4d74-883c-25e35adf1a9a
 # ╠═1891feb3-4e3a-4fdd-aca9-5b14fef13c30
@@ -554,21 +750,34 @@ A \ b
 # ╟─e1f474e6-4dcb-4934-808b-3719de3f906a
 # ╟─90d676d8-4139-433c-afcb-dc3c16cc0be2
 # ╟─c8dbb330-efdd-4067-acd7-ed0fc1facf48
+# ╟─29e224b6-0b4c-4a83-811e-6d6cde561278
+# ╠═e2082ba8-bc1a-4114-a43a-c8b430d303fd
+# ╠═b91a8b8e-8bc5-4ebc-addc-0893144f2b1a
+# ╟─c1910146-a9bb-472a-814c-419aa75b077e
+# ╠═c5d0d8c7-0fc2-4f32-803b-a15d836e80bb
+# ╠═8b4b532e-f149-49e0-be60-7b3d674ba4d8
+# ╠═1e1c2e60-8c8f-4b2c-b615-1ad4497c0e5a
+# ╠═e56f2ba7-6a50-4400-b761-9f587076778f
+# ╠═598c0ff3-786e-4911-a6f7-1f1d4956e154
+# ╟─0daab8e4-f099-414f-aca3-51b845ef88bd
 # ╠═d1a8f940-c8b8-4ce6-af68-dee3a286e632
 # ╠═08b92a4a-3db4-4548-9516-e5a513f78237
 # ╠═8e2263d2-ffbf-4aa5-bf7e-29f16b2dbade
-# ╠═1b8bb513-7e2a-4077-b0e9-ead9764a93fd
+# ╟─1b8bb513-7e2a-4077-b0e9-ead9764a93fd
 # ╟─a3b8e20a-4214-4f12-ad60-de699718b727
 # ╠═db7e73f2-d1e8-4c77-b4c4-3f1f936915f2
 # ╠═6781f8f5-97b5-43ae-9afc-f914f53e170e
 # ╠═1a63c2ea-0b51-4900-8fbb-2aaec508fcd3
 # ╠═916ed7f0-c98f-4f4e-b5c9-32e4eeef2ccd
-# ╠═f48bf3da-acfd-4d07-ac72-daaacbe987b7
-# ╠═99609748-c999-4903-b31b-d883a2ce3250
 # ╟─52077825-a293-4bd7-91bc-8bed0c3a447a
-# ╠═e56f2ba7-6a50-4400-b761-9f587076778f
+# ╟─25544e9e-7b20-41d2-932d-7557389defbe
 # ╠═75e06a22-7107-45fb-adb7-7f3888b2f6f1
 # ╟─daa47c15-207d-49c1-aa1c-fd5e148d5a55
+# ╟─003bd44a-b0be-4f84-94b6-7e1ae9490bcd
+# ╟─00ba67fe-7f53-4b47-ad98-cfd6171c8bfe
+# ╟─0537b8ea-8007-4428-b46a-1a7b91ba30c7
+# ╟─8502b87f-3e59-4b58-ab4b-2814537d4979
+# ╟─2c5c9e61-2e1b-43f2-a33e-9ea621f8c092
 # ╠═f2c1633a-0e2b-4ecc-81bf-f54fa0efcb44
 # ╠═826e6fd6-3a7c-4aef-896a-667582b744b7
 # ╟─b9f15328-a0f2-4538-9758-fe7e2a2190d7
@@ -590,10 +799,21 @@ A \ b
 # ╠═e25f34bf-1611-49e1-8933-16f245a0c460
 # ╠═fc6c553b-7b6f-4abf-9136-ee428462516f
 # ╠═bb42928b-0589-425a-bcbd-346ed9a5ef76
+# ╠═8a7d7bf7-3816-4619-a75e-5ee03777add7
 # ╟─c13f5fe7-3a2c-4369-a18b-a7388190bd4a
-# ╠═02918811-f120-4291-809b-caeef49468f2
 # ╠═a97d1c41-fb19-42ce-a412-68491f02a3fa
-# ╠═f8b0dffb-a6af-4f7d-a608-013c50ffda75
 # ╠═a458b905-9434-43ab-b62d-c653c276b9f5
 # ╠═d30c76c8-2bde-405a-aed2-11b46f919394
-# ╠═0319a259-4bcc-4ad2-a2e7-bb07882a5670
+# ╠═f8b0dffb-a6af-4f7d-a608-013c50ffda75
+# ╠═04563702-ddb0-437a-8ae5-4132a13d1f49
+# ╠═c69f3eb5-aec6-496b-8872-3f92d295f93b
+# ╠═bd980a2e-f60a-4bde-9275-0737ab20d3c2
+# ╠═01177d08-50ba-4b6a-8a46-bd446ba8c56e
+# ╠═5eee76e3-d8f4-4ab6-bf8f-8493d91b4a50
+# ╠═0ec2b495-07f3-40c8-833a-01223514521f
+# ╟─f14b15c2-f066-4a2e-a4fe-5e5fbe9cf987
+# ╟─ba163c37-011c-455b-9899-38e9a108b6a6
+# ╠═33c23f29-6e7f-4a8e-b164-69b5605a3f3b
+# ╠═d13e65e9-0cbb-42f7-b7e9-72237e353528
+# ╠═b1fcf86d-6e2c-4f1c-8ad5-910310b08165
+# ╠═e31cd630-e972-4a1e-9c40-06f0bd63731d
