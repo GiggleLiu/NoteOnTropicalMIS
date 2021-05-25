@@ -56,9 +56,6 @@ using Test
 # ╔═╡ a97d1c41-fb19-42ce-a412-68491f02a3fa
 using Primes
 
-# ╔═╡ d13e65e9-0cbb-42f7-b7e9-72237e353528
-using ProfileSVG
-
 # ╔═╡ 2a37780e-53b6-4a40-9738-5daba20c1001
 begin
 	node_black = nodestyle(:circle, r=0.03)
@@ -547,7 +544,7 @@ end
 md"## Symbolic"
 
 # ╔═╡ ec4ef314-d42b-4a52-ae75-d109dab02426
-OMEinsum.asarray(x::Polynomial, y::AbstractArray{<:Polynomial}) = fill(x)
+OMEinsum.asarray(x::Polynomial, y::AbstractArray) = fill(x)
 
 # ╔═╡ 2f20b087-e990-44d5-abaf-c6605d1515ed
 mis_polysolve(optcode, Polynomial([0, 1]))
@@ -592,7 +589,7 @@ YS = let
 	
 	YS = []
 	for P in bigest_prime_table(Int, 5)
-		ys = [mis_polysolve(optcode, Mod{P,Int}(x))[] for x in xs]
+		ys = [mis_polysolve(optcode, Mod{P}(x))[] for x in xs]
 		push!(YS, ys)
 	end
 	YS
@@ -640,7 +637,7 @@ Base.isless(x::Mod{N}, y::Mod{N}) where N = mod(x.val, N) < mod(y.val, N)
 let
 	xs = 0:mis_result
 	N = prevprime(typemax(Int))
-	T = Mod{N,Int}
+	T = Mod{N}
 	ys = [mis_polysolve(optcode, T(x))[] for x in xs]
 	A = zeros(T, mis_result+1, mis_result+1)
 	for j=1:mis_result+1, i=1:mis_result+1
@@ -666,6 +663,9 @@ Mod{997}(1) == Mod{997}(998)
 
 # ╔═╡ 0ec2b495-07f3-40c8-833a-01223514521f
 Mod{997}(40) / Mod{997}(2341234)
+
+# ╔═╡ 13cb14b6-50e6-4f48-8243-b8793bdd4cbf
+inv(Mod{997}(37))
 
 # ╔═╡ f14b15c2-f066-4a2e-a4fe-5e5fbe9cf987
 md"# Contraction order comparison"
@@ -751,8 +751,8 @@ mis_solve(ein"i,j,v,vi,vj,ij->ijv")
 # ╟─90d676d8-4139-433c-afcb-dc3c16cc0be2
 # ╟─c8dbb330-efdd-4067-acd7-ed0fc1facf48
 # ╟─29e224b6-0b4c-4a83-811e-6d6cde561278
-# ╠═e2082ba8-bc1a-4114-a43a-c8b430d303fd
-# ╠═b91a8b8e-8bc5-4ebc-addc-0893144f2b1a
+# ╟─e2082ba8-bc1a-4114-a43a-c8b430d303fd
+# ╟─b91a8b8e-8bc5-4ebc-addc-0893144f2b1a
 # ╟─c1910146-a9bb-472a-814c-419aa75b077e
 # ╠═c5d0d8c7-0fc2-4f32-803b-a15d836e80bb
 # ╠═8b4b532e-f149-49e0-be60-7b3d674ba4d8
@@ -811,9 +811,9 @@ mis_solve(ein"i,j,v,vi,vj,ij->ijv")
 # ╠═01177d08-50ba-4b6a-8a46-bd446ba8c56e
 # ╠═5eee76e3-d8f4-4ab6-bf8f-8493d91b4a50
 # ╠═0ec2b495-07f3-40c8-833a-01223514521f
+# ╠═13cb14b6-50e6-4f48-8243-b8793bdd4cbf
 # ╟─f14b15c2-f066-4a2e-a4fe-5e5fbe9cf987
 # ╟─ba163c37-011c-455b-9899-38e9a108b6a6
 # ╠═33c23f29-6e7f-4a8e-b164-69b5605a3f3b
-# ╠═d13e65e9-0cbb-42f7-b7e9-72237e353528
 # ╠═b1fcf86d-6e2c-4f1c-8ad5-910310b08165
 # ╠═e31cd630-e972-4a1e-9c40-06f0bd63731d

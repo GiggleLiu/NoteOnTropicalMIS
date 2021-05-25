@@ -189,11 +189,15 @@ Listing \thelstlisting: #1\hfill%\hfill%
 
 \iclrfinalcopy
 \begin{document}
-\title{Solving the maximum independant set problem with Tropical tensor networks}
+\title{Solving the maximum independant set problem with tensor networks}
 
 \author{Jin-Guo Liu\\
 Harvard University\\
-\texttt{jinguoliu@harvard.edu}\\
+\texttt{jinguoliu@g.harvard.edu}\\
+\AND
+Xun Gao\\
+Harvard University\\
+\texttt{xungao@g.harvard.edu}\\
 %\AND
 %Sheng-Tao Wang\\
 %QuEra computing Inc.
@@ -201,15 +205,99 @@ Harvard University\\
 \maketitle
 
 \begin{abstract}
-	Solving the maximum independent set size problem: the maximum independent set size, the degeneracy, the optimal configuration and the equivalence between different graphs.
+	Solving the maximum independent set size problem: the maximum independent set size, the independance polynomial and the optimal configuration.
 \end{abstract}
 
-\section{Tools}
+\section{Technical guide}
 \begin{description}
-	\item[OMEinsum] a package for einsum \\ \href{https://github.com/under-Peter/OMEinsum.jl}{https://github.com/under-Peter/OMEinsum.jl}
-	\item[TropicalGEMM] a package for efficient tropical matrix multiplication (compatible with OMEinsum) \\ \href{https://github.com/TensorBFS/TropicalGEMM.jl}{https://github.com/TensorBFS/TropicalGEMM.jl}
-	\item[TropicalNumbers] a package providing tropical number types and tropical algebra, one o the dependency of TropicalGEMM \\ \href{https://github.com/TensorBFS/TropicalNumbers.jl}{https://github.com/TensorBFS/TropicalNumbers.jl}
+	\item[OMEinsum] a package for einsum,
+	\item[OMEinsumContractionOrders] a package for finding the optimal contraction order for einsum \\ \href{https://github.com/Happy-Diode/OMEinsumContractionOrders.jl}{https://github.com/Happy-Diode/OMEinsumContractionOrders.jl},
+	\item[TropicalGEMM] a package for efficient tropical matrix multiplication (compatible with OMEinsum),
+	\item[TropicalNumbers] a package providing tropical number types and tropical algebra, one o the dependency of TropicalGEMM,
+	\item[LightGraphs] a package providing graph utilities, like random regular graph generator,
+	\item[Polynomials] a package providing polynomial algebra and polynomial fitting,
+	\item[Mods and Primes] packages providing finite field algebra and prime number generators.
 \end{description}
+
+One can install these packages by opening a julia REPL, type \colorbox{lightgray}{\texttt{]}} to enter the \texttt{pkg>} mode and type, e.g.
+\begin{lstlisting}
+pkg> add OMEinsum
+\end{lstlisting}
+
+An example of computing the maximum independant set size
+\begin{lstlisting}
+julia> using OMEinsum, LightGraphs, TropicalNumbers
+
+julia> n, k = 6, 3
+(6, 3)
+
+julia> g = LightGraphs.random_regular_graph(n, k)
+{6, 9} undirected simple Int64 graph
+
+julia> ixs = [minmax(e.src,e.dst) for e in LightGraphs.edges(g)]
+9-element Vector{Tuple{Int64, Int64}}:
+ (1, 2)
+ (1, 4)
+ (1, 5)
+ (2, 3)
+ (2, 6)
+ (3, 5)
+ (3, 6)
+ (4, 5)
+ (4, 6)
+
+julia> code = EinCode((ixs..., [(i,) for i in LightGraphs.vertices(g)]...), ())
+1∘2, 1∘4, 1∘5, 2∘3, 2∘6, 3∘5, 3∘6, 4∘5, 4∘6, 1, 2, 3, 4, 5, 6 -> 
+
+julia> optimized_code = optimize_greedy(code, Dict([i=>2 for i=1:6]))
+4∘6, 4∘6 -> 
+├─ 4∘6, 6 -> 4∘6
+│  ├─ 6
+│  └─ 4∘6
+└─ 2∘5∘4, 5∘2∘6 -> 4∘6
+   ├─ 2∘5∘6, 6∘2 -> 5∘2∘6
+   │  ├─ 2∘6, 2 -> 6∘2
+   │  │  ├─ 2
+   │  │  └─ 2∘6
+   │  └─ 2∘3, 5∘6∘3 -> 2∘5∘6
+   │     ├─ 3∘5, 6∘3 -> 5∘6∘3
+   │     │  ├─ 3∘6, 3 -> 6∘3
+   │     │  │  ⋮
+   │     │  │  
+   │     │  └─ 3∘5, 5 -> 3∘5
+   │     │     ⋮
+   │     │     
+   │     └─ 2∘3
+   └─ 2∘4∘1, 1∘4∘5 -> 2∘5∘4
+      ├─ 1∘5, 5∘4 -> 1∘4∘5
+      │  ├─ 4∘5, 4 -> 5∘4
+      │  │  ├─ 4
+      │  │  └─ 4∘5
+      │  └─ 1∘5
+      └─ 2∘1, 1∘4 -> 2∘4∘1
+         ├─ 1∘4
+         └─ 1∘2, 1 -> 2∘1
+            ├─ 1
+            └─ 1∘2
+
+
+julia> function mis_contract(code::OMEinsum.NestedEinsum, x::T) where T
+           tensors = map(OMEinsum.getixs(Iterators.flatten(code))) do ix
+               @assert length(ix) == 1 || length(ix) == 2
+                           length(ix) == 1 ? [one(T), x] : [one(T) one(T); one(T) zero(T)]
+           end
+                 code(tensors...)
+       end
+mis_contract (generic function with 1 method)
+
+julia> result = mis_contract(optimized_code, Tropical(1.0))
+0-dimensional Array{TropicalF64, 0}:
+2.0ₜ
+\end{lstlisting}
+
+For larger graph, we hight recommend using two additional packages,
+\texttt{TropicalGEMM} for BLAS speed tropical matrix multiplication and
+\texttt{OMEinsumContractionOrders} for hyper optimized contraction order (the KaHyPar approach) ~\cite{Gray2021,Pan2021}.
 
 \section{Computing degeneracy}
 Consider the following 5 node graph.
@@ -225,8 +313,7 @@ If put a vector of size $2$ at each vertex
         x
     \end{matrix}\right),
 \end{equation}
-
-and a matrix of size $2 \times 2$ at each edge
+were $x$ is a variable, and a matrix of size $2 \times 2$ at each edge
 \begin{equation}
     \left(\begin{matrix}
         1  & 1\\
@@ -238,7 +325,7 @@ and a matrix of size $2 \times 2$ at each edge
     \centerline{\includegraphics[width=0.4\columnwidth,trim={0 0cm 0 0},clip]{../notebooks/fig2.pdf}}
 \end{figure}
 
-Here $x$ is a variable. Then we contract this graph with einsum \texttt{a,b,c,d,ab,ad,bc,bd,cd,ce->}.
+Then we contract this graph with einsum \texttt{a,b,c,d,ab,ad,bc,bd,cd,ce->}.
 The result is a scalar function of $x$, it corresponds to the independance polynomial~\cite{}.
 \begin{equation}
 I(G, x) = \sum_{k=1}^{\alpha(G)} a_k x^k,
