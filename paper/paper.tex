@@ -18,7 +18,7 @@
 \usepackage{wrapfig}
 %\usepackage{caption}
 %\usepackage[plain]{algorithm}
-\usepackage[ruled, vlined]{algorithm2e}
+\usepackage[linesnumbered, ruled, vlined]{algorithm2e}
 \usepackage{algpseudocode}
 \usepackage{rotating}
 %\usepackage{cite}
@@ -205,7 +205,7 @@ Harvard University\\
 \maketitle
 
 \begin{abstract}
-	Solving the maximum independent set size problem: the maximum independent set size, the independance polynomial and the optimal configuration.
+	Solving the maximum independent set size problem: the maximum independent set size, the independence polynomial and the optimal configuration.
 \end{abstract}
 
 \section{Technical guide}
@@ -297,7 +297,7 @@ julia> result = mis_contract(optimized_code, Tropical(1.0))
 
 For larger graph, we hight recommend using two additional packages,
 \texttt{TropicalGEMM} for BLAS speed tropical matrix multiplication and
-\texttt{OMEinsumContractionOrders} for hyper optimized contraction order (the KaHyPar approach) ~\cite{Gray2021,Pan2021}.
+\texttt{OMEinsumContractionOrders} for hyper optimized contraction order (the KaHyPar~\cite{Schlag2020} approach) ~\cite{Gray2021,Pan2021}.
 
 \section{Computing degeneracy}
 Consider the following 5 node graph.
@@ -326,7 +326,7 @@ were $x$ is a variable, and a matrix of size $2 \times 2$ at each edge
 \end{figure}
 
 Then we contract this graph with einsum \texttt{a,b,c,d,ab,ad,bc,bd,cd,ce->}.
-The result is a scalar function of $x$, it corresponds to the independance polynomial~\cite{}.
+The result is a scalar function of $x$, it corresponds to the independence polynomial~\cite{Ferrin2014}.
 \begin{equation}
 I(G, x) = \sum_{k=1}^{\alpha(G)} a_k x^k,
 \end{equation}
@@ -388,6 +388,34 @@ In the special case that $\omega = e^{-2\pi i/(m+1)}$, it is directly solvable w
 where $(\vec a_r)_k = a_k r ^k$, by choosing diferent $r$, we can obtain better precision in low independant set size region  ($\omega<1$) and high independant set size region ($\omega>1$).
 
 \subsection{Finite field algebra}
+It is possible to compute the independence polynomials exactly using basic integer types only,
+even when the degeneracy is bigger than that can be represented by 64 bit integers.
+What we need is computing with the finite field algebra. In a finite field algebra $GF(p)$, we have the following observations
+\begin{enumerate}
+    \item One can still use Gaussian elimination~\cite{Golub2013} to solve the linear equations in a finite field, since the multiplicative inverse is properly defined in a finite field,
+    \item Let remainders of an integer $x$ over a set of coprime integers $\{p_1, p_2, \ldots, p_n\}$ being $\{x \pmod {p_1}, x\pmod {p_2}, \ldots, x \pmod {p_n}\}$,
+    then $\{x \pmod {p_1 \times p_2 \times \ldots \times p_n}\}$ can be obtained using the chinese remainder theorem.
+\end{enumerate}
+With these observations, we use Algorithm~\ref{alg:finitefield} to compute degeneracies.
+In the algorithm, except the computation of chinese remainder theorem, all computations are done with integers with fixed width.
+
+\begin{algorithm}[!ht]
+    \small
+    \SetAlgoNoLine
+    \LinesNumbered
+    Let $P = 1$, $X = {0,1,2,\ldots,m}$ and $\hat X_{ij} = X_i^j$, where $i,j = \{0, 1, \ldots m\}$\;
+    \While{true}{
+        compute the largest prime 64 bit integer $p$ that $\gcd(p, P) = 1$\;
+        compute the tensor network contraction on $GF(p)$ and obtain $Y\pmod p = \{y_0 \pmod p, y_1 \pmod p, \ldots , y_m \pmod p\} $\;
+        $A \pmod p = \{a_0 \pmod p, a_1 \pmod p, \ldots, a_m \pmod p\} = {\rm gaussian\_elimination}(\hat X, Y \pmod p) $\;
+        $A \pmod {P\times p} = {\rm chinese\_remainder}(A \pmod P, A \pmod p)$\;
+        \If{$A \pmod P = A \pmod {P \times p}$}{
+            \Return $A \pmod P$\;
+        }
+        $P = P \times p$\;
+    }\caption{Compute independence polynomial exactly without integer overflow}\label{alg:finitefield}
+\end{algorithm}
+
 
 \section{Utilizing the sparsity}
 Tensor network compression is an important tool to utilize sparsity.
