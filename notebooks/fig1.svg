@@ -13,7 +13,7 @@
     <path d="M0,0 L15,3.5 L0,7 z" stroke="context-stroke" fill="context-stroke"/>
   </marker>
 </defs>
-<g stroke="#000000" id="img-d144ffa3-1">
+<g stroke="#000000" id="img-7bcb588d-1">
   <g transform="translate(16,32)">
     <path fill="none" d="M0,-16 L0,16 " class="primitive"/>
   </g>
@@ -48,7 +48,7 @@
 <g transform="translate(72,72)">
   <circle cx="0" cy="0" r="2.4" class="primitive"/>
 </g>
-<g fill="#FFFFFF" id="img-d144ffa3-2">
+<g fill="#FFFFFF" id="img-7bcb588d-2">
   <g transform="translate(16,16)">
     <g class="primitive">
       <text text-anchor="middle" dy="0.35em">a</text>

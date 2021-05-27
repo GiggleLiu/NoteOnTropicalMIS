@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.14.5
+# v0.14.6
 
 using Markdown
 using InteractiveUtils
@@ -56,9 +56,13 @@ using Test
 # ╔═╡ a97d1c41-fb19-42ce-a412-68491f02a3fa
 using Primes
 
+# ╔═╡ d13e65e9-0cbb-42f7-b7e9-72237e353528
+using ProfileSVG
+
 # ╔═╡ 2a37780e-53b6-4a40-9738-5daba20c1001
 begin
 	node_black = nodestyle(:circle, r=0.03)
+	node_red = nodestyle(:circle, fill("red"), r=0.03)
 	node_white = nodestyle(:circle, fill("white"), r=0.08)
 	edge_black = bondstyle(:default)
 	text_black = textstyle(:default)
@@ -72,6 +76,105 @@ begin
 		return img
 	end
 end;
+
+# ╔═╡ a8ac2b58-86c7-4964-ac10-46c842cbe731
+canvas() do
+	Compose.set_default_graphic_size(8cm, 8cm)
+	xs = [(0.1, 0.5), (0.1, 0.7), (0.3, 0.5), (0.4, 0.8), (0.5, 0.6), (0.3, 0.3), (0.5, 0.2), (0.6, 0.7), (0.7, 0.4), (0.9, 0.5)]
+	for (i, loc) in enumerate(xs)
+		(i ∈ (3,4,5,6,7) ? node_red : node_black) >> loc
+		text_white >> (loc, string('a'+i-1))
+	end
+	for (i,j) in [(1, 2), (2,3), (1,3), (3, 4), (4, 5), (5, 6), (6,7), (7,8), (8, 9), (9, 10), (3, 5), (3, 6), (7,9), (6,9), (10,8), (3,9)]
+		edge_black >> (xs[i], xs[j])
+	end
+end
+
+# ╔═╡ e57abcc2-7b48-4e38-a90a-fe6a6bc1eeb7
+let
+	img1 = canvas() do
+		xs = [(0.1, 0.5), (0.1, 0.7), (0.3, 0.5), (0.4, 0.8), (0.5, 0.6), (0.3, 0.3), (0.5, 0.2), (0.6, 0.7), (0.7, 0.4), (0.9, 0.5)]
+		for (i, loc) in enumerate(xs)
+			if i ∈ (3,4,5,6,7)
+				(node_red >> loc)
+				text_white >> (loc, string('a'+i-1))
+			end
+		end
+		for (i,j) in [(3, 4), (4, 5), (5, 6), (6,7), (3, 5), (3, 6)]
+			edge_black >> (xs[i], xs[j])
+		end
+	end
+	img2 = vizeinsum(ein"d,c,e,f,g,dc,de,ce,ef,fg,cf->cfg", ['c'=>(0.3, 0.5), 'd'=>(0.4, 0.8), 'e'=>(0.5, 0.6), 'f'=>(0.3, 0.3), 'g'=>(0.5, 0.2)], unit=2.5, rescale=0.8, textcolor="transparent")
+	img3 = canvas() do
+		unit = 4.0
+		textcolor = "black"
+		nb = nodestyle(:circle, fill("black"), linewidth(0mm); r=0.01*unit)
+		bt = nodestyle(:square, fill("black"), linewidth(0mm); r=0.015*unit)
+		bt1 = nodestyle(:circle, fill("transparent"), stroke("black"), linewidth(0.08mm*unit); r=0.015*unit)
+		nb2 = nodestyle(:circle, fill("red"), linewidth(0mm); r=0.01*unit)
+		eb = bondstyle(:default, linewidth(0.08mm*unit))
+		tb = textstyle(:default, fill(textcolor), fontsize(3pt*unit))
+		y = 0.2
+		nb >> (0.25, y)
+		eb >> ((0.1, y), (0.4, y))
+		tb >> ((1.0, y), "vertex")
+		y = 0.4
+		nb2 >> (0.25, y)
+		eb >> ((0.1, y), (0.4, y))
+		tb >> ((1.0, y), "boundary vertex")
+		y = 0.6
+		bt1 >> (0.25, y)
+		#eb >> ((0.1, y), (0.4, y))
+		tb >> ((1.0, y), "vertex tensor")
+		y = 0.8
+		bt >> (0.25, y)
+		eb >> ((0.1, y), (0.4, y))
+		tb >> ((1.0, y), "edge tensor")
+	end
+	img4 = canvas() do
+		text_black >> ((0.2, 0.9), "(a)")
+		text_black >> ((0.6, 0.9), "(b)")
+	end
+	Compose.set_default_graphic_size(14cm, 7cm)
+	Compose.compose(context(), (context(0.0,0.0,0.5,1.0), img1), (context(0.4,0.0,0.17,1.0), img2), (context(0.6,0.3,0.2,0.4), img3), (context(), img4))
+end
+
+# ╔═╡ 2989b2da-6951-470d-8ef1-cd08628f50f4
+let
+	img1 = canvas() do
+		xs = [(0.1, 0.5), (0.1, 0.7), (0.3, 0.5), (0.4, 0.8), (0.5, 0.6), (0.3, 0.3), (0.5, 0.2), (0.6, 0.7), (0.7, 0.4), (0.9, 0.5)]
+		for (i, loc) in enumerate(xs)
+			if i ∈ (3,4,5,6,7)
+				(node_red >> loc)
+				text_white >> (loc, string('a'+i-1))
+			end
+		end
+		for (i,j) in [(3, 4), (4, 5), (5, 6), (6,7), (3, 5), (3, 6)]
+			edge_black >> (xs[i], xs[j])
+		end
+	end
+
+	img2 = canvas() do
+		xs = [(0.1, 0.5), (0.1, 0.7), (0.3, 0.5), (0.4, 0.8), (0.5, 0.6), (0.3, 0.3), (0.5, 0.2), (0.6, 0.7), (0.7, 0.4), (0.9, 0.5)]
+		for (i, loc) in enumerate(xs)
+			if i ∈ (3,4,5,6,7)
+				(node_red >> loc)
+				text_white >> (loc, string('a'+i-1))
+			end
+		end
+		for (i,j) in [(3, 4), (4, 5), (5, 6), (6,7), (3, 5), (3, 6)]
+			edge_black >> (xs[i], xs[j])
+		end
+	end
+	Compose.set_default_graphic_size(14cm, 7cm)
+	Compose.compose(context(), (context(0.0,0.0,0.5,1.0), img1), (context(0.5,0.0,0.5,1.0), img2))
+end
+
+# ╔═╡ d4921f23-459a-4436-a526-71951b2d438e
+mis_solve(ein"d,c,e,f,g,dc,de,ce,ef,fg,cf->cfg")
+
+# ╔═╡ 80fb581d-c2ab-4d81-97cb-b65bd038a7ce
+compress!(mis_solve(ein"d,c,e,f,g,dc,de,ce,ef,fg,cf->cfg"))
 
 # ╔═╡ b91528fe-6aa1-4c58-968e-a8997e895af3
 md"## Rule 0"
@@ -544,7 +647,7 @@ end
 md"## Symbolic"
 
 # ╔═╡ ec4ef314-d42b-4a52-ae75-d109dab02426
-OMEinsum.asarray(x::Polynomial, y::AbstractArray) = fill(x)
+OMEinsum.asarray(x::Polynomial, y::AbstractArray{<:Polynomial}) = fill(x)
 
 # ╔═╡ 2f20b087-e990-44d5-abaf-c6605d1515ed
 mis_polysolve(optcode, Polynomial([0, 1]))
@@ -589,7 +692,7 @@ YS = let
 	
 	YS = []
 	for P in bigest_prime_table(Int, 5)
-		ys = [mis_polysolve(optcode, Mod{P}(x))[] for x in xs]
+		ys = [mis_polysolve(optcode, Mod{P,Int}(x))[] for x in xs]
 		push!(YS, ys)
 	end
 	YS
@@ -637,7 +740,7 @@ Base.isless(x::Mod{N}, y::Mod{N}) where N = mod(x.val, N) < mod(y.val, N)
 let
 	xs = 0:mis_result
 	N = prevprime(typemax(Int))
-	T = Mod{N}
+	T = Mod{N,Int}
 	ys = [mis_polysolve(optcode, T(x))[] for x in xs]
 	A = zeros(T, mis_result+1, mis_result+1)
 	for j=1:mis_result+1, i=1:mis_result+1
@@ -663,9 +766,6 @@ Mod{997}(1) == Mod{997}(998)
 
 # ╔═╡ 0ec2b495-07f3-40c8-833a-01223514521f
 Mod{997}(40) / Mod{997}(2341234)
-
-# ╔═╡ 13cb14b6-50e6-4f48-8243-b8793bdd4cbf
-inv(Mod{997}(37))
 
 # ╔═╡ f14b15c2-f066-4a2e-a4fe-5e5fbe9cf987
 md"# Contraction order comparison"
@@ -693,6 +793,11 @@ mis_solve(ein"i,j,v,vi,vj,ij->ijv")
 # ╔═╡ Cell order:
 # ╠═c8c14900-b7f5-11eb-3dbe-4390dd0fcc0a
 # ╠═2a37780e-53b6-4a40-9738-5daba20c1001
+# ╠═a8ac2b58-86c7-4964-ac10-46c842cbe731
+# ╟─e57abcc2-7b48-4e38-a90a-fe6a6bc1eeb7
+# ╠═2989b2da-6951-470d-8ef1-cd08628f50f4
+# ╠═d4921f23-459a-4436-a526-71951b2d438e
+# ╠═80fb581d-c2ab-4d81-97cb-b65bd038a7ce
 # ╟─b91528fe-6aa1-4c58-968e-a8997e895af3
 # ╟─8d10a46a-99ab-4847-8fcb-51318c3f15a0
 # ╠═3d08e981-b041-4cbf-a808-76532ccc9359
@@ -751,8 +856,8 @@ mis_solve(ein"i,j,v,vi,vj,ij->ijv")
 # ╟─90d676d8-4139-433c-afcb-dc3c16cc0be2
 # ╟─c8dbb330-efdd-4067-acd7-ed0fc1facf48
 # ╟─29e224b6-0b4c-4a83-811e-6d6cde561278
-# ╟─e2082ba8-bc1a-4114-a43a-c8b430d303fd
-# ╟─b91a8b8e-8bc5-4ebc-addc-0893144f2b1a
+# ╠═e2082ba8-bc1a-4114-a43a-c8b430d303fd
+# ╠═b91a8b8e-8bc5-4ebc-addc-0893144f2b1a
 # ╟─c1910146-a9bb-472a-814c-419aa75b077e
 # ╠═c5d0d8c7-0fc2-4f32-803b-a15d836e80bb
 # ╠═8b4b532e-f149-49e0-be60-7b3d674ba4d8
@@ -811,9 +916,9 @@ mis_solve(ein"i,j,v,vi,vj,ij->ijv")
 # ╠═01177d08-50ba-4b6a-8a46-bd446ba8c56e
 # ╠═5eee76e3-d8f4-4ab6-bf8f-8493d91b4a50
 # ╠═0ec2b495-07f3-40c8-833a-01223514521f
-# ╠═13cb14b6-50e6-4f48-8243-b8793bdd4cbf
 # ╟─f14b15c2-f066-4a2e-a4fe-5e5fbe9cf987
 # ╟─ba163c37-011c-455b-9899-38e9a108b6a6
 # ╠═33c23f29-6e7f-4a8e-b164-69b5605a3f3b
+# ╠═d13e65e9-0cbb-42f7-b7e9-72237e353528
 # ╠═b1fcf86d-6e2c-4f1c-8ad5-910310b08165
 # ╠═e31cd630-e972-4a1e-9c40-06f0bd63731d
