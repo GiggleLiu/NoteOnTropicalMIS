@@ -5,7 +5,7 @@ struct UnitdiskWidget{LT}
     radius::Float64
 end
 
-function edges(ud::UnitdiskWidget)
+function get_edges(ud::UnitdiskWidget)
 	edges = Tuple{Int,Int}[]
 	for (i, p) in enumerate(ud.nodes)
 		for (j,p2) in enumerate(ud.nodes)

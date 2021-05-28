@@ -1,4 +1,3 @@
-%\documentclass[a4paper,superscriptaddress,11pt]{quantumarticle}
 %\documentclass[aps,twocolumn,longbibliography,english,superscriptaddress]{revtex4-1}
 \documentclass{article}
 \usepackage{iclr2021_conference}
@@ -215,7 +214,6 @@ The independence polynomial~\cite{Ferrin2014, Harvey2017} of a graph $G$ is defi
 I(G, x) = \sum_{k=1}^{\alpha(G)} a_k x^k,
 \end{equation}
 where $a_k$ is the number of independent sets of order $k$ in $G$, and $\alpha(G)$ is the maximum independent set size of graph $G$.
-
 If we map a graph into an einsum network, as shown in \Fig{fig:einsummapping}, by putting a vertex tensor of size $2$ at each vertex
 \begin{equation}
     W(x) = \left(\begin{matrix}
