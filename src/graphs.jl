@@ -50,11 +50,6 @@ function widget12()
     UnitdiskWidget(locs, 0.23)
 end
 
-function uniformsize(::EinCode{ixs,iy}, size::Int) where {ixs, iy}
-    Dict([c=>size for c in [Base.Iterators.flatten(ixs)..., iy...]])
-end
-uniformsize(ne::NestedEinsum, size::Int) = uniformsize(Base.Iterators.flatten(ne), size)
-
 function contract16(::Type{T}, x) where T
 	code = ein"a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,ae,bf,cg,dh,ei,ej,ek,el,fi,fm,gm,gn,go,gp,hl,hp,ij,im,in,jk,jm,jn,jo,kl,kn,ko,kp,lo,lp,mn,no,op->abcd"
     code = optimize_greedy(code, uniformsize(code, 2))

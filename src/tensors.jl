@@ -36,20 +36,20 @@ end
 
 _auto_mistensor(::Type{T}, ix::NTuple{2}) where T = misb(T)
 _auto_mistensor(::Type{T}, ix::NTuple{1}) where T = misv(T, 1, 1.0)
-function generate_xs!(::Type{T}, code::NestedEinsum, xs) where {T}
+function generate_xs!(f, ::Type{T}, code::NestedEinsum, xs) where {T}
     for (ix, arg) in zip(OMEinsum.getixs(code.eins), code.args)
 		if arg isa Integer
-			xs[arg] = _auto_mistensor(T, ix)
+			xs[arg] = f(T, ix)
 		else
-        	generate_xs!(T, arg, xs)
+        	generate_xs!(f, T, arg, xs)
 		end
     end
 	return xs
 end
 
-function generate_xs!(::Type{T}, code::EinCode, xs) where {T}
+function generate_xs!(f, ::Type{T}, code::EinCode, xs) where {T}
     for (i,ix) in enumerate(OMEinsum.getixs(code))
-		xs[i] = _auto_mistensor(T, ix)
+		xs[i] = f(T, ix)
     end
 	return xs
 end
@@ -62,11 +62,11 @@ end
 
 export mis_solve, mis_count
 function mis_contract(::Type{T}, code) where {T}
-	xs = generate_xs!(T, code, Vector{Any}(undef, ninput(code)))
+	xs = generate_xs!(_auto_mistensor, T, code, Vector{Any}(undef, ninput(code)))
 	code(xs...)
 end
 mis_solve(code) = mis_contract(TropicalF64, code)
-mis_count(code) = mis_contract(CountingTropical{Float64}, code)
+mis_count(code) = mis_contract(CountingTropical{Float64,Float64}, code)
 
 function is_diff_by_const(t1::AbstractArray{T}, t2::AbstractArray{T}) where T
 	x = NaN

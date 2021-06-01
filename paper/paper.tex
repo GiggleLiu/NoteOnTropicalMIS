@@ -205,7 +205,9 @@ Harvard University\\
 \maketitle
 
 \begin{abstract}
-	Solving the maximum independent set size problem: the maximum independent set size, the independence polynomial and the optimal configuration.
+	Solving the maximum independent set size problem by mapping the problem to an einsum network. 
+    We obtain the maximum independent set size,
+    the independence polynomial and the optimal configuration by using different tensor elements to a commutative semiring.
 \end{abstract}
 
 \section{Computing independence polynomial}
@@ -221,7 +223,7 @@ If we map a graph into an einsum network, as shown in \Fig{fig:einsummapping}, b
         x
     \end{matrix}\right),
 \end{equation}
-were $x$ is a variable, and a matrix of size $2 \times 2$ at each edge
+and a matrix of size $2 \times 2$ at each edge
 \begin{equation}
     B = \left(\begin{matrix}
         1  & 1\\
@@ -229,7 +231,9 @@ were $x$ is a variable, and a matrix of size $2 \times 2$ at each edge
     \end{matrix}\right).
 \end{equation}
 
-The contractionof this einsum network is exactly the independence polynomial %, we denote this contraction as \texttt{a,b,c,d,ab,ad,bc,bd,cd,ce->}.
+Here $0$ and $1$ are the additive identity and multiplicative identity of a commutative semiring respectively.
+$x$ is a variable.
+The contraction of this einsum network is the independence polynomial %, we denote this contraction as \texttt{a,b,c,d,ab,ad,bc,bd,cd,ce->}.
 \begin{equation}
     I(G, x) = \sum\limits_{s_1, s_2, \ldots, s_n = 0}^{1} \prod\limits_{i=1}^n W(x)_{s_i} \prod\limits_{(i,j) \in E(G)} B_{s_i, s_j}.
 \end{equation}
@@ -371,7 +375,7 @@ I(G, \infty) = a_k \infty^{\alpha(G)},
 where the lower orders terms disappear automatically. We can define a new algebra as
 \begin{align}
 \begin{split}
-    a_x\infty^x + a_y\infty^y &= \begin{cases}
+    a_x\infty^x \oplus a_y\infty^y &= \begin{cases}
         (a_x + a_y)\infty^{\max(x,y)}, & x = y\\
         a_y\infty^{\max(x,y)}, & x < y\\
         a_x\infty^{\max(x,y)}, & x > y
@@ -381,8 +385,19 @@ where the lower orders terms disappear automatically. We can define a new algebr
     \mymathbb{1} &= 0
 \end{split}
 \end{align}
-In the program, we only store the power $x$ and the corresponding factor $a_x$. This is exactly the tropical tensor network~\cite{Liu2021} used in solving spin glass ground states.
+In the program, we only store the power $x$ and the corresponding factor $a_x$ that initialized to $1$. This is exactly the tropical tensor network~\cite{Liu2021} used in solving spin glass ground states.
 Here if we are only interested in obtaining $\alpha(G)$, we can only consider the powers, which corresponds to the tropical algebra~\cite{Maclagan2015}.
+
+One may want to obtain all ground state configurations,
+it can be achieved replacing the factors $a_x$ with a set of bit strings $s_x$ initialized to a vertex dependent value $s_i = \{\delta_{ij=1,\ldots,n}$\}.
+The bit strings has a redefined algebra
+\begin{align}
+\begin{split}
+    s_x \oplus s_y &= s_x \cup s_y\\
+    s_x \odot s_y &= \{\sigma \lor \tau | \sigma \in s_x, \tau \in s_y\}
+\end{split}
+\end{align}
+The $\vee$ is the bit-wise \texttt{or}.
 
 \subsection{Utilizing sparsity}
 So far, we have used the language of einsum networks for contraction.
