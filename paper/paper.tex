@@ -198,9 +198,9 @@ Harvard University\\
 Xun Gao\\
 Harvard University\\
 \texttt{xungao@g.harvard.edu}\\
-%\AND
-%Sheng-Tao Wang\\
-%QuEra computing Inc.
+\AND
+Sheng-Tao Wang\\
+QuEra computing Inc.
 }
 \maketitle
 
@@ -231,14 +231,14 @@ and a matrix of size $2 \times 2$ at each edge
     \end{matrix}\right).
 \end{equation}
 
-Here $0$ and $1$ are the additive identity and multiplicative identity of a commutative semiring respectively.
-$x$ is a variable.
+where $x$ is a variable.
 The contraction of this einsum network is the independence polynomial %, we denote this contraction as \texttt{a,b,c,d,ab,ad,bc,bd,cd,ce->}.
 \begin{equation}
-    I(G, x) = \sum\limits_{s_1, s_2, \ldots, s_n = 0}^{1} \prod\limits_{i=1}^n W(x)_{s_i} \prod\limits_{(i,j) \in E(G)} B_{s_i, s_j}.
+    I(G, x) = \sum\limits_{s_1, s_2, \ldots, s_n = 0}^{1} \prod\limits_{i=1}^n W(x)_{s_i} \prod\limits_{(i,j) \in E(G)} B_{s_i s_j}.
 \end{equation}
-Here, the einsum enumerates all possible configurations and accumulates the product of tensor elements to the output. The product over edge tensors will provide a factor $0$ if the configuration is not an independent set, otherwise $1$.
-While the product over edges provide a factor $x^k$, where $k$ depends on how many times a vertex takes value $1$.
+Here, the einsum enumerates all possible configurations and accumulates the product of tensor elements to the output.
+The product over vertices tensors provides a factor $x^k$, where $k=\sum_k s_k$ is the set size.
+While the product over edge tensors provides a factor $0$ if the configuration is not an independent set, otherwise $1$.
 \begin{figure*}[t!]
     \centering
     \begin{subfigure}[t]{0.4\textwidth}
@@ -257,7 +257,11 @@ While the product over edges provide a factor $x^k$, where $k$ depends on how ma
 The benefit of mapping the problem to einsum is, some existing algorithms can be used to decrease the complexity of the problem.
 Especially those techiniques developed in recent quantum circuit simulations for finding the optimal exactly contraction order of a tensor network ~\cite{Gray2021,Pan2021}.
 With these algorithms, one can easily find a good contraction order that reduces the complexity to a quantity related to the minimum treewidth of the graph.~\cite{Markov2008}
-Such mapping makes it possible to utilize fater linear algebra functions.
+Such mapping also makes it possible to utilize faster BLAS functions.
+
+Before contracting the tensor network and evaluating this polynomial numerically, let us give up thinking $0$s and $1$s in tensors $W(x)$ and $B$ as regular computer numbers such as integers and floating point numbers.
+Instead, we treat them as the additive identity and multiplicative identity of a commutative semiring.
+A commutative semiring can be defined as: a ring without additive inverse is called a semiring, and commutative semiring is a semiring that multiplication commutative.
 
 \subsection{Symbolic computing}
 To evaluate this polynomial, one can use the symbolic computing directly.
@@ -272,7 +276,8 @@ We define the algebra between the polynomial expansions of order $k$ as
     \end{split}
 \end{align}
 and insert them to the original tensor network contraction algorithm.
-However, this method suffers from a space overhead that propotional to the maximum independant set size.
+In the program, the multiplication can be evaluated efficiently with the convolution theorem.
+However, this method still suffers from a space overhead that propotional to the maximum independant set size.
 
 \subsection{Polynomial fitting}
 Let $m$ be the maximum independent set size and $X$ be a set of $m+1$ random real numbers, e.g. $\{0, 1, 2, \ldots, m\}$.
@@ -643,7 +648,7 @@ julia> result = mis_contract(optimized_code, Tropical(1.0))
 
 For larger graph, we hight recommend using two additional packages,
 \texttt{TropicalGEMM} for BLAS speed tropical matrix multiplication and
-\texttt{OMEinsumContractionOrders} for hyper optimized contraction order (the KaHyPar~\cite{Schlag2020} approach) ~\cite{Gray2021,Pan2021}.
+\texttt{OMEinsumContractionOrders} for hyper optimized contraction order (the KaHyPar~\cite{Schlag2020} approach) ~\cite{Kourtis2019,Gray2021,Pan2021}.
 
 
 \end{document}

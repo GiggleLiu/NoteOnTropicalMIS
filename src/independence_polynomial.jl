@@ -82,5 +82,5 @@ function independence_polynomial(::Val{:finitefield}, code; mis_size=Int(mis_sol
 end
 
 function improved_counting(sequences)
-    map(yi->Mods.CRT(BigInt.(Mods.value.(yi)), BigInt.(Mods.modulus.(yi))), zip(sequences...))
+    map(yi->Mods.CRT(yi...), zip(sequences...))
 end

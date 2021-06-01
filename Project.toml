@@ -19,7 +19,7 @@ Viznet = "52a3aca4-6234-47fd-b74a-806bdf78ede9"
 [compat]
 Compose = "0.9"
 LightGraphs = "1.3"
-Mods = "1.2"
+Mods = "1.3"
 OMEinsum = "0.4"
 Polynomials = "2.0"
 Primes = "0.5"

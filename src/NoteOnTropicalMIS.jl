@@ -3,6 +3,7 @@ module NoteOnTropicalMIS
 using TropicalGEMM, TropicalNumbers
 using OMEinsum
 
+include("arithematics.jl")
 include("tensors.jl")
 include("graphs.jl")
 include("independence_polynomial.jl")

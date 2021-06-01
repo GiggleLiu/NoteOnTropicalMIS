@@ -1,4 +1,5 @@
 using NoteOnTropicalMIS, Test, OMEinsum
+using Mods, Polynomials, TropicalNumbers
 
 @testset "independence_polynomial" begin
     code = random_regular_eincode(10, 3)
@@ -10,4 +11,15 @@ using NoteOnTropicalMIS, Test, OMEinsum
     @test p1 ≈ p2
     @test p1 ≈ p3
     @test p1 ≈ p4
+end
+
+@testset "arithematics" begin
+    for (a, b, c) in [(Mod{17}(2), Mod{17}(8), Mod{17}(9)),
+                    (Polynomial([0,1,2,3.0]), Polynomial([3,2.0]), Polynomial([1,7.0])),
+                    (TropicalF64(5), TropicalF64(3), TropicalF64(-9)),
+                    (CountingTropicalF64(5, 3), CountingTropicalF64(3, 9), CountingTropicalF64(-3, 2)),
+                    (CountingTropical(5.0, ConfigEnumerator{10}([BitVector(rand(Bool, 10)) for j=1:3])), CountingTropical(3.0, ConfigEnumerator{10}([BitVector(rand(Bool, 10)) for j=1:4])), CountingTropical(-3.0, ConfigEnumerator{10}([BitVector(rand(Bool, 10)) for j=1:5]))),
+                    ]
+        @test is_commutative_semiring(a, b, c)
+    end
 end
