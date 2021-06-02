@@ -198,9 +198,6 @@ Harvard University\\
 Xun Gao\\
 Harvard University\\
 \texttt{xungao@g.harvard.edu}\\
-\AND
-Sheng-Tao Wang\\
-QuEra computing Inc.
 }
 \maketitle
 
@@ -400,8 +397,8 @@ where the lower orders terms disappear automatically. We can define a new algebr
         a_x\infty^{\max(x,y)}, & x > y
     \end{cases}\\
     a_x\infty^x \odot a_y\infty^y &= a_x a_y\infty^{x+y}\\
-    \mymathbb{0} &= -\infty\\
-    \mymathbb{1} &= 0
+    \mymathbb{0} &= 0\infty^{-\infty}\\
+    \mymathbb{1} &= 1\infty^{0}
 \end{split}
 \end{align}
 In the program, we only store the power $x$ and the corresponding factor $a_x$ that initialized to $1$. This is exactly the tropical tensor network~\cite{Liu2021} used in solving spin glass ground states.
@@ -409,7 +406,7 @@ Here if we are only interested in obtaining $\alpha(G)$, we can only consider th
 
 One may want to obtain all ground state configurations,
 it can be achieved replacing the factors $a_x$ with a set of bit strings $s_x$ initialized to a vertex index $i$ dependent onehot vector $s_i = \{\boldsymbol{\delta}_{ij=1,\ldots,n}\}$.
-The bit strings has a redefined algebra
+\iffalse
 \begin{align}
 \begin{split}
     s_x \oplus s_y &= s_x \cup s_y\\
@@ -418,7 +415,22 @@ The bit strings has a redefined algebra
     \mymathbb{1} &= \{\boldsymbol 0\}
 \end{split}
 \end{align}
+\fi
+\begin{align}
+\begin{split}
+    s_x\infty^x \oplus s_y\infty^y &= \begin{cases}
+        (s_x \cup s_y)\infty^{\max(x,y)}, & x = y\\
+        s_y\infty^{\max(x,y)}, & x < y\\
+        s_x\infty^{\max(x,y)}, & x > y
+    \end{cases}\\
+    s_x\infty^x \odot s_y\infty^y &= \{\sigma \lor \tau | \sigma \in s_x, \tau \in s_y\}\infty^{x+y}\\
+    \mymathbb{0} &= \{\}\infty^{-\infty}\\
+    \mymathbb{1} &= \{\boldsymbol 0\}\infty^{0}
+\end{split}
+\end{align}
 The $\vee$ is the bit-wise \texttt{or}. One can easily check that this replacement does not change the fact that the algebra is a commutative semiring.
+By slightly modifying the above algebra, it can also be used to obtain just a single configuration to save computational effort.
+We leave this as an exercise for readers.
 
 \section{Utilizing sparsity}
 So far, we have used the language of einsum networks for contraction.
@@ -666,5 +678,156 @@ For larger graph, we hight recommend using two additional packages,
 \texttt{TropicalGEMM} for BLAS speed tropical matrix multiplication and
 \texttt{OMEinsumContractionOrders} for hyper optimized contraction order (the KaHyPar~\cite{Schlag2020} approach) ~\cite{Kourtis2019,Gray2021,Pan2021}.
 
+\section{Indenpendence polynomials}
+\subsection{Common}
+\begin{lstlisting}
+using Polynomials
 
+_auto_mispolytensor(x::T, ix::NTuple{2}) where T = T[1 1; 1 0]
+_auto_mispolytensor(x::T, ix::NTuple{1}) where T = T[1, x]
+function generate_polyxs!(x::T, code::OMEinsum.NestedEinsum, xs=Vector{Any}(undef, ninput(code))) where {T}
+    for (ix, arg) in zip(OMEinsum.getixs(code.eins), code.args)
+		if arg isa Integer
+			xs[arg] = _auto_mispolytensor(x, ix)
+		else
+        	generate_polyxs!(x, arg, xs)
+		end
+    end
+	return xs
+end
+
+function generate_polyxs!(x::T, code::EinCode, xs=Vector{Any}(undef, ninput(code))) where {T}
+    for (i,ix) in enumerate(OMEinsum.getixs(code))
+		xs[i] = _auto_mispolytensor(x, ix)
+    end
+	return xs
+end
+
+function mis_polysolve(code, x::T) where {T}
+	xs = generate_polyxs!(x, code, Vector{Any}(undef, NoteOnTropicalMIS.ninput(code)))
+	code(xs...)
+end
+\end{lstlisting}
+
+\subsection{Symbolic}
+\begin{lstlisting}
+function independence_polynomial(::Val{:polynomial}, code)
+    mis_polysolve(code, Polynomial([0, 1.0]))[]
+end
+\end{lstlisting}
+
+\subsection{Fitting and FFT}
+\begin{lstlisting}
+using FFTW
+function independence_polynomial(::Val{:fft}, code; mis_size=Int(mis_solve(code)[].n), r=1.0)
+	ω = exp(-2im*π/(mis_size+1))
+	xs = r .* collect(ω .^ (0:mis_size))
+	ys = [mis_polysolve(code, x)[] for x in xs]
+	Polynomial(real.(ifft(ys) ./ (r .^ (0:mis_size))))
+end
+
+function independence_polynomial(::Val{:fitting}, code; mis_size=Int(mis_solve(code)[].n))
+	xs = (0:mis_size)
+	ys = [mis_polysolve(code, x)[] for x in xs]
+	fit(xs, ys, mis_size)
+end
+\end{lstlisting}
+
+\subsection{Finite field algebra}
+\begin{lstlisting}
+using Mods, Primes
+
+# pirate
+Base.abs(x::Mod) = x
+Base.isless(x::Mod{N}, y::Mod{N}) where N = mod(x.val, N) < mod(y.val, N)
+
+function _independance_polynomial(::Type{T}, code, mis_size::Int) where T
+	xs = 0:mis_size
+	ys = [mis_polysolve(code, T(x))[] for x in xs]
+	A = zeros(T, mis_size+1, mis_size+1)
+	for j=1:mis_size+1, i=1:mis_size+1
+		A[j,i] = T(xs[j])^(i-1)
+	end
+	A \ T.(ys)
+end
+
+function independence_polynomial(::Val{:finitefield}, code; mis_size=Int(mis_solve(code)[].n), max_order=100)
+    N = typemax(Int)
+    YS = []
+    local res
+    for k = 1:max_order
+	    N = prevprime(N-1)
+        T = Mods.Mod{N,Int}
+        rk = _independance_polynomial(T, code, mis_size)
+        push!(YS, rk)
+        if max_order==1
+            return Polynomial(Mods.value.(YS[1]))
+        elseif k != 1
+            ra = improved_counting(YS[1:end-1])
+            res = improved_counting(YS)
+            ra == res && return Polynomial(res)
+        end
+    end
+    @warn "result is potentially inconsistent."
+    return Polynomial(res)
+end
+
+function improved_counting(sequences)
+    map(yi->Mods.CRT(yi...), zip(sequences...))
+end
+\end{lstlisting}
+
+\section{Enumerating configurations}
+\begin{lstlisting}
+using OMEinsum, TropicalNumbers
+
+struct ConfigEnumerator{N}
+    data::Vector{BitVector}
+end
+
+Base.length(x::ConfigEnumerator{N}) where N = length(x.data)
+Base.:(==)(x::ConfigEnumerator, y::ConfigEnumerator) = x.data == y.data
+
+function Base.:+(x::ConfigEnumerator{N}, y::ConfigEnumerator{N}) where N
+    res = ConfigEnumerator{N}(vcat(x.data, y.data))
+    @show length(x), length(y), length(res)
+    @assert length(res) == length(x) + length(y)
+    return res
+end
+
+function Base.:*(x::ConfigEnumerator{L}, y::ConfigEnumerator{L}) where L
+    M, N = length(x), length(y)
+    z = Vector{BitVector}(undef, M*N)
+    for j=1:N, i=1:M
+        z[(j-1)*M+i] = x.data[i] .| y.data[j]
+    end
+    #@show M, N, length(z)
+    @assert length(z) == length(x) * length(y)
+    return ConfigEnumerator{L}(z)
+end
+
+Base.zero(::Type{ConfigEnumerator{N}}) where N = ConfigEnumerator{N}(BitVector[])
+Base.one(::Type{ConfigEnumerator{N}}) where N = ConfigEnumerator{N}([falses(N)])
+
+function onehot(::Type{ConfigEnumerator{N}}, i::Int) where N
+    res = one(ConfigEnumerator{N})
+    res.data[1][i] |= true
+    return res
+end
+
+function enumerator_t(::Type{T}, ix::NTuple{2}, vertex_index) where {T1, N, T<:CountingTropical{T1, ConfigEnumerator{N}}}
+    [one(T) one(T); one(T) zero(T)]
+end
+function enumerator_t(::Type{T}, ix::NTuple{1}, vertex_index) where {T1, N, T<:CountingTropical{T1, ConfigEnumerator{N}}}
+    [one(T), CountingTropical(one(T1), onehot(ConfigEnumerator{N}, vertex_index[ix[1]]))]
+end
+
+symbols(::EinCode{ixs}) where ixs = unique(Iterators.flatten(ixs))
+symbols(ne::NestedEinsum) = symbols(Iterators.flatten(ne))
+function mis_enumerate(code)
+    vertex_index = Dict([s=>i for (i, s) in enumerate(symbols(code))])
+	xs = generate_xs!((T, ix)->enumerator_t(T, ix, vertex_index), CountingTropical{Float64,ConfigEnumerator{length(vertex_index)}}, code, Vector{Any}(undef, ninput(code)))
+	code(xs...)
+end
+\end{lstlisting}
 \end{document}
