@@ -54,12 +54,6 @@ function generate_xs!(f, x::T, code::EinCode, xs) where {T}
 	return xs
 end
 
-ninput(::EinCode{ixs}) where ixs = length(ixs)
-ninput(ne::Int) = 1
-function ninput(ne::NestedEinsum)
-    mapreduce(ninput, +, ne.args, init=0)
-end
-
 export mis_solve, mis_count
 function mis_contract(x::T, code) where {T}
 	xs = generate_xs!(_auto_mistensor, x, code, Vector{Any}(undef, ninput(code)))

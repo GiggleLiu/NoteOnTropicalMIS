@@ -38,7 +38,9 @@ function enumerator_t(::Type{T}, ix::NTuple{1}, vertex_index) where {T1,N,C, T<:
 end
 
 symbols(::EinCode{ixs}) where ixs = unique(Iterators.flatten(ixs))
-symbols(ne::NestedEinsum) = symbols(Iterators.flatten(ne))
+symbols(ne::OMEinsum.NestedEinsum) = symbols(Iterators.flatten(ne))
+ninput(::EinCode{ixs}) where ixs = length(ixs)
+ninput(ne::OMEinsum.NestedEinsum) = ninput(Iterators.flatten(ne))
 function mis_config(code; all=false)
     vertex_index = Dict([s=>i for (i, s) in enumerate(symbols(code))])
     N = length(vertex_index)
