@@ -228,7 +228,7 @@ and a rank two tensor of size $2 \times 2$ at each edge
         1 & 0
     \end{matrix}\right)_{s_is_j},
 \end{equation}
-the contraction of this einsum network is the independence polynomial %, we denote this contraction as \texttt{a,b,c,d,ab,ad,bc,bd,cd,ce->}.
+the contraction of this einsum network generates the independence polynomial %, we denote this contraction as \texttt{a,b,c,d,ab,ad,bc,bd,cd,ce->}.
 \begin{equation}
     I(G, x) = \sum\limits_{s_1, s_2, \ldots, s_n = 0}^{1} \prod\limits_{i=1}^n W(x)_{s_i} \prod\limits_{(i,j) \in E(G)} B_{s_i s_j}.
 \end{equation}
@@ -777,7 +777,15 @@ function improved_counting(sequences)
 end
 \end{lstlisting}
 
-\section{Enumerating configurations}
+\section{Maximum independent set}
+\subsection{Tropical numbers}
+\begin{lstlisting}
+function independence_polynomial(::Val{:polynomial}, code)
+    mis_polysolve(code, Polynomial([0, 1.0]))[]
+end
+\end{lstlisting}
+
+\subsection{Enumerating configurations}
 \begin{lstlisting}
 using OMEinsum, TropicalNumbers
 

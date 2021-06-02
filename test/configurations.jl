@@ -1,10 +1,10 @@
 using NoteOnTropicalMIS, Test, LightGraphs
 
 @testset "ConfigTropical" begin
-    x = one(ConfigTropical{Float64, 5})
+    x = one(ConfigTropical{Float64, 5, 1})
     @test x.n == 0
     @test x.config == falses(5)
-    x = zero(ConfigTropical{Float64, 5})
+    x = zero(ConfigTropical{Float64, 5, 1})
     @test x.n == -Inf
     @test x.config == trues(5)
 end

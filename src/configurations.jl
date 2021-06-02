@@ -29,8 +29,9 @@ function onehot(::Type{ConfigEnumerator{N}}, i::Int) where N
     res.data[1][i] |= true
     return res
 end
-
-include("configtropical.jl")
+function onehot(::Type{ConfigTropical{T,N,C}}, i::Int) where {T,N,C}
+    ConfigTropical{T,N,C}(one(T), TropicalNumbers.onehot(StaticBitVector{N,C}, i))
+end
 
 function enumerator_t(::Type{T}, ix::NTuple{2}, vertex_index) where {T1, T2, T<:CountingTropical{T1, T2}}
     [one(T) one(T); one(T) zero(T)]
@@ -49,7 +50,8 @@ symbols(::EinCode{ixs}) where ixs = unique(Iterators.flatten(ixs))
 symbols(ne::NestedEinsum) = symbols(Iterators.flatten(ne))
 function mis_config(code; all=false)
     vertex_index = Dict([s=>i for (i, s) in enumerate(symbols(code))])
-    T = all ? CountingTropical{Float64, ConfigEnumerator{length(vertex_index)}} : ConfigTropical{Float64, length(vertex_index)}
+    N = length(vertex_index)
+    T = all ? CountingTropical{Float64, ConfigEnumerator{N}} : ConfigTropical{Float64, N, TropicalNumbers._nints(N)}
 	xs = generate_xs!((T, ix)->enumerator_t(T, ix, vertex_index), T, code, Vector{Any}(undef, ninput(code)))
 	code(xs...)
 end

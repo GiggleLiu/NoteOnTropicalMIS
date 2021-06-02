@@ -24,7 +24,7 @@ OMEinsum = "0.4"
 Polynomials = "2.0"
 Primes = "0.5"
 TropicalGEMM = "0.1"
-TropicalNumbers = "0.3"
+TropicalNumbers = "0.4"
 Viznet = "0.3"
 julia = "1"
 
