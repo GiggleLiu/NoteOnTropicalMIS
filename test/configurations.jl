@@ -10,7 +10,6 @@ using NoteOnTropicalMIS, Test, LightGraphs
 end
 
 @testset "enumerating" begin
-    @test NoteOnTropicalMIS.onehot(ConfigEnumerator{10}, 3) == ConfigEnumerator{10}(BitVector[[0, 0, 1, 0, 0, 0, 0, 0, 0, 0]])
     code = random_regular_eincode(10, 3)
     res1 = mis_count(code)[]
     res2 = mis_config(code; all=true)[]

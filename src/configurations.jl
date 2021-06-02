@@ -1,49 +1,40 @@
 export mis_config, ConfigEnumerator, ConfigTropical
 
-struct ConfigEnumerator{N}
-    data::Vector{BitVector}
+struct ConfigEnumerator{N,C}
+    data::Vector{StaticBitVector{N,C}}
 end
 
 Base.length(x::ConfigEnumerator{N}) where N = length(x.data)
-Base.:(==)(x::ConfigEnumerator, y::ConfigEnumerator) = x.data == y.data
+Base.:(==)(x::ConfigEnumerator{N,C}, y::ConfigEnumerator{N,C}) where {N,C} = x.data == y.data
 
-function Base.:+(x::ConfigEnumerator{N}, y::ConfigEnumerator{N}) where N
-    res = ConfigEnumerator{N}(vcat(x.data, y.data))
+function Base.:+(x::ConfigEnumerator{N,C}, y::ConfigEnumerator{N,C}) where {N,C}
+    res = ConfigEnumerator{N,C}(vcat(x.data, y.data))
     return res
 end
 
-function Base.:*(x::ConfigEnumerator{L}, y::ConfigEnumerator{L}) where L
+function Base.:*(x::ConfigEnumerator{L,C}, y::ConfigEnumerator{L,C}) where {L,C}
     M, N = length(x), length(y)
-    z = Vector{BitVector}(undef, M*N)
+    z = Vector{StaticBitVector{L,C}}(undef, M*N)
     for j=1:N, i=1:M
         z[(j-1)*M+i] = x.data[i] .| y.data[j]
     end
-    return ConfigEnumerator{L}(z)
+    return ConfigEnumerator{L,C}(z)
 end
 
-Base.zero(::Type{ConfigEnumerator{N}}) where N = ConfigEnumerator{N}(BitVector[])
-Base.one(::Type{ConfigEnumerator{N}}) where N = ConfigEnumerator{N}([falses(N)])
+Base.zero(::Type{ConfigEnumerator{N,C}}) where {N,C} = ConfigEnumerator{N,C}(StaticBitVector{N,C}[])
+Base.one(::Type{ConfigEnumerator{N,C}}) where {N,C} = ConfigEnumerator{N,C}([TropicalNumbers.staticfalses(StaticBitVector{N,C})])
 
-function onehot(::Type{ConfigEnumerator{N}}, i::Int) where N
-    res = one(ConfigEnumerator{N})
-    res.data[1][i] |= true
-    return res
-end
-function onehot(::Type{ConfigTropical{T,N,C}}, i::Int) where {T,N,C}
-    ConfigTropical{T,N,C}(one(T), TropicalNumbers.onehot(StaticBitVector{N,C}, i))
-end
-
-function enumerator_t(::Type{T}, ix::NTuple{2}, vertex_index) where {T1, T2, T<:CountingTropical{T1, T2}}
+function enumerator_t(::Type{T}, ix::NTuple{2}, vertex_index) where {T1, N, C, T<:CountingTropical{T1,ConfigEnumerator{N,C}}}
     [one(T) one(T); one(T) zero(T)]
 end
-function enumerator_t(::Type{T}, ix::NTuple{1}, vertex_index) where {T1, T2, T<:CountingTropical{T1, T2}}
-    [one(T), CountingTropical(one(T1), onehot(T2, vertex_index[ix[1]]))]
+function enumerator_t(::Type{T}, ix::NTuple{1}, vertex_index) where {T1, N, C, T<:CountingTropical{T1,ConfigEnumerator{N,C}}}
+    [one(T), CountingTropical(one(T1), ConfigEnumerator([TropicalNumbers.onehot(StaticBitVector{N,C}, vertex_index[ix[1]])]))]
 end
-function enumerator_t(::Type{T}, ix::NTuple{2}, vertex_index) where {T1, T2, T<:ConfigTropical{T1, T2}}
+function enumerator_t(::Type{T}, ix::NTuple{2}, vertex_index) where {T1,N,C, T<:ConfigTropical{T1,N,C}}
     [one(T) one(T); one(T) zero(T)]
 end
-function enumerator_t(::Type{T}, ix::NTuple{1}, vertex_index) where {T1, T2, T<:ConfigTropical{T1, T2}}
-    [one(T), onehot(T, vertex_index[ix[1]])]
+function enumerator_t(::Type{T}, ix::NTuple{1}, vertex_index) where {T1,N,C, T<:ConfigTropical{T1,N,C}}
+    [one(T), T(one(T1), TropicalNumbers.onehot(StaticBitVector{N,C}, vertex_index[ix[1]]))]
 end
 
 symbols(::EinCode{ixs}) where ixs = unique(Iterators.flatten(ixs))
@@ -51,7 +42,8 @@ symbols(ne::NestedEinsum) = symbols(Iterators.flatten(ne))
 function mis_config(code; all=false)
     vertex_index = Dict([s=>i for (i, s) in enumerate(symbols(code))])
     N = length(vertex_index)
-    T = all ? CountingTropical{Float64, ConfigEnumerator{N}} : ConfigTropical{Float64, N, TropicalNumbers._nints(N)}
+    C = TropicalNumbers._nints(N)
+    T = all ? CountingTropical{Float64, ConfigEnumerator{N,C}} : ConfigTropical{Float64, N, C}
 	xs = generate_xs!((T, ix)->enumerator_t(T, ix, vertex_index), T, code, Vector{Any}(undef, ninput(code)))
 	code(xs...)
 end

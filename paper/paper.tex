@@ -207,7 +207,7 @@ Harvard University\\
     the independence polynomial and the optimal configuration by using different tensor elements to a commutative semiring.
 \end{abstract}
 
-\section{Computing independence polynomial}
+\section{Three approaches to computing independence polynomial}
 The independence polynomial~\cite{Ferrin2014, Harvey2017} of a graph $G$ is defined as
 \begin{equation}
 I(G, x) = \sum_{k=1}^{\alpha(G)} a_k x^k,
@@ -274,20 +274,20 @@ a \odot \mymathbb{0} = \mymathbb{0} * a = \mymathbb{0}
 \end{align*}
 
 \subsection{Symbolic computing}
-To evaluate this polynomial, one can use the symbolic computing directly.
-One can store a polynomial of $x$ as a vector of factors.
-We define the algebra between the polynomial expansions $a$ of order $k_a$ and $b$ of order $k_b$ as
+To evaluate this polynomial, one can use the symbolic computing directly, that is, storing a polynomial of $x$ as a vector of factors.
+We define the algebra between the polynomials $a$ of order $k_a$ and $b$ of order $k_b$ as
 \begin{align}
     \begin{split}
     a \oplus b &= \{a_0 + b_0, a_1 + b_1, \ldots, a_{\max(k_a, k_b)} + b_{\max(k_a, k_b)}\},\\
     a \odot b &= \{a_0 + b_0, a_1b_0 + a_0b_1, \ldots, a_{k_a} b_{k_b}\},\\
     \mymathbb{0} &= \{\},\\
-    \mymathbb{1} &= \{1\},
+    \mymathbb{1} &= \{1\}.
     \end{split}
 \end{align}
-and insert them to the original tensor network contraction algorithm.
+The variable $x$ now is represented as a vector $\{0, 1\}$.
+Then we insert them to the original tensor network contraction algorithm, the final result is the exact representation of the independence polynomial.
 In the program, the multiplication can be evaluated efficiently with the convolution theorem.
-However, this method still suffers from a space overhead that propotional to the maximum independant set size.
+However, this method suffers from a space overhead that propotional to the maximum independant set size because each polynomial requires a vector of such size to store.
 
 \subsection{Polynomial fitting and Fourier transformation}
 Let $m=\alpha(G)$ be the maximum independent set size and $X$ be a set of $m+1$ random real numbers, e.g. $\{0, 1, 2, \ldots, m\}$.
@@ -384,7 +384,7 @@ In the algorithm, except the computation of chinese remainder theorem, all compu
 \end{algorithm}
 
 \section{Computing maximum independent set size and its corresponding degeneracy and configurations}
-Obtaining the maximum independent set size and its degeneracy is much easier. Let $x=\infty$, then the independence polynomial becomes
+Obtaining the maximum independent set size and its degeneracy is computational more efficient. Let $x=\infty$, then the independence polynomial becomes
 \begin{equation}
 I(G, \infty) = a_k \infty^{\alpha(G)},
 \end{equation}
@@ -401,8 +401,9 @@ where the lower orders terms disappear automatically. We can define a new algebr
     \mymathbb{1} &= 1\infty^{0}
 \end{split}
 \end{align}
-In the program, we only store the power $x$ and the corresponding factor $a_x$ that initialized to $1$. This is exactly the tropical tensor network~\cite{Liu2021} used in solving spin glass ground states.
-Here if we are only interested in obtaining $\alpha(G)$, we can only consider the powers, which corresponds to the tropical algebra~\cite{Maclagan2015}.
+In the program, we only store the power $x$ and the corresponding factor $a_x$ that initialized to $1$.
+This algebra is consistent with the one we derived in ~\cite{Liu2021} that uses the tropical tensor network solving spin glass ground states.
+Here if we are only interested in obtaining $\alpha(G)$ and omit the factors, the algebra of $x$ corresponds to the tropical algebra~\cite{Maclagan2015,Moore2011}.
 
 One may want to obtain all ground state configurations,
 it can be achieved replacing the factors $a_x$ with a set of bit strings $s_x$ initialized to a vertex index $i$ dependent onehot vector $s_i = \{\boldsymbol{\delta}_{ij=1,\ldots,n}\}$.
