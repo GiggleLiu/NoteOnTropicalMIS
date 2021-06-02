@@ -215,29 +215,28 @@ The independence polynomial~\cite{Ferrin2014, Harvey2017} of a graph $G$ is defi
 \begin{equation}
 I(G, x) = \sum_{k=1}^{\alpha(G)} a_k x^k,
 \end{equation}
-where $a_k$ is the number of independent sets of order $k$ in $G$, and $\alpha(G)$ is the maximum independent set size of graph $G$.
-If we map a graph into an einsum network, as shown in \Fig{fig:einsummapping}, by putting a vertex tensor of size $2$ at each vertex
+where $a_k$ is the number of independent sets of size $k$ in $G$, and $\alpha(G)$ is the maximum independent set size.
+\blue{here, I preassumed a user knows tensor network, add more details later.}
+If we map a graph into an einsum network, as shown in \Fig{fig:einsummapping}, by placing a rank one tensor of size $2$ at each vertex
 \begin{equation}
-    W(x) = \left(\begin{matrix}
+    W(x)_{s_i} = \left(\begin{matrix}
         1 \\
         x
-    \end{matrix}\right),
+    \end{matrix}\right)_{s_i},
 \end{equation}
-and a matrix of size $2 \times 2$ at each edge
+and a rank two tensor of size $2 \times 2$ at each edge
 \begin{equation}
-    B = \left(\begin{matrix}
+    B_{s_i s_j} = \left(\begin{matrix}
         1  & 1\\
         1 & 0
-    \end{matrix}\right).
+    \end{matrix}\right)_{s_is_j},
 \end{equation}
-
-where $x$ is a variable.
-The contraction of this einsum network is the independence polynomial %, we denote this contraction as \texttt{a,b,c,d,ab,ad,bc,bd,cd,ce->}.
+the contraction of this einsum network is the independence polynomial %, we denote this contraction as \texttt{a,b,c,d,ab,ad,bc,bd,cd,ce->}.
 \begin{equation}
     I(G, x) = \sum\limits_{s_1, s_2, \ldots, s_n = 0}^{1} \prod\limits_{i=1}^n W(x)_{s_i} \prod\limits_{(i,j) \in E(G)} B_{s_i s_j}.
 \end{equation}
 Here, the einsum enumerates all possible configurations and accumulates the product of tensor elements to the output.
-The product over vertices tensors provides a factor $x^k$, where $k=\sum_k s_k$ is the set size.
+The product over vertex tensors provides a factor $x^k$, where $k=\sum_i s_i$ is the set size.
 While the product over edge tensors provides a factor $0$ if the configuration is not an independent set, otherwise $1$.
 \begin{figure*}[t!]
     \centering
@@ -254,23 +253,37 @@ While the product over edge tensors provides a factor $0$ if the configuration i
     \end{subfigure}
     \caption{Mapping a graph to an einsum network.}\label{fig:einsummapping}
 \end{figure*}
-The benefit of mapping the problem to einsum is, some existing algorithms can be used to decrease the complexity of the problem.
+By mapping the problem to einsum, one can use some existing algorithms to decrease the complexity of the problem.
 Especially those techiniques developed in recent quantum circuit simulations for finding the optimal exactly contraction order of a tensor network ~\cite{Gray2021,Pan2021}.
 With these algorithms, one can easily find a good contraction order that reduces the complexity to a quantity related to the minimum treewidth of the graph.~\cite{Markov2008}
 Such mapping also makes it possible to utilize faster BLAS functions.
-
-Before contracting the tensor network and evaluating this polynomial numerically, let us give up thinking $0$s and $1$s in tensors $W(x)$ and $B$ as regular computer numbers such as integers and floating point numbers.
+Before contracting the tensor network and evaluating this polynomial numerically, let us first give up thinking $0$s and $1$s in tensors $W(x)$ and $B$ as regular computer numbers such as integers and floating point numbers.
 Instead, we treat them as the additive identity and multiplicative identity of a commutative semiring.
-A commutative semiring can be defined as: a ring without additive inverse is called a semiring, and commutative semiring is a semiring that multiplication commutative.
+A ring without additive inverse is called a semiring, and commutative semiring is a semiring that multiplication commutative.
+To define a commutative semiring with addition algebra $\oplus$ and multiplication algebra $\odot$ on a set $R$, the following relation must hold for arbituary three elements $a, b, c \in R$.
+\begin{align*}
+(a \oplus b) \oplus c = a \oplus (b \oplus c) & \hspace{5em}\text{$\triangleright$ commutative monoid $\oplus$ with identity $\mymathbb{0}$}\\
+a \oplus \mymathbb{0} = \mymathbb{0} \oplus a = a &\\
+a \oplus b = b \oplus a &\\
+&\\
+(a \odot b) \odot c = a \odot (b \odot c)  &   \hspace{5em}\text{$\triangleright$ commutative monoid $\odot$ with identity $\mymathbb{1}$}\\
+a \odot  \mymathbb{1} =  \mymathbb{1} \odot a = a &\\
+a \odot b = b \odot a &\\
+&\\
+a \odot (b\oplus c) = a\odot b + a\odot c  &  \hspace{5em}\text{$\triangleright$ left and right distributive}\\
+(a\oplus b) \odot c = a\odot c \oplus b\odot c &\\
+&\\
+a \odot \mymathbb{0} = \mymathbb{0} * a = \mymathbb{0}
+\end{align*}
 
 \subsection{Symbolic computing}
 To evaluate this polynomial, one can use the symbolic computing directly.
 One can store a polynomial of $x$ as a vector of factors.
-We define the algebra between the polynomial expansions of order $k$ as
+We define the algebra between the polynomial expansions $a$ of order $k_a$ and $b$ of order $k_b$ as
 \begin{align}
     \begin{split}
-    a \oplus b &= \{a_0 + b_0, a_1 + b_1, \ldots, a_k + b_k\},\\
-    a \odot b &= \{a_0 + b_0, a_1b_0 + a_0b_1, \ldots, a_k + b_k\},\\
+    a \oplus b &= \{a_0 + b_0, a_1 + b_1, \ldots, a_{\max(k_a, k_b)} + b_{\max(k_a, k_b)}\},\\
+    a \odot b &= \{a_0 + b_0, a_1b_0 + a_0b_1, \ldots, a_{k_a} b_{k_b}\},\\
     \mymathbb{0} &= \{\},\\
     \mymathbb{1} &= \{1\},
     \end{split}
@@ -279,8 +292,8 @@ and insert them to the original tensor network contraction algorithm.
 In the program, the multiplication can be evaluated efficiently with the convolution theorem.
 However, this method still suffers from a space overhead that propotional to the maximum independant set size.
 
-\subsection{Polynomial fitting}
-Let $m$ be the maximum independent set size and $X$ be a set of $m+1$ random real numbers, e.g. $\{0, 1, 2, \ldots, m\}$.
+\subsection{Polynomial fitting and Fourier transformation}
+Let $m=\alpha(G)$ be the maximum independent set size and $X$ be a set of $m+1$ random real numbers, e.g. $\{0, 1, 2, \ldots, m\}$.
 We compute the einsum contraction for each $x \in X$ and obtain the following relations
 \begin{align}
     \begin{split}
@@ -291,8 +304,7 @@ a_0 + a_1 x_m + a_2 x_m^2 + \ldots + a_m x_m^m& = y_m
     \end{split}
 \end{align}
 The polynomial fitting between $X$ and $Y = \{y_0, y_1, \ldots, y_m\}$ gives us the factors.
-
-\subsection{Fourier transformation}
+The polynomial fitting is esentially about solving the following linear equation
 \begin{align}
 \left(\begin{matrix}
 1 & x_1 & x_1^2 & \ldots & x_1^m \\
@@ -305,9 +317,11 @@ a_0 \\ a_1 \\ \vdots \\ a_m
 \end{matrix}\right)
 = \left(\begin{matrix}
 y_0 \\ y_1 \\ \vdots \\ y_m
-\end{matrix}\right)
+\end{matrix}\right).
 \end{align}
 
+However, the result is very unreliable in practise due to the non-negligible round off error of floating point numbers.
+Instead of choosing $X$ as a set of random real numbers, we let $x_i = r\omega^i$ and the above linear equation becomes
 \begin{align}
 \left(\begin{matrix}
 1 & r\omega & r^2\omega^2 & \ldots & r^m\omega^m \\
@@ -320,7 +334,7 @@ a_0 \\ a_1 \\ \vdots \\ a_m
 \end{matrix}\right)
 = \left(\begin{matrix}
 y_0 \\ y_1 \\ \vdots \\ y_m
-\end{matrix}\right)
+\end{matrix}\right).
 \end{align}
 
 When $r=1$, the left side is a DFT matrix. We can obtain the factors using the relation $\vec a = {\rm FFT^{-1}}(\omega) \cdot \vec y$.
@@ -372,7 +386,7 @@ In the algorithm, except the computation of chinese remainder theorem, all compu
     }\caption{Compute independence polynomial exactly without integer overflow}\label{alg:finitefield}
 \end{algorithm}
 
-\section{Computing maximum independent set size and its degeneracy}
+\section{Computing maximum independent set size and its corresponding degeneracy and configurations}
 Obtaining the maximum independent set size and its degeneracy is much easier. Let $x=\infty$, then the independence polynomial becomes
 \begin{equation}
 I(G, \infty) = a_k \infty^{\alpha(G)},
@@ -394,17 +408,19 @@ In the program, we only store the power $x$ and the corresponding factor $a_x$ t
 Here if we are only interested in obtaining $\alpha(G)$, we can only consider the powers, which corresponds to the tropical algebra~\cite{Maclagan2015}.
 
 One may want to obtain all ground state configurations,
-it can be achieved replacing the factors $a_x$ with a set of bit strings $s_x$ initialized to a vertex dependent value $s_i = \{\delta_{ij=1,\ldots,n}$\}.
+it can be achieved replacing the factors $a_x$ with a set of bit strings $s_x$ initialized to a vertex index $i$ dependent onehot vector $s_i = \{\boldsymbol{\delta}_{ij=1,\ldots,n}\}$.
 The bit strings has a redefined algebra
 \begin{align}
 \begin{split}
     s_x \oplus s_y &= s_x \cup s_y\\
-    s_x \odot s_y &= \{\sigma \lor \tau | \sigma \in s_x, \tau \in s_y\}
+    s_x \odot s_y &= \{\sigma \lor \tau | \sigma \in s_x, \tau \in s_y\}\\
+    \mymathbb{0} &= \{\}\\
+    \mymathbb{1} &= \{\boldsymbol 0\}
 \end{split}
 \end{align}
-The $\vee$ is the bit-wise \texttt{or}.
+The $\vee$ is the bit-wise \texttt{or}. One can easily check that this replacement does not change the fact that the algebra is a commutative semiring.
 
-\subsection{Utilizing sparsity}
+\section{Utilizing sparsity}
 So far, we have used the language of einsum networks for contraction.
 When using sparse tropical tensor networks to find the maximum independent set, we can introduce a new rule to compress the tensor by removing elements that are not helpful.
 As show in \Fig{fig:compressrule}, after we contract the tensors in a subregion $R \subseteq G$ of a graph $G$, and obtain a resulting tensor $A$ of rank $|C|$, where $C$ is the set of vertice tensors at the cut.
