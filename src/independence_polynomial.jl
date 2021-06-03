@@ -6,7 +6,7 @@ function independence_polynomial(::Val{:fft}, code; mis_size=Int(mis_solve(code)
 	ω = exp(-2im*π/(mis_size+1))
 	xs = r .* collect(ω .^ (0:mis_size))
 	ys = [mis_contract(x, code)[] for x in xs]
-	Polynomial(real.(ifft(ys) ./ (r .^ (0:mis_size))))
+	Polynomial(ifft(ys) ./ (r .^ (0:mis_size)))
 end
 
 function independence_polynomial(::Val{:fitting}, code; mis_size=Int(mis_solve(code)[].n))

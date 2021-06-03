@@ -17,9 +17,15 @@ end
 begin
 	using Revise
 	using NoteOnTropicalMIS
-	using NoteOnTropicalMIS.OMEinsum, NoteOnTropicalMIS.TropicalNumbers, NoteOnTropicalMIS.Polynomials
+	using NoteOnTropicalMIS.OMEinsum, NoteOnTropicalMIS.TropicalNumbers, NoteOnTropicalMIS.Polynomials, NoteOnTropicalMIS.TropicalGEMM
 	using OMEinsumContractionOrders, PlutoUI
 end
+
+# ╔═╡ c5db88b3-f294-458f-aaf4-f4c50abc8e4e
+using ProfileSVG
+
+# ╔═╡ 525ecde1-d55c-4bde-833e-e5a2bd591165
+using TensorOperations, LinearAlgebra
 
 # ╔═╡ 18124cde-bdf0-11eb-382a-a727d1fbe17a
 md"# Tensor network playground
@@ -29,7 +35,7 @@ md"# Tensor network playground
 md"## Generate a random-regular graph"
 
 # ╔═╡ d704acbf-12c0-4468-b122-3f25406e2e5a
-n = 80;
+n = 200;
 
 # ╔═╡ 5527cdcb-dc41-4237-aeb0-f38b1e218729
 k = 3;
@@ -58,7 +64,7 @@ end
 optimized_code = if order_optimizer == "Greedy"
 	optimize_greedy(code, Dict([i=>2 for i=1:n]))
 else
-	optimize_kahypar(code, Dict([i=>2 for i=1:n]), sc_target=sc_target, max_group_size=50)
+	optimize_kahypar(code, Dict([i=>2 for i=1:n]), sc_target=sc_target, max_group_size=40)
 end;
 
 # ╔═╡ 4df90029-1950-4701-a5ea-3b432992de61
@@ -81,20 +87,29 @@ end
 
 # ╔═╡ 7461f34d-39d0-4d99-a717-9f76815f1273
 md"""
-$(@bind element_type Select(["Select Task"=>"Select Task", "Regular"=>"number of independent sets", "Tropical"=>"maximum independent set size", "Polynomial"=>"Independence polynomial", "Tropical-Counting"=>"maximum independent set degeneracy", "Tropical-Config"=>"single optimal configuration", "Tropical-Config-All"=>"all optimal configurations"]))
+$(@bind element_type Select(["Select Task"=>"Select Task", "Regular"=>"number of independent sets", "Tropical"=>"maximum independent set size", "Polynomial"=>"Independence polynomial", "Polynomial-finitefield"=>"Independence polynomial (finite field)", "Polynomial-fft"=>"Independence polynomial (fft)", "Tropical-Counting"=>"maximum independent set degeneracy", "Tropical-Config"=>"single optimal configuration", "Tropical-Config-All"=>"all optimal configurations"]))
 """
 
+# ╔═╡ b80080d6-a178-4b4a-9897-4a17ddee5b50
+let
+	_r = @bind r NumberField(0.01:0.01:5.0; default=3.0)
+	if element_type == "Polynomial-fft"
+		md"r = $_r"
+	end
+end
+
 # ╔═╡ 42628cd3-5a34-46c6-a1a2-325463fafe45
-if element_type !== "Select Task" 
-	let
-		T = Dict(
-			"Regular"=>Float64,
-			"Tropical"=>TropicalF64,
-			"Polynomial"=>Polynomial,
-			"Tropical-Counting"=>CountingTropicalF64,
-			"Tropical-Config"=>ConfigTropical{Float64,n,TropicalNumbers._nints(n)},
-			"Tropical-Config-All"=>CountingTropical{Float64,ConfigEnumerator{n,TropicalNumbers._nints(n)}},
-			)[element_type]
+@profview let
+	element_dict = Dict(
+		"Regular"=>Float64,
+		"Tropical"=>TropicalF64,
+		"Polynomial"=>Polynomial,
+		"Tropical-Counting"=>CountingTropicalF64,
+		"Tropical-Config"=>ConfigTropical{Float64,n,TropicalNumbers._nints(n)},
+		"Tropical-Config-All"=>CountingTropical{Float64,ConfigEnumerator{n,TropicalNumbers._nints(n)}},
+		)
+	if haskey(element_dict, element_type)
+		T = element_dict[element_type]
 
 		xfunc = if element_type == "Tropical-Config"
 			c = TropicalNumbers._nints(n)
@@ -109,13 +124,17 @@ if element_type !== "Select Task"
 		end
 
 		mis_contract(xfunc, T, optimized_code)[]
+	elseif element_type == "Polynomial-finitefield"
+		independence_polynomial(Val(:finitefield), optimized_code)
+	elseif element_type == "Polynomial-fft"
+		independence_polynomial(Val(:fft), optimized_code; r=r)
 	end
 end
 
-# ╔═╡ 0d4bb3b5-4eeb-41a9-951b-c05f21c6df55
-md"## Notes
-Package `TropicalGEMM` provides BLAS level speed for tropical tensor contraction. To use this feature, just install and import the package.
-"
+# ╔═╡ d792602d-3f7d-4812-bbb2-6ef16560563a
+#function LinearAlgebra.permutedims!(C::Array{T,N}, A::StridedArray{T,N}, perm) where {T,N}
+#    TensorOperations.tensorcopy!(A, ntuple(identity,N), C, perm)
+#end
 
 # ╔═╡ Cell order:
 # ╟─18124cde-bdf0-11eb-382a-a727d1fbe17a
@@ -131,5 +150,8 @@ Package `TropicalGEMM` provides BLAS level speed for tropical tensor contraction
 # ╟─f2b12677-2613-4b56-96ff-450ea388a929
 # ╠═092cb056-2c0e-40af-ba1b-8879460c6dd1
 # ╟─7461f34d-39d0-4d99-a717-9f76815f1273
+# ╟─b80080d6-a178-4b4a-9897-4a17ddee5b50
 # ╠═42628cd3-5a34-46c6-a1a2-325463fafe45
-# ╟─0d4bb3b5-4eeb-41a9-951b-c05f21c6df55
+# ╠═c5db88b3-f294-458f-aaf4-f4c50abc8e4e
+# ╠═525ecde1-d55c-4bde-833e-e5a2bd591165
+# ╠═d792602d-3f7d-4812-bbb2-6ef16560563a

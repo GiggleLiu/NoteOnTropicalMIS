@@ -8,12 +8,15 @@ Base.length(x::ConfigEnumerator{N}) where N = length(x.data)
 Base.:(==)(x::ConfigEnumerator{N,C}, y::ConfigEnumerator{N,C}) where {N,C} = x.data == y.data
 
 function Base.:+(x::ConfigEnumerator{N,C}, y::ConfigEnumerator{N,C}) where {N,C}
-    res = ConfigEnumerator{N,C}(vcat(x.data, y.data))
-    return res
+    length(x) == 0 && return y
+    length(y) == 0 && return x
+    return ConfigEnumerator{N,C}(vcat(x.data, y.data))
 end
 
 function Base.:*(x::ConfigEnumerator{L,C}, y::ConfigEnumerator{L,C}) where {L,C}
     M, N = length(x), length(y)
+    M == 0 && return x
+    N == 0 && return y
     z = Vector{StaticBitVector{L,C}}(undef, M*N)
     @inbounds for j=1:N, i=1:M
         z[(j-1)*M+i] = x.data[i] | y.data[j]
