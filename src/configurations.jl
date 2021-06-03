@@ -15,8 +15,8 @@ end
 function Base.:*(x::ConfigEnumerator{L,C}, y::ConfigEnumerator{L,C}) where {L,C}
     M, N = length(x), length(y)
     z = Vector{StaticBitVector{L,C}}(undef, M*N)
-    for j=1:N, i=1:M
-        z[(j-1)*M+i] = x.data[i] .| y.data[j]
+    @inbounds for j=1:N, i=1:M
+        z[(j-1)*M+i] = x.data[i] | y.data[j]
     end
     return ConfigEnumerator{L,C}(z)
 end

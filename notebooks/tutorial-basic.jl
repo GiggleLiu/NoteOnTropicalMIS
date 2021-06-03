@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.14.6
+# v0.14.7
 
 using Markdown
 using InteractiveUtils
@@ -9,9 +9,6 @@ using OMEinsum, LightGraphs, TropicalNumbers
 
 # ╔═╡ f67a7abb-d96c-4167-962f-b9afa23300cd
 using Polynomials
-
-# ╔═╡ 20fbd4af-50a3-45b1-b519-e9e7c4b5740f
-using SymEngine
 
 # ╔═╡ 0fd7b695-fd29-4570-b33f-a9261565b06b
 using ForwardDiff
@@ -84,19 +81,19 @@ md"Here, the size of each bond is 2."
 md"## Generate tensors and do the contraction"
 
 # ╔═╡ 092cb056-2c0e-40af-ba1b-8879460c6dd1
-function mis_contract(code::OMEinsum.NestedEinsum, x::T) where T
+function mis_contract(f, ::Type{T}, code::OMEinsum.NestedEinsum) where T
    	tensors = map(OMEinsum.getixs(Iterators.flatten(code))) do ix
 	   	@assert length(ix) == 1 || length(ix) == 2
-		length(ix) == 1 ? [one(T), x] : [one(T) one(T); one(T) zero(T)]
+		length(ix) == 1 ? [one(T), convert(T, f(ix[1]))] : [one(T) one(T); one(T) zero(T)]
    	end
    	code(tensors...)
 end
 
 # ╔═╡ 42628cd3-5a34-46c6-a1a2-325463fafe45
-mis_size = mis_contract(optimized_code, Tropical(1.0))
+mis_size = mis_contract(ix->TropicalF64(1.0), TropicalF64, optimized_code)
 
 # ╔═╡ 4fe151d5-cc5a-4447-9ae6-bb6a1fbbddf8
-mis_size_with_degeneracy = mis_contract(optimized_code, CountingTropical(1.0))
+mis_size_with_degeneracy = mis_contract(ix->CountingTropicalF64(1.0), CountingTropicalF64, optimized_code)
 
 # ╔═╡ 112f8104-88b2-4968-8c7a-2d96ef6a52b8
 md"For independence polynomial"
@@ -105,16 +102,34 @@ md"For independence polynomial"
 OMEinsum.asarray(x, ::AbstractArray) = fill(x)
 
 # ╔═╡ 87bcf018-3c56-427c-a8c3-24e600062f06
-independence_polynomial = mis_contract(optimized_code, Polynomial([0,1.0]))
+independence_polynomial = mis_contract(ix->Polynomial([0,1.0]), Polynomial, optimized_code)
 
 # ╔═╡ ddacba43-20e2-4575-9ba1-35e26371f723
-gadget = mis_contract(optimize_greedy(ein"a,b,c,d,e,f,g,h,i,j,k,ae,ag,be,bf,ci,ck,dj,dk,ef,eg,fg,fh,gh,hi,hj,ij,ik,jk->abcd", Dict([(x=>2) for x in "abcdefghijk"])), Tropical(1))
+gadget = mis_contract(ix->TropicalF64(1), TropicalF64, optimize_greedy(ein"a,b,c,d,e,f,g,h,i,j,k,ae,ag,be,bf,ci,ck,dj,dk,ef,eg,fg,fh,gh,hi,hj,ij,ik,jk->abcd", Dict([(x=>2) for x in "abcdefghijk"])))
 
 # ╔═╡ 7fb0099b-511b-496b-a411-839f72b62556
 content.(gadget) .- 3
 
-# ╔═╡ e028cecc-6e75-4f94-a081-fb005f8026de
-Basic(:x) + Basic(:y)
+# ╔═╡ 03849452-3b16-43d9-b42b-80136b024227
+md"### Optimal configuration"
+
+# ╔═╡ 0b4509ba-a05a-43ab-900e-7586a0429223
+md"One can use the `ConfigTropical` to compute optimal configurations. It has two fields, a tropical number and a static bit string vector. The bit string vector can be constructed with the following functions."
+
+# ╔═╡ eb83a776-9629-4ae9-98ad-943426713a70
+TropicalNumbers.staticfalses(StaticBitVector{11,1})  # 0s
+
+# ╔═╡ f8a22082-35d7-4045-a210-b0ee6e02ab82
+TropicalNumbers.statictrues(StaticBitVector{11,1})   # 1s
+
+# ╔═╡ 0b99d453-220e-4b35-8b20-86dbdf687e07
+TropicalNumbers.onehot(StaticBitVector{11,1}, 3)     # one hot vector
+
+# ╔═╡ 327bc673-3490-4af0-b236-1af0519244ad
+TropicalNumbers.onehot(StaticBitVector{11,1}, 3) | TropicalNumbers.onehot(StaticBitVector{11,1}, 5)     # bit-wise or
+
+# ╔═╡ 74a47e93-00d9-4926-b5f1-2cf8a47e9503
+mis_contract(ix->ConfigTropical(1.0, TropicalNumbers.onehot(StaticBitVector{11,1}, ix-'a'+1)), ConfigTropical{Float64,11,1}, optimize_greedy(ein"a,b,c,d,e,f,g,h,i,j,k,ae,ag,be,bf,ci,ck,dj,dk,ef,eg,fg,fh,gh,hi,hj,ij,ik,jk->abcd", Dict([(x=>2) for x in "abcdefghijk"])))
 
 # ╔═╡ 7c0aa88b-b451-4210-aa30-d24c1e6f78ff
 md"## Autodiff"
@@ -123,7 +138,7 @@ md"## Autodiff"
 md"#### Forward mode autodiff"
 
 # ╔═╡ 4f2e4d03-2f57-4aa8-8875-0aa4f8001f14
-tropical_loss(x) = mis_contract(optimized_code, Tropical(x))[].n
+tropical_loss(x) = mis_contract(_->Tropical(x), Tropical{eltype(x)}, optimized_code)[].n
 
 # ╔═╡ 775f36e6-3663-4b68-9dc0-c3bb1b63f184
 ForwardDiff.gradient(x->tropical_loss(x[]), [1.0])
@@ -175,8 +190,13 @@ md"## Notes
 # ╠═87bcf018-3c56-427c-a8c3-24e600062f06
 # ╠═ddacba43-20e2-4575-9ba1-35e26371f723
 # ╠═7fb0099b-511b-496b-a411-839f72b62556
-# ╠═20fbd4af-50a3-45b1-b519-e9e7c4b5740f
-# ╠═e028cecc-6e75-4f94-a081-fb005f8026de
+# ╟─03849452-3b16-43d9-b42b-80136b024227
+# ╟─0b4509ba-a05a-43ab-900e-7586a0429223
+# ╠═eb83a776-9629-4ae9-98ad-943426713a70
+# ╠═f8a22082-35d7-4045-a210-b0ee6e02ab82
+# ╠═0b99d453-220e-4b35-8b20-86dbdf687e07
+# ╠═327bc673-3490-4af0-b236-1af0519244ad
+# ╠═74a47e93-00d9-4926-b5f1-2cf8a47e9503
 # ╟─7c0aa88b-b451-4210-aa30-d24c1e6f78ff
 # ╟─6bceb180-095b-41e0-b6ca-e9c02e4117d6
 # ╠═4f2e4d03-2f57-4aa8-8875-0aa4f8001f14
