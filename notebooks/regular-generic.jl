@@ -99,7 +99,7 @@ let
 end
 
 # ╔═╡ 42628cd3-5a34-46c6-a1a2-325463fafe45
-@profview let
+let
 	element_dict = Dict(
 		"Regular"=>Float64,
 		"Tropical"=>TropicalF64,
@@ -132,9 +132,9 @@ end
 end
 
 # ╔═╡ d792602d-3f7d-4812-bbb2-6ef16560563a
-#function LinearAlgebra.permutedims!(C::Array{T,N}, A::StridedArray{T,N}, perm) where {T,N}
-#    TensorOperations.tensorcopy!(A, ntuple(identity,N), C, perm)
-#end
+function LinearAlgebra.permutedims!(C::Array{T,N}, A::StridedArray{T,N}, perm) where {T,N}
+    TensorOperations.tensorcopy!(A, ntuple(identity,N), C, perm)
+end
 
 # ╔═╡ Cell order:
 # ╟─18124cde-bdf0-11eb-382a-a727d1fbe17a
