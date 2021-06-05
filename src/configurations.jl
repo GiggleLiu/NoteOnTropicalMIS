@@ -50,5 +50,10 @@ function mis_config(code; all=false)
     C = TropicalNumbers._nints(N)
     T = all ? CountingTropical{Float64, ConfigEnumerator{N,C}} : ConfigTropical{Float64, N, C}
 	xs = generate_xs!((T, ix)->enumerator_t(T, ix, vertex_index), T, code, Vector{Any}(undef, ninput(code)))
-	code(xs...)
+	xst = generate_xs!(_auto_mistensor, Tropical(1.0), code, Vector{Any}(undef, ninput(code)))
+    if all
+	    return bounding_contract(code, xst, BitArray(fill(true)), xs)
+    else
+	    return code(xs...)
+    end
 end

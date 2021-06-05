@@ -12,3 +12,7 @@ end
 @testset "configurations" begin
     include("configurations.jl")
 end
+
+@testset "ad" begin
+    include("ad.jl")
+end
