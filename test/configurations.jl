@@ -1,4 +1,5 @@
 using NoteOnTropicalMIS, Test, LightGraphs
+using OMEinsum
 
 @testset "ConfigTropical" begin
     x = one(ConfigTropical{Float64, 5, 1})

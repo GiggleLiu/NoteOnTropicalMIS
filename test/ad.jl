@@ -4,11 +4,12 @@ using NoteOnTropicalMIS: cached_einsum, generate_masktree, masked_einsum, CacheT
 @testset "cached einsum" begin
     xs = map(x->Tropical.(x), [randn(2,2), randn(2), randn(2,2), randn(2,2), randn(2,2)])
     code = ein"((ij,j),jk, kl), ii->kli"
-    c = cached_einsum(code, xs)
+    size_dict = uniformsize(code, 2)
+    c = cached_einsum(code, xs, size_dict)
     @test c.content == code(xs...)
-    mt = generate_masktree(code, c, rand(Bool,2,2,2))
+    mt = generate_masktree(code, c, rand(Bool,2,2,2), size_dict)
     @test mt isa CacheTree{Bool}
-    y = masked_einsum(code, xs, mt)
+    y = masked_einsum(code, xs, mt, size_dict)
     @test y isa AbstractArray
 end
 

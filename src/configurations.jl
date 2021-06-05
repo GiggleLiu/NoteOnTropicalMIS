@@ -57,3 +57,10 @@ function mis_config(code; all=false)
 	    return code(xs...)
     end
 end
+function Base.Matrix(x::ConfigEnumerator{N,C}) where {N,C}
+    m = zeros(UInt64, C, length(x))
+    for i=1:length(x)
+        m[:,i] .= x.data[i].data
+    end
+    return m
+end
