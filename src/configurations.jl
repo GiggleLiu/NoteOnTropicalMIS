@@ -42,17 +42,29 @@ end
 
 symbols(::EinCode{ixs}) where ixs = unique(Iterators.flatten(ixs))
 symbols(ne::OMEinsum.NestedEinsum) = symbols(Iterators.flatten(ne))
+single_symbols(::EinCode{ixs}) where ixs = unique(Iterators.flatten(filter(x->length(x)==1,ixs)))
+single_symbols(ne::OMEinsum.NestedEinsum) = single_symbols(Iterators.flatten(ne))
 ninput(::EinCode{ixs}) where ixs = length(ixs)
 ninput(ne::OMEinsum.NestedEinsum) = ninput(Iterators.flatten(ne))
-function mis_config(code; all=false)
-    vertex_index = Dict([s=>i for (i, s) in enumerate(symbols(code))])
+_getiy(code::EinCode) = OMEinsum.getiy(code)
+_getiy(code::NestedEinsum) = OMEinsum.getiy(code.eins)
+function mis_config(code; all=false, usemask=true)
+    nvertex = ninput(code)
+    vertex_index = Dict([s=>i for (i, s) in enumerate(single_symbols(code))])
     N = length(vertex_index)
     C = TropicalNumbers._nints(N)
     T = all ? CountingTropical{Float64, ConfigEnumerator{N,C}} : ConfigTropical{Float64, N, C}
-	xs = generate_xs!((T, ix)->enumerator_t(T, ix, vertex_index), T, code, Vector{Any}(undef, ninput(code)))
-	xst = generate_xs!(_auto_mistensor, Tropical(1.0), code, Vector{Any}(undef, ninput(code)))
-    if all
-	    return bounding_contract(code, xst, BitArray(fill(true)), xs)
+    xs = generate_xs!((T, ix)->enumerator_t(T, ix, vertex_index), T, code, Vector{Any}(undef, nvertex))
+    if usemask
+        ymask = trues(fill(2, length(_getiy(code)))...)
+        xst = generate_xs!(_auto_mistensor, Tropical(1.0), code, Vector{Any}(undef, nvertex))
+        if all
+            return bounding_contract(code, xst, ymask, xs)
+        else
+            @assert ndims(ymask) == 0
+            t, res = mis_config_ad(code, xst, ymask)
+            return fill(ConfigTropical(t[].n, StaticBitVector(map(l->res[l], 1:N))))
+        end
     else
 	    return code(xs...)
     end

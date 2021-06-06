@@ -204,10 +204,10 @@ Harvard University\\
 \begin{abstract}
 	Solving the maximum independent set size problem by mapping the problem to an einsum network. 
     We obtain the maximum independent set size,
-    the independence polynomial and the optimal configuration by using different tensor elements to a commutative semiring.
+    the independence polynomial and the optimal configuration by generic programming tensor networks.
 \end{abstract}
 
-\section{Three approaches to computing independence polynomial}
+\section{Three approaches to compute independence polynomial}
 The independence polynomial~\cite{Ferrin2014, Harvey2017} of a graph $G$ is defined as
 \begin{equation}
 I(G, x) = \sum_{k=1}^{\alpha(G)} a_k x^k,
@@ -228,7 +228,7 @@ and a rank two tensor of size $2 \times 2$ at each edge
         1 & 0
     \end{matrix}\right)_{s_is_j},
 \end{equation}
-the contraction of this einsum network generates the independence polynomial %, we denote this contraction as \texttt{a,b,c,d,ab,ad,bc,bd,cd,ce->}.
+the contraction of this einsum network gives the independence polynomial %, we denote this contraction as \texttt{a,b,c,d,ab,ad,bc,bd,cd,ce->}.
 \begin{equation}
     I(G, x) = \sum\limits_{s_1, s_2, \ldots, s_n = 0}^{1} \prod\limits_{i=1}^n W(x)_{s_i} \prod\limits_{(i,j) \in E(G)} B_{s_i s_j}.
 \end{equation}
@@ -403,7 +403,7 @@ where the lower orders terms disappear automatically. We can define a new algebr
 \end{align}
 In the program, we only store the power $x$ and the corresponding factor $a_x$ that initialized to $1$.
 This algebra is consistent with the one we derived in ~\cite{Liu2021} that uses the tropical tensor network solving spin glass ground states.
-Here if we are only interested in obtaining $\alpha(G)$ and omit the factors, the algebra of $x$ corresponds to the tropical algebra~\cite{Maclagan2015,Moore2011}.
+Here if we are only interested in obtaining $\alpha(G)$ and omit the factors, the algebra of $x$ corresponds to the max-plus tropical algebra~\cite{Maclagan2015,Moore2011}.
 
 One may want to obtain all ground state configurations,
 it can be achieved replacing the factors $a_x$ with a set of bit strings $s_x$ initialized to a vertex index $i$ dependent onehot vector $s_i = \{\boldsymbol{\delta}_{ij=1,\ldots,n}\}$.
@@ -432,6 +432,31 @@ it can be achieved replacing the factors $a_x$ with a set of bit strings $s_x$ i
 The $\vee$ is the bit-wise \texttt{or}. One can easily check that this replacement does not change the fact that the algebra is a commutative semiring.
 By slightly modifying the above algebra, it can also be used to obtain just a single configuration to save computational effort.
 We leave this as an exercise for readers.
+
+\subsection{bounding the enumeration space}
+If one tries to implement the above algebra for enumerating configurations, he will find the space overhead is not propotional to the degeneracy of the optimal configuration.
+It stores more than nessesary intermedite configurations. To speed up calculation, we use the result of much faster tropical number for bounding.
+We first compute the optimal maximum independent set size $\alpha(G)$ with tropical numbers and cache all intermediate tensors in the contraction route.
+Then we use boolean masks to mark relevent items for each cached tensor, i.e. using a boolean true to mark a tensor element with nonzero gradients and boolean false otherwise.
+Finally, we perform masked matrix multiplication using the new element type with the above algebra for obtaining all configurations.
+To compute the masks, we ``back propagate'' the masks through contraction route.
+Consider a tropical matrix multiplication $C = A B$, we have the following inequality
+\begin{align}
+    A_{ij} \odot B_{jk} &\leq C_{ik}
+\end{align}
+
+Using the tropical algebra, we have
+\begin{align}
+    A_{ij} &\leq (\max_{k} (C_{ik}^{-1} \odot B_{jk}))^{-1}
+\end{align}
+where the tropical multiplicative inverse is defined as the additive inverse of the regular algebra. The equality holds if and only if $A_{ij}$ can contribute to $C$ (i.e. has nonzero gradient).
+Let the mask for $C$ being $\overline C$, the backward rule for the mask reads
+\begin{align}
+\overline{A}_{ij} = \delta(A_{ij}, ((C^{\circ-1} \circ \overline C )B^T)_{ij}^{\circ -1}),
+\end{align}
+where ${}^{\circ -1}$ is the Hadamard inverse, $\circ$ is the Hadamard multiplication, boolean false is treated as tropical zero and boolean true is treated as tropical one.
+This backward rule utilizes the properties that tropical algebra has multiplicative inverse for a nonzero element, while the ordering is well defined too.
+This rule defined on matrix multiplication can be easily generalized to the einsum by replacing the matrix multiplication between $C^{\circ-1} \circ \overline C$ and $B^T$ by an einsum.
 
 \section{Utilizing sparsity}
 So far, we have used the language of einsum networks for contraction.

@@ -37,14 +37,7 @@ end
 _auto_mistensor(x::T, ix::NTuple{2}) where T = misb(T)
 _auto_mistensor(x::T, ix::NTuple{1}) where T = misv(T, 1, x)
 function generate_xs!(f, x::T, code::NestedEinsum, xs) where {T}
-    for (ix, arg) in zip(OMEinsum.getixs(code.eins), code.args)
-		if arg isa Integer
-			xs[arg] = f(x, ix)
-		else
-        	generate_xs!(f, x, arg, xs)
-		end
-    end
-	return xs
+    generate_xs!(f, x, Iterators.flatten(code), xs)
 end
 
 function generate_xs!(f, x::T, code::EinCode, xs) where {T}
