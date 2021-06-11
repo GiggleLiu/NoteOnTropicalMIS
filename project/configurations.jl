@@ -33,10 +33,10 @@ if false
     mis_configurations(13, 1, 'A')
     mis_configurations(13, 3, 'A')
 else
-    #for n in [7, 10], seed in 1:6
-    #    mis_configurations(n, seed, 'B'; writefile=true)
-    #end
-    for n in [13, 15], seed in [1, 2, 3, "Easy_1", "Medium_1", "Hard_1"]
-        mis_configurations(n, seed, 'B', writefile=true)
+    for n in [7, 10], seed in 1:6
+        mis_configurations(n, seed, 'B'; writefile=true)
     end
+    #for n in [13, 15], seed in [1, 2, 3, "Easy_1", "Medium_1", "Hard_1"]
+    #    mis_configurations(n, seed, 'B', writefile=true)
+    #end
 end

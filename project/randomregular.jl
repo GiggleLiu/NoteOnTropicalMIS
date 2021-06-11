@@ -1,33 +1,46 @@
 using DelimitedFiles, NoteOnTropicalMIS
 using NoteOnTropicalMIS.OMEinsumContractionOrders
 using NoteOnTropicalMIS.OMEinsum
+using TensorOperations, LinearAlgebra
 
-function mis_configurations(n, seed; writefile=false)
+function LinearAlgebra.permutedims!(C::Array{T,N}, A::StridedArray{T,N}, perm) where {T,N}
+    if isbitstype(T)
+        TensorOperations.tensorcopy!(A, ntuple(identity,N), C, perm)
+    else
+        invoke(permutedims!, Tuple{Any,AbstractArray,Any}, C, A, perm)
+    end
+end
+
+function mis_configurations(task, code; writefile=false)
     folder = joinpath("project", "data")
-    mask = Matrix{Bool}(readdlm(fname))
-    rawcode = diagonal_coupled_eincode(mask)
-    code = optimize_kahypar(rawcode, uniformsize(rawcode, 2); sc_target=17, max_group_size=40)
-    if task == :counting
+    if task == :missize
+        nc = mis_solve(code)[]
+    elseif task == :miscounting
         nc = mis_count(code)[]
-        println("n = $n, MIS size = $(nc.n), degeneracy = $(nc.c)")
-    elseif task == :config
+        println("MIS size = $(nc.n), degeneracy = $(nc.c)")
+    elseif task == :misconfig
+        nc = mis_config(code; all=false, usemask=true)[]
     elseif task == :allconfigs
-        res = mis_config(code; all=true)[]
-        @assert res.n == nc.n
-        config = res.c
-        @assert length(config) == nc.c
-
-        ofname = joinpath(folder, "configurations_$(n)x$(n)_5.3x5.3_$seed.dat")
-        writefile && write(ofname, Matrix(config))
-        return nc.n, config
+        res = mis_config(code; all=true, usemask=true)[]
+        #writefile && write(ofname, Matrix(config))
+        return res
+    elseif task == :independencepolynomial
+        independence_polynomial(Val(:polynomial), code)
+    elseif task == :numofis
+        NoteOnTropicalMIS.mis_contract(1.0, code)[]
+    else
+        error("unknown task: $task")
     end
 end
 
-if true
-    #for n in [7, 10], seed in 1:6
-    #    mis_configurations(n, seed; writefile=true)
-    #end
-    for n in [13, 15], seed in [1, 2, 3, "Easy_1", "Medium_1", "Hard_1"]
-        mis_configurations(n, seed, writefile=true)
-    end
-end
+n = 200
+rawcode = random_regular_eincode(n, 3);
+code = optimize_kahypar(rawcode, uniformsize(rawcode, 2); sc_target=27, max_group_size=40);
+tc, sc = OMEinsum.timespace_complexity(code, uniformsize(code,2))
+println("time complexity = $tc, space complexity = $sc")
+@time mis_configurations(:numofis, code)
+@time mis_configurations(:missize, code)
+@time mis_configurations(:miscounting, code)
+@time mis_configurations(:misconfig, code)
+@time mis_configurations(:allconfigs, code)
+@time mis_configurations(:independencepolynomial, code)
