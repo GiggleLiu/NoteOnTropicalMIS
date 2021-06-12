@@ -1,6 +1,7 @@
 using Test, NoteOnTropicalMIS
 using TropicalNumbers
 using NoteOnTropicalMIS: unitdisk_graph, diagonal_coupled_graph
+using LightGraphs
 
 @testset "bond and vertex tensor" begin
     @test misb(TropicalF64) == [TropicalF64(0) TropicalF64(0); TropicalF64(0) TropicalF64(-Inf)]

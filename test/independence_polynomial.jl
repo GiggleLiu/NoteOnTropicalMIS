@@ -22,7 +22,7 @@ end
                     (TropicalF64(5), TropicalF64(3), TropicalF64(-9)),
                     (CountingTropicalF64(5, 3), CountingTropicalF64(3, 9), CountingTropicalF64(-3, 2)),
                     (ConfigTropical{Float64,10,1}(5.0, BitVector(rand(Bool, 10))), ConfigTropical{Float64,10,1}(3.0, BitVector(rand(Bool, 10))), ConfigTropical{Float64,10,1}(-3.0, BitVector(rand(Bool, 10)))),
-                    (CountingTropical(5.0, ConfigEnumerator{10}([BitVector(rand(Bool, 10)) for j=1:3])), CountingTropical(3.0, ConfigEnumerator{10}([BitVector(rand(Bool, 10)) for j=1:4])), CountingTropical(-3.0, ConfigEnumerator{10}([BitVector(rand(Bool, 10)) for j=1:5]))),
+                    (CountingTropical(5.0, ConfigEnumerator([StaticBitVector(rand(Bool, 10)) for j=1:3])), CountingTropical(3.0, ConfigEnumerator([StaticBitVector(rand(Bool, 10)) for j=1:4])), CountingTropical(-3.0, ConfigEnumerator([StaticBitVector(rand(Bool, 10)) for j=1:5]))),
                     ]
         @test is_commutative_semiring(a, b, c)
     end

@@ -80,10 +80,10 @@ end
 function bounding_contract(code::NestedEinsum, @nospecialize(xsa), ymask, @nospecialize(xsb); size_info=nothing)
     size_dict = OMEinsum.get_size_dict(OMEinsum.getixs(Iterators.flatten(code)), xsa, size_info)
     # compute intermediate tensors
-    println("caching einsum...")
+    @debug "caching einsum..."
     c = cached_einsum(code, xsa, size_dict)
     # compute masks from cached tensors
-    println("generating masked tree...")
+    @debug "generating masked tree..."
     mt = generate_masktree(code, c, ymask, size_dict, :all)
     # compute results with masks
     masked_einsum(code, xsb, mt, size_dict)
@@ -96,11 +96,11 @@ end
 function mis_config_ad(code::NestedEinsum, @nospecialize(xsa), ymask; size_info=nothing)
     size_dict = OMEinsum.get_size_dict(OMEinsum.getixs(Iterators.flatten(code)), xsa, size_info)
     # compute intermediate tensors
-    println("caching einsum...")
+    @debug "caching einsum..."
     c = cached_einsum(code, xsa, size_dict)
     n = c.content[]
     # compute masks from cached tensors
-    println("generating masked tree...")
+    @debug "generating masked tree..."
     mt = generate_masktree(code, c, ymask, size_dict, :single)
     n, read_config!(code, mt, Dict())
 end

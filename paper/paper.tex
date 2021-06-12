@@ -271,7 +271,7 @@ a \odot b = b \odot a &\\
 a \odot (b\oplus c) = a\odot b + a\odot c  &  \hspace{5em}\text{$\triangleright$ left and right distributive}\\
 (a\oplus b) \odot c = a\odot c \oplus b\odot c &\\
 &\\
-a \odot \mymathbb{0} = \mymathbb{0} * a = \mymathbb{0}
+a \odot \mymathbb{0} = \mymathbb{0} \odot a = \mymathbb{0}
 \end{align*}
 
 In the rest of this paper, we show how to obtain the independence polynomial, the maximum independent set size and optimal configurations of a general graph $G$ by designing tensor element types as commutative semirings,
@@ -568,6 +568,22 @@ Let $G = (V, E)$ be a disconnected graph and $C \subseteq V$ a connected compone
 \end{theorem}
 Contract by the disconnected parts, and this rule can be captured by the \textit{local maximum rule}.
 
+\section{discussion}
+We introduced in the main text how to compute the indenpendence polynomial, maximum independent set and optimal configurations.
+It is interesting that although these properties are global,
+they can be solved by designing different element types that having two operations $\oplus$ and $\odot$ and two special elements $\mymathbb{0}$ and $\mymathbb{1}$.
+One thing in common is that they all defines a commutative semiring.
+Here, we want the $\oplus$ and $\odot$ operations being commutative because we do not want the contraction result of an einsum network to be sensitive to the contraction order.
+We show most of the implementation in Appendix \ref{sec:technical}. It is supprisingly short.
+The style that we program is called generic programming,
+it is about writing a single copy of code, feeding different types into it, and the program computing the result with a proper performance.
+It is language dependent feature. If someone want to implement this algorithm in python,
+one has to rewrite the matrix multiplication for different element types in C and then export the interface to python.
+In C++, users can use templates for such a purpose.
+In our work, we chose Julia because its just in time compiling is very powerful that it can generate fast code dynamically for users.
+Elements of fixed size, such as the finite field algebra, tropical number, tropical number with counting/configuration field used in the main text can be inlined in an array.
+Furthermore, these inlined arrays can be upload to GPU devices for faster generic matrix multiplication implemented in CUDA.jl.
+
 \iffalse
 \begin{align}
 if |V| = 0 then
@@ -618,7 +634,7 @@ return
 
 \appendix
 
-\section{Technical guide}
+\section{Technical guide}\label{sec:technical}
 \begin{description}
 	\item[OMEinsum] a package for einsum,
 	\item[OMEinsumContractionOrders] a package for finding the optimal contraction order for einsum \\ \href{https://github.com/Happy-Diode/OMEinsumContractionOrders.jl}{https://github.com/Happy-Diode/OMEinsumContractionOrders.jl},
@@ -631,275 +647,15 @@ return
 
 One can install these packages by opening a julia REPL, type \colorbox{lightgray}{\texttt{]}} to enter the \texttt{pkg>} mode and type, e.g.
 \begin{lstlisting}
-pkg> add OMEinsum
+pkg> add OMEinsum LightGraphs Mods Primes FFTW Polynomials TropicalNumbers
 \end{lstlisting}
 
-An example of computing the maximum independant set size
-\begin{lstlisting}
-julia> using OMEinsum, LightGraphs, TropicalNumbers
+It may supprise you that the Julia implementation of algorithms introduced in the paper is so short that except the bounding and sparsity related parts,
+all are contained in this appendix. After installing required packages, one can open a Julia REPL and copy the following code into it.
 
-julia> n, k = 6, 3
-(6, 3)
+\lstinputlisting[breaklines]{../democode/demo.jl}
 
-julia> g = LightGraphs.random_regular_graph(n, k)
-{6, 9} undirected simple Int64 graph
-
-julia> ixs = [minmax(e.src,e.dst) for e in LightGraphs.edges(g)]
-9-element Vector{Tuple{Int64, Int64}}:
- (1, 2)
- (1, 4)
- (1, 5)
- (2, 3)
- (2, 6)
- (3, 5)
- (3, 6)
- (4, 5)
- (4, 6)
-
-julia> code = EinCode((ixs..., [(i,) for i in LightGraphs.vertices(g)]...), ())
-1∘2, 1∘4, 1∘5, 2∘3, 2∘6, 3∘5, 3∘6, 4∘5, 4∘6, 1, 2, 3, 4, 5, 6 -> 
-
-julia> optimized_code = optimize_greedy(code, Dict([i=>2 for i=1:6]))
-4∘6, 4∘6 -> 
-├─ 4∘6, 6 -> 4∘6
-│  ├─ 6
-│  └─ 4∘6
-└─ 2∘5∘4, 5∘2∘6 -> 4∘6
-   ├─ 2∘5∘6, 6∘2 -> 5∘2∘6
-   │  ├─ 2∘6, 2 -> 6∘2
-   │  │  ├─ 2
-   │  │  └─ 2∘6
-   │  └─ 2∘3, 5∘6∘3 -> 2∘5∘6
-   │     ├─ 3∘5, 6∘3 -> 5∘6∘3
-   │     │  ├─ 3∘6, 3 -> 6∘3
-   │     │  │  ⋮
-   │     │  │  
-   │     │  └─ 3∘5, 5 -> 3∘5
-   │     │     ⋮
-   │     │     
-   │     └─ 2∘3
-   └─ 2∘4∘1, 1∘4∘5 -> 2∘5∘4
-      ├─ 1∘5, 5∘4 -> 1∘4∘5
-      │  ├─ 4∘5, 4 -> 5∘4
-      │  │  ├─ 4
-      │  │  └─ 4∘5
-      │  └─ 1∘5
-      └─ 2∘1, 1∘4 -> 2∘4∘1
-         ├─ 1∘4
-         └─ 1∘2, 1 -> 2∘1
-            ├─ 1
-            └─ 1∘2
-
-
-julia> function mis_contract(code::OMEinsum.NestedEinsum, x::T) where T
-           tensors = map(OMEinsum.getixs(Iterators.flatten(code))) do ix
-               @assert length(ix) == 1 || length(ix) == 2
-                           length(ix) == 1 ? [one(T), x] : [one(T) one(T); one(T) zero(T)]
-           end
-           code(tensors...)
-       end
-mis_contract (generic function with 1 method)
-
-julia> result = mis_contract(optimized_code, Tropical(1.0))
-0-dimensional Array{TropicalF64, 0}:
-2.0ₜ
-\end{lstlisting}
-
-For larger graph, we hight recommend using two additional packages,
-\texttt{TropicalGEMM} for BLAS speed tropical matrix multiplication and
-\texttt{OMEinsumContractionOrders} for hyper optimized contraction order (the KaHyPar~\cite{Schlag2020} approach) ~\cite{Kourtis2019,Gray2021,Pan2021}.
-
-\section{Indenpendence polynomials}
-\subsection{Common}
-\begin{lstlisting}
-using Polynomials
-
-_auto_mispolytensor(x::T, ix::NTuple{2}) where T = T[1 1; 1 0]
-_auto_mispolytensor(x::T, ix::NTuple{1}) where T = T[1, x]
-function generate_polyxs!(x::T, code::OMEinsum.NestedEinsum, xs=Vector{Any}(undef, ninput(code))) where {T}
-    for (ix, arg) in zip(OMEinsum.getixs(code.eins), code.args)
-		if arg isa Integer
-			xs[arg] = _auto_mispolytensor(x, ix)
-		else
-        	generate_polyxs!(x, arg, xs)
-		end
-    end
-	return xs
-end
-
-function generate_polyxs!(x::T, code::EinCode, xs=Vector{Any}(undef, ninput(code))) where {T}
-    for (i,ix) in enumerate(OMEinsum.getixs(code))
-		xs[i] = _auto_mispolytensor(x, ix)
-    end
-	return xs
-end
-
-function mis_polysolve(code, x::T) where {T}
-	xs = generate_polyxs!(x, code, Vector{Any}(undef, NoteOnTropicalMIS.ninput(code)))
-	code(xs...)
-end
-\end{lstlisting}
-
-\subsection{Symbolic}
-\begin{lstlisting}
-function independence_polynomial(::Val{:polynomial}, code)
-    mis_polysolve(code, Polynomial([0, 1.0]))[]
-end
-\end{lstlisting}
-
-\subsection{Fitting and FFT}
-\begin{lstlisting}
-using FFTW
-function independence_polynomial(::Val{:fft}, code; mis_size=Int(mis_solve(code)[].n), r=1.0)
-	ω = exp(-2im*π/(mis_size+1))
-	xs = r .* collect(ω .^ (0:mis_size))
-	ys = [mis_polysolve(code, x)[] for x in xs]
-	Polynomial(real.(ifft(ys) ./ (r .^ (0:mis_size))))
-end
-
-function independence_polynomial(::Val{:fitting}, code; mis_size=Int(mis_solve(code)[].n))
-	xs = (0:mis_size)
-	ys = [mis_polysolve(code, x)[] for x in xs]
-	fit(xs, ys, mis_size)
-end
-\end{lstlisting}
-
-\subsection{Finite field algebra}
-\begin{lstlisting}
-using Mods, Primes
-
-# pirate
-Base.abs(x::Mod) = x
-Base.isless(x::Mod{N}, y::Mod{N}) where N = mod(x.val, N) < mod(y.val, N)
-
-function _independance_polynomial(::Type{T}, code, mis_size::Int) where T
-	xs = 0:mis_size
-	ys = [mis_polysolve(code, T(x))[] for x in xs]
-	A = zeros(T, mis_size+1, mis_size+1)
-	for j=1:mis_size+1, i=1:mis_size+1
-		A[j,i] = T(xs[j])^(i-1)
-	end
-	A \ T.(ys)
-end
-
-function independence_polynomial(::Val{:finitefield}, code; mis_size=Int(mis_solve(code)[].n), max_order=100)
-    N = typemax(Int)
-    YS = []
-    local res
-    for k = 1:max_order
-	    N = prevprime(N-1)
-        T = Mods.Mod{N,Int}
-        rk = _independance_polynomial(T, code, mis_size)
-        push!(YS, rk)
-        if max_order==1
-            return Polynomial(Mods.value.(YS[1]))
-        elseif k != 1
-            ra = improved_counting(YS[1:end-1])
-            res = improved_counting(YS)
-            ra == res && return Polynomial(res)
-        end
-    end
-    @warn "result is potentially inconsistent."
-    return Polynomial(res)
-end
-
-function improved_counting(sequences)
-    map(yi->Mods.CRT(yi...), zip(sequences...))
-end
-\end{lstlisting}
-
-\section{Maximum independent set}
-\subsection{Tropical numbers}
-\begin{lstlisting}
-function independence_polynomial(::Val{:polynomial}, code)
-    mis_polysolve(code, Polynomial([0, 1.0]))[]
-end
-\end{lstlisting}
-
-\subsection{Enumerating configurations}
-
-The following is a complete example.
-
-\begin{lstlisting}
-using OMEinsum, TropicalNumbers
-using OMEinsum: NestedEinsum
-
-struct ConfigEnumerator{N,C}
-    data::Vector{StaticBitVector{N,C}}
-end
-
-Base.length(x::ConfigEnumerator{N}) where N = length(x.data)
-Base.:(==)(x::ConfigEnumerator{N,C}, y::ConfigEnumerator{N,C}) where {N,C} = x.data == y.data
-
-function Base.:+(x::ConfigEnumerator{N,C}, y::ConfigEnumerator{N,C}) where {N,C}
-    res = ConfigEnumerator{N,C}(vcat(x.data, y.data))
-    return res
-end
-
-function Base.:*(x::ConfigEnumerator{L,C}, y::ConfigEnumerator{L,C}) where {L,C}
-    M, N = length(x), length(y)
-    z = Vector{StaticBitVector{L,C}}(undef, M*N)
-    for j=1:N, i=1:M
-        z[(j-1)*M+i] = x.data[i] .| y.data[j]
-    end
-    return ConfigEnumerator{L,C}(z)
-end
-
-Base.zero(::Type{ConfigEnumerator{N,C}}) where {N,C} = ConfigEnumerator{N,C}(StaticBitVector{N,C}[])
-Base.one(::Type{ConfigEnumerator{N,C}}) where {N,C} = ConfigEnumerator{N,C}([TropicalNumbers.staticfalses(StaticBitVector{N,C})])
-
-function enumerator_t(::Type{T}, ix::NTuple{2}, vertex_index) where {T1, N, C, T<:CountingTropical{T1,ConfigEnumerator{N,C}}}
-    [one(T) one(T); one(T) zero(T)]
-end
-function enumerator_t(::Type{T}, ix::NTuple{1}, vertex_index) where {T1, N, C, T<:CountingTropical{T1,ConfigEnumerator{N,C}}}
-    [one(T), CountingTropical(one(T1), ConfigEnumerator([TropicalNumbers.onehot(StaticBitVector{N,C}, vertex_index[ix[1]])]))]
-end
-function enumerator_t(::Type{T}, ix::NTuple{2}, vertex_index) where {T1,N,C, T<:ConfigTropical{T1,N,C}}
-    [one(T) one(T); one(T) zero(T)]
-end
-function enumerator_t(::Type{T}, ix::NTuple{1}, vertex_index) where {T1,N,C, T<:ConfigTropical{T1,N,C}}
-    [one(T), T(one(T1), TropicalNumbers.onehot(StaticBitVector{N,C}, vertex_index[ix[1]]))]
-end
-
-function generate_xs!(f, x::T, code::NestedEinsum, xs) where {T}
-    for (ix, arg) in zip(OMEinsum.getixs(code.eins), code.args)
-		if arg isa Integer
-			xs[arg] = f(x, ix)
-		else
-        	generate_xs!(f, x, arg, xs)
-		end
-    end
-	return xs
-end
-
-function generate_xs!(f, x::T, code::EinCode, xs) where {T}
-    for (i,ix) in enumerate(OMEinsum.getixs(code))
-		xs[i] = f(x, ix)
-    end
-	return xs
-end
-
-symbols(::EinCode{ixs}) where ixs = unique(Iterators.flatten(ixs))
-symbols(ne::NestedEinsum) = symbols(Iterators.flatten(ne))
-ninput(::EinCode{ixs}) where ixs = length(ixs)
-ninput(ne::NestedEinsum) = ninput(Iterators.flatten(ne))
-function mis_config(code; all=false)
-    vertex_index = Dict([s=>i for (i, s) in enumerate(symbols(code))])
-    N = length(vertex_index)
-    C = TropicalNumbers._nints(N)
-    T = all ? CountingTropical{Float64, ConfigEnumerator{N,C}} : ConfigTropical{Float64, N, C}
-	xs = generate_xs!((T, ix)->enumerator_t(T, ix, vertex_index), T, code, Vector{Any}(undef, ninput(code)))
-	code(xs...)
-end
-
-mis_config(optimize_greedy(ein"i,j,k,l,ij,jk,kl,li->", Dict('i'=>2, 'j'=>2, 'k'=>2, 'l'=>2)); all=true)  # square
-\end{lstlisting}
-
-You will see the following output
-
-\begin{lstlisting}
-0-dimensional Array{CountingTropical{Float64, ConfigEnumerator{4, 1}}, 0}:
-(2.0, ConfigEnumerator{4, 1}(StaticBitVector{4, 1}[1010, 0101]))ₜ
-\end{lstlisting}
-
+In the above examples, the configuration enumeration is very slow, one should use the optimal MIS size for bounding as decribed in the main text.
+We will not show any example about implementing the backward rule here because it has approximately 100 lines of code.
+Please checkout our Github repository \href{https://github.com/Happy-Diode/NoteOnTropicalMIS}{https://github.com/Happy-Diode/NoteOnTropicalMIS}.
 \end{document}

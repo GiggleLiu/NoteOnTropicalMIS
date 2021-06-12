@@ -34,22 +34,16 @@ function cross(::Type{T}) where T
 	ein"((((a,c),b),d),bd,ac)->abcd"([misv(T, 1, 1.0) for i=1:4]..., misb(T), misb(T))
 end
 
-_auto_mistensor(x::T, ix::NTuple{2}) where T = misb(T)
-_auto_mistensor(x::T, ix::NTuple{1}) where T = misv(T, 1, x)
-function generate_xs!(f, x::T, code::NestedEinsum, xs) where {T}
-    generate_xs!(f, x, Iterators.flatten(code), xs)
+function generate_vertextensors(f, code::NestedEinsum) where {T}
+    generate_vertextensors(f, Iterators.flatten(code))
 end
-
-function generate_xs!(f, x::T, code::EinCode, xs) where {T}
-    for (i,ix) in enumerate(OMEinsum.getixs(code))
-		xs[i] = f(x, ix)
-    end
-	return xs
+function generate_vertextensors(f, code::EinCode) where {T}
+    f.(OMEinsum.getixs(code))
 end
 
 export mis_solve, mis_count
 function mis_contract(x::T, code) where {T}
-	xs = generate_xs!(_auto_mistensor, x, code, Vector{Any}(undef, ninput(code)))
+	xs = generate_vertextensors(ix->length(ix)==1 ? misv(T,1,x) : misb(T), code)
 	code(xs...)
 end
 mis_solve(code) = mis_contract(TropicalF64(1.0), code)
