@@ -67,13 +67,13 @@ Base.abs(x::Mod) = x
 Base.isless(x::Mod{N}, y::Mod{N}) where N = mod(x.val, N) < mod(y.val, N)
 
 function independence_polynomial_finitefield(code; mis_size=Int(mis_size(code)[].n), max_order=100)
-    N = typemax(Int)
+    N = typemax(Int32) # Int32 is faster than Int.
     YS = []
     local res
     for k = 1:max_order
-	    N = Primes.prevprime(N-1)  # previous prime number
+	    N = Primes.prevprime(N-one(N))  # previous prime number
         # evaluate the polynomial on a finite field algebra of modulus `N`
-        rk = _independance_polynomial(Mods.Mod{N,Int}, code, mis_size)
+        rk = _independance_polynomial(Mods.Mod{N,Int32}, code, mis_size)
         push!(YS, rk)
         if max_order==1
             return Polynomial(Mods.value.(YS[1]))
@@ -123,7 +123,7 @@ Base.one(::Type{ConfigEnumerator{N,C}}) where {N,C} = ConfigEnumerator{N,C}([Tro
 # enumerate all configurations if `all` is true, compute one otherwise.
 # a configuration is stored in the data type of `StaticBitVector`, it uses integers to represent bit strings.
 # `ConfigTropical` is defined in `TropicalNumbers`. It has two fields, tropical number `n` and optimal configuration `config`.
-# `CountingTropical{T,<:ConfigEnumerator}` stores configurations instead of simple counting.
+# `CountingTropical{T,<:ConfigEnumerator}` is a simple stores configurations instead of simple counting.
 function mis_config(code; all=false)
     # map a vertex label to an integer
     vertex_index = Dict([s=>i for (i, s) in enumerate(symbols(code))])
