@@ -14,9 +14,9 @@ end
 function mis_configurations(task, code; writefile=false)
     folder = joinpath("project", "data")
     if task == :missize
-        nc = mis_solve(code)[]
+        nc = mis_size(code)
     elseif task == :miscounting
-        nc = mis_count(code)[]
+        nc = mis_count(code)
         println("MIS size = $(nc.n), degeneracy = $(nc.c)")
     elseif task == :misconfig
         nc = mis_config(code; all=false, usemask=true)[]

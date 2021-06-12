@@ -27,19 +27,14 @@ end
 Base.zero(::Type{ConfigEnumerator{N,C}}) where {N,C} = ConfigEnumerator{N,C}(StaticBitVector{N,C}[])
 Base.one(::Type{ConfigEnumerator{N,C}}) where {N,C} = ConfigEnumerator{N,C}([TropicalNumbers.staticfalses(StaticBitVector{N,C})])
 
-symbols(::EinCode{ixs}) where ixs = unique(Iterators.flatten(ixs))
-symbols(ne::OMEinsum.NestedEinsum) = symbols(Iterators.flatten(ne))
-single_symbols(::EinCode{ixs}) where ixs = unique(Iterators.flatten(filter(x->length(x)==1,ixs)))
-single_symbols(ne::OMEinsum.NestedEinsum) = single_symbols(Iterators.flatten(ne))
-ninput(::EinCode{ixs}) where ixs = length(ixs)
-ninput(ne::OMEinsum.NestedEinsum) = ninput(Iterators.flatten(ne))
-_getiy(code::EinCode) = OMEinsum.getiy(code)
-_getiy(code::NestedEinsum) = OMEinsum.getiy(code.eins)
+symbols(::EinCode{ixs}) where ixs = unique(Iterators.flatten(filter(x->length(x)==1,ixs)))
+
 function mis_config(code; all=false, usemask=true)
-    vertex_index = Dict([s=>i for (i, s) in enumerate(single_symbols(code))])
+    flatten_code = flatten(code)
+    vertex_index = Dict([s=>i for (i, s) in enumerate(symbols(flatten_code))])
     N = length(vertex_index)
     C = TropicalNumbers._nints(N)
-    xs = generate_vertextensors(code) do ix
+    xs = map(getixs(flatten_code)) do ix
         T = all ? CountingTropical{Float64, ConfigEnumerator{N,C}} : ConfigTropical{Float64, N, C}
         if length(ix) == 2
             return [one(T) one(T); one(T) zero(T)]
@@ -53,8 +48,10 @@ function mis_config(code; all=false, usemask=true)
         end
     end
     if usemask
-        ymask = trues(fill(2, length(_getiy(code)))...)
-        xst = generate_vertextensors(ix->length(ix)==1 ? misv(TropicalF64,1,Tropical(1.0)) : misb(TropicalF64), code)
+        ymask = trues(fill(2, length(getiy(flatten_code)))...)
+        xst = map(getixs(flatten_code)) do ix
+            length(ix) == 1 ? misv(TropicalF64,Tropical(1.0)) : misb(TropicalF64)
+        end
         if all
             return bounding_contract(code, xst, ymask, xs)
         else

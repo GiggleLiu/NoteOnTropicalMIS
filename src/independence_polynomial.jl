@@ -1,22 +1,43 @@
 using Polynomials
+using OMEinsum: NestedEinsum, flatten, getixs, getiy
+
 export independence_polynomial
+export misb, misv, mis_size, mis_count
+
+# MIS bond tensor
+misb(::Type{T}) where T = [one(T) one(T); one(T) zero(T)]
+# MIS vertex tensor
+misv(::Type{T}, val) where T = [one(T), convert(T, val)]
+
+function mis_contract(x::T, code; usecuda=false) where {T}
+	tensors = map(getixs(flatten(code))) do ix
+        # if the tensor rank is 1, create a vertex tensor.
+        # otherwise the tensor rank must be 2, create a bond tensor.
+        t = length(ix)==1 ? misv(T, x) : misb(T)
+        usecuda ? CuArray(t) : t
+    end
+	code(tensors...)
+end
+
+mis_size(code; usecuda=false) = Int(asscalar(mis_contract(TropicalF64(1.0), code; usecuda=usecuda)).n)
+mis_count(code; usecuda=false) = asscalar(mis_contract(CountingTropical{Float64,Float64}(1.0, 1.0), code; usecuda=usecuda)).c
 
 using FFTW
-function independence_polynomial(::Val{:fft}, code; mis_size=Int(mis_solve(code)[].n), r=1.0)
+function independence_polynomial(::Val{:fft}, code; mis_size=mis_size(code), r=1.0)
 	ω = exp(-2im*π/(mis_size+1))
 	xs = r .* collect(ω .^ (0:mis_size))
-	ys = [mis_contract(x, code)[] for x in xs]
+	ys = [asscalar(mis_contract(x, code)) for x in xs]
 	Polynomial(ifft(ys) ./ (r .^ (0:mis_size)))
 end
 
-function independence_polynomial(::Val{:fitting}, code; mis_size=Int(mis_solve(code)[].n))
+function independence_polynomial(::Val{:fitting}, code; mis_size=mis_size(code))
 	xs = (0:mis_size)
-	ys = [mis_contract(x, code)[] for x in xs]
+	ys = [asscalar(mis_contract(x, code)) for x in xs]
 	fit(xs, ys, mis_size)
 end
 
 function independence_polynomial(::Val{:polynomial}, code)
-    mis_contract(Polynomial([0, 1.0]), code)[]
+    asscalar(mis_contract(Polynomial([0, 1.0]), code))
 end
 
 using Mods, Primes
@@ -27,7 +48,7 @@ Base.isless(x::Mod{N}, y::Mod{N}) where N = mod(x.val, N) < mod(y.val, N)
 
 function _independance_polynomial(::Type{T}, code, mis_size::Int) where T
 	xs = 0:mis_size
-	ys = [mis_contract(T(x), code)[] for x in xs]
+	ys = [asscalar(mis_contract(T(x), code)) for x in xs]
 	A = zeros(T, mis_size+1, mis_size+1)
 	for j=1:mis_size+1, i=1:mis_size+1
 		A[j,i] = T(xs[j])^(i-1)
@@ -35,7 +56,7 @@ function _independance_polynomial(::Type{T}, code, mis_size::Int) where T
 	A \ T.(ys)
 end
 
-function independence_polynomial(::Val{:finitefield}, code; mis_size=Int(mis_solve(code)[].n), max_order=100)
+function independence_polynomial(::Val{:finitefield}, code; mis_size=mis_size(code), max_order=100)
     N = typemax(Int)
     YS = []
     local res

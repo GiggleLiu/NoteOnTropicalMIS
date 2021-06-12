@@ -93,7 +93,7 @@ md"## Generate tensors and do the contraction"
 
 # ╔═╡ 092cb056-2c0e-40af-ba1b-8879460c6dd1
 function mis_contract(f, ::Type{T}, code::OMEinsum.NestedEinsum) where T
-   	tensors = map(OMEinsum.getixs(Iterators.flatten(code))) do ix
+   	tensors = map(OMEinsum.getixs(OMEinsum.flatten(code))) do ix
 	   	@assert length(ix) == 1 || length(ix) == 2
 		length(ix) == 1 ? [one(T), convert(T, f(ix[1]))] : [one(T) one(T); one(T) zero(T)]
    	end

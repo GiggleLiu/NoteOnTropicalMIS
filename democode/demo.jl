@@ -1,6 +1,6 @@
 using OMEinsumContractionOrders: OMEinsum
 using OMEinsum, OMEinsumContractionOrders
-using OMEinsum: NestedEinsum
+using OMEinsum: NestedEinsum, flatten, getixs
 using LightGraphs
 using Random
 
@@ -15,8 +15,8 @@ code = EinCode(([minmax(e.src,e.dst) for e in LightGraphs.edges(graph)]..., # la
 # an einsum contraction has contraction order (specified as a tree structure) is called `NestedEinsum`.
 # assign each label a dimension-2, it will be used in contraction order optimization
 # `symbols` function extracts tensor labels into a vector.
-symbols(::EinCode{ixs}) where ixs = unique(Iterators.flatten(ixs)) # `ixs` is input tensor labels
-symbols(ne::NestedEinsum) = symbols(Iterators.flatten(ne)) # `Iterators.flatten` converts a `NestedEinsum` to an `EinCode`
+symbols(::EinCode{ixs}) where ixs = unique(flatten(filter(x->length(x)==1,ixs)))
+symbols(ne::OMEinsum.NestedEinsum) = symbols(flatten(ne))
 size_dict = Dict([s=>2 for s in symbols(code)])
 # optimize the contraction order using KaHyPar + Greedy, target space complexity is 2^20
 optimized_code = optimize_kahypar(code, size_dict; sc_target=17, max_group_size=40)
@@ -24,7 +24,7 @@ println("time/space complexity is $(OMEinsum.timespace_complexity(optimized_code
 
 # a function for computing independence polynomial
 function independence_polynomial(x::T, code) where {T}
-	xs = map(OMEinsum.getixs(Iterators.flatten(code))) do ix
+	xs = map(getixs(flatten(code))) do ix
         # if the tensor rank is 1, create a vertex tensor.
         # otherwise the tensor rank must be 2, create a bond tensor.
         length(ix)==1 ? [one(T), x] : [one(T) one(T); one(T) zero(T)]
@@ -129,7 +129,7 @@ function mis_config(code; all=false)
     vertex_index = Dict([s=>i for (i, s) in enumerate(symbols(code))])
     N = length(vertex_index)  # number of vertices
     C = TropicalNumbers._nints(N)  # number of integers to store N bits
-    xs = map(OMEinsum.getixs(Iterators.flatten(code))) do ix
+    xs = map(getixs(flatten(code))) do ix
         T = all ? CountingTropical{Float64, ConfigEnumerator{N,C}} : ConfigTropical{Float64, N, C}
         if length(ix) == 2
             return [one(T) one(T); one(T) zero(T)]

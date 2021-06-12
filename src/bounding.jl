@@ -78,7 +78,7 @@ function bounding_contract(@nospecialize(code::EinCode), @nospecialize(xsa), yma
     bounding_contract(NestedEinsum((1:length(xsa)), code), xsa, ymask, xsb; size_info=size_info)
 end
 function bounding_contract(code::NestedEinsum, @nospecialize(xsa), ymask, @nospecialize(xsb); size_info=nothing)
-    size_dict = OMEinsum.get_size_dict(OMEinsum.getixs(Iterators.flatten(code)), xsa, size_info)
+    size_dict = OMEinsum.get_size_dict(getixs(flatten(code)), xsa, size_info)
     # compute intermediate tensors
     @debug "caching einsum..."
     c = cached_einsum(code, xsa, size_dict)
@@ -94,7 +94,7 @@ function mis_config_ad(@nospecialize(code::EinCode), @nospecialize(xsa), ymask; 
 end
 
 function mis_config_ad(code::NestedEinsum, @nospecialize(xsa), ymask; size_info=nothing)
-    size_dict = OMEinsum.get_size_dict(OMEinsum.getixs(Iterators.flatten(code)), xsa, size_info)
+    size_dict = OMEinsum.get_size_dict(getixs(flatten(code)), xsa, size_info)
     # compute intermediate tensors
     @debug "caching einsum..."
     c = cached_einsum(code, xsa, size_dict)

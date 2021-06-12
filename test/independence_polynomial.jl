@@ -1,5 +1,20 @@
 using NoteOnTropicalMIS, Test, OMEinsum
 using Mods, Polynomials, TropicalNumbers
+using LightGraphs
+
+@testset "bond and vertex tensor" begin
+    @test misb(TropicalF64) == [TropicalF64(0) TropicalF64(0); TropicalF64(0) TropicalF64(-Inf)]
+    @test misv(TropicalF64, 2.0) == [TropicalF64(0), TropicalF64(2.0)]
+end
+
+@testset "graph generator" begin
+    g = diagonal_coupled_graph(trues(3, 3))
+    @test ne(g) == 20
+    g = diagonal_coupled_graph((x = trues(3, 3); x[2,2]=0; x))
+    @test ne(g) == 12
+    g = diagonal_coupled_eincode(trues(3, 3))
+    @test length(NoteOnTropicalMIS.symbols(g)) == 9
+end
 
 @testset "independence_polynomial" begin
     code = random_regular_eincode(10, 3)

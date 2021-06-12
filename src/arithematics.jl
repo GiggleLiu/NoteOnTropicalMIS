@@ -1,5 +1,6 @@
 export is_commutative_semiring
 
+# this function is used for testing
 function is_commutative_semiring(a::T, b::T, c::T) where T
     # +
     (a + b) + c == a + (b + c) &&

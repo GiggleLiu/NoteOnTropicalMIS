@@ -1,10 +1,6 @@
 using NoteOnTropicalMIS
 using Test
 
-@testset "tensors" begin
-    include("tensors.jl")
-end
-
 @testset "independence polynomial" begin
     include("independence_polynomial.jl")
 end
@@ -13,6 +9,6 @@ end
     include("configurations.jl")
 end
 
-@testset "ad" begin
-    include("ad.jl")
+@testset "bounding" begin
+    include("bounding.jl")
 end
