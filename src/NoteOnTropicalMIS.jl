@@ -10,5 +10,6 @@ include("configurations.jl")
 include("graphs.jl")
 include("bounding.jl")
 include("viz.jl")
+include("demos.jl")
 
 end

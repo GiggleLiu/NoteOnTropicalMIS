@@ -18,7 +18,7 @@ code = EinCode(([minmax(e.src,e.dst) for e in LightGraphs.edges(graph)]..., # la
 symbols(::EinCode{ixs}) where ixs = unique(flatten(filter(x->length(x)==1,ixs)))
 symbols(ne::OMEinsum.NestedEinsum) = symbols(flatten(ne))
 size_dict = Dict([s=>2 for s in symbols(code)])
-# optimize the contraction order using KaHyPar + Greedy, target space complexity is 2^20
+# optimize the contraction order using KaHyPar + Greedy, target space complexity is 2^17
 optimized_code = optimize_kahypar(code, size_dict; sc_target=17, max_group_size=40)
 println("time/space complexity is $(OMEinsum.timespace_complexity(optimized_code, size_dict))")
 

@@ -29,7 +29,7 @@ Base.one(::Type{ConfigEnumerator{N,C}}) where {N,C} = ConfigEnumerator{N,C}([Tro
 
 symbols(::EinCode{ixs}) where ixs = unique(Iterators.flatten(filter(x->length(x)==1,ixs)))
 
-function mis_config(code; all=false, usemask=true)
+function mis_config(code; all=false, bounding=true)
     flatten_code = flatten(code)
     vertex_index = Dict([s=>i for (i, s) in enumerate(symbols(flatten_code))])
     N = length(vertex_index)
@@ -37,17 +37,17 @@ function mis_config(code; all=false, usemask=true)
     xs = map(getixs(flatten_code)) do ix
         T = all ? CountingTropical{Float64, ConfigEnumerator{N,C}} : ConfigTropical{Float64, N, C}
         if length(ix) == 2
-            return [one(T) one(T); one(T) zero(T)]
+            return misb(T)
         else
             s = TropicalNumbers.onehot(StaticBitVector{N,C}, vertex_index[ix[1]])
             if all
-                [one(T), T(1.0, ConfigEnumerator([s]))]
+                misv(T, T(1.0, ConfigEnumerator([s])))
             else
-                [one(T), T(1.0, s)]
+                misv(T, T(1.0, s))
             end
         end
     end
-    if usemask
+    if bounding
         ymask = trues(fill(2, length(getiy(flatten_code)))...)
         xst = map(getixs(flatten_code)) do ix
             length(ix) == 1 ? misv(TropicalF64,Tropical(1.0)) : misb(TropicalF64)
@@ -57,16 +57,9 @@ function mis_config(code; all=false, usemask=true)
         else
             @assert ndims(ymask) == 0
             t, res = mis_config_ad(code, xst, ymask)
-            return fill(ConfigTropical(t[].n, StaticBitVector(map(l->res[l], 1:N))))
+            return fill(ConfigTropical(asscalar(t).n, StaticBitVector(map(l->res[l], 1:N))))
         end
     else
 	    return code(xs...)
     end
-end
-function Base.Matrix(x::ConfigEnumerator{N,C}) where {N,C}
-    m = zeros(UInt64, C, length(x))
-    for i=1:length(x)
-        m[:,i] .= x.data[i].data
-    end
-    return m
 end

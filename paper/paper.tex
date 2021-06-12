@@ -466,7 +466,8 @@ Let the mask for $C$ being $\overline C$, the backward rule for gradient masks r
 where ${}^{\circ -1}$ is the Hadamard inverse, $\circ$ is the Hadamard multiplication, boolean false is treated as tropical zero and boolean true is treated as tropical one.
 This rule defined on matrix multiplication can be easily generalized to the einsum of two tensors by replacing the matrix multiplication between $C^{\circ-1} \circ \overline C$ and $B^T$ by an einsum.
 
-\section{Utilizing sparsity}
+\section{Automated branching}
+% check http://www.tcs.rwth-aachen.de/independentset/ for more rules
 So far, we have used the language of einsum networks for contraction.
 When using sparse tropical tensor networks to find the maximum independent set, we can introduce a new rule to compress the tensor by removing elements that are not helpful.
 As show in \Fig{fig:compressrule}, after we contract the tensors in a subregion $R \subseteq G$ of a graph $G$, and obtain a resulting tensor $A$ of rank $|C|$, where $C$ is the set of vertice tensors at the cut.
@@ -586,6 +587,29 @@ In C++, users can use templates for such a purpose.
 In our work, we chose Julia because its just in time compiling is very powerful that it can generate fast code dynamically for users.
 Elements of fixed size, such as the finite field algebra, tropical number, tropical number with counting/configuration field used in the main text can be inlined in an array.
 Furthermore, these inlined arrays can be upload to GPU devices for faster generic matrix multiplication implemented in CUDA.jl.
+
+\begin{table}[h!]\centering
+\begin{minipage}{0.9\columnwidth}
+\ra{1.3}
+    \scalebox{1.0}{
+        \begin{tabularx}{\textwidth}{bb}\toprule
+            \hline
+            \textbf{element type}     & \textbf{purpose} \\
+            {regular number}     & {counting all indenepent sets} \\
+            {tropical number}     & {finding the maximum independent set size} \\
+            {tropical number with counting}     & {finding both the maximum independent set size and its degeneracy} \\
+            {tropical number with configuration}     & {finding the maximum independent set size and one of the optimal configurations} \\
+            {tropical number with multiple configurations}     & {finding the maximum independent set size and all optimal configurations} \\
+            {polynomial}     & {computing the indenpendence polynomials exactly} \\
+            {complex number}     & {fitting the indenpendence polynomials with fast fourier transformation} \\
+            {finite field algebra}     & {fitting the indenpendence polynomials exactly using number theory} \\
+            \bottomrule
+        \end{tabularx}
+    }
+    \caption{Tensor element types used in the main text and their purposes.}\label{tbl:generictypes}
+\end{minipage}
+\end{table}
+
 
 \iffalse
 \begin{align}

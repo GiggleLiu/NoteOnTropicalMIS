@@ -22,7 +22,6 @@ function mis_configurations(task, code; writefile=false)
         nc = mis_config(code; all=false, usemask=true)[]
     elseif task == :allconfigs
         res = mis_config(code; all=true, usemask=true)[]
-        #writefile && write(ofname, Matrix(config))
         return res
     elseif task == :independencepolynomial
         independence_polynomial(Val(:polynomial), code)

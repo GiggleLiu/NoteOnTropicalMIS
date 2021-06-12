@@ -57,12 +57,13 @@ function _independance_polynomial(::Type{T}, code, mis_size::Int) where T
 end
 
 function independence_polynomial(::Val{:finitefield}, code; mis_size=mis_size(code), max_order=100)
-    N = typemax(Int)
+    TI = Int32  # Int 32 is faster
+    N = typemax(TI)
     YS = []
     local res
     for k = 1:max_order
-	    N = prevprime(N-1)
-        T = Mods.Mod{N,Int}
+	    N = prevprime(N-TI(1))
+        T = Mods.Mod{N,TI}
         rk = _independance_polynomial(T, code, mis_size)
         push!(YS, rk)
         if max_order==1

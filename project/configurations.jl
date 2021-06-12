@@ -22,9 +22,18 @@ function mis_configurations(n, seed, round; writefile=false)
         @assert length(config) == nc.c
 
         ofname = joinpath(folder, "configurations_$(n)x$(n)_5.3x5.3_$seed.dat")
-        writefile && write(ofname, Matrix(config))
+
+        writefile && write(ofname, toMatrix(config))
         return nc.n, config
     end
+end
+
+function toMatrix(x::ConfigEnumerator{N,C}) where {N,C}
+    m = zeros(UInt64, C, length(x))
+    for i=1:length(x)
+        m[:,i] .= x.data[i].data
+    end
+    return m
 end
 
 if false

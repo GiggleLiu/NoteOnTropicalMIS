@@ -16,14 +16,14 @@ end
     for code in [rawcode, optcode]
         res0 = mis_size(code)
         res1 = mis_count(code)
-        res2 = mis_config(code; all=true, usemask=true)[]
-        res3 = mis_config(code; all=false, usemask=false)[]
-        res4 = mis_config(code; all=true, usemask=false)[]
+        res2 = mis_config(code; all=true, bounding=true)[]
+        res3 = mis_config(code; all=false, bounding=false)[]
+        res4 = mis_config(code; all=true, bounding=false)[]
         @test res0 == res2.n == res3.n == res4.n
         @test res1 == length(res2.c) == length(res4.c)
         @test res3.config ∈ res2.c.data
         @test res3.config ∈ res4.c.data
-        res5 = mis_config(code; all=false, usemask=true)[]
+        res5 = mis_config(code; all=false, bounding=true)[]
         @test res5.n == res0
         @test res5.config ∈ res2.c.data
     end
