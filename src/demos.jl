@@ -1,4 +1,4 @@
-export case_r3, run_task
+export case_r3, case_dc, run_task
 
 using Random
 
@@ -29,26 +29,28 @@ function case_dc(L::Int, ρ; sc_target, seed=2)
     return optimized_code
 end
 
-function run_task(code, task)
+function run_task(code, task; usecuda=false)
     if task == :totalsize
-        return mis_contract(1.0, code)
+        return mis_contract(1.0, code; usecuda=usecuda)
     elseif task == :maxsize
-        return mis_size(code)
+        return mis_size(code; usecuda=usecuda)
     elseif task == :counting
-        return mis_count(code)
+        return mis_count(code; usecuda=usecuda)
     elseif task == :idp_polynomial
-        return independence_polynomial(Val(:polynomial), code)
+        return independence_polynomial(Val(:polynomial), code; usecuda=usecuda)
     elseif task == :idp_fft
-        return independence_polynomial(Val(:fft), code)
+        return independence_polynomial(Val(:fft), code; usecuda=usecuda)
     elseif task == :idp_finitefield
-        return independence_polynomial(Val(:finitefield), code)
+        return independence_polynomial(Val(:finitefield), code; usecuda=usecuda)
     elseif task == :config_single
-        return mis_config(code; all=false, bounding=false)
+        return mis_config(code; all=false, bounding=false, usecuda=usecuda)
+    elseif task == :config_single_bounded
+        return mis_config(code; all=false, bounding=true, usecuda=usecuda)
     elseif task == :config_all
-        return mis_config(code; all=true, bounding=false)
+        return mis_config(code; all=true, bounding=false, usecuda=usecuda)
     elseif task == :config_all_bounded
-        return mis_config(code; all=true, bounding=true)
+        return mis_config(code; all=true, bounding=true, usecuda=usecuda)
     else
-        error("undefined task $task.")
+        error("unknown task $task.")
     end
 end

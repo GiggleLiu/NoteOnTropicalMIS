@@ -29,7 +29,10 @@ Base.one(::Type{ConfigEnumerator{N,C}}) where {N,C} = ConfigEnumerator{N,C}([Tro
 
 symbols(::EinCode{ixs}) where ixs = unique(Iterators.flatten(filter(x->length(x)==1,ixs)))
 
-function mis_config(code; all=false, bounding=true)
+function mis_config(code; all=false, bounding=true, usecuda=false)
+    if all && usecuda
+        throw(ArgumentError("ConfigEnumerator can not be computed on GPU!"))
+    end
     flatten_code = flatten(code)
     vertex_index = Dict([s=>i for (i, s) in enumerate(symbols(flatten_code))])
     N = length(vertex_index)
@@ -52,6 +55,10 @@ function mis_config(code; all=false, bounding=true)
         xst = map(getixs(flatten_code)) do ix
             length(ix) == 1 ? misv(TropicalF64,Tropical(1.0)) : misb(TropicalF64)
         end
+        if usecuda
+            ymask = CuArray(ymask)
+            xst = CuArray.(xst)
+        end
         if all
             return bounding_contract(code, xst, ymask, xs)
         else
@@ -60,6 +67,9 @@ function mis_config(code; all=false, bounding=true)
             return fill(ConfigTropical(asscalar(t).n, StaticBitVector(map(l->res[l], 1:N))))
         end
     else
+        if usecuda
+            xs = CuArray.(xs)
+        end
 	    return code(xs...)
     end
 end

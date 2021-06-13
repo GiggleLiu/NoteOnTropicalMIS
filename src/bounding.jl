@@ -4,9 +4,7 @@ export bounding_contract
 
 Base.isnan(x::Tropical) = isnan(x.n)
 function backward_tropical(mode, @nospecialize(ixs), @nospecialize(xs), @nospecialize(iy), @nospecialize(y), @nospecialize(ymask), size_dict)
-    @inbounds for i=1:length(y)
-        y[i] = inv(y[i]) * ymask[i]
-    end
+    y .= inv.(y) .* ymask
     masks = []
     for i=1:length(ixs)
         nixs = TupleTools.insertat(ixs, i, (iy,))
@@ -19,7 +17,7 @@ function backward_tropical(mode, @nospecialize(ixs), @nospecialize(xs), @nospeci
         elseif mode == :single  # wrong, need `B` matching `A`.
             A = zeros(eltype(xs[i]), size(xs[i]))
             A = einsum(EinCode(nixs, niy), nxs, size_dict)
-            push!(masks, hotmask(A, xs[i]))
+            push!(masks, onehotmask(A, xs[i]))
         else
             error("unkown mode: $mod")
         end
@@ -27,7 +25,7 @@ function backward_tropical(mode, @nospecialize(ixs), @nospecialize(xs), @nospeci
     return masks
 end
 
-function hotmask(A, X::AbstractArray{T}) where T
+function onehotmask(A::AbstractArray{T}, X::AbstractArray{T}) where T
     @assert length(A) == length(X)
     mask = falses(size(A)...)
     found = false
@@ -98,7 +96,7 @@ function mis_config_ad(code::NestedEinsum, @nospecialize(xsa), ymask; size_info=
     # compute intermediate tensors
     @debug "caching einsum..."
     c = cached_einsum(code, xsa, size_dict)
-    n = c.content[]
+    n = asscalar(c.content)
     # compute masks from cached tensors
     @debug "generating masked tree..."
     mt = generate_masktree(code, c, ymask, size_dict, :single)
@@ -108,7 +106,7 @@ end
 function read_config!(code::NestedEinsum, mt, out)
     for (arg, ix, sibling) in zip(code.args, OMEinsum.getixs(code.eins), mt.siblings)
         if arg isa Int
-            assign = sibling.content
+            assign = convert(Array, sibling.content)  # note: the content can be CuArray
             if length(ix) == 1
                 if !assign[1] && assign[2]
                     out[ix[1]] = 1
