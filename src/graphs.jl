@@ -1,6 +1,8 @@
 using LightGraphs, OMEinsumContractionOrders
-export random_regular_graph, diagonal_coupled_graph
+export random_regular_graph, diagonal_coupled_graph, isindependentset
 export random_regular_eincode, random_diagonal_coupled_eincode, diagonal_coupled_eincode
+
+isindependentset(g, v) = !any(e->v[e.src] == 1 && v[e.dst] == 1, edges(g))
 
 function random_regular_eincode(n, k; optimize=nothing)
 	EinCode(LightGraphs.random_regular_graph(n, k))

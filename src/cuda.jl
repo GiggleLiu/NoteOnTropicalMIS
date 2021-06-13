@@ -1,5 +1,9 @@
 using .CUDA
 
 function onehotmask(A::CuArray{T}, X::CuArray{T}) where T
-    CuArray(onehotmask(Array(A), Array(X)))
+    mask = X .== inv.(A)
+    ci = argmax(mask)
+    mask .= false
+    mask[CuArray([ci])] = true
+    return mask
 end

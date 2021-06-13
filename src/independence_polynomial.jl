@@ -1,5 +1,5 @@
 using Polynomials
-using OMEinsum: NestedEinsum, flatten, getixs, getiy
+using OMEinsum: NestedEinsum, getixs, getiy
 
 export independence_polynomial
 export misb, misv, mis_size, mis_count
