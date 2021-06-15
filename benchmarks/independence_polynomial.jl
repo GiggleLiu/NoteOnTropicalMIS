@@ -31,7 +31,7 @@ function run_benchmarks(cases; output_file)
     writedlm(output_file, times)
 end
 
-function run(;
+function runcase(;
         case_set=:r3,
         task = :maxsize,
         usecuda = false,
@@ -63,4 +63,4 @@ const truncatedict = Dict(
         (:idp_polynomial, 0), (:idp_fft, 0), (:idp_finitefield, 0),
         (:config_single, 0), (:config_all, 5), (:config_single_bounded, 0), (:config_all_bounded, 0)
     ]]))
-run(case_set=Symbol(GRAPH), task=Symbol(TASK), usecuda=DEVICE>=0, ntruncate=truncatedict[GRAPH][TASK])
+runcase(case_set=Symbol(GRAPH), task=Symbol(TASK), usecuda=DEVICE>=0, ntruncate=truncatedict[GRAPH][TASK])

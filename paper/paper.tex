@@ -182,7 +182,8 @@ Listing \thelstlisting: #1\hfill%\hfill%
 \newcommand{\material}[1]{\iffalse[{\bf  \color{cyan}{Material: #1}}]\fi}
 \newcommand{\orange}[1]{\iffalse[{\bf  \color{orange}{Jo: #1}}]\fi}
 
-\newtheorem{theorem}{\textit{Branching Rule}}
+\newtheorem{theorem}{\textit{Theorem}}
+\newtheorem{corollary}{\textit Branching Rule}
 \theoremstyle{definition}\newtheorem{definition}{\textit{Definition}}
 
 \makeatother
@@ -470,7 +471,10 @@ This rule defined on matrix multiplication can be easily generalized to the eins
 % check http://www.tcs.rwth-aachen.de/independentset/ for more rules
 So far, we have used the language of einsum networks for contraction.
 When using sparse tropical tensor networks to find the maximum independent set, we can introduce a new rule to compress the tensor by removing elements that are not helpful.
-As show in \Fig{fig:compressrule}, after we contract the tensors in a subregion $R \subseteq G$ of a graph $G$, and obtain a resulting tensor $A$ of rank $|C|$, where $C$ is the set of vertice tensors at the cut.
+As show in \Fig{fig:compressrule}, after we contract the tensors in a subregion $R \subseteq G$ of a graph $G$, and obtain a resulting tensor $A$ of rank $|C|$, where $C$ is the set of boundary vertices defined as $C := \{c | c\in R \land c \in G\backslash R\}$.
+
+We denote the effective branching number of contracting the local degrees of freedoms as $|T_S|_{\neq -\infty}/2^{|S|}$, where $|\cdot|_{\neq -\infty}$ is the number of nonzero elements in a tropical tensor.
+
 Each tensor entry $A_{\sigma}$ defines a local maximum independant set size with a fixed boundary configuration $\sigma \in \{0,1\}^{|C|}$ by marginalizing the inner degrees of freedom.
 We call this properly the \textit{local maximum rule}.
 
@@ -497,80 +501,143 @@ we only retain those least restrictive (less ones at the boundary) to exterial c
     \caption{Two configurations with same local independent size $v_a = v_b = 3$ and different boundary configurations (a) ${001}$ and (b) ${101}$, where black nodes are $1$s (in the independent set) and white nodes are $0$s (not in the independent set).}\label{fig:compressrule}
 \end{figure}
 
+\begin{theorem}
+    A MIS-compact tropical tensor is optimal, i.e. none of its none zero entries can be further reduces.
+\end{theorem}
+
+\begin{proof}
+    Let us prove it by showing any nonzero entry in a MIS-compact tropical tensor can be the only solution of maximum independent set under a certan exterior graph configuration.
+    Let $A$ be a tropical tensor, and an entry of it being $A_{\sigma} = k$, where $\sigma$ is the bounary configuration.
+    Construct a graph $G$ such that for a $v \in C$, if $\sigma_v=1$, $\alpha(N[v] \cap (G \backslash R)) = 0$, otherwise, $\alpha(N[v] \cap (G\backslash R)) = \infty$.
+    The simplest construction is connecting vertices that $\sigma_v=0$ with infinite many mutually disconnected vertices as illustrated in the following graph.
+
+    \centerline{\includegraphics[width=0.35\textwidth, trim={0cm 2cm 6cm 0cm}, clip]{proofoptimal.pdf}}
+
+    Then we have $\alpha(G) = \infty (|C|-|\sigma|) + k$. If there exists another configuration $\tau$ that generating the same good result, then $\tau \prec \sigma$,
+    otherwise it will suffer from infinite punishment from $G\backslash R$.
+    Since this tropical tensor is MIS-compact, it is not possible to find a such $\tau$ that $A_\tau \geq k$, otherwise $\sigma$ will be remove by the \textit{least restrictive rule}.
+\end{proof}
+
 \subsection{The tensor network compression detects branching rules automatically}
 In the following, we are going to show \textit{local maximum rule} and \textit{least restrictive rule} can automatically discover branching rules and use it for compressing tensor elements,
 i.e. sparse tropical tensor network can not be worse than branching in truncating the search space.
 
-We are going the verify the Lemmas used for branching in book~\cite{Fomin2013}.
-\begin{theorem}\label{rule:one} % basic
+\begin{corollary}\label{rule:one} % basic
   If a vertex $v$ is in an independent set $I$, then none of its neighbors can be in $I$.
 On the other hand, if $I$ is a maximum (and thus maximal) independent set,
 and thus if $v$ is not in $I$ then at least one of its neighbors is in $I$.
-\end{theorem}
+\end{corollary}
 
 Contract $N[v]$ and the resulting tensor $A$ has a rank $|N(v)|$. Each tensor entry $A_{\sigma}$ corresponds to a locally maximized independant set size with fixed boundary configuration $\sigma \in \{0, 1\}^{|N(v)|}$.
 If the boundary configuration is a bit string of 0s, $\sigma_v$ will takes value $1$ to maximize the local independant set size.
 
-\begin{theorem} % 2.5
-Let $G=(V,E)$ be a graph, let $v$ and $w$ be adjacent vertices of $G$ such that $N[v] \subseteq N[w]$. Then
-\begin{equation}
-\alpha(G)=\alpha(G\backslash w).
-\end{equation}
-\end{theorem}
+\centerline{\includegraphics[width=0.4\columnwidth,trim={0 3.5cm 0 1cm},clip]{../notebooks/basic.pdf}}
 
-Contract $N[w]$, both $\{v, w\}$ disapear from the tensor indices because they are inner degrees of freedom.
-If $w$ is one, then $N[v]$ are all zeros, the resulting tensor element can not be larger than setting $v=1$ and $w=0$.
-By the maximization rule, the local tensor does not change if we remove $w$.
+After contracting $N[v]$, $v$ becomes an internal degree of freedom.
+Applying tensor compression rule \Eq{eq:compress}, the resulting rank 4 tropical tensor is
 
-\begin{theorem} % 2.6
-  Let $G = (V, E)$ be a graph and let $v$ be a vertex of $G$. If no maximum
-independent set of $G$ contains $v$ then every maximum independent set of $G$ contains
-at least two vertices of $N(v)$.
-\end{theorem}
-Contract $N[v]$, the minimum tensor element is $2$, otherwise letting $v$ be in the independent set is one of the solutions. This is again captured by the \textit{local maximum rule}.
+\begin{align}
+    T_{juwk} = \left(\begin{matrix}
+        \left(\begin{matrix}
+        ~~~~1 & -\infty \\
+        -\infty & ~~~~2
+        \end{matrix}\right)_{ju}&
+        \left(\begin{matrix}
+        -\infty & ~~~~2 \\
+        ~~~~2 & ~~~~3
+        \end{matrix}\right)_{ju}\\
+        \left(\begin{matrix}
+        -\infty & ~~~~2 \\
+        ~~~~2 & ~~~~3
+        \end{matrix}\right)_{ju} &
+        \left(\begin{matrix}
+        ~~~~2 & ~~~~3 \\
+        ~~~~3 & ~~~~4
+        \end{matrix}\right)_{ju}
+    \end{matrix}\right)_{wk}.
+\end{align}
 
-\begin{theorem} % 2.7
+The effective branching value is $11^{1/5} \approx 1.6154$, which is larger than the branching number $\tau(1, 5) \approx 1.3247$.
+It does not mean the tropical tensor does not find all the branches, if we contract $N^2[v]$.
+
+\begin{corollary}[mirror rule] % 2.7
+For some $v \in V$, a node $u \in N^2(v)$ is called mirror of $v$, if $N(v) \backslash N(u)$ is a clique. We denote the set of of a node $v$ mirrors~\cite{Fomin2013} by $M(v)$.
 Let $G = (V, E)$ be a graph and $v$ a vertex of $G$. Then
 \begin{equation}
 \alpha(G) = \max(1 + \alpha(G \backslash N[v]), \alpha(G \backslash (M(v) \cup \{v\})).
 \end{equation}
-\end{theorem}
+\end{corollary}
 
-Here, $M(v)$ is the set of mirrors of $v$ in $G$.
-A vertex $w \in N^2(v)$ is called a mirror of $v$ if $N(v) \backslash N(w)$ is a clique.
 This rule states that if $v$ is not in $M$, there exists an MIS $I$ that $M(v)\notin I$.
 otherwise, there must be one of $N(v)$ in the MIS (\textit{local maximum rule}).
 If $w$ is in $I$, then none of $N(v) \cap N(w)$ is in $I$, then there must be one of node in the clique $N(v)\backslash N(w)$ in $I$ (\textit{local maximum rule}),
 since clique has at most one node in the MIS, the tensor compression will eliminate this solution by moving the occuppied node to the interior.
 Hence, the \textit{least restrictive rule} captures the mirror rule.
 
-\begin{theorem} % 2.9
-Let $G = (V, E)$ be a graph and $v$ be a vertex of $G$ such that $N[v]$ is a
-clique. Then
-\begin{equation}
-\alpha(G) = 1 + \alpha(G \backslash N[v]).
-\end{equation}
-\end{theorem}
+In the following example, since $u\in N^2(v)$ and $N(v) \backslash N(u)$ is a clique, $u$ is a mirror of $v$.
 
-Contract $N[v]$, and this rule can be captured by the \textit{local maximum rule}.
+\centerline{\includegraphics[width=0.4\columnwidth,trim={0 3.5cm 0 1cm},clip]{../notebooks/mirror.pdf}}
 
-\begin{theorem}  %2.10
-Let $G$ be a graph, let $S$ be a separator of $G$ and let $I(S)$ be the set of
-all subsets of $S$ being an independent set of $G$. Then
-\begin{equation}
-\alpha(G) = \max_{A\in I(S)} |A| + \alpha(G \backslash (S \cup N[A])).
-\end{equation}
-\end{theorem}
-This rule corresponds to first contract tensors in subgraph $S$, then $N[S]$, and then contract the rest parts.
-These branching rule can be captured by the \textit{local maximum rule}.
+After contracting $N[v]\cup u$, $v$ becomes an internal degree of freedom.
+Applying tensor compression rule \Eq{eq:compress}, the resulting rank 4 tropical tensor is
 
-\begin{theorem}  %2.11
-Let $G = (V, E)$ be a disconnected graph and $C \subseteq V$ a connected component of $G$. Then
+\begin{align}
+    T_{juwk} = \left(\begin{matrix}
+        \left(\begin{matrix}
+        ~~~~1 & ~~~~2 \\
+        -\infty & -\infty
+        \end{matrix}\right)_{ju}&
+        \left(\begin{matrix}
+        -\infty & -\infty \\
+        ~~~~2 & -\infty
+        \end{matrix}\right)_{ju}\\
+        \left(\begin{matrix}
+        -\infty & -\infty \\
+        -\infty & -\infty
+        \end{matrix}\right)_{ju} &
+        \left(\begin{matrix}
+        -\infty & -\infty \\
+        -\infty & -\infty
+        \end{matrix}\right)_{ju}
+    \end{matrix}\right)_{wk}.
+\end{align}
+
+In this case, the effective branching number is $3^{1/5}\approx 1.2457$,
+which is smaller than the branching number $\tau(4, 2) = 1.2721$ by simply applying the mirror rule.
+
+\begin{corollary}[satellite rule] % satellite rule
+Let $G$ be agraph $v \in V$. A node $u \in N^2(v)$ is called satellite~\cite{Kneis2009} of $v$, if there is some $u' \in N(v)$ such that $N[u'] \backslash N[v] = \{u\}$.
+The set of satellites of a node $v$ is denotedby $S(v)$, and we also use the notation $S[v] := S(v) \cup {v}$. Then 
 \begin{equation}
-\alpha(G) = \alpha(G[C]) + \alpha(G \backslash C)).
+\alpha(G) = \max\{\alpha(G \backslash \{v\}), \alpha(G \backslash N[S[v]]) + |S(v)| + 1\}.
 \end{equation}
-\end{theorem}
-Contract by the disconnected parts, and this rule can be captured by the \textit{local maximum rule}.
+\end{corollary}
+
+This rule can be capture by contracting $N[v] \cup S(v)$.
+In the following example, since $u \in N^2(v)$ and $w \in N(v)$ satisfies $N[w] \backslash N[v] = \{u\}$, $u$ is a satellite of $v$.
+
+\centerline{\includegraphics[width=0.4\columnwidth,trim={0 3.5cm 0 1cm},clip]{../notebooks/satellite.pdf}}
+
+After contracting $N[v] \cup u$, both $v$ and $w$ become internal degrees of freedoms.
+Applying tensor compression rule \Eq{eq:compress}, the resulting rank 3 tropical tensor is
+\begin{align}
+    T_{juk} = \left(\begin{matrix}
+        \left(\begin{matrix}
+        ~~~~1 & ~~~~2 \\
+        ~~~~2 & -\infty
+        \end{matrix}\right)_{ju}\\
+        \left(\begin{matrix}
+        -\infty & -\infty \\
+        -\infty & -\infty
+        \end{matrix}\right)_{ju}
+    \end{matrix}\right)_{k}.
+\end{align}
+
+There are 3 nonzero entries. The internal configurations of entry $T(j=1, u=0, k=0) = 2$ is $(v=0, w =1)$,
+that of entry $T(j=0, u=1, k=0)=2$ is $(v=1, w=0)$, and that of entry $T(j=0, u=0, k=0)=1$ is $(v=1, w=0)$ or $(v=0, w=1)$.
+For entry $T(j=0, u=0, k=0)=1$, we post-select the internal degree of freedom as $(v=0, w=1)$.
+Then we can see the satellite rule either ${v, u} \in I$ or $v \notin I$ is satisfied.
+In this case, the effective branching number is $3^{1/5}\approx 1.2457$. 
 
 \section{discussion}
 We introduced in the main text how to compute the indenpendence polynomial, maximum independent set and optimal configurations.

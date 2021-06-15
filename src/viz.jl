@@ -71,7 +71,7 @@ function vizeinsum(code::NestedEinsum, locs::AbstractVector{<:Pair}; kwargs...)
 	vizeinsum(flatten(code), locs; kwargs...)
 end
 function vizeinsum(ixs::Tuple, iy::Tuple, locs::Dict; kwargs...)
-	legs = unique!([flatten(ixs)..., iy...])
+	legs = unique!([Iterators.flatten(ixs)..., iy...])
 	nodes = [l=>locs[l] for l in legs]
 	edges = [map(i->findfirst(==(i), legs), ix) for ix in ixs]
 	vizeinsum(nodes, edges; config=[l ∈ iy for l in legs], kwargs...)

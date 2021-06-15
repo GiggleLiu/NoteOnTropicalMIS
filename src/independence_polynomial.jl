@@ -2,7 +2,7 @@ using Polynomials
 using OMEinsum: NestedEinsum, getixs, getiy
 
 export independence_polynomial
-export misb, misv, mis_size, mis_count
+export misb, misv, mis_size, mis_count, mis_contract
 
 # MIS bond tensor
 misb(::Type{T}) where T = [one(T) one(T); one(T) zero(T)]
