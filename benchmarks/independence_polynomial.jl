@@ -55,8 +55,8 @@ end
 const truncatedict = Dict(
     "r3"=>Dict([string(task)=>ntruncate for (task, ntruncate) in [
         (:totalsize, 0), (:maxsize, 0), (:counting, 0),
-        (:idp_polynomial, 0), (:idp_fft, 0), (:idp_finitefield, 0),
-        (:config_single, 0), (:config_all, 5), (:config_single_bounded, 0), (:config_all_bounded, 0)
+        (:idp_polynomial, 3), (:idp_fft, 3), (:idp_finitefield, 3),
+        (:config_single, 0), (:config_all, 5), (:config_single_bounded, 0), (:config_all_bounded, 3)
         ]]),
     "dc"=>Dict([string(task)=>ntruncate for (task, ntruncate) in [
         (:totalsize, 0), (:maxsize, 0), (:counting, 0),

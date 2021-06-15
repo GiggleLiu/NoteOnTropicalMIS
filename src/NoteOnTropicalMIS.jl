@@ -14,6 +14,15 @@ else
     flatten(code) = Iterators.flatten(code::Union{NestedEinsum,EinCode})
 end
 
+using TensorOperations, LinearAlgebra
+function LinearAlgebra.permutedims!(C::Array{T,N}, A::StridedArray{T,N}, perm) where {T,N}
+    if isbitstype(T)
+        TensorOperations.tensorcopy!(A, ntuple(identity,N), C, perm)
+    else
+        invoke(permutedims!, Tuple{Any,AbstractArray,Any}, C, A, perm)
+    end
+end
+
 include("arithematics.jl")
 include("widgets.jl")
 include("independence_polynomial.jl")
