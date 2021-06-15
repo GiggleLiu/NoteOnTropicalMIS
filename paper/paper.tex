@@ -469,58 +469,60 @@ This rule defined on matrix multiplication can be easily generalized to the eins
 
 \section{Automated branching}
 % check http://www.tcs.rwth-aachen.de/independentset/ for more rules
-So far, we have used the language of einsum networks for contraction.
-When using sparse tropical tensor networks to find the maximum independent set, we can introduce a new rule to compress the tensor by removing elements that are not helpful.
-As show in \Fig{fig:compressrule}, after we contract the tensors in a subregion $R \subseteq G$ of a graph $G$, and obtain a resulting tensor $A$ of rank $|C|$, where $C$ is the set of boundary vertices defined as $C := \{c | c\in R \land c \in G\backslash R\}$.
-
-We denote the effective branching number of contracting the local degrees of freedoms as $|T_S|_{\neq -\infty}/2^{|S|}$, where $|\cdot|_{\neq -\infty}$ is the number of nonzero elements in a tropical tensor.
-
-Each tensor entry $A_{\sigma}$ defines a local maximum independant set size with a fixed boundary configuration $\sigma \in \{0,1\}^{|C|}$ by marginalizing the inner degrees of freedom.
-We call this properly the \textit{local maximum rule}.
-
-In addition, suppose we have two entries with the same local maximum independent set size corresponding to local configurations shown in (a) and (b), it is safe to claim configuration (a) being better than configuration (b) and remove the entry $A_{\sigma_b}$.
-This is because the boundary of (a) is less restrictive to the rest of the graph while having the equally good local maximum independent set size, 
-i.e. any exterior configuration $\overline{\sigma}$ making $\overline{\sigma} \cup \sigma_b$ a global maximum independent set also makes $\overline{\sigma} \cup \sigma_a$ a maximum independent set.
-Hence an entry $A_{\sigma_a}$ is ``better'' than $A_{\sigma_b}$ can be defined as
+Branching rules can be automatically discovered by contracting the tropical einsum network for a subgraph $R \subseteq G$.
+Let us denote the resulting tropical tensor of rank $|C|$ as $A$, where $C$ is the set of boundary vertices defined as $C := \{c | c\in R \land c \in G\backslash R\}$ and $|C|$ the size of $C$.
+Each tensor entry $A_{\sigma}$ is a local maximum independant set size with a fixed boundary configuration $\sigma \in \{0,1\}^{|C|}$ by marginalizing the inner degrees of freedom.
+If we are only interested in finding a single maximum independent set rather than enumerating all possible solutions,
+this tensor can be further ``compresed'' by setting some entries to tropical zero.
+Let us define a relation of \textit{less restrictive} as
 \begin{align}
-(\sigma_a \land \sigma_b = \sigma_a) \land (A_{\sigma_a} \geq A_{\sigma_b}),\label{eq:compress}
+(\sigma_a \prec \sigma_b) := (\sigma_a \neq \sigma_b) \land (\sigma_a \leq^\circ \sigma_b)
 \end{align}
-where $\land$ is a bitwise and operations.
-The first term means that whenever a bit in $\sigma_a$ has boolean value $1$, the corresponding bit in $\sigma_b$ is also $1$.
-While the second term means the maximum independant set size with boundary configuration fixed to $\sigma_a$ is not less than that fixed to $\sigma_b$.
-The word ``better'' means the best solution with boundary configuration $\sigma_a$ is never worse than that with $\sigma_b$.
-When Eq. \ref{eq:compress} holds, It is easy to see that if $\sigma_b \cup \overline{\sigma_b}$ is one of the solutions for maximum independant sets in $G$, $\sigma_a \cup \overline{\sigma_b}$ is also a solution.
-With this observation, it is safe to set $A_{\sigma_b}$ to tropical zero.
-We call this property the \textit{least restrictive rule}, that is,
+where $\leq^\circ$ is the Hadamard less or equal operations.
+We say an entry $A_{\sigma_a}$ is ``better'' than $A_{\sigma_b}$ if
+\begin{align}
+(\sigma_a \prec \sigma_b) \land (A_{\sigma_a} \geq A_{\sigma_b}),\label{eq:compress}.
+\end{align}
+If we remove such $A_{\sigma_b}$, the contraction over the whole graph is guaranted to give the same maximum independant set size.
+It can be seen by considering two entries with the same local maximum independent set sizes and different boundary configurations as shown in \Fig{fig:compressrule} (a) and (b).
+If we have $\sigma_b \cup \overline{\sigma_b}$ being one of the solutions for maximum independant sets in $G$, then $\sigma_a \cup \overline{\sigma_b}$ is another solution giving the same $\alpha(G)$.
+Hence, we can set $A_{\sigma_b}$ to tropical zero safely.
+We name this entry elimination principle as the \textit{least restrictive principle}, that is,
 among boundary configurations with equal local maximum independent sizes,
 we only retain those least restrictive (less ones at the boundary) to exterial configurations.
 
 \begin{figure}
     \centering
     \includegraphics[width=0.8\textwidth, trim={5cm 4cm 5cm 4cm}, clip]{compressionrule.pdf}
-    \caption{Two configurations with same local independent size $v_a = v_b = 3$ and different boundary configurations (a) ${001}$ and (b) ${101}$, where black nodes are $1$s (in the independent set) and white nodes are $0$s (not in the independent set).}\label{fig:compressrule}
+    \caption{Two configurations with the same local independent size $A_{\sigma_a} = A_{\sigma_b} = 3$ and different boundary configurations (a) $\sigma_a=\{001\}$ and (b) $\sigma_b = \{101\}$, where black nodes are $1$s (in the independent set) and white nodes are $0$s (not in the independent set).}\label{fig:compressrule}
 \end{figure}
 
 \begin{theorem}
-    A MIS-compact tropical tensor is optimal, i.e. none of its none zero entries can be further reduces.
+    We denote a tensors $A$ as MIS-compact if are no two nonzero entries of it that one is ``better'' than another.
+    A MIS-compact tropical tensor is optimal, i.e. none of its none zero entries can be removed without accessing global information.
 \end{theorem}
 
 \begin{proof}
-    Let us prove it by showing any nonzero entry in a MIS-compact tropical tensor can be the only solution of maximum independent set under a certan exterior graph configuration.
-    Let $A$ be a tropical tensor, and an entry of it being $A_{\sigma} = k$, where $\sigma$ is the bounary configuration.
-    Construct a graph $G$ such that for a $v \in C$, if $\sigma_v=1$, $\alpha(N[v] \cap (G \backslash R)) = 0$, otherwise, $\alpha(N[v] \cap (G\backslash R)) = \infty$.
+    %Given $A_\{\sigma_a}$ is better than $A_\{\sigma_b\}$, any exterior configuration $\overline{\sigma}$ making $\overline{\sigma} \cup \sigma_b$ a global maximum independent set also makes $\overline{\sigma} \cup \sigma_a$ a maximum independent set.
+    Let use prove it by showing $\forall \sigma$ in a MIS-compact tropical tensor for a subgraph $R$, there exists a graph $G$ that $R\subseteq G$ and $\sigma$ is the only boundary configuration that produces the maximum independent set.
+    i.e. no tensor entry can be removed without knowledge about $G\backslash R$.
+    Let $A$ be a tropical tensor, and an entry of it being $A_{\sigma}$, where $\sigma$ is the bounary configuration.
+    Let us construct a graph $G$ such that for a vertex $v \in C$, if $\sigma_v=1$, $\alpha(N[v] \cap (G \backslash R)) = 0$, otherwise, $\alpha(N[v] \cap (G\backslash R)) = \infty$, meanwhile, for any $v, w \in C$, $N[v]\cap N[w] = \emptyset$.
     The simplest construction is connecting vertices that $\sigma_v=0$ with infinite many mutually disconnected vertices as illustrated in the following graph.
 
     \centerline{\includegraphics[width=0.35\textwidth, trim={0cm 2cm 6cm 0cm}, clip]{proofoptimal.pdf}}
 
-    Then we have $\alpha(G) = \infty (|C|-|\sigma|) + k$. If there exists another configuration $\tau$ that generating the same good result, then $\tau \prec \sigma$,
-    otherwise it will suffer from infinite punishment from $G\backslash R$.
-    Since this tropical tensor is MIS-compact, it is not possible to find a such $\tau$ that $A_\tau \geq k$, otherwise $\sigma$ will be remove by the \textit{least restrictive rule}.
+    Then we have the maximum independent set size with boundary configuration $\sigma$ being $\alpha(G,\sigma) = \infty (|C|-|\sigma|) + A_{\sigma}$,
+    where $|\sigma|$ is defined as the number of $1$s in $\sigma$.
+    Let us assume there exists another configuration $\tau$ that generating the same or even better maximum independent set size $\alpha(G, \tau) \geq \alpha(G, \sigma)$.
+    Then we have $\tau \prec \sigma$, otherwise it will suffer from infinite punishment from $G\backslash R$.
+    For such a $\tau$, we have $A_\tau < A_\sigma$, otherwise $A_\sigma \prec A_\tau$ contradicts with $A$ being MIS-compact.
+    Finally, we have $\alpha(G,\tau) = \infty (|C|-|\sigma|) + A_{\tau} < \alpha(G,\sigma)$, which contradicts with our preassumtion. Such $\tau$ does not exist and $\sigma$ is the only boundary configuration that $\alpha(G) = \alpha(G, \sigma)$.
 \end{proof}
 
 \subsection{The tensor network compression detects branching rules automatically}
-In the following, we are going to show \textit{local maximum rule} and \textit{least restrictive rule} can automatically discover branching rules and use it for compressing tensor elements,
-i.e. sparse tropical tensor network can not be worse than branching in truncating the search space.
+In the following, we are going to show tropical tensor networks with least restrictive principle can automatically discover branching rules.
+We denote the effective branching number of contracting the local degrees of freedoms as $|T_S|_{\neq -\infty}/2^{|S|}$, where $|\cdot|_{\neq -\infty}$ is the number of nonzero elements in a tropical tensor.
 
 \begin{corollary}\label{rule:one} % basic
   If a vertex $v$ is in an independent set $I$, then none of its neighbors can be in $I$.
@@ -572,7 +574,7 @@ This rule states that if $v$ is not in $M$, there exists an MIS $I$ that $M(v)\n
 otherwise, there must be one of $N(v)$ in the MIS (\textit{local maximum rule}).
 If $w$ is in $I$, then none of $N(v) \cap N(w)$ is in $I$, then there must be one of node in the clique $N(v)\backslash N(w)$ in $I$ (\textit{local maximum rule}),
 since clique has at most one node in the MIS, the tensor compression will eliminate this solution by moving the occuppied node to the interior.
-Hence, the \textit{least restrictive rule} captures the mirror rule.
+Hence, the \textit{least restrictive principle} captures the mirror rule.
 
 In the following example, since $u\in N^2(v)$ and $N(v) \backslash N(u)$ is a clique, $u$ is a mirror of $v$.
 
