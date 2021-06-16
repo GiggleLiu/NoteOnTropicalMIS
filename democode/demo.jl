@@ -1,4 +1,3 @@
-using OMEinsumContractionOrders: OMEinsum
 using OMEinsum, OMEinsumContractionOrders
 using OMEinsum: NestedEinsum, flatten, getixs
 using LightGraphs

@@ -536,12 +536,12 @@ We design a new element type that having algebra
         s_y\infty^{\max(x,y)}, & x < y\\
         s_x\infty^{\max(x,y)}, & x > y
     \end{cases},\\
-    s_x\infty^x \odot s_y\infty^y &= \{\sigma \lor \tau | \sigma \in s_x, \tau \in s_y\}\infty^{x+y},\\
+    s_x\infty^x \odot s_y\infty^y &= \{\sigma + \tau | \sigma \in s_x, \tau \in s_y\}\infty^{x+y},\\
     \mymathbb{0} &= \{\}\infty^{-\infty},\\
     \mymathbb{1} &= \{\boldsymbol 0\}\infty^{0},
 \end{split}
 \end{align}
-where $\vee$ is the bit-wise \texttt{or}. One can easily check that this replacement does not change the fact that the algebra is a commutative semiring.
+One can easily check that this replacement does not change the fact that the algebra is a commutative semiring.
 We first initialize the bit strings of the variable $x$ in the vertex tensor to a vertex index $i$ dependent onehot vector $x_i = \boldsymbol{e}_{i}$,
 then we contract the tensor network. The resulting object will give us the set of all optimal configurations.
 By slightly modifying the above algebra, it can also be used to obtain just a single configuration to save computational effort.
@@ -568,7 +568,7 @@ Let the mask for $C$ being $\overline C$, the backward rule for gradient masks r
 \begin{align}
 \overline{A}_{ij} = \delta(A_{ij}, ((C^{\circ-1} \circ \overline C )B^T)_{ij}^{\circ -1}),
 \end{align}
-where ${}^{\circ -1}$ is the Hadamard inverse, $\circ$ is the Hadamard multiplication, boolean false is treated as tropical zero and boolean true is treated as tropical one.
+where ${}^{\circ -1}$ is the Hadamard inverse, $\circ$ is the Hadamard product, boolean false is treated as tropical zero and boolean true is treated as tropical one.
 This rule defined on matrix multiplication can be easily generalized to the einsum of two tensors by replacing the matrix multiplication between $C^{\circ-1} \circ \overline C$ and $B^T$ by an einsum.
 
 \section{Automated branching}
@@ -784,51 +784,6 @@ Furthermore, these inlined arrays can be upload to GPU devices for faster generi
 \end{table}
 
 
-\iffalse
-\begin{align}
-if |V| = 0 then
-return 0
-if \exists v \in V with d(v) \leq 1 then
-return 1 + mis2(G \backslash N[v])
-if \exists v \in V with d(v) = 2 then
-(let u 1 and u 2 be the neighbors of v)
-if {u 1 , u 2 } \in E then
-return 1 + mis2(G \backslash N[v])
-if {u 1 , u 2 } \in
-/ E then
-if |N 2 (v)| = 1 then
-(let N 2 (v) = {w})
-return max(2 + mis2(G \backslash (N 2 [v] \cup N[w])), 2 + mis2(G \backslash N 2 [v]))
-if |N 2 (v)| > 1 then
-return max(mis2(G \backslash N[v]), mis2(G \backslash (M(v) \cup cup))
-if \exists v \in V with d(v) = 3 then
-(let u 1 u 2 and u 3 be the neighbors of v)
-if G[N(v)] has no edge then
-if v has a mirror then
-return max(1 + mis2(G \backslash N[v]), mis2(G \backslash (M(v) \cup {v}))
-if v has no mirror then
-return max(1 + mis2(G \backslash N[v]), 2 + mis2(G \backslash N[{u 1 , u 2 }]), 2 + mis2(G \backslash
-(N[{u_1 , u_3 }] \cup \{u_2\})), 2 + mis2(G \backslash (N[{u_2 , u_3 }] \cup \{1\})))
-if G[N(v)] has one or two edges then
-return max(1 + mis2(G \backslash N[v]), mis2(G \backslash (M(v) \cup cup))
-if G[N(v)] has three edges then
-return 1 + mis2(G \backslash N[v])
-if \Delta (G) \geq 6 then
-choose a vertex v of maximum degree in G
-return max(1 + mis2(G \backslash N[v]), mis2(G \backslash v))
-if G is disconnected then
-(let C \subseteq V be a component of G)
-return mis2(G[C]) + mis2(G \backslash C)
-if G is 4 or 5-regular then
-choose any vertex v of G
-return max(1 + mis2(G \backslash N[v]), mis2(G \backslash (M(v) \cup \{v\}))
-if \Delta (G) = 5 and \delta (G) = 4 then
-choose adjacent vertices v and w with d(v) = 5 and d(w) = 4 in G
-return
-\max(1 + mis2(G \backslash N[v]), 1 + mis2(G \backslash (\{v\} \cup M(v) \cup N[w])), mis2(G \backslash (M(v) \cup \{v, w\})))
-\end{align}
-\fi
-
 \bibliographystyle{iclr2021_conference}
 \bibliography{refs}
 
@@ -910,9 +865,11 @@ Its einsum network representation is
     \def\r{0.1}
     \def\a{0.1}
     \foreach \x in {1,...,5}
-        \foreach \y in {1,...,5}
+        \foreach \y in {1,...,5}{
         \node[fill, regular polygon, 
-            regular polygon sides=3, scale=0.5] at (\x, \y) {};
+            regular polygon sides=3, scale=0.3, rotate=90] at (\x+0.1, \y+0.2) {};
+        \draw [black,thick] (\x,\y) -- (\x+0.1,\y+0.2);
+        }
     \foreach \x in {1,...,5}
         \foreach \y in {1,...,4}{
             \filldraw[fill=black] (\x-\a,\y+0.5-\a) rectangle (\x+\a, \y+0.5+\a);
