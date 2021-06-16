@@ -863,26 +863,26 @@ Its einsum network representation is
 
 \centerline{\begin{tikzpicture}
     \def\r{0.1}
-    \def\a{0.1}
+    \def\a{0.07}
+    \def\L{0.6}
+    \def\l{0.1}
     \foreach \x in {1,...,5}
         \foreach \y in {1,...,5}{
         \node[fill, regular polygon, 
-            regular polygon sides=3, scale=0.3, rotate=90] at (\x+0.1, \y+0.2) {};
-        \draw [black,thick] (\x,\y) -- (\x+0.1,\y+0.2);
+            regular polygon sides=3, scale=0.3] at (\x, \y) {};
         }
     \foreach \x in {1,...,5}
-        \foreach \y in {1,...,4}{
-            \filldraw[fill=black] (\x-\a,\y+0.5-\a) rectangle (\x+\a, \y+0.5+\a);
-            \filldraw[fill=black] (\y+0.5-\a,\x-\a) rectangle (\y+0.5+\a, \x+\a);
-            \draw [black,thick] (\x,\y) -- (\x,\y+1);
-            \draw [black,thick] (\y,\x) -- (\y+1,\x);
+        \foreach \y in {1,...,5}{
+            \ifnum \y < 5
+                \filldraw[fill=black] (\x-\a,\y+0.5-\a) rectangle (\x+\a, \y+0.5+\a);
+                \filldraw[fill=black] (\y+0.5-\a,\x-\a) rectangle (\y+0.5+\a, \x+\a);
+            \fi
+            \filldraw [red, opacity=0.3] plot [smooth cycle] coordinates {(\x-\L,\y+\l) (\x-\l,\y+\l) (\x-\l, \y+\L) (\x+\l,\y+\L) (\x+\l,\y+\l) (\x+\L,\y+\l) (\x+\L,\y-\l) (\x+\l,\y-\l) (\x+\l,\y-\L) (\x-\l,\y-\L) (\x-\l,\y-\l) (\x-\L,\y-\l)};
         }
     \foreach \x in {1,...,4}
         \foreach \y in {1,...,4}{
             \filldraw[fill=black] (\x+0.3-\a,\y+0.3-\a) rectangle (\x+0.3+\a, \y+0.3+\a);
             \filldraw[fill=black] (\y+0.3-\a,\x+0.7-\a) rectangle (\y+0.3+\a, \x+0.7+\a);
-            \draw [black,thick] (\x,\y) -- (\x+1,\y+1);
-            \draw [black,thick] (\y+1,\x) -- (\y,\x+1);
         }
 \end{tikzpicture}}
 
