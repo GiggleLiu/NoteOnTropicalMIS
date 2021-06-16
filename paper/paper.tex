@@ -14,6 +14,7 @@
 \usepackage{subcaption}
 \usepackage{multicol}
 \usepackage[framemethod=TikZ]{mdframed}
+\usetikzlibrary{shapes}
 \usepackage{wrapfig}
 %\usepackage{caption}
 %\usepackage[plain]{algorithm}
@@ -209,18 +210,18 @@ Harvard University\\
 \end{abstract}
 
 \section{Introduction}
-Exact algorithms that solves the MIS problem in $1.1893^n n ^{O(1)}$ time ~\cite{Xiao2017}.
+Branching algorithms can solve the MIS problem in $1.1893^n n ^{O(1)}$ time ~\cite{Xiao2017}.
 Previous dynamic programming approach~\cite{Fomin2013} can reduce the complexity of computing to $2^{tw(G)}$.
 
 \section{A short introduction to einsum networks}
 
-The word ``einsum'' is a shorthand for Einstein's summation, but it is actually invented by a group of programmers.
+The word ``einsum'' is a shorthand for Einstein's summation, however, modern einsum notation in program is actually invented by a group of programmers.
 Einstein's notation is originally proposed as a generalization to of multiplication between two matrices to the contraction between multiple tensors.
-Let $A, B$ be two matrices, the matrix multiplication is defined as $C_{ik} = \sum_{j}A_{ij}B_{jk}$,
-or $C_i^k = A_i^j B_j^k$ in the Einstein's original notation, where the paired subscript and superscript $j$ is a dummy index summed over.
+Let $A, B$ be two matrices, the matrix multiplication is defined as $C_{ik} = \sum_{j}A_{ij}B_{jk}$.
+It is denoted as $C_i^k = A_i^j B_j^k$ in the Einstein's original notation, where the paired subscript and superscript $j$ is a dummy index summed over.
 An example of tensor networks is $C_i^l = A_{ij}^k B^l_k V^j$.
 One can map a tensor network to a muti-graph with open edges by viewing a tensor in the expression on the right hand side as a vertex in a graph, a label pairing two tensors as an edge, and the remaining labels as open edges.
-This is because a label in a tensor network representation always appear exactly twice.
+We get the graphical notation as the following.
 
 \centerline{\begin{tikzpicture}
     \def\dx{0};
@@ -249,10 +250,11 @@ This is because a label in a tensor network representation always appear exactly
     \node[color=white] at (\cx+\dx,\cy) {V};
 \end{tikzpicture}}
 
+One can easily check a label in a tensor network representation appears precisely twice.
 Numpy programmers make a generalization to this notation by not restricting the number of times a label is used by tensors.
-For example, $C_{ijk} = A_{jkm} B_{mia} V_{jm}$ is a elgal einsum representation, all indices not appearing in the output are summed over, i.e. it represents $C_{ijki} = \sum_{ma}A_{jkm} B_{mia} V_{jm}$.
+For example, $C_{ijk} = A_{jkm} B_{mil} V_{jm}$ is an einsum but not a tensor network. Here, all indices not appearing in the output are summed over, i.e. it represents $C_{ijk} = \sum_{ml}A_{jkm} B_{mia} V_{jm}$.
 Whether the index appear as a superscript or a subscript makes no sense now.
-The graphical representation of an einsum is called a hypergraph, where an edge can be shared by any number of nodes.
+The graphical representation of an einsum is a hypergraph, where an edge can be shared by a arbituary number of nodes.
 
 \centerline{\begin{tikzpicture}
     \def\dx{0};
@@ -269,7 +271,7 @@ The graphical representation of an einsum is called a hypergraph, where an edge 
     \draw[color=blue,thick] (\bx+\dx,\by) circle [radius=\r+0.1];
     \node[color=blue] at (\bx+\dx-0.6,\bx) {i};
     \draw[color=cyan,dashed,thick] (\bx+\dx,\by) circle [radius=\r+0.25];
-    \node[color=cyan] at (\bx+\dx+0.5,\bx-0.5) {a};
+    \node[color=cyan] at (\bx+\dx+0.5,\bx-0.5) {l};
     \draw[color=violet,thick,dashed] (\ax+\dx,\ay) circle [radius=\r+0.1];
     \node[color=violet] at (\ax+\dx+0.4,-0.4) {k};
     \draw[color=black,thick] (0.5+\dx,0) circle [radius=1.7];
@@ -281,22 +283,59 @@ The graphical representation of an einsum is called a hypergraph, where an edge 
     \node[color=white] at (\cx+\dx,\cy) {V};
 \end{tikzpicture}}
 
-In the main text, we stick to the einsum notation, although to most physicists, they are more familiar with tensor networks,
-and an einsum network can be translated to an equivalent tensor network by adding $\delta$ tensors (a generalization of identity matrix to higher order).
+In the main text, we stick to the einsum notation rather than the tensor network notation,
+although one can easily translate an einsum network to the equivalent tensor network by adding $\delta$ tensors (a generalization of identity matrix to higher order).
 We do not use the language of tensor network because it can sometime increase the contraction complexity of a graph. We will show an example in the appendix.
 
 \section{Independence polynomial}
-The independence polynomial~\cite{Ferrin2014, Harvey2017} of a graph $G$ is defined as
-\begin{equation}
-I(G, x) = \sum_{k=1}^{\alpha(G)} a_k x^k,
-\end{equation}
-where $a_k$ is the number of independent sets of size $k$ in $G$, and $\alpha(G)$ is the maximum independent set size.
-\blue{here, I preassumed a user knows tensor network, add more details later.}
+\begin{figure*}[h!]
+    \centerline{\begin{tikzpicture}
+        \def\dx{0};
+        \def\r{0.25}
+        \filldraw[fill=black] (\dx,0) circle [radius=\r];
+        \filldraw[fill=black] (\dx,1.5) circle [radius=\r];
+        \filldraw[fill=black] (1.5+\dx,0) circle [radius=\r];
+        \filldraw[fill=black] (1.5+\dx,1.5) circle [radius=\r];
+        \filldraw[fill=black] (2.5+\dx,2.5) circle [radius=\r];
+        \draw [black,thick] (\dx,0) -- (\dx,1.5);
+        \draw [black,thick] (\dx,0) -- (1.5+\dx,0);
+        \draw [black,thick] (\dx,1.5) -- (1.5+\dx,1.5);
+        \draw [black,thick] (1.5+\dx,0) -- (1.5+\dx,1.5);
+        \draw [black,thick] (1.5+\dx,0) -- (\dx,1.5);
+        \draw [black,thick] (2.5+\dx,2.5) -- (1.5+\dx,1.5);
+        \node[color=white] at (\dx,0) {a};
+        \node[color=white] at (\dx,1.5) {b};
+        \node[color=white] at (1.5+\dx,0) {c};
+        \node[color=white] at (1.5+\dx,1.5) {d};
+        \node[color=white] at (2.5+\dx,2.5) {e};
+        \def\dx{5};
+        \def\r{0.25}
+        \draw [black,thick] (\dx,0) -- (\dx,1.5);
+        \draw [black,thick] (\dx,0) -- (1.5+\dx,0);
+        \draw [black,thick] (\dx,1.5) -- (1.5+\dx,1.5);
+        \draw [black,thick] (1.5+\dx,0) -- (1.5+\dx,1.5);
+        \draw [black,thick] (1.5+\dx,0) -- (\dx,1.5);
+        \draw [black,thick] (2.5+\dx,2.5) -- (1.5+\dx,1.5);
+        \node[color=black,fill=white] at (0.75+\dx,0) {\scriptsize $B$};
+        \node[color=black,fill=white] at (\dx,0.75) {\scriptsize $B$};
+        \node[color=black,fill=white] at (1.5+\dx,0.75) {\scriptsize $B$};
+        \node[color=black,fill=white] at (0.75+\dx,1.5) {\scriptsize $B$};
+        \node[color=black,fill=white] at (0.75+\dx,0.75) {\scriptsize $B$};
+        \node[color=black,fill=white] at (2+\dx,2) {\scriptsize $B$};
+        \node[color=black,fill=white] at (\dx,0) {\scriptsize $W(x_a)$};
+        \node[color=black,fill=white] at (\dx,1.5) {\scriptsize $W(x_b)$};
+        \node[color=black,fill=white] at (1.5+\dx,0) {\scriptsize $W(x_c)$};
+        \node[color=black,fill=white] at (1.5+\dx,1.5) {\scriptsize $W(x_d)$};
+        \node[color=black,fill=white] at (2.5+\dx,2.5) {\scriptsize $W(x_e)$};
+    \end{tikzpicture}}
+    \caption{Mapping a graph to an einsum network.}\label{fig:einsummapping}
+\end{figure*}
+
 Let us map the graph $G$ into an einsum network, as shown in \Fig{fig:einsummapping}, by placing a rank one tensor of size $2$ on vertex $i$
 \begin{equation}
-    W(x)_{s_i} = \left(\begin{matrix}
+    W(x_i)_{s_i} = \left(\begin{matrix}
         1 \\
-        x
+        x_i
     \end{matrix}\right)_{s_i},
 \end{equation}
 and a rank two tensor of size $2 \times 2$ on edge $(i,j)$
@@ -306,29 +345,20 @@ and a rank two tensor of size $2 \times 2$ on edge $(i,j)$
         1 & 0
     \end{matrix}\right)_{s_is_j},
 \end{equation}
-where a tensor index $s_i$ is a boolean variable that being 1 if vertex $i$ is in the independent set, 0 otherwise. The contraction of this einsum network gives the independence polynomial %, we denote this contraction as \texttt{a,b,c,d,ab,ad,bc,bd,cd,ce->}.
+where a tensor index $s_i$ is a boolean variable that being 1 if vertex $i$ is in the independent set, 0 otherwise, $x_i$ is a variable.
+We denote the contraction result of this einsum network as
 \begin{equation}
-    I(G, x) = \sum\limits_{s_1, s_2, \ldots, s_n = 0}^{1} \prod\limits_{i=1}^n W(x)_{s_i} \prod\limits_{(i,j) \in E(G)} B_{s_i s_j}.
+    A(G, \{x_1,\ldots,x_n\}) = \sum\limits_{s_1, s_2, \ldots, s_n = 0}^{1} \prod\limits_{i=1}^n W(x_i)_{s_i} \prod\limits_{(i,j) \in E(G)} B_{s_i s_j}.
 \end{equation}
 Here, the einsum runs over all possible vertex configurations and accumulates the product of tensor elements to the output.
-The product over vertex tensors provides a factor $x^k$, where $k=\sum_i s_i$ is the vertex set size, 
-while the product over edge tensors provides a factor $0$ for configurations not being an independent set.
-\begin{figure*}[t!]
-    \centering
-    \begin{subfigure}[t]{0.4\textwidth}
-        \centering
-        \centerline{\includegraphics[width=0.8\columnwidth,trim={0 0cm 0 0},clip]{../notebooks/fig1.pdf}}
-        \caption{}
-    \end{subfigure}%
-    ~
-    \begin{subfigure}[t]{0.4\textwidth}
-        \centering
-    \centerline{\includegraphics[width=0.8\columnwidth,trim={0 0cm 0 0},clip]{../notebooks/fig2.pdf}}
-        \caption{}
-    \end{subfigure}
-    \caption{Mapping a graph to an einsum network.}\label{fig:einsummapping}
-\end{figure*}
-With this einsum network representation, one can take the advantage of recently developed techiniques in tensor network based quantum circuit simulations ~\cite{Gray2021,Pan2021},
+Let $x_i = x$ be the same variable, then the product over vertex tensors provides a factor $x^k$, where $k=\sum_i s_i$ is the vertex set size, 
+and the product over edge tensors provides a factor $0$ for configurations not being an independent set.
+The contraction of this einsum network gives the independence polynomial~\cite{Ferrin2014, Harvey2017} of $G$
+\begin{equation}
+I(G, x) = \sum_{k=1}^{\alpha(G)} a_k x^k,
+\end{equation}
+where $a_k$ is the number of independent sets of size $k$ in $G$, and $\alpha(G)$ is the maximum independent set size.
+By mapping the independence polynomial solving problem to the einsum network contraction, one can take the advantage of recently developed techiniques in tensor network based quantum circuit simulations ~\cite{Gray2021,Pan2021},
 where people evaluate a tensor network by pairwise contracting tensors in a heuristic order.
 A good contraction order can reduce the time complexity significantly, at the cost of having a space overhead of $O(2^{tw(G)})$, where $tw(G)$ is the treewidth of $G$.~\cite{Markov2008}
 The pairwise tensor contraction also makes it possible to utilize fast basic linear algebra subprograms (BLAS) functions for certain tensor element types.
@@ -828,4 +858,75 @@ all are contained in this appendix. After installing required packages, one can 
 In the above examples, the configuration enumeration is very slow, one should use the optimal MIS size for bounding as decribed in the main text.
 We will not show any example about implementing the backward rule here because it has approximately 100 lines of code.
 Please checkout our Github repository \href{https://github.com/Happy-Diode/NoteOnTropicalMIS}{https://github.com/Happy-Diode/NoteOnTropicalMIS}.
+
+\section{When tensor network is worse than einsum network}\label{app:tensorbad}
+
+Given a graph
+
+\centerline{\begin{tikzpicture}
+    \def\r{0.2}
+    \foreach \x in {1,...,5}
+        \foreach \y in {1,...,5}
+            \filldraw[fill=black] (\x,\y) circle [radius=\r];
+    \foreach \x in {1,...,5}
+        \foreach \y in {1,...,4}{
+            \draw [black,thick] (\x,\y) -- (\x,\y+1);
+            \draw [black,thick] (\y,\x) -- (\y+1,\x);
+        }
+    \foreach \x in {1,...,4}
+        \foreach \y in {1,...,4}{
+            \draw [black,thick] (\x,\y) -- (\x+1,\y+1);
+            \draw [black,thick] (\y+1,\x) -- (\y,\x+1);
+        }
+\end{tikzpicture}}
+
+Its tensor network representation is
+
+\centerline{\begin{tikzpicture}
+    \def\r{0.1}
+    \def\a{0.1}
+    \foreach \x in {1,...,5}
+        \foreach \y in {1,...,5}
+            \filldraw[fill=black] (\x,\y) circle [radius=\r];
+    \foreach \x in {1,...,5}
+        \foreach \y in {1,...,4}{
+            \filldraw[fill=black] (\x-\a,\y+0.5-\a) rectangle (\x+\a, \y+0.5+\a);
+            \filldraw[fill=black] (\y+0.5-\a,\x-\a) rectangle (\y+0.5+\a, \x+\a);
+            \draw [black,thick] (\x,\y) -- (\x,\y+1);
+            \draw [black,thick] (\y,\x) -- (\y+1,\x);
+        }
+    \foreach \x in {1,...,4}
+        \foreach \y in {1,...,4}{
+            \filldraw[fill=black] (\x+0.3-\a,\y+0.3-\a) rectangle (\x+0.3+\a, \y+0.3+\a);
+            \filldraw[fill=black] (\y+0.3-\a,\x+0.7-\a) rectangle (\y+0.3+\a, \x+0.7+\a);
+            \draw [black,thick] (\x,\y) -- (\x+1,\y+1);
+            \draw [black,thick] (\y+1,\x) -- (\y,\x+1);
+        }
+\end{tikzpicture}}
+
+Its einsum network representation is
+
+\centerline{\begin{tikzpicture}
+    \def\r{0.1}
+    \def\a{0.1}
+    \foreach \x in {1,...,5}
+        \foreach \y in {1,...,5}
+        \node[fill, regular polygon, 
+            regular polygon sides=3, scale=0.5] at (\x, \y) {};
+    \foreach \x in {1,...,5}
+        \foreach \y in {1,...,4}{
+            \filldraw[fill=black] (\x-\a,\y+0.5-\a) rectangle (\x+\a, \y+0.5+\a);
+            \filldraw[fill=black] (\y+0.5-\a,\x-\a) rectangle (\y+0.5+\a, \x+\a);
+            \draw [black,thick] (\x,\y) -- (\x,\y+1);
+            \draw [black,thick] (\y,\x) -- (\y+1,\x);
+        }
+    \foreach \x in {1,...,4}
+        \foreach \y in {1,...,4}{
+            \filldraw[fill=black] (\x+0.3-\a,\y+0.3-\a) rectangle (\x+0.3+\a, \y+0.3+\a);
+            \filldraw[fill=black] (\y+0.3-\a,\x+0.7-\a) rectangle (\y+0.3+\a, \x+0.7+\a);
+            \draw [black,thick] (\x,\y) -- (\x+1,\y+1);
+            \draw [black,thick] (\y+1,\x) -- (\y,\x+1);
+        }
+\end{tikzpicture}}
+
 \end{document}
