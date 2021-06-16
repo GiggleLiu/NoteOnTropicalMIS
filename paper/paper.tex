@@ -234,13 +234,18 @@ This is because a label in a tensor network representation always appear exactly
     \filldraw[fill=black] (\ax+\dx,\ax) circle [radius=\r];
     \filldraw[fill=black] (\bx+\dx,\by) circle [radius=\r];
     \filldraw[fill=black] (\cx+\dx,\cy) circle [radius=\r];
-    \draw [black,thick] (\ax+\dx,\ay) .. controls (0.5*\ax+0.5*\bx+\dx+0.2,0.5*\ay+0.5*\by-0.2) .. (\bx+\dx,\by);
-    \draw [black,thick] (\ax+\dx,\ay) .. controls (0.5*\ax+0.5*\bx+\dx-0.2,0.5*\ay+0.5*\by+0.2) .. (\bx+\dx,\by);
+    %\draw [black,thick] (\ax+\dx,\ay) .. controls (0.5*\ax+0.5*\bx+\dx+0.2,0.5*\ay+0.5*\by-0.2) .. (\bx+\dx,\by);
+    %\draw [black,thick] (\ax+\dx,\ay) .. controls (0.5*\ax+0.5*\bx+\dx-0.2,0.5*\ay+0.5*\by+0.2) .. (\bx+\dx,\by);
+    \draw [black,thick] (\ax+\dx,\ay) -- (\bx+\dx,\by);
     \draw [black,thick] (\ax+\dx,\ay) -- (\cx+\dx,\cy);
-    \draw [black,thick] (\ax+\dx,\ay) -- (\ax+\dx-0.6,\ay);
-    \draw [black,thick] (\bx+\dx,\by) -- (\bx+\dx+0.6,\by);
+    \draw [black,thick] (\ax+\dx,\ay) -- (\ax+\dx-0.8,\ay);
+    \draw [black,thick] (\bx+\dx,\by) -- (\bx+\dx+0.8,\by);
     \node[color=white] at (\ax+\dx,\ax) {A};
     \node[color=white] at (\bx+\dx,\by) {B};
+    \node[color=black] at (0.5*\ax+0.5*\bx-0.2+\dx,0.5*\ay+0.5\by+0.2) {k};
+    \node[color=black] at (0.5*\ax+0.5*\cx+\dx+0.2,0.5*\ay+0.5\cy+0.2) {j};
+    \node[color=black] at (\ax+\dx-0.5,\ay-0.2) {i};
+    \node[color=black] at (\bx+\dx+0.5,\by-0.2) {l};
     \node[color=white] at (\cx+\dx,\cy) {V};
 \end{tikzpicture}}
 
@@ -590,7 +595,8 @@ Hence, we can set $A_{\sigma_b}$ to tropical zero safely.
 
 \subsection{The tensor network compression detects branching rules automatically}
 In the following, we are going to show tropical tensor networks with least restrictive principle can automatically discover branching rules.
-We denote the effective branching number of contracting the local degrees of freedoms as $|T_S|_{\neq -\infty}/2^{|S|}$, where $|\cdot|_{\neq -\infty}$ is the number of nonzero elements in a tropical tensor.
+We denote the effective branching number of contracting the local degrees of freedoms as $\left|\{A_{\sigma} \neq \mymathbb{0}\right|\sigma \in \{0, 1\}^{|C|}\}|/2^{|R|}$.
+It is the effective degree of freedoms per vertex in $R$.
 
 \begin{corollary}\label{rule:one} % basic
   If a vertex $v$ is in an independent set $I$, then none of its neighbors can be in $I$.

@@ -26,7 +26,7 @@ function run_benchmarks(cases; output_file)
         times[k] = minimum(res[case].times)
     end
 
-    println("Writing benchmark results to file: $output_file.")
+    println("Writing benchmark results to file: $output_file")
     mkpath(dirname(output_file))
     writedlm(output_file, times)
 end
