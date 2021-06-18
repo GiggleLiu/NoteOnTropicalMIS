@@ -14,7 +14,7 @@ code = EinCode(([minmax(e.src,e.dst) for e in LightGraphs.edges(graph)]..., # la
 # an einsum contraction has contraction order (specified as a tree structure) is called `NestedEinsum`.
 # assign each label a dimension-2, it will be used in contraction order optimization
 # `symbols` function extracts tensor labels into a vector.
-symbols(::EinCode{ixs}) where ixs = unique(flatten(filter(x->length(x)==1,ixs)))
+symbols(::EinCode{ixs}) where ixs = unique(Iterators.flatten(filter(x->length(x)==1,ixs)))
 symbols(ne::OMEinsum.NestedEinsum) = symbols(flatten(ne))
 size_dict = Dict([s=>2 for s in symbols(code)])
 # optimize the contraction order using KaHyPar + Greedy, target space complexity is 2^17
