@@ -61,6 +61,9 @@ run_task(code, :maxsize)
 # ╔═╡ f657f321-255e-44f2-a1d5-9093fa8eca28
 md"## Obtaining configurations"
 
+# ╔═╡ fdbe425d-5539-4a38-8f8f-aa98fb20ce64
+@doc run_task
+
 # ╔═╡ adb6a76a-18a2-46a8-8ad6-352cac1d2efc
 res_configs = run_task(code, :config_all);
 
@@ -90,6 +93,7 @@ vizconfig(graph; locs=locs,config=res_configs[s1+1,s2+1,s3+1,s4+1].c.data[index]
 # ╠═e068f0b8-7b2c-49b2-94d1-83dead406326
 # ╠═90c88c7f-e0c7-4845-a8b9-7f7562bd256f
 # ╟─f657f321-255e-44f2-a1d5-9093fa8eca28
+# ╟─fdbe425d-5539-4a38-8f8f-aa98fb20ce64
 # ╠═adb6a76a-18a2-46a8-8ad6-352cac1d2efc
 # ╟─6ae40df1-f576-44f0-9d48-561dab3cb899
 # ╟─21aa560c-d2f0-467b-a0bf-7b77024aeeaa
