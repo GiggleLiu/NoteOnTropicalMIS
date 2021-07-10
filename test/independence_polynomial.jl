@@ -1,6 +1,6 @@
-using NoteOnTropicalMIS, Test, OMEinsum
+using NoteOnTropicalMIS, Test, OMEinsum, OMEinsumContractionOrders
 using Mods, Polynomials, TropicalNumbers
-using LightGraphs
+using LightGraphs, Random
 
 @testset "bond and vertex tensor" begin
     @test misb(TropicalF64) == [TropicalF64(0) TropicalF64(0); TropicalF64(0) TropicalF64(-Inf)]
@@ -17,8 +17,9 @@ end
 end
 
 @testset "independence_polynomial" begin
+    Random.seed!(2)
     code = random_regular_eincode(10, 3)
-    code = optimize_greedy(code, uniformsize(code, 2))
+    code = optimize_kahypar(code, uniformsize(code, 2), sc_target=4, max_group_size=5)
     p1 = independence_polynomial(Val(:fitting), code)
     p2 = independence_polynomial(Val(:polynomial), code)
     p3 = independence_polynomial(Val(:fft), code)

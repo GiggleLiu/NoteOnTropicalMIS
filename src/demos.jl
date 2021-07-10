@@ -29,13 +29,30 @@ function case_dc(L::Int, ρ; sc_target, seed=2)
     return optimized_code
 end
 
+
+"""
+    run_task(code, task; usecuda=false)
+
+* `code` is the einsum code,
+* `task` is one of
+    * `:totalsize`, total number of independent sets,
+    * `:maxsize`, the maximum independent set size,
+    * `:counting`, the dengeneracy is MIS,
+    * `:idp_polynomial`, independence polynomial, the polynomial number approach,
+    * `:idp_fft`, independence polynomial, the fast fourier transformation approach,
+    * `:idp_finitefield`, independence polynomial, the finite field approach,
+    * `:config_single`, single MIS configuration,
+    * `:config_single_bounded`, single MIS configuration, the bounded approach (maybe faster),
+    * `:config_all`, all MIS configurations,
+    * `:config_all_bounded`, all MIS configurations, the bounded approach (much faster),
+"""
 function run_task(code, task; usecuda=false)
     if task == :totalsize
         return mis_contract(1.0, code; usecuda=usecuda)
     elseif task == :maxsize
-        return mis_size(code; usecuda=usecuda)
+        return mis_contract(Tropical(1.0), code; usecuda=usecuda)
     elseif task == :counting
-        return mis_count(code; usecuda=usecuda)
+        return mis_contract(CountingTropical(1.0), code; usecuda=usecuda)
     elseif task == :idp_polynomial
         return independence_polynomial(Val(:polynomial), code; usecuda=usecuda)
     elseif task == :idp_fft

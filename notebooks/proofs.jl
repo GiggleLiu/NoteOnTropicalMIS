@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.14.7
+# v0.15.0
 
 using Markdown
 using InteractiveUtils
@@ -15,6 +15,8 @@ end
 
 # ╔═╡ c8c14900-b7f5-11eb-3dbe-4390dd0fcc0a
 begin
+	using Pkg
+	Pkg.activate(pwd())
 	using Revise, OMEinsum, OMEinsumContractionOrders, TropicalNumbers, NoteOnTropicalMIS, Compose, Viznet, PlutoUI
 	using OMEinsumContractionOrders: uniformsize
 	function savetodisk(obj, filename)
