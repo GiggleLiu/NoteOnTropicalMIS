@@ -27,7 +27,17 @@ end
 Base.zero(::Type{ConfigEnumerator{N,C}}) where {N,C} = ConfigEnumerator{N,C}(StaticBitVector{N,C}[])
 Base.one(::Type{ConfigEnumerator{N,C}}) where {N,C} = ConfigEnumerator{N,C}([TropicalNumbers.staticfalses(StaticBitVector{N,C})])
 
-symbols(::EinCode{ixs}) where ixs = unique(Iterators.flatten(filter(x->length(x)==1,ixs)))
+function symbols(::EinCode{ixs}) where ixs
+    res = []
+    for ix in ixs
+        for l in ix
+            if l ∉ res
+                push!(res, l)
+            end
+        end
+    end
+    return res
+end
 
 function mis_config(code; all=false, bounding=true, usecuda=false)
     if all && usecuda

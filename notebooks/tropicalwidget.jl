@@ -287,10 +287,10 @@ function compress!(a::AbstractArray{T}) where T
 end
 
 # ╔═╡ 201acfaa-8358-11eb-094b-e7241fd58324
-content.(res_gadget) .- 4.0
+content.(res_gadget) .- 2.0
 
 # ╔═╡ b98adcc4-7b23-4d1e-bcf2-626ea5f4cc47
-res3 = content.(compress!(copy(res_gadget))) .- 4
+res3 = content.(compress!(copy(res_gadget))) .- 2
 
 # ╔═╡ e278731d-3a77-460a-8ea2-d94ddb0851ac
 md"**They must be different by a constant!**"

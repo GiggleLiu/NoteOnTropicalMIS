@@ -1,32 +1,22 @@
-export case_r3, case_dc, run_task
+export case_r3, case_dc, run_task, suboptimal_counting
 
 using Random
 
 function case_r3(n, k=3; sc_target, seed=2)
     # generate a random regular graph of size 100, degree 3
     graph = (Random.seed!(seed); LightGraphs.random_regular_graph(n, k))
-    # generate einsum code, i.e. the labels of tensors
-    code = EinCode(([minmax(e.src,e.dst) for e in LightGraphs.edges(graph)]..., # labels for edge tensors
-                    [(i,) for i in LightGraphs.vertices(graph)]...), ())        # labels for vertex tensors
-    size_dict = Dict([s=>2 for s in symbols(code)])
     # optimize the contraction order using KaHyPar + Greedy
-    optimized_code = optimize_kahypar(code, size_dict; sc_target=sc_target, max_group_size=40)
-    println("time/space complexity is $(OMEinsum.timespace_complexity(optimized_code, size_dict))")
-    return optimized_code
+    optcode = idp_code(graph; method=:kahypar, sc_target=sc_target, max_group_size=40)
+    return optcode
 end
 
 function case_dc(L::Int, ρ; sc_target, seed=2)
     # generate a random regular graph of size 100, degree 3
     Random.seed!(seed)
     graph = diagonal_coupled_graph(rand(L, L) .< ρ)
-    # generate einsum code, i.e. the labels of tensors
-    code = EinCode(([minmax(e.src,e.dst) for e in LightGraphs.edges(graph)]..., # labels for edge tensors
-                    [(i,) for i in LightGraphs.vertices(graph)]...), ())        # labels for vertex tensors
-    size_dict = Dict([s=>2 for s in symbols(code)])
     # optimize the contraction order using KaHyPar + Greedy, target space complexity is 2^20
-    optimized_code = optimize_kahypar(code, size_dict; sc_target=sc_target, max_group_size=40)
-    println("time/space complexity is $(OMEinsum.timespace_complexity(optimized_code, size_dict))")
-    return optimized_code
+    optcode = idp_code(graph; method=:kahypar, sc_target=sc_target, max_group_size=40)
+    return optcode
 end
 
 
@@ -46,7 +36,7 @@ end
     * `:config_all`, all MIS configurations,
     * `:config_all_bounded`, all MIS configurations, the bounded approach (much faster),
 """
-function run_task(code, task; usecuda=false)
+function run_task(code::NestedEinsum, task; usecuda=false)
     if task == :totalsize
         return mis_contract(1.0, code; usecuda=usecuda)
     elseif task == :maxsize
@@ -70,4 +60,24 @@ function run_task(code, task; usecuda=false)
     else
         error("unknown task $task.")
     end
+end
+
+function run_task(g::SimpleGraph, task; usecuda=false, kwargs...)
+    run_task(idp_code(g; kwargs...), task; usecuda=false)
+end
+
+function suboptimal_counting(g::SimpleGraph; kwargs...)
+    res0 = run_task(g, :counting)[]
+    n0, c0 = res0.n, res0.c
+    c1 = 0
+    for v in LightGraphs.vertices(g)
+        code = idp_code(g2; kwargs...)
+        resv = run_task(code, :counting)[]
+        @show resv.n, n0
+        if resv.n == n0 - 1
+            c1 += resv.c
+        end
+    end
+    @show c0, c1
+    return c0 - c1
 end

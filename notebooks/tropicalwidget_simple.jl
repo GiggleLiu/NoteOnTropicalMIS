@@ -15,12 +15,13 @@ end
 
 # ╔═╡ 53ce616e-8055-11eb-0caf-e968c041ff4f
 begin
+	using Revise
 	using Pkg
 	Pkg.activate(pwd())
 	using LightGraphs # graph support
-	using Revise, PlutoUI
+	using PlutoUI
 	using Viznet, Compose
-	using TropicalNumbers, OMEinsum, NoteOnTropicalMIS
+	using TropicalNumbers, OMEinsum, NoteOnTropicalMIS#, TropicalGEMM
 end
 
 # ╔═╡ 100e3eb1-9d5c-4ae0-9a1b-d279927443fc
@@ -43,7 +44,7 @@ locs = let
 end
 
 # ╔═╡ 9d0ba8b7-5a34-418d-97cf-863f376f8453
-graph = NoteOnTropicalMIS.unitdisk_graph(locs, 0.23)
+graph = NoteOnTropicalMIS.unitdisk_graph(locs, 0.23) # SimpleGraph
 
 # ╔═╡ 78ee8772-83e4-40fb-8151-0123370481d9
 vizconfig(graph; locs=locs, config=rand(Bool, 12), graphsize=8cm)
@@ -56,7 +57,7 @@ code = let
 end
 
 # ╔═╡ 90c88c7f-e0c7-4845-a8b9-7f7562bd256f
-run_task(code, :maxsize)
+run_task(code, :config_single)
 
 # ╔═╡ f657f321-255e-44f2-a1d5-9093fa8eca28
 md"## Obtaining configurations"

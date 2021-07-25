@@ -21,7 +21,7 @@ end
     code = random_regular_eincode(10, 3)
     code = optimize_kahypar(code, uniformsize(code, 2), sc_target=4, max_group_size=5)
     p1 = independence_polynomial(Val(:fitting), code)
-    p2 = independence_polynomial(Val(:polynomial), code)
+    p2 = independence_polynomial(Val(:polynomial), code)[]
     p3 = independence_polynomial(Val(:fft), code)
     p4 = independence_polynomial(Val(:finitefield), code)
     @test p1 ≈ p2
@@ -41,5 +41,20 @@ end
                     (CountingTropical(5.0, ConfigEnumerator([StaticBitVector(rand(Bool, 10)) for j=1:3])), CountingTropical(3.0, ConfigEnumerator([StaticBitVector(rand(Bool, 10)) for j=1:4])), CountingTropical(-3.0, ConfigEnumerator([StaticBitVector(rand(Bool, 10)) for j=1:5]))),
                     ]
         @test is_commutative_semiring(a, b, c)
+    end
+end
+
+@testset "counting maximal IS" begin
+    g = random_regular_graph(20, 3)
+    cs = maximal_polynomial(Val(:fft), g; r=1.0, method=:greedy)
+    cs2 = maximal_polynomial(Val(:polynomial), g; method=:greedy)[]
+    cg = complement(g)
+    cliques = maximal_cliques(cg)
+    for i=1:20
+        c = count(x->length(x)==i, cliques)
+        if c > 0
+            @test cs2.coeffs[i+1] == c
+            @test cs.coeffs[i+1] ≈ c
+        end
     end
 end

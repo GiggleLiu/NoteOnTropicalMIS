@@ -1,6 +1,7 @@
 %\documentclass[aps,twocolumn,longbibliography,english,superscriptaddress]{revtex4-1}
 \documentclass{article}
-\usepackage{iclr2021_conference}
+%\usepackage{iclr2021_conference}
+\usepackage{natbib}
 %\documentclass[a4paper,superscriptaddress,11pt]{article}
 \pdfoutput=1
 \usepackage[colorlinks=true,urlcolor=blue,citecolor=blue,linkcolor=blue]{hyperref}
@@ -46,6 +47,16 @@
 \usepackage{txfonts}
 \usepackage[epsilon, tsrm, altpo]{backnaur}
 
+\makeatletter
+\def\parsept#1#2#3{%
+    \def\nospace##1{\zap@space##1 \@empty}%
+    \def\rawparsept(##1,##2){%
+        \edef#1{\nospace{##1}}%
+        \edef#2{\nospace{##2}}%
+    }%
+    \expandafter\rawparsept#3%
+}
+\makeatother
 \DeclareMathAlphabet{\mymathbb}{U}{BOONDOX-ds}{m}{n}
 \newcommand{\listingcaption}[1]%
 {%
@@ -189,7 +200,7 @@ Listing \thelstlisting: #1\hfill%\hfill%
 
 \makeatother
 
-\iclrfinalcopy
+%\iclrfinalcopy
 \begin{document}
 \title{Solving the maximum independant set problem by generic programming einsum networks}
 
@@ -210,8 +221,11 @@ Listing \thelstlisting: #1\hfill%\hfill%
 \end{abstract}
 
 \section{Introduction}
+MIS problem is hard~\cite{Hastad1996}.
 Branching algorithms can solve the MIS problem in $1.1893^n n ^{O(1)}$ time ~\cite{Xiao2017}.
 Previous dynamic programming approach~\cite{Fomin2013} can reduce the complexity of computing to $2^{tw(G)}$.
+A set is independent if and only if it is a clique in the graph's complement, so the two concepts are complementary.
+A set is independent if and only if its complement is a vertex cover.[4] Therefore, the sum of the size of the largest independent set $\alpha (G)$ and the size of a minimum vertex cover $\beta (G)$ is equal to the number of vertices in the graph.
 
 \section{A short introduction to einsum networks}
 
@@ -546,6 +560,7 @@ We first initialize the bit strings of the variable $x$ in the vertex tensor to 
 then we contract the tensor network. The resulting object will give us the set of all optimal configurations.
 By slightly modifying the above algebra, it can also be used to obtain just a single configuration to save computational effort.
 We leave this as an exercise for readers.
+This algorithm is parallelizable.
 
 \subsection{bounding the enumeration space}
 When we try to implement the above algebra for enumerating configurations, we find the space overhead is larger than than we have expected.
@@ -583,10 +598,15 @@ Let us define a relation of \textit{less restrictive} as
 (\sigma_a \prec \sigma_b) := (\sigma_a \neq \sigma_b) \land (\sigma_a \leq^\circ \sigma_b)
 \end{align}
 where $\leq^\circ$ is the Hadamard less or equal operations.
-We say an entry $A_{\sigma_a}$ is ``better'' than $A_{\sigma_b}$ if
+
+\begin{definition}
+A tensors $A$ is \textit{MIS-compact} if are no two nonzero entries of it that one is ``better'' than another,
+where an entry $A_{\sigma_a}$ is ``better'' than $A_{\sigma_b}$ if
 \begin{align}
-(\sigma_a \prec \sigma_b) \land (A_{\sigma_a} \geq A_{\sigma_b}),\label{eq:compress}.
+(\sigma_a \prec \sigma_b) \land (A_{\sigma_a} \geq A_{\sigma_b})\label{eq:compress}.
 \end{align}
+\end{definition}
+
 If we remove such $A_{\sigma_b}$, the contraction over the whole graph is guaranted to give the same maximum independant set size.
 It can be seen by considering two entries with the same local maximum independent set sizes and different boundary configurations as shown in \Fig{fig:compressrule} (a) and (b).
 If we have $\sigma_b \cup \overline{\sigma_b}$ being one of the solutions for maximum independant sets in $G$, then $\sigma_a \cup \overline{\sigma_b}$ is another solution giving the same $\alpha(G)$.
@@ -601,7 +621,6 @@ Hence, we can set $A_{\sigma_b}$ to tropical zero safely.
 \end{figure}
 
 \begin{theorem}
-    We denote a tensors $A$ as MIS-compact if are no two nonzero entries of it that one is ``better'' than another.
     A MIS-compact tropical tensor is optimal, i.e. none of its none zero entries can be removed without accessing global information.
 \end{theorem}
 
@@ -745,6 +764,114 @@ For entry $T(j=0, u=0, k=0)=1$, we post-select the internal degree of freedom as
 Then we can see the satellite rule either ${v, u} \in I$ or $v \notin I$ is satisfied.
 In this case, the effective branching number is $3^{1/5}\approx 1.2457$. 
 
+\subsection{gadget design}
+
+Suppose we have a local structure as the following.
+
+\centerline{\begin{tikzpicture}[scale=1.0]
+    \def\r{0.2}
+    \foreach \x/\y [count=\i] in {0.17/0.5,0.83/0.5,0.5/0.67,0.5/0.33}
+        \node[fill=red,circle,radius=\r] at (\x*8, \y*8) (\i) {};
+    \draw (1) -- (2);
+    \draw (3) -- (4);
+\end{tikzpicture}}
+
+
+Contract this local structure gives the tropical tensor
+
+\begin{align}
+    \left(\begin{matrix}
+        \left(\begin{matrix}
+            ~~~~0 & ~~~~1\\
+            ~~~~1 & ~~~~2
+        \end{matrix}\right) &
+        \left(\begin{matrix}
+            ~~~~1 & -\infty\\
+            ~~~~2 & -\infty
+        \end{matrix}\right) \\
+        \left(\begin{matrix}
+            ~~~~1 & ~~~~2\\
+            -\infty & -\infty
+        \end{matrix}\right) &
+        \left(\begin{matrix}
+            ~~~~2 & -\infty\\
+            -\infty & -\infty
+        \end{matrix}\right)
+    \end{matrix}\right).
+\end{align}
+
+The following gadget is equivalent to the above diagram up to a constant $2$.
+
+\centerline{\begin{tikzpicture}
+    \def\nodes{(0.5, 0.33), (0.17, 0.5), (0.5, 0.67), (0.83, 0.5), (0.32, 0.44), (0.44, 0.44), (0.56, 0.44), (0.68, 0.44), (0.32, 0.56), (0.44, 0.56), (0.56, 0.56), (0.68, 0.56)}
+    \def\edges{(1, 5), (1, 6), (1, 7), (1, 8), (2, 5), (2, 9), (3, 9), (3, 10), (3, 11), (3, 12), (4, 8), (4, 12), (5, 6), (5, 9), (5, 10), (6, 7), (6, 9), (6, 10), (6, 11), (7, 8), (7, 10), (7, 11), (7, 12), (8, 11), (8, 12), (9, 10), (10, 11), (11, 12)}
+    \def\r{0.2}
+    \foreach \p [count=\i] in \nodes{
+        \parsept{\x}{\y}{\p}
+        \pgfmathparse{((\x<0.2 || \x>0.8 || \y<0.35 || \y>0.65) ? 1 : 0)}
+        \ifnum\pgfmathresult>0
+            \node[fill=red,circle,radius=\r] at (\x*8, \y*8) (\i) {};
+        \else
+            \node[fill,circle,radius=\r] at (\x*8, \y*8) (\i) {};
+        \fi
+    }
+    \foreach \e [count=\i] in \edges{
+        \parsept{\x}{\y}{\e}
+        \draw (\x) -- (\y);
+    }
+\end{tikzpicture}}
+
+\begin{align}
+    \left(\begin{matrix}
+        \left(\begin{matrix}
+            ~~~~2 & ~~~~3\\
+            ~~~~3 & ~~~~4
+        \end{matrix}\right) &
+        \left(\begin{matrix}
+            ~~~~3 & ~~~~3\\
+            ~~~~4 & ~~~~4
+        \end{matrix}\right) \\
+        \left(\begin{matrix}
+            ~~~~3 & ~~~~4\\
+            ~~~~2 & ~~~~3
+        \end{matrix}\right) &
+        \left(\begin{matrix}
+            ~~~~4 & ~~~~4\\
+            ~~~~3 & ~~~~4
+        \end{matrix}\right)
+    \end{matrix}\right)
+    \xrightarrow[\text{compress, -2}]{}
+    \left(\begin{matrix}
+        \left(\begin{matrix}
+            ~~~~0 & ~~~~1\\
+            ~~~~1 & ~~~~2
+        \end{matrix}\right) &
+        \left(\begin{matrix}
+            ~~~~1 & -\infty\\
+            ~~~~2 & -\infty
+        \end{matrix}\right) \\
+        \left(\begin{matrix}
+            ~~~~1 & ~~~~2\\
+            -\infty & -\infty
+        \end{matrix}\right) &
+        \left(\begin{matrix}
+            ~~~~2 & -\infty\\
+            -\infty & -\infty
+        \end{matrix}\right)
+    \end{matrix}\right)
+\end{align}
+
+We can 
+
+\section{benchmarks}
+We run a sequetial program benchmark on CPU Intel(R) Core(TM) i5-10400 CPU @ 2.90GHz, and show the results bellow.
+\begin{figure}
+    \centering
+    \includegraphics[width=0.8\textwidth, trim={0cm 0cm 0cm 0cm}, clip]{benchmark.pdf}
+    \caption{Benchmark results for computing different properties with different element types.
+    }\label{fig:benchmark}
+\end{figure}
+
 \section{discussion}
 We introduced in the main text how to compute the indenpendence polynomial, maximum independent set and optimal configurations.
 It is interesting that although these properties are global,
@@ -859,6 +986,7 @@ Its tensor network representation is
         }
 \end{tikzpicture}}
 
+Once we represent a $\delta$ tensor as a general tensor, the complexity of this contraction is $\approx 2^{2L}$.
 Its einsum network representation is
 
 \centerline{\begin{tikzpicture}
@@ -866,6 +994,7 @@ Its einsum network representation is
     \def\a{0.07}
     \def\L{0.6}
     \def\l{0.1}
+    \def\sql{0.24}
     \foreach \x in {1,...,5}
         \foreach \y in {1,...,5}{
         \node[fill, regular polygon, 

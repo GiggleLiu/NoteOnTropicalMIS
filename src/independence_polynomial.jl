@@ -9,6 +9,15 @@ misb(::Type{T}) where T = [one(T) one(T); one(T) zero(T)]
 # MIS vertex tensor
 misv(::Type{T}, val) where T = [one(T), convert(T, val)]
 
+function neighbortensor(x::T, d::Int) where T
+    t = zeros(T, fill(2, d)...)
+    for i = 2:1<<(d-1)
+        t[i] = one(T)
+    end
+    t[1<<(d-1)+1] = x
+    return t
+end
+
 function mis_contract(x::T, code; usecuda=false) where {T}
 	tensors = map(getixs(flatten(code))) do ix
         # if the tensor rank is 1, create a vertex tensor.
@@ -38,7 +47,7 @@ end
 
 function independence_polynomial(::Val{:polynomial}, code; usecuda=false)
     @assert !usecuda "Polynomial type can not be computed on GPU!"
-    asscalar(mis_contract(Polynomial([0, 1.0]), code))
+    mis_contract(Polynomial([0, 1.0]), code)
 end
 
 using Mods, Primes
@@ -81,4 +90,58 @@ end
 
 function improved_counting(sequences)
     map(yi->Mods.CRT(yi...), zip(sequences...))
+end
+
+export maximal_contract, maximal_code
+
+function idp_code(g::SimpleGraph; method=:kahypar, sc_target=17, max_group_size=40, nrepeat=10, imbalances=0.0:0.01:0.2)
+    code = EinCode(([minmax(e.src,e.dst) for e in LightGraphs.edges(g)]..., # labels for edge tensors
+                    [(i,) for i in LightGraphs.vertices(g)]...), ())        # labels for vertex tensors
+    size_dict = Dict([s=>2 for s in symbols(code)])
+    optcode = if method == :kahypar
+        optimize_kahypar(code, size_dict; sc_target=sc_target, max_group_size=max_group_size, imbalances=imbalances)
+    elseif method == :greedy
+        optimize_greedy(code, size_dict; nrepeat=nrepeat)
+    else
+        ArgumentError("optimizer `$method` not defined.")
+    end
+    println("time/space complexity is $(OMEinsum.timespace_complexity(optcode, size_dict))")
+    return optcode
+end
+
+function maximal_code(g::SimpleGraph; method=:kahypar, sc_target=17, max_group_size=40, nrepeat=10, imbalances=0.0:0.01:0.5)
+    code = EinCode(([(LightGraphs.neighbors(g, v)..., v) for v in LightGraphs.vertices(g)]...,), ())
+    size_dict = Dict([s=>2 for s in symbols(code)])
+    optcode = if method == :kahypar
+        optimize_kahypar(code, size_dict; sc_target=sc_target, max_group_size=max_group_size, imbalances=imbalances)
+    elseif method == :greedy
+        optimize_greedy(code, size_dict; nrepeat=nrepeat)
+    else
+        ArgumentError("optimizer `$method` not defined.")
+    end
+    println("time/space complexity is $(OMEinsum.timespace_complexity(optcode, size_dict))")
+    return optcode
+end
+
+function maximal_contract(optcode::NestedEinsum, x::T; usecuda=false) where T
+    ixs = OMEinsum.getixs(OMEinsum.flatten(optcode))
+	tensors = map(ixs) do ix
+        t = neighbortensor(x, length(ix))
+        usecuda ? CuArray(t) : t
+    end
+	optcode(tensors...)
+end
+
+function maximal_polynomial(::Val{:fft}, g; usecuda=false, mis_size=run_task(g, :maxsize; usecuda=usecuda)[].n, r=1.0, kwargs...)
+	ω = exp(-2im*π/(mis_size+1))
+	xs = r .* collect(ω .^ (0:mis_size))
+    optcode = maximal_code(g; kwargs...)
+	ys = [OMEinsum.asscalar(maximal_contract(optcode, x; usecuda=usecuda)) for x in xs]
+	Polynomial(ifft(ys) ./ (r .^ (0:mis_size)))
+end
+
+function maximal_polynomial(::Val{:polynomial}, g; usecuda=false, kwargs...)
+    @assert !usecuda "Polynomial type can not be computed on GPU!"
+    optcode = maximal_code(g; kwargs...)
+    maximal_contract(optcode, Polynomial([0, 1.0]))
 end
