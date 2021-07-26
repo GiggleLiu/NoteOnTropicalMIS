@@ -1,6 +1,12 @@
 using NoteOnTropicalMIS, Test, OMEinsum, OMEinsumContractionOrders
 using Mods, Polynomials, TropicalNumbers
-using LightGraphs, Random
+using LightGraphs, Random, FFTW
+
+@testset "ifft" begin
+    x = randn(ComplexF32, 10)
+    @test NoteOnTropicalMIS.ifft(copy(x)) ≈ ifft(x)
+    @test NoteOnTropicalMIS.fft(copy(x)) ≈ fft(x)
+end
 
 @testset "bond and vertex tensor" begin
     @test misb(TropicalF64) == [TropicalF64(0) TropicalF64(0); TropicalF64(0) TropicalF64(-Inf)]
@@ -48,12 +54,14 @@ end
     g = random_regular_graph(20, 3)
     cs = maximal_polynomial(Val(:fft), g; r=1.0, method=:greedy)
     cs2 = maximal_polynomial(Val(:polynomial), g; method=:greedy)[]
+    cs3 = maximal_polynomial(Val(:finitefield), g; method=:greedy)
     cg = complement(g)
     cliques = maximal_cliques(cg)
     for i=1:20
         c = count(x->length(x)==i, cliques)
         if c > 0
             @test cs2.coeffs[i+1] == c
+            @test cs3.coeffs[i+1] == c
             @test cs.coeffs[i+1] ≈ c
         end
     end

@@ -31,7 +31,6 @@ end
 mis_size(code; usecuda=false) = Int(asscalar(mis_contract(TropicalF64(1.0), code; usecuda=usecuda)).n)
 mis_count(code; usecuda=false) = asscalar(mis_contract(CountingTropical{Float64,Float64}(1.0, 1.0), code; usecuda=usecuda)).c
 
-using FFTW
 function independence_polynomial(::Val{:fft}, code; mis_size=mis_size(code), r=1.0, usecuda=false)
 	ω = exp(-2im*π/(mis_size+1))
 	xs = r .* collect(ω .^ (0:mis_size))
@@ -56,17 +55,23 @@ using Mods, Primes
 Base.abs(x::Mod) = x
 Base.isless(x::Mod{N}, y::Mod{N}) where N = mod(x.val, N) < mod(y.val, N)
 
-function _independance_polynomial(::Type{T}, code, mis_size::Int; usecuda) where T
+function _polynomial_single(which, ::Type{T}, code, mis_size::Int; usecuda) where T
 	xs = 0:mis_size
-	ys = [asscalar(mis_contract(T(x), code; usecuda=usecuda)) for x in xs]
+	ys = [asscalar(_polycon(which, T, x, code, usecuda)) for x in xs]
 	A = zeros(T, mis_size+1, mis_size+1)
 	for j=1:mis_size+1, i=1:mis_size+1
 		A[j,i] = T(xs[j])^(i-1)
 	end
 	A \ T.(ys)
 end
+_polycon(::Val{:idp}, ::Type{T}, x, code, usecuda) where T = mis_contract(T(x), code; usecuda=usecuda)
+_polycon(::Val{:maximal}, ::Type{T}, x, code, usecuda) where T = maximal_contract(T(x), code; usecuda=usecuda)
 
 function independence_polynomial(::Val{:finitefield}, code; mis_size=mis_size(code), max_order=100, usecuda=false)
+    _polynomial(Val(:idp), Val(:finitefield), code; mis_size=mis_size, max_order=max_order, usecuda=usecuda)
+end
+
+function _polynomial(which, ::Val{:finitefield}, code; mis_size=mis_size(code), max_order=100, usecuda=false)
     TI = Int32  # Int 32 is faster
     N = typemax(TI)
     YS = []
@@ -74,7 +79,7 @@ function independence_polynomial(::Val{:finitefield}, code; mis_size=mis_size(co
     for k = 1:max_order
 	    N = prevprime(N-TI(1))
         T = Mods.Mod{N,TI}
-        rk = _independance_polynomial(T, code, mis_size; usecuda=usecuda)
+        rk = _polynomial_single(which, T, code, mis_size; usecuda=usecuda)
         push!(YS, rk)
         if max_order==1
             return Polynomial(Mods.value.(YS[1]))
@@ -92,7 +97,9 @@ function improved_counting(sequences)
     map(yi->Mods.CRT(yi...), zip(sequences...))
 end
 
-export maximal_contract, maximal_code
+using LightGraphs
+
+export maximal_polynomial, maximal_code, idp_code
 
 function idp_code(g::SimpleGraph; method=:kahypar, sc_target=17, max_group_size=40, nrepeat=10, imbalances=0.0:0.01:0.2)
     code = EinCode(([minmax(e.src,e.dst) for e in LightGraphs.edges(g)]..., # labels for edge tensors
@@ -111,6 +118,26 @@ end
 
 function maximal_code(g::SimpleGraph; method=:kahypar, sc_target=17, max_group_size=40, nrepeat=10, imbalances=0.0:0.01:0.5)
     code = EinCode(([(LightGraphs.neighbors(g, v)..., v) for v in LightGraphs.vertices(g)]...,), ())
+    #=
+    ixs = []
+    s0 = 10000
+    for v in LightGraphs.vertices(g)
+        vs = [LightGraphs.neighbors(g, v)..., v]
+        if false # length(vs) > 3
+            spre = vs[1]
+            for j=1:length(vs)-2
+                vj = (spre, vs[j+1], j==length(vs)-2 ? vs[j+2] : s0)
+                spre = s0
+                s0 += 1
+                @show vj
+                push!(ixs, vj)
+            end
+        else
+            push!(ixs, (vs...,))
+        end
+    end
+    code = EinCode((ixs...,), ())
+    =#
     size_dict = Dict([s=>2 for s in symbols(code)])
     optcode = if method == :kahypar
         optimize_kahypar(code, size_dict; sc_target=sc_target, max_group_size=max_group_size, imbalances=imbalances)
@@ -123,7 +150,7 @@ function maximal_code(g::SimpleGraph; method=:kahypar, sc_target=17, max_group_s
     return optcode
 end
 
-function maximal_contract(optcode::NestedEinsum, x::T; usecuda=false) where T
+function maximal_contract(x::T, optcode::NestedEinsum; usecuda=false) where T
     ixs = OMEinsum.getixs(OMEinsum.flatten(optcode))
 	tensors = map(ixs) do ix
         t = neighbortensor(x, length(ix))
@@ -136,12 +163,66 @@ function maximal_polynomial(::Val{:fft}, g; usecuda=false, mis_size=run_task(g, 
 	ω = exp(-2im*π/(mis_size+1))
 	xs = r .* collect(ω .^ (0:mis_size))
     optcode = maximal_code(g; kwargs...)
-	ys = [OMEinsum.asscalar(maximal_contract(optcode, x; usecuda=usecuda)) for x in xs]
+	ys = [OMEinsum.asscalar(maximal_contract(x, optcode; usecuda=usecuda)) for x in xs]
 	Polynomial(ifft(ys) ./ (r .^ (0:mis_size)))
 end
 
 function maximal_polynomial(::Val{:polynomial}, g; usecuda=false, kwargs...)
     @assert !usecuda "Polynomial type can not be computed on GPU!"
     optcode = maximal_code(g; kwargs...)
-    maximal_contract(optcode, Polynomial([0, 1.0]))
+    maximal_contract(Polynomial([0, 1.0]), optcode)
 end
+
+function maximal_polynomial(::Val{:finitefield}, g; max_order=100, usecuda=false, kwargs...)
+    optcode = maximal_code(g; kwargs...)
+    ms = mis_size(idp_code(g; kwargs...))
+    @show ms
+    _polynomial(Val(:maximal), Val(:finitefield), optcode; mis_size=ms, max_order=max_order, usecuda=usecuda)
+end
+
+# check: https://math.stackexchange.com/questions/77118/non-power-of-2-ffts
+function fft(x, m=length(x), w= exp(-2im * π / m), a=1)
+    # Translated from GNU Octave's czt.m
+    n = length(x)
+    chirp = w .^ ((1-n:max(m, n)-1) .^ 2 ./ 2.0)
+    N2 = 2 ^ ceil(Int, log2(m + n - 1))  # next power of 2
+    xp = vcat(x .* a .^ (n-1:-1:0) .* chirp[n:2n-1], zeros(N2 - n))
+    ichirpp = vcat(1 ./ chirp[1:m+n-1], zeros(N2 - (m + n - 1)))
+    r = _ifft!(_fft!(xp) .* _fft!(ichirpp))
+    return r[n:m+n-1] .* chirp[n: m+n-1]
+end
+
+# https://rosettacode.org/wiki/Fast_Fourier_transform#Fortran
+# In place Cooley-Tukey FFT
+function _fft!(x::AbstractVector{T}) where T
+    N = length(x)
+    @inbounds if N <= 1
+        return x
+    elseif N == 2
+        t =  x[2]
+        oi = x[1]
+        x[1]     = (oi + t)
+        x[2]     = (oi - t)
+        return x
+    end
+ 
+    # divide
+    odd  = x[1:2:N]
+    even = x[2:2:N]
+ 
+    # conquer
+    _fft!(odd)
+    _fft!(even)
+ 
+    # combine
+    @inbounds for i=1:N÷2
+       t = exp(-T(2im*π*(i-1)/N)) * even[i]
+       oi = odd[i]
+       x[i]     = (oi + t)
+       x[i+N÷2] = (oi - t)
+    end
+    return x
+end
+
+_ifft!(x::AbstractVector{T}) where T = (x .= conj.(x); res = _fft!(x); res./=length(x); res .= conj.(res); res)
+ifft(x::AbstractVector{T}) where T = (x .= conj.(x); res = fft(x); res./=length(x); res .= conj.(res); res)

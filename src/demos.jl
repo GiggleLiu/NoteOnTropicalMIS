@@ -19,6 +19,14 @@ function case_dc(L::Int, ρ; sc_target, seed=2)
     return optcode
 end
 
+function case_sq(L::Int, ρ; sc_target, seed=2)
+    # generate a random regular graph of size 100, degree 3
+    Random.seed!(seed)
+    graph = square_lattice_graph(rand(L, L) .< ρ)
+    # optimize the contraction order using KaHyPar + Greedy, target space complexity is 2^20
+    optcode = idp_code(graph; method=:kahypar, sc_target=sc_target, max_group_size=40)
+    return optcode
+end
 
 """
     run_task(code, task; usecuda=false)

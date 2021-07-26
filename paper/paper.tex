@@ -586,6 +586,37 @@ Let the mask for $C$ being $\overline C$, the backward rule for gradient masks r
 where ${}^{\circ -1}$ is the Hadamard inverse, $\circ$ is the Hadamard product, boolean false is treated as tropical zero and boolean true is treated as tropical one.
 This rule defined on matrix multiplication can be easily generalized to the einsum of two tensors by replacing the matrix multiplication between $C^{\circ-1} \circ \overline C$ and $B^T$ by an einsum.
 
+\section{Counting maximal independent sets}
+Let us denote the neighbor of a vertex $v$ as $N(v)$ and $N[v] = N(v)\cup \{v\}$.
+A maximal independent set $I_m$ is an independent sets that there is no such vertex $v$ that $N[v] \cap I_m = \emptyset$.
+Let us modify the einsum network for computing independence polynomial to count maximal independent sets.
+We define a tensor on $N[v]$ to capture this property
+\begin{align}
+    T(x)_{s_1,s_2,\ldots,s_{|N(v)|},s_v} = \begin{cases}
+        s_vx & s_1=s_2=\ldots=s_{|N(v)|}=0,\\
+        1-s_v& otherwise.\\
+    \end{cases}
+\end{align}
+As an example, for a vertex of degree 2, the resulting rank 3 tensor is
+\begin{align}
+    T(x)=\left(\begin{matrix}
+    \left(\begin{matrix}
+        0 &1 \\
+        1 &1
+    \end{matrix}\right)\\
+    \left(\begin{matrix}
+        x &0 \\
+        0 &0
+    \end{matrix}\right)
+    \end{matrix}\right).
+\end{align}
+
+We do the same computation as independence polynoimal, the coefficients of resulting polynomial gives the counting of maximal independent sets.
+In many sparse graphs, this tensor network contraction approach is much faster than computing the maximal cliques of its complement and use Bron Kerbosch algorithms for finding maximum cliques.
+However, the treewidth of this new tensor network is larger than the one for independence polynomial because it can not utilize some structures of the original graph,
+while the original tensor network can be trivially reduced to this one.
+We will use an example in the appendix to show why this tensor network is harder to contract.
+
 \section{Automated branching}
 % check http://www.tcs.rwth-aachen.de/independentset/ for more rules
 Branching rules can be automatically discovered by contracting the tropical einsum network for a subgraph $R \subseteq G$.

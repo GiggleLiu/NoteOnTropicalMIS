@@ -1,6 +1,7 @@
 using LightGraphs, OMEinsumContractionOrders
 export random_regular_graph, diagonal_coupled_graph, isindependentset
 export random_regular_eincode, random_diagonal_coupled_eincode, diagonal_coupled_eincode
+export square_lattice_graph
 
 isindependentset(g, v) = !any(e->v[e.src] == 1 && v[e.dst] == 1, edges(g))
 
@@ -11,6 +12,11 @@ end
 function OMEinsum.EinCode(g::SimpleGraph; outputs=())
 	ixs = [minmax(e.src,e.dst) for e in LightGraphs.edges(g)]
 	return EinCode((ixs..., [(i,) for i in LightGraphs.vertices(g)]...), outputs)
+end
+
+function square_lattice_graph(mask::AbstractMatrix{Bool})
+    locs = [(i, j) for i=1:size(mask, 1), j=1:size(mask, 2) if mask[i,j]]
+    unitdisk_graph(locs, 1.1)
 end
 
 function random_diagonal_coupled_graph(m::Int, n::Int, ρ::Real)
