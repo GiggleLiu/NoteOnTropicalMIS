@@ -8,39 +8,38 @@ using NoteOnTropicalMIS, Polynomials, Random, OMEinsum
 using DelimitedFiles
 using NoteOnTropicalMIS.OMEinsum
 
-function mis_maximal_counting(n, seed, round; writefile=false, rs, sc_target=24)
-    folder = joinpath("/home/leo/.julia/dev/TropicalMIS/", "project", "data")
-    if round == 'A'
-        fname = joinpath(folder, "atom_configuration_$(n)x$(n)_$seed.txt")
-    elseif round == 'B'
-        fname = joinpath(folder, "MISGraph_$(n)x$(n)_5.3x5.3_$seed.txt")
+# patch
+using GPUArrays, CUDA, LinearAlgebra
+function LinearAlgebra.permutedims!(dest::AbstractGPUArray, src::AbstractGPUArray,
+                                    perm::NTuple)
+    Base.checkdims_perm(dest, src, perm)
+    function permutedims_kernel(ctx, dest, src, perm)
+        I = @cartesianidx src
+        @inbounds begin
+            J = CartesianIndex(map(i->I[i], perm))
+            dest[J] = src[I]
+        end
+        return
     end
-    mask = Matrix{Bool}(readdlm(fname))
-    g = diagonal_coupled_graph(mask)
-    println("Graph $seed")
-    for r in rs
-        res = maximal_polynomial(Val(:fft), g; sc_target=sc_target, imbalances=0.0:0.002:1.0, max_group_size=50, r=r)
-        ofname = joinpath(folder, "maximal_counting_$(n)x$(n)_5.3x5.3_$(seed)_r$(r).dat")
-        writefile && writedlm(ofname, res.coeffs)
-    end
+    gpu_call(permutedims_kernel, dest, src, perm)
+    return dest
 end
 
-if false
-    mis_maximal_counting(15, 1, 'A')
-    mis_maximal_counting(15, 3, 'A')
-    mis_maximal_counting(13, 1, 'A')
-    mis_maximal_counting(13, 3, 'A')
-else
-    #for n in [7, 10], seed in 1:6
-    #    mis_maximal_counting(n, seed, 'B'; writefile=true, rs=[1.0])
-    #end
-    for n in [13], seed in [1, 2, 3, "Easy_1", "Medium_1", "Hard_1"]
-        mis_maximal_counting(n, seed, 'B', writefile=true)
-    end
-    #for n in [13, 15], seed in [1, 2, 3, "Easy_1", "Medium_1", "Hard_1"]
-    #    mis_maximal_counting(n, seed, 'B', writefile=true)
-    #end
-    #for n in [15], seed in ["Wang"]
-    #    mis_maximal_counting(n, seed, 'B', writefile=true)
-    #end
+function mis_maximal_counting(n, ρ, ; writefile=false, sc_target=24, usecuda=false, folder=".")
+    mask = rand(n, n) .< ρ
+    g = diagonal_coupled_graph(mask)
+    println("Graph n=$n, ρ=$ρ")
+    #res = maximal_polynomial(Val(:fft), g; sc_target=sc_target, imbalances=0.0:0.002:1.0, max_group_size=50, usecuda=usecuda, r=3.0)
+    res = maximal_polynomial(Val(:finitefield), g; sc_target=sc_target, imbalances=0.0:0.002:1.0, max_group_size=50, usecuda=usecuda)
+    ofname = joinpath(folder, "maximal_counting_$(n)x$(n)_rho$ρ.dat")
+    writefile && writedlm(ofname, res.coeffs)
 end
+
+const DEVICE = length(ARGS) >= 1 ? parse(Int, ARGS[1]) : -1
+
+if DEVICE >= 0
+    using CUDA
+    CUDA.device!(DEVICE)
+end
+
+#mis_maximal_counting(15, 0.8, writefile=true, usecuda=DEVICE>=0, sc_target=26)
