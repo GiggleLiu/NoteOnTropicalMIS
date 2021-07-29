@@ -23,4 +23,5 @@ output/
 *.out
 *.xdv
 *.swp
+*.thm
 Manifest.toml
