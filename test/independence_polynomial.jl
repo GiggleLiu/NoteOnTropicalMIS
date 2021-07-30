@@ -66,3 +66,11 @@ end
         end
     end
 end
+
+@testset "match polynomial" begin
+    g = SimpleGraph(7)
+    for (i,j) in [(1,2),(2,3),(3,4),(4,5),(5,6),(6,1),(1,7)]
+        add_edge!(g, i, j)
+    end
+    @test match_polynomial(Val(:polynomial), g)[] == Polynomial([1,7,13,5])
+end

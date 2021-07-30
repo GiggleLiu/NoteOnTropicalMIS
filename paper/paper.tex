@@ -218,10 +218,21 @@ Listing \thelstlisting: #1\hfill%\hfill%
     We show how to obtain the maximum independent set size, the independence polynomial and optimal configurations of a graph by engineering the tensor element algebra.
 \end{abstract}
 
+% REQUIRED
+\begin{keywords}
+  maximum independent set, einsum network
+\end{keywords}
+
+% REQUIRED
+% 14N07  	Secant varieties, tensor rank, varieties of sums of powers
+\begin{AMS}
+  05C31, 14N07
+\end{AMS}
+
 \section{Introduction}
 MIS problem is hard~\cite{Hastad1996}.
 Branching algorithms can solve the MIS problem in $1.1893^n n ^{O(1)}$ time ~\cite{Xiao2017}.
-Previous dynamic programming approach~\cite{Fomin2013} can reduce the complexity of computing to $2^{tw(G)}$.
+Previous dynamic programming approach~\cite{Fomin2013} can reduce the complexity of computing to $O(2^{tw(G)}tw(G)n)$.
 A set is independent if and only if it is a clique in the graph's complement, so the two concepts are complementary.
 A set is independent if and only if its complement is a vertex cover. Therefore, the sum of the size of the largest independent set $\alpha (G)$ and the size of a minimum vertex cover $\beta (G)$ is equal to the number of vertices in the graph.
 It is related to hard spheres lattice gas model~\cite{Dyre2016}, and Rydberg hamiltonian~\cite{Pichler2018}.
@@ -1048,5 +1059,30 @@ Its einsum network representation is
             \filldraw[fill=black] (\y+0.3-\a,\x+0.7-\a) rectangle (\y+0.3+\a, \x+0.7+\a);
         }
 \end{tikzpicture}}
+
+\section{matching polynomial}
+One can generalize the generic einsum network for solving another \#P-complete problem, the matching polynomials.
+A match polynomial of a graph $G$ is defined as
+\begin{align}
+    M(G, x) = \sum\limits_{k=1}^{|V|/2} c_k x^k,
+\end{align}
+where $k$ is the number of matches, and coefficients $c_k$ are countings.
+
+We define a tensor of rank $d(v) = |N(v)|$ on vertex $v$ such that,
+\begin{align}
+    W_{v\rightarrow n_1, v\rightarrow n_2, \ldots, v\rightarrow n_{d(v)}} = \begin{cases}
+        1, & \sum_{i=1}^{d(v)} v\rightarrow n_i \leq 1,\\
+        0, & otherwise,
+    \end{cases}
+\end{align}
+and a tensor of rank $1$ on the bond
+\begin{align}
+    B_{v\rightarrow w} = \begin{cases}
+    1, & v \rightarrow w = 0 \\
+    x, & v \rightarrow w = 1.
+\end{cases}
+\end{align}
+
+Here, we use bond index $v \rightarrow w$ to label tensors.
 
 \end{document}
