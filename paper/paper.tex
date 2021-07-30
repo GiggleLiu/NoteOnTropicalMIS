@@ -1,10 +1,7 @@
-%\documentclass[aps,twocolumn,longbibliography,english,superscriptaddress]{revtex4-1}
-\documentclass{article}
-%\usepackage{iclr2021_conference}
-\usepackage{natbib}
-%\documentclass[a4paper,superscriptaddress,11pt]{article}
+\documentclass[review,onefignum,onetabnum]{siamart190516}
+%\usepackage{natbib}
 \pdfoutput=1
-\usepackage[colorlinks=true,urlcolor=blue,citecolor=blue,linkcolor=blue]{hyperref}
+%\usepackage[colorlinks=true,urlcolor=blue,citecolor=blue,linkcolor=blue]{hyperref}
 \usepackage[english]{babel}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
@@ -18,8 +15,8 @@
 \usetikzlibrary{shapes}
 \usepackage{wrapfig}
 %\usepackage{caption}
-%\usepackage[plain]{algorithm}
-\usepackage[linesnumbered, ruled, vlined]{algorithm2e}
+%\usepackage[plain]{algorithmic}
+\usepackage[linesnumbered, ruled, vlined, algo2e]{algorithm2e}
 \usepackage{algpseudocode}
 \usepackage{rotating}
 %\usepackage{cite}
@@ -38,7 +35,7 @@
 \usepackage{bbm}
 \usepackage{jlcode}
 \usepackage{graphicx}
-\usepackage{amsmath,color,amsthm}
+\usepackage{amsmath,color}
 \usepackage{mathrsfs}
 \usepackage{float}
 \usepackage[normalem]{ulem}
@@ -149,7 +146,6 @@ Listing \thelstlisting: #1\hfill%\hfill%
 \newcommand{\thetai}{{\theta^\alpha_l}}
 \newcommand{\Expect}{{\mathbb{E}}}
 \newcommand{\Tr}{{\rm Tr}}
-\renewcommand{\cite}[1]{{\citep{#1}}}
 \newcommand{\etc}{{\it etc~}}
 \newcommand{\etal}{{\it etal~}}
 \newcommand{\xset}{\mathbf{X}}
@@ -194,41 +190,54 @@ Listing \thelstlisting: #1\hfill%\hfill%
 \newcommand{\material}[1]{\iffalse[{\bf  \color{cyan}{Material: #1}}]\fi}
 \newcommand{\orange}[1]{\iffalse[{\bf  \color{orange}{Jo: #1}}]\fi}
 
-\newtheorem{theorem}{\textit{Theorem}}
-\newtheorem{corollary}{\textit Branching Rule}
-\theoremstyle{definition}\newtheorem{definition}{\textit{Definition}}
+%\newtheorem{theorem}{\textit{Theorem}}
+%\newtheorem{corollary}{\textit Branching Rule}
+%\theoremstyle{definition}\newtheorem{definition}{\textit{Definition}}
+%\newtheorem{defin}[thm]{Definition}
 
 \makeatother
 
-%\iclrfinalcopy
-\begin{document}
-\title{Solving the maximum independant set problem by generic programming einsum networks}
+%\externaldocument{ex_supplement}
 
-%\author{Jin-Guo Liu\\
-%Harvard University\\
-%\texttt{jinguoliu@g.harvard.edu}\\
-%\AND
-%Xun Gao\\
-%Harvard University\\
-%\texttt{xungao@g.harvard.edu}\\
-%}
+\title{Solving the maximum independant set problem by generic programming einsum networks
+\thanks{\funding{...}}
+}
+
+\author{XXX\thanks{XXX 
+  (\email{email}, \url{website}).}
+\and YYY\thanks{yyyyy 
+  (\email{yyyy}, \email{email}).}
+}
+
+\begin{document}
+
 \maketitle
 
 \begin{abstract}
 	Solving the maximum independent set size problem by mapping the graph to an einsum network. 
-    By contracting the einsum network with generic element types, we show how to obtain the maximum independent set size,
-    the independence polynomial and optimal configurations.
+    We show how to obtain the maximum independent set size, the independence polynomial and optimal configurations of a graph by engineering the tensor element algebra.
 \end{abstract}
+
+% REQUIRED
+\begin{keywords}
+  maximum independent set, einsum network
+\end{keywords}
+
+% REQUIRED
+% 14N07  	Secant varieties, tensor rank, varieties of sums of powers
+\begin{AMS}
+  05C31, 14N07
+\end{AMS}
 
 \section{Introduction}
 MIS problem is hard~\cite{Hastad1996}.
 Branching algorithms can solve the MIS problem in $1.1893^n n ^{O(1)}$ time ~\cite{Xiao2017}.
-Previous dynamic programming approach~\cite{Fomin2013} can reduce the complexity of computing to $2^{tw(G)}$.
+Previous dynamic programming approach~\cite{Fomin2013} can reduce the complexity of computing to $O(2^{tw(G)}tw(G)n)$.
 A set is independent if and only if it is a clique in the graph's complement, so the two concepts are complementary.
-A set is independent if and only if its complement is a vertex cover.[4] Therefore, the sum of the size of the largest independent set $\alpha (G)$ and the size of a minimum vertex cover $\beta (G)$ is equal to the number of vertices in the graph.
+A set is independent if and only if its complement is a vertex cover. Therefore, the sum of the size of the largest independent set $\alpha (G)$ and the size of a minimum vertex cover $\beta (G)$ is equal to the number of vertices in the graph.
+It is related to hard spheres lattice gas model~\cite{Dyre2016}, and Rydberg hamiltonian~\cite{Pichler2018}.
 
-\section{A short introduction to einsum networks}
-
+In this work, we attack this problem by mapping it to an ``einsum'' network.
 The word ``einsum'' is a shorthand for Einstein's summation, however, modern einsum notation in program is actually invented by a group of programmers.
 Einstein's notation is originally proposed as a generalization to of multiplication between two matrices to the contraction between multiple tensors.
 Let $A, B$ be two matrices, the matrix multiplication is defined as $C_{ik} = \sum_{j}A_{ij}B_{jk}$.
@@ -497,11 +506,16 @@ In the algorithm, except the computation of chinese remainder theorem, all compu
     \SetAlgoNoLine
     \LinesNumbered
     Let $P = 1$, vector $X = (0,1,2,\ldots,m)$, matrix $\hat X_{ij} = X_i^j$, where $i,j = 0, 1, \ldots m$\;
+
     \While{true}{
         compute the largest prime $p$ that $\gcd(p, P) = 1 \land p \leq 2^W$\;
+
         compute the tensor network contraction on $GF(p)$ and obtain $Y = (y_0, y_1, \ldots , y_m) \pmod p $\;
+
         $A_p = (a_0, a_1, \ldots, a_m) \pmod p = {\rm gaussian\_elimination}(\hat X, Y \pmod p) $\;
+
         $A_{P\times p} = {\rm chinese\_remainder}(A_P, A_p)$\;
+
         \If{$A_P = A_{P \times p}$}{
             \Return $A_P$ \tcp*[l]{converged}
         }
@@ -651,7 +665,7 @@ Hence, we can set $A_{\sigma_b}$ to tropical zero safely.
     \caption{Two configurations with the same local independent size $A_{\sigma_a} = A_{\sigma_b} = 3$ and different boundary configurations (a) $\sigma_a=\{001\}$ and (b) $\sigma_b = \{101\}$, where black nodes are $1$s (in the independent set) and white nodes are $0$s (not in the independent set).}\label{fig:compressrule}
 \end{figure}
 
-\begin{theorem}
+\begin{theorem}[]
     A MIS-compact tropical tensor is optimal, i.e. none of its none zero entries can be removed without accessing global information.
 \end{theorem}
 
@@ -942,7 +956,7 @@ Furthermore, these inlined arrays can be upload to GPU devices for faster generi
 \end{table}
 
 
-\bibliographystyle{iclr2021_conference}
+\bibliographystyle{siamplain}
 \bibliography{refs}
 
 \appendix
@@ -1045,5 +1059,30 @@ Its einsum network representation is
             \filldraw[fill=black] (\y+0.3-\a,\x+0.7-\a) rectangle (\y+0.3+\a, \x+0.7+\a);
         }
 \end{tikzpicture}}
+
+\section{matching polynomial}
+One can generalize the generic einsum network for solving another \#P-complete problem, the matching polynomials.
+A match polynomial of a graph $G$ is defined as
+\begin{align}
+    M(G, x) = \sum\limits_{k=1}^{|V|/2} c_k x^k,
+\end{align}
+where $k$ is the number of matches, and coefficients $c_k$ are countings.
+
+We define a tensor of rank $d(v) = |N(v)|$ on vertex $v$ such that,
+\begin{align}
+    W_{v\rightarrow n_1, v\rightarrow n_2, \ldots, v\rightarrow n_{d(v)}} = \begin{cases}
+        1, & \sum_{i=1}^{d(v)} v\rightarrow n_i \leq 1,\\
+        0, & otherwise,
+    \end{cases}
+\end{align}
+and a tensor of rank $1$ on the bond
+\begin{align}
+    B_{v\rightarrow w} = \begin{cases}
+    1, & v \rightarrow w = 0 \\
+    x, & v \rightarrow w = 1.
+\end{cases}
+\end{align}
+
+Here, we use bond index $v \rightarrow w$ to label tensors.
 
 \end{document}

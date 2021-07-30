@@ -44,7 +44,9 @@ function mis_config(code; all=false, bounding=true, usecuda=false)
         throw(ArgumentError("ConfigEnumerator can not be computed on GPU!"))
     end
     flatten_code = flatten(code)
-    vertex_index = Dict([s=>i for (i, s) in enumerate(symbols(flatten_code))])
+    syms = unique(Iterators.flatten(filter(x->length(x)==1,OMEinsum.getixs(flatten_code))))
+    vertex_index = Dict([s=>i for (i, s) in enumerate(syms)])
+    @show syms
     N = length(vertex_index)
     C = TropicalNumbers._nints(N)
     xs = map(getixs(flatten_code)) do ix

@@ -1,7 +1,7 @@
 using Polynomials
 using OMEinsum: NestedEinsum, getixs, getiy
 
-export independence_polynomial
+export independence_polynomial, match_polynomial
 export misb, misv, mis_size, mis_count, mis_contract
 
 # MIS bond tensor
@@ -104,40 +104,21 @@ export maximal_polynomial, maximal_code, idp_code
 function idp_code(g::SimpleGraph; method=:kahypar, sc_target=17, max_group_size=40, nrepeat=10, imbalances=0.0:0.01:0.2)
     code = EinCode(([minmax(e.src,e.dst) for e in LightGraphs.edges(g)]..., # labels for edge tensors
                     [(i,) for i in LightGraphs.vertices(g)]...), ())        # labels for vertex tensors
-    size_dict = Dict([s=>2 for s in symbols(code)])
-    optcode = if method == :kahypar
-        optimize_kahypar(code, size_dict; sc_target=sc_target, max_group_size=max_group_size, imbalances=imbalances)
-    elseif method == :greedy
-        optimize_greedy(code, size_dict; nrepeat=nrepeat)
-    else
-        ArgumentError("optimizer `$method` not defined.")
-    end
-    println("time/space complexity is $(OMEinsum.timespace_complexity(optcode, size_dict))")
-    return optcode
+    _optimize_code(code, method, sc_target, max_group_size, nrepeat, imbalances)
+end
+
+function match_code(g::SimpleGraph; method=:kahypar, sc_target=17, max_group_size=40, nrepeat=10, imbalances=0.0:0.01:0.2)
+    code = EinCode(([(minmax(e.src,e.dst),) for e in LightGraphs.edges(g)]..., # labels for edge tensors
+                    [([minmax(i,j) for j in neighbors(g, i)]...,) for i in LightGraphs.vertices(g)]...,), ())        # labels for vertex tensors
+    _optimize_code(code, method, sc_target, max_group_size, nrepeat, imbalances)
 end
 
 function maximal_code(g::SimpleGraph; method=:kahypar, sc_target=17, max_group_size=40, nrepeat=10, imbalances=0.0:0.01:0.5)
     code = EinCode(([(LightGraphs.neighbors(g, v)..., v) for v in LightGraphs.vertices(g)]...,), ())
-    #=
-    ixs = []
-    s0 = 10000
-    for v in LightGraphs.vertices(g)
-        vs = [LightGraphs.neighbors(g, v)..., v]
-        if false # length(vs) > 3
-            spre = vs[1]
-            for j=1:length(vs)-2
-                vj = (spre, vs[j+1], j==length(vs)-2 ? vs[j+2] : s0)
-                spre = s0
-                s0 += 1
-                @show vj
-                push!(ixs, vj)
-            end
-        else
-            push!(ixs, (vs...,))
-        end
-    end
-    code = EinCode((ixs...,), ())
-    =#
+    _optimize_code(code, method, sc_target, max_group_size, nrepeat, imbalances)
+end
+
+function _optimize_code(code, method, sc_target, max_group_size, nrepeat, imbalances)
     size_dict = Dict([s=>2 for s in symbols(code)])
     optcode = if method == :kahypar
         optimize_kahypar(code, size_dict; sc_target=sc_target, max_group_size=max_group_size, imbalances=imbalances)
@@ -177,6 +158,38 @@ function maximal_polynomial(::Val{:finitefield}, g; max_order=100, usecuda=false
     optcode = maximal_code(g; kwargs...)
     ms = mis_size(idp_code(g; kwargs...))
     _polynomial(Val(:maximal), Val(:finitefield), optcode; mis_size=ms, max_order=max_order, usecuda=usecuda)
+end
+
+function match_contract(n::Int, x::T, optcode::NestedEinsum; usecuda=false) where T
+    ixs = OMEinsum.getixs(OMEinsum.flatten(optcode))
+    tensors = []
+    for i=1:length(ixs)
+        if i<=n
+            @assert length(ixs[i]) == 1
+            t = T[one(T), x]
+        else
+            t = match_tensor(T, length(ixs[i]))
+        end
+        push!(tensors, usecuda ? CuArray(t) : t)
+    end
+    @show ndims.(tensors)
+	optcode(tensors...)
+end
+
+function match_tensor(::Type{T}, n::Int) where T
+    t = zeros(T, fill(2, n)...)
+    for ci in CartesianIndices(t)
+        if sum(ci.I .- 1) <= 1
+            t[ci] = one(T)
+        end
+    end
+    return t
+end
+
+function match_polynomial(::Val{:polynomial}, g; usecuda=false, kwargs...)
+    @assert !usecuda "Polynomial type can not be computed on GPU!"
+    optcode = match_code(g; kwargs...)
+    match_contract(nv(g), Polynomial([0, 1.0]), optcode)
 end
 
 # check: https://math.stackexchange.com/questions/77118/non-power-of-2-ffts

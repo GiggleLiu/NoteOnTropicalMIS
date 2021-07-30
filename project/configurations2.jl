@@ -34,6 +34,6 @@ for seed in [0, 2, 4, 9, 50]
     @time mis_configurations(10, seed; writefile=true)
 end
 
-for seed in [26, 40, 339, 542, 339, 8, 13, 25, 89, 108, 138]
+for seed in  [4, 6, 7, 17] #[26, 40, 339, 339, 8, 13, 25, 89, 108, 138]
     @time mis_configurations(15, seed; writefile=true, sc_target=16)
 end
