@@ -156,7 +156,7 @@ function maximal_contract(x::T, optcode::NestedEinsum; usecuda=false) where T
         t = neighbortensor(x, length(ix))
         usecuda ? CuArray(t) : t
     end
-	optcode(tensors...)
+	dynamic_einsum(optcode, tensors)
 end
 
 function maximal_polynomial(::Val{:fft}, g; usecuda=false, mis_size=run_task(g, :maxsize; usecuda=usecuda)[].n, r=1.0, kwargs...)
@@ -176,7 +176,6 @@ end
 function maximal_polynomial(::Val{:finitefield}, g; max_order=100, usecuda=false, kwargs...)
     optcode = maximal_code(g; kwargs...)
     ms = mis_size(idp_code(g; kwargs...))
-    @show ms
     _polynomial(Val(:maximal), Val(:finitefield), optcode; mis_size=ms, max_order=max_order, usecuda=usecuda)
 end
 
