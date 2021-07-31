@@ -46,10 +46,10 @@ end
 #end
 
 for n = [11]
-    for seed in 95:999
-        #try
-            @time mis_maximal_counting(n, seed; writefile=true, sc_target=23, usecuda=DEVICE>=0, imbalances=0.0:0.00066:1.0)
-        #catch e
-        #end
+    for seed in 488:699
+        try
+            @time mis_maximal_counting(n, seed; writefile=true, sc_target=20, usecuda=DEVICE>=0, imbalances=0.03:0.001:1.0)
+        catch e
+        end
     end
 end

@@ -19,13 +19,13 @@ function neighbortensor(x::T, d::Int) where T
 end
 
 function mis_contract(x::T, code; usecuda=false) where {T}
-	tensors = map(getixs(flatten(code))) do ix
+    tensors = map(getixs(flatten(code))) do ix
         # if the tensor rank is 1, create a vertex tensor.
         # otherwise the tensor rank must be 2, create a bond tensor.
         t = length(ix)==1 ? misv(T, x) : misb(T)
         usecuda ? CuArray(t) : t
     end
-	code(tensors...)
+	dynamic_einsum(code, tensors)
 end
 
 mis_size(code; usecuda=false) = Int(asscalar(mis_contract(TropicalF64(1.0), code; usecuda=usecuda)).n)
