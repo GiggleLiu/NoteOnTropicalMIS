@@ -46,7 +46,6 @@ function mis_config(code; all=false, bounding=true, usecuda=false)
     flatten_code = flatten(code)
     syms = unique(Iterators.flatten(filter(x->length(x)==1,OMEinsum.getixs(flatten_code))))
     vertex_index = Dict([s=>i for (i, s) in enumerate(syms)])
-    @show syms
     N = length(vertex_index)
     C = TropicalNumbers._nints(N)
     xs = map(getixs(flatten_code)) do ix
@@ -82,6 +81,25 @@ function mis_config(code; all=false, bounding=true, usecuda=false)
         if usecuda
             xs = CuArray.(xs)
         end
-	    return code(xs...)
+	    return dynamic_einsum(code, xs)
     end
+end
+
+export mis_max2_config
+function mis_max2_config(code)
+    flatten_code = flatten(code)
+    syms = unique(Iterators.flatten(filter(x->length(x)==1,OMEinsum.getixs(flatten_code))))
+    vertex_index = Dict([s=>i for (i, s) in enumerate(syms)])
+    N = length(vertex_index)
+    C = TropicalNumbers._nints(N)
+    xs = map(getixs(flatten_code)) do ix
+        T = Max2Poly{ConfigEnumerator{N,C}}
+        if length(ix) == 2
+            return misb(T)
+        else
+            s = TropicalNumbers.onehot(StaticBitVector{N,C}, vertex_index[ix[1]])
+            misv(T, Max2Poly(zero(ConfigEnumerator{N,C}), ConfigEnumerator([s]), 1.0))
+        end
+    end
+    return dynamic_einsum(code, xs)
 end

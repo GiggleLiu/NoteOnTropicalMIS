@@ -172,7 +172,6 @@ function match_contract(n::Int, x::T, optcode::NestedEinsum; usecuda=false) wher
         end
         push!(tensors, usecuda ? CuArray(t) : t)
     end
-    @show ndims.(tensors)
 	optcode(tensors...)
 end
 
@@ -238,3 +237,35 @@ end
 
 _ifft!(x::AbstractVector{T}) where T = (x .= conj.(x); res = _fft!(x); res./=length(x); res .= conj.(res); res)
 ifft(x::AbstractVector{T}) where T = (x .= conj.(x); res = fft(x); res./=length(x); res .= conj.(res); res)
+
+export Max2Poly
+
+struct Max2Poly{T} <: Number
+    a::T
+    b::T
+    maxorder::Float64
+end
+
+function Base.:+(a::Max2Poly, b::Max2Poly)
+    if a.maxorder == b.maxorder
+        return Max2Poly(a.a+b.a, a.b+b.b, a.maxorder)
+    elseif a.maxorder == b.maxorder-1
+        return Max2Poly(a.b+b.a, b.b, b.maxorder)
+    elseif a.maxorder == b.maxorder+1
+        return Max2Poly(a.a+b.b, a.b, a.maxorder)
+    elseif a.maxorder < b.maxorder
+        return b
+    else
+        return a
+    end
+end
+
+function Base.:*(a::Max2Poly, b::Max2Poly)
+    maxorder = a.maxorder + b.maxorder
+    Max2Poly(a.a*b.b + a.b*b.a, a.b * b.b, maxorder)
+end
+
+Base.zero(::Type{Max2Poly{T}}) where T = Max2Poly(zero(T), zero(T), -Inf)
+Base.one(::Type{Max2Poly{T}}) where T = Max2Poly(zero(T), one(T), 0.0)
+Base.zero(::Max2Poly{T}) where T = zero(Max2Poly{T})
+Base.one(::Max2Poly{T}) where T = one(Max2Poly{T})

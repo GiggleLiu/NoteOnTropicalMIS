@@ -14,12 +14,13 @@ function mis_configurations(n, seed; writefile, sc_target=12)
     if c > 1000000
         @warn "degeneracy too high, got: $c"
     end
-    s2, config = (res = mis_config(code; all=true)[]; (res.n, res.c))
+    s2, config1, config0 = (res = mis_max2_config(code)[]; (res.maxorder, res.a, res.b))
     @assert s == s2
-    @assert length(config) == c
-    ofname = joinpath(folder, "configurations_$(n)x$(n)_$seed.dat")
-    writefile && write(ofname, toMatrix(config))
-    return s, config
+    @assert length(config0) == c
+    #ofname = joinpath(folder, "configurations_$(n)x$(n)_$seed.dat")
+    ofname1 = joinpath(folder, "configurations_suboptimal_$(n)x$(n)_$seed.dat")
+    writefile && write(ofname1, toMatrix(config1))
+    return s, config0, config1
 end
 
 function toMatrix(x::ConfigEnumerator{N,C}) where {N,C}
@@ -30,10 +31,15 @@ function toMatrix(x::ConfigEnumerator{N,C}) where {N,C}
     return m
 end
 
-for seed in [0, 2, 4, 9, 50]
-    @time mis_configurations(10, seed; writefile=true)
-end
-
-for seed in  [4, 6, 7, 17] #[26, 40, 339, 339, 8, 13, 25, 89, 108, 138]
-    @time mis_configurations(15, seed; writefile=true, sc_target=16)
+for (n, seeds) in [
+    #(5, [410, 407, 396]),
+    #(6, [667, 557, 78]),
+    #(7, [189, 623, 354]),
+    #(10, [983, 828, 61]),
+    #(11, [571, 808, 438]),
+    (15, [612, 907, 758])
+    ]
+    for seed in seeds
+        @time mis_configurations(n, seed; writefile=true, sc_target=14)
+    end
 end
