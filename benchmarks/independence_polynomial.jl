@@ -39,8 +39,8 @@ function runcase(;
     )
     cases = if case_set == :r3
         [case_r3(n, 3; seed=2, sc_target=s) for (n, s) in [
-            (10, 3), (20, 4), (30, 6), (40, 7), (50, 8), (60, 10), (70, 11), (80, 11), (90, 15), (100, 15),
-            (110, 15), (120, 18), (130, 17), (140, 16), (150, 21), (160, 20), (170, 22), (180, 24), (190, 26), (200, 25),
+            (10, 3), (20, 4), (30, 5), (40, 6), (50, 8), (60, 9), (70, 8), (80, 11), (90, 13), (100, 13),
+            (110, 15), (120, 16), (130, 14), (140, 18), (150, 18), (160, 22), (170, 19), (180, 25), (190, 24), (200, 26),
         ][1:end-ntruncate]]
     else
         [case_dc(L, 0.8; seed=2, sc_target=s) for (L, s) in [
@@ -55,7 +55,7 @@ end
 const truncatedict = Dict(
     "r3"=>Dict([string(task)=>ntruncate for (task, ntruncate) in [
         (:totalsize, 0), (:maxsize, 0), (:counting, 0),
-        (:idp_polynomial, 3), (:idp_fft, 3), (:idp_finitefield, 3),
+        (:idp_polynomial, 3), (:idp_fft, 0), (:idp_finitefield, 3),
         (:config_single, 0), (:config_all, 6), (:config_single_bounded, 0), (:config_all_bounded, 3)
         ]]),
     "dc"=>Dict([string(task)=>ntruncate for (task, ntruncate) in [

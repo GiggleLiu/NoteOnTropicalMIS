@@ -1,5 +1,6 @@
 \documentclass[review,onefignum,onetabnum]{siamart190516}
 %\usepackage{natbib}
+%\usepackage[sort]{cite}
 \pdfoutput=1
 %\usepackage[colorlinks=true,urlcolor=blue,citecolor=blue,linkcolor=blue]{hyperref}
 \usepackage[english]{babel}
@@ -13,6 +14,7 @@
 \usepackage{multicol}
 \usepackage[framemethod=TikZ]{mdframed}
 \usetikzlibrary{shapes}
+\usetikzlibrary{snakes}
 \usepackage{wrapfig}
 %\usepackage{caption}
 %\usepackage[plain]{algorithmic}
@@ -190,6 +192,10 @@ Listing \thelstlisting: #1\hfill%\hfill%
 \newcommand{\material}[1]{\iffalse[{\bf  \color{cyan}{Material: #1}}]\fi}
 \newcommand{\orange}[1]{\iffalse[{\bf  \color{orange}{Jo: #1}}]\fi}
 
+\newcounter{example}
+\newenvironment{example}[1][]{\refstepcounter{example}\par\medskip
+   \noindent \textbf{Example~\theexample. #1} \rmfamily}{\medskip}
+
 %\newtheorem{theorem}{\textit{Theorem}}
 %\newtheorem{corollary}{\textit Branching Rule}
 %\theoremstyle{definition}\newtheorem{definition}{\textit{Definition}}
@@ -230,22 +236,36 @@ Listing \thelstlisting: #1\hfill%\hfill%
 \end{AMS}
 
 \section{Introduction}
-MIS problem is hard~\cite{Hastad1996}.
-Branching algorithms can solve the MIS problem in $1.1893^n n ^{O(1)}$ time ~\cite{Xiao2017}.
-Previous dynamic programming approach~\cite{Courcelle1990,Fomin2013} can reduce the complexity of computing to $O(2^{tw(G)}tw(G)n)$.
+In this work, we introduce a new method to solve the classic graph problem, finding independent sets.
+Given an undirected graph $G = (V,E)$, an independent set $I \subseteq V$ is a set that for any $u,v \in I$, there is no edge connecting $u$ and $v$ in $G$.
+Finding the maximum independent set (MIS) size $\alpha(G) \equiv \max_{I}|I|$ belongs to the complexity class NP-complete~\cite{Hastad1996}, which is unlikely to be decided in polynomial time.
+It is hard to even approximate this size in polynomial time within a factor $|V|^{1-\epsilon}$ for an arbituary small possitive $\epsilon$.
+The naive algorithm of enumerating all configuration space gives a $2^{|V|}$ time solution.
+More efficient algorithms to compute the MIS size exactly includes the branching algorithm and dynamic programming.
+Without changing the fact of exponential scaling in computing time, the branching algorithm gives a smaller base.
+For example, in ~\cite{Xiao2017}, a sophisticated branching algorithm gives a time complexity $1.1893^n n ^{O(1)}$.
+The dynamic programming approach~\cite{Courcelle1990,Fomin2013} works better for graphs with small tree width $tw(G)$, it gives an algorithms of complexity $O(2^{tw(G)}tw(G)n)$.
+People are interested in solving this problem better not only because it is a NP-complete problem that directly related to other NP-complete prolems like maximal cliques and vertex cover~\cite{Moore2011},
+but also for its close relation with physical applications like hard spheres lattice gas model~\cite{Dyre2016}, and Rydberg hamiltonian~\cite{Pichler2018}.
+In these applications, knowing the MIS size and one of the optimal solution is not the only goal.
+%A set is independent if and only if it is a clique in the graph's complement, so the two concepts are complementary.
+%A set is independent if and only if its complement is a vertex cover. Therefore, the sum of the size of the largest independent set $\alpha (G)$ and the size of a minimum vertex cover $\beta (G)$ is equal to the number of vertices in the graph.
+People often ask different questions about independent sets in order to understand the landscape of their models better.
+These questions includes but not limited to, counting all independent sets, obtaining all indenepent sets of size $\alpha(G)$ and $\alpha(G)-1$,
+counting the number of (maximal) independent sets of different sizes.
+In this work, we attack this problem by mapping it to an generic ``einsum'' network.
+It does not give a better time complexity comparing to dynamic programming, but is versatile enough to answer the above questions by engineering the tensor elements.
 
-A set is independent if and only if it is a clique in the graph's complement, so the two concepts are complementary.
-A set is independent if and only if its complement is a vertex cover. Therefore, the sum of the size of the largest independent set $\alpha (G)$ and the size of a minimum vertex cover $\beta (G)$ is equal to the number of vertices in the graph.
-It is related to hard spheres lattice gas model~\cite{Dyre2016}, and Rydberg hamiltonian~\cite{Pichler2018}.
-
-In this work, we attack this problem by mapping it to an ``einsum'' network.
+\section{Einsum network}
 The word ``einsum'' is a shorthand for Einstein's summation, however, modern einsum notation in program is actually invented by a group of programmers.
 Einstein's notation is originally proposed as a generalization to of multiplication between two matrices to the contraction between multiple tensors.
 Let $A, B$ be two matrices, the matrix multiplication is defined as $C_{ik} = \sum_{j}A_{ij}B_{jk}$.
 It is denoted as $C_i^k = A_i^j B_j^k$ in the Einstein's original notation, where the paired subscript and superscript $j$ is a dummy index summed over.
-An example of tensor networks is $C_i^l = A_{ij}^k B^l_k V^j$.
 One can map a tensor network to a muti-graph with open edges by viewing a tensor in the expression on the right hand side as a vertex in a graph, a label pairing two tensors as an edge, and the remaining labels as open edges.
-We get the graphical notation as the following.
+
+\begin{example}
+    A tensor networks $C_i^l = A_{ij}^k B^l_k V^j$, where its graphical notation as the following.
+One can easily check a label in a tensor network representation appears precisely twice.
 
 \centerline{\begin{tikzpicture}
     \def\dx{0};
@@ -274,48 +294,105 @@ We get the graphical notation as the following.
     \node[color=white] at (\cx+\dx,\cy) {V};
 \end{tikzpicture}}
 
-One can easily check a label in a tensor network representation appears precisely twice.
-Numpy programmers make a generalization to this notation by not restricting the number of times a label is used by tensors.
-For example, $C_{ijk} = A_{jkm} B_{mil} V_{jm}$ is an einsum but not a tensor network. Here, all indices not appearing in the output are summed over, i.e. it represents $C_{ijk} = \sum_{ml}A_{jkm} B_{mia} V_{jm}$.
-Whether the index appear as a superscript or a subscript makes no sense now.
-The graphical representation of an einsum is a hypergraph, where an edge can be shared by a arbituary number of nodes.
+\end{example}
 
-\centerline{\begin{tikzpicture}
+Numpy programmers make a generalization of this notation by not restricting the number of times a label is used by tensors,
+hence whether an index appears as a superscript or a subscript makes no sense now.
+It has different names in different context, like sum-product network and factor graph~\cite{Bishop2006}.
+The graphical representation of an einsum is a hypergraph, where an edge (degree of freedom) can be shared by a arbituary number of nodes (tensors).
+
+\begin{example}
+$C_{ijk} = A_{jkm} B_{mil} V_{jm}$ is an einsum but not a tensor network, it represents $C_{ijk} = \sum_{ml}A_{jkm} B_{mia} V_{jm}$.
+Its hypergraph representation is as the following, where we use different color to annotate different hyperedges.
+
+\centerline{\begin{tikzpicture}[
+    dot/.style = {circle, fill, minimum size=#1,
+                inner sep=0pt, outer sep=0pt},
+    dot/.default = 6pt  % size of the circle diameter 
+                    ]  
     \def\dx{0};
-    \def\r{0.25}
+    \def\r{0.5cm}
     \def\ax{0}
     \def\ay{0}
     \def\bx{1}
     \def\by{1}
     \def\cx{1}
     \def\cy{-1}
-    \filldraw[fill=black] (\ax+\dx,\ax) circle [radius=\r];
-    \filldraw[fill=black] (\bx+\dx,\by) circle [radius=\r];
-    \filldraw[fill=black] (\cx+\dx,\cy) circle [radius=\r];
-    \draw[color=blue,thick] (\bx+\dx,\by) circle [radius=\r+0.1];
-    \node[color=blue] at (\bx+\dx-0.6,\bx) {i};
-    \draw[color=cyan,dashed,thick] (\bx+\dx,\by) circle [radius=\r+0.25];
-    \node[color=cyan] at (\bx+\dx+0.5,\bx-0.5) {l};
-    \draw[color=violet,thick,dashed] (\ax+\dx,\ay) circle [radius=\r+0.1];
-    \node[color=violet] at (\ax+\dx+0.4,-0.4) {k};
-    \draw[color=black,thick] (0.5+\dx,0) circle [radius=1.7];
-    \node[color=black] at (0.5+\dx-1.9,0) {m};
-    \draw[color=red,thick,rotate=135,dashed] (-0.6,0) ellipse (1.2 and 0.5);
-    \node[color=red] at (\ax+\dx,-1.0) {j};
-    \node[color=white] at (\ax+\dx,\ax) {A};
-    \node[color=white] at (\bx+\dx,\by) {B};
-    \node[color=white] at (\cx+\dx,\cy) {V};
+    \node[color=white,fill=black,dot=\r] at (\ax+\dx,\ax) (a) {A};
+    \node[color=white,fill=black,dot=\r] at (\bx+\dx,\by) (b) {B};
+    \node[color=white,fill=black,dot=\r] at (\cx+\dx,\cy) (v) {V};
+    \node at (\ax-0.8,\ay) (k) {k};
+    \node at (\bx+0.4,\ay) (m) {m};
+    \node at (\ax,\cy) (j) {j};
+    \node at (\bx+1,\by) (l) {l};
+    \node at (\bx-1,\by) (i) {i};
+    \draw[color=blue] (i) -- (b);
+    \draw[color=blue] (i) -- (\ax-1,\by);
+    \draw[color=cyan,thick] (l) -- (b);
+    \draw[color=violet,thick] (k) -- (a);
+    \draw[color=violet,thick] (k) -- (\ax-1.5,\ay);
+    \draw[color=black,thick] (b) -- (m);
+    \draw[color=black,thick] (m) -- (a);
+    \draw[color=black,thick] (m) -- (v);
+    \draw[color=red,thick] (a) -- (j);
+    \draw[color=red,thick] (v) -- (j);
+    \draw[color=red,thick] (\ax-1,\cy) -- (j);
 \end{tikzpicture}}
+\end{example}
 
-In the main text, we stick to the einsum notation rather than the tensor network notation,
+In the main text, we stick to the einsum notation rather than the tensor network notation.
+As a note to those who are more familiar with tensor network representation,
 although one can easily translate an einsum network to the equivalent tensor network by adding $\delta$ tensors (a generalization of identity matrix to higher order).
-We do not use the language of tensor network because it can sometime increase the contraction complexity of a graph. We will show an example in the appendix.
+It can sometime increase the contraction complexity of a graph. We have an example demonstrating this in \App{app:tensorbad}.
 
 \section{Independence polynomial}
-\begin{figure*}[h!]
-    \centerline{\begin{tikzpicture}
+One can encode the independent set problem on graph $G$ to an einsum network by placing a rank one tensor of size $2$ on vertex $i$
+\begin{equation}
+    W(x_i)_{s_i} = \left(\begin{matrix}
+        1 \\
+        x_i
+    \end{matrix}\right)_{s_i},\label{eq:wtensor}
+\end{equation}
+and a rank two tensor of size $2 \times 2$ on edge $(i,j)$
+\begin{equation}
+    B_{s_i s_j} = \left(\begin{matrix}
+        1  & 1\\
+        1 & 0
+    \end{matrix}\right)_{s_is_j},\label{eq:btensor}
+\end{equation}
+where a tensor index $s_i$ is a boolean variable that being 1 if vertex $i$ is in the independent set, 0 otherwise.
+It corresponds to a hyperedge in the hypergraph.
+$x_i$ is a variable.
+The contraction of such an einsum network gives
+\begin{equation}
+    A(G, \{x_1,\ldots,x_n\}) = \sum\limits_{s_1, s_2, \ldots, s_n = 0}^{1} \prod\limits_{i=1}^n W(x_i)_{s_i} \prod\limits_{(i,j) \in E(G)} B_{s_i s_j}.
+\end{equation}
+Here, the einsum runs over all vertex configurations $\{s_1,\ldots,s_n\}$ and accumulates the product of tensor elements to the scalar output.
+Let $x_i = x$, then the product over vertex tensors gives a factor $x^k$, where $k=\sum_i s_i$ is the vertex set size, 
+and the product over edge tensors gives a factor $0$ for configurations not being an independent set.
+The contraction of this einsum network gives the independence polynomial~\cite{Ferrin2014, Harvey2017} of $G$
+\begin{equation}
+I(G, x) = \sum_{k=1}^{\alpha(G)} a_k x^k,
+\end{equation}
+where $a_k$ is the number of independent sets of size $k$ in $G$, and $\alpha(G)$ is the maximum independent set size.
+By mapping the independence polynomial solving problem to the einsum network contraction, one can take the advantage of recently developed techiniques in tensor network based quantum circuit simulations ~\cite{Gray2021,Pan2021},
+where people evaluate a tensor network by pairwise contracting tensors in a heuristic order.
+A good contraction order can reduce the time complexity significantly, at the cost of having a space overhead of $O(2^{tw(G)})$, where $tw(G)$ is the treewidth of the line graph of a tensor network, here it corresponds to the original graph $G$ that we mapped from.~\cite{Markov2008}
+The pairwise tensor contraction also makes it possible to utilize fast basic linear algebra subprograms (BLAS) functions for certain tensor element types.
+
+\begin{example}
+    Mapping a graph (left) to an einsum network, the resulting einsum network is shown in the right panel.
+    A vertex is mapped to a hyperedge in the einsum's graphical notation.
+    An edge is mapped to an edge tensor.
+
+    \centerline{\begin{tikzpicture}[
+    dot/.style = {circle, fill, minimum size=#1,
+                inner sep=0pt, outer sep=0pt},
+    dot/.default = 6pt  % size of the circle diameter 
+                    ]  
+
         \def\dx{0};
-        \def\r{0.25}
+        \def\r{0.25cm}
         \filldraw[fill=black] (\dx,0) circle [radius=\r];
         \filldraw[fill=black] (\dx,1.5) circle [radius=\r];
         \filldraw[fill=black] (1.5+\dx,0) circle [radius=\r];
@@ -333,59 +410,37 @@ We do not use the language of tensor network because it can sometime increase th
         \node[color=white] at (1.5+\dx,1.5) {d};
         \node[color=white] at (2.5+\dx,2.5) {e};
         \def\dx{5};
-        \def\r{0.25}
-        \draw [black,thick] (\dx,0) -- (\dx,1.5);
-        \draw [black,thick] (\dx,0) -- (1.5+\dx,0);
-        \draw [black,thick] (\dx,1.5) -- (1.5+\dx,1.5);
-        \draw [black,thick] (1.5+\dx,0) -- (1.5+\dx,1.5);
-        \draw [black,thick] (1.5+\dx,0) -- (\dx,1.5);
-        \draw [black,thick] (2.5+\dx,2.5) -- (1.5+\dx,1.5);
-        \node[color=black,fill=white] at (0.75+\dx,0) {\scriptsize $B$};
-        \node[color=black,fill=white] at (\dx,0.75) {\scriptsize $B$};
-        \node[color=black,fill=white] at (1.5+\dx,0.75) {\scriptsize $B$};
-        \node[color=black,fill=white] at (0.75+\dx,1.5) {\scriptsize $B$};
-        \node[color=black,fill=white] at (0.75+\dx,0.75) {\scriptsize $B$};
-        \node[color=black,fill=white] at (2+\dx,2) {\scriptsize $B$};
-        \node[color=black,fill=white] at (\dx,0) {\scriptsize $W(x_a)$};
-        \node[color=black,fill=white] at (\dx,1.5) {\scriptsize $W(x_b)$};
-        \node[color=black,fill=white] at (1.5+\dx,0) {\scriptsize $W(x_c)$};
-        \node[color=black,fill=white] at (1.5+\dx,1.5) {\scriptsize $W(x_d)$};
-        \node[color=black,fill=white] at (2.5+\dx,2.5) {\scriptsize $W(x_e)$};
+        \def\r{0.25cm}
+        \foreach \x/\y/\e in {0.75/0/ac, 0/0.75/ab, 1.5/0.75/cd, 0.75/1.5/bd, 0.75/0.75/bc, 2/2/de}
+            \node[color=white,fill=black,dot=2*\r] at (\x+\dx,\y) (\e) {\scriptsize B};
+        \foreach \x/\y/\v in {0/0/a, 0/1.5/b, 1.5/0/c, 1.5/1.5/d, 2.5/2.5/e}
+            \node[color=black] at (\x+\dx,\y) (\v) {$s_\v$};
+        \foreach \x/\y/\v in {-0.5/-0.5/a, -0.5/2.0/b, 2.0/-0.5/c, 2.0/1.0/d, 3.0/2.0/e}
+            \node[color=white,fill=black,dot=\r] at (\x+\dx,\y) (\v\v) {};
+        \foreach \x/\y/\v in {-0.5/-0.5/a, -0.5/2.0/b, 2.0/-0.5/c, 2.0/1.0/d, 3.0/2.0/e}
+            \node[color=black] at (\x+\dx+0.5,\y) {\scriptsize $W(x_\v)$};
+        \draw [cyan,thick] (a) -- (aa);
+        \draw [cyan,thick] (a) -- (ab);
+        \draw [cyan,thick] (a) -- (ac);
+        \draw [blue,thick] (b) -- (bb);
+        \draw [blue,thick] (b) -- (ab);
+        \draw [blue,thick] (b) -- (bc);
+        \draw [blue,thick] (b) -- (bd);
+        \draw [red,thick] (c) -- (cc);
+        \draw [red,thick] (c) -- (ac);
+        \draw [red,thick] (c) -- (bc);
+        \draw [red,thick] (c) -- (cd);
+        \draw [green,thick] (d) -- (dd);
+        \draw [green,thick] (d) -- (bd);
+        \draw [green,thick] (d) -- (de);
+        \draw [green,thick] (d) -- (cd);
+        \draw [orange,thick] (e) -- (ee);
+        \draw [orange,thick] (e) -- (de);
     \end{tikzpicture}}
-    \caption{Mapping a graph to an einsum network.}\label{fig:einsummapping}
-\end{figure*}
-
-Let us map the graph $G$ into an einsum network, as shown in \Fig{fig:einsummapping}, by placing a rank one tensor of size $2$ on vertex $i$
-\begin{equation}
-    W(x_i)_{s_i} = \left(\begin{matrix}
-        1 \\
-        x_i
-    \end{matrix}\right)_{s_i},
-\end{equation}
-and a rank two tensor of size $2 \times 2$ on edge $(i,j)$
-\begin{equation}
-    B_{s_i s_j} = \left(\begin{matrix}
-        1  & 1\\
-        1 & 0
-    \end{matrix}\right)_{s_is_j},
-\end{equation}
-where a tensor index $s_i$ is a boolean variable that being 1 if vertex $i$ is in the independent set, 0 otherwise, $x_i$ is a variable.
-We denote the contraction result of this einsum network as
-\begin{equation}
-    A(G, \{x_1,\ldots,x_n\}) = \sum\limits_{s_1, s_2, \ldots, s_n = 0}^{1} \prod\limits_{i=1}^n W(x_i)_{s_i} \prod\limits_{(i,j) \in E(G)} B_{s_i s_j}.
-\end{equation}
-Here, the einsum runs over all possible vertex configurations and accumulates the product of tensor elements to the output.
-Let $x_i = x$ be the same variable, then the product over vertex tensors provides a factor $x^k$, where $k=\sum_i s_i$ is the vertex set size, 
-and the product over edge tensors provides a factor $0$ for configurations not being an independent set.
-The contraction of this einsum network gives the independence polynomial~\cite{Ferrin2014, Harvey2017} of $G$
-\begin{equation}
-I(G, x) = \sum_{k=1}^{\alpha(G)} a_k x^k,
-\end{equation}
-where $a_k$ is the number of independent sets of size $k$ in $G$, and $\alpha(G)$ is the maximum independent set size.
-By mapping the independence polynomial solving problem to the einsum network contraction, one can take the advantage of recently developed techiniques in tensor network based quantum circuit simulations ~\cite{Gray2021,Pan2021},
-where people evaluate a tensor network by pairwise contracting tensors in a heuristic order.
-A good contraction order can reduce the time complexity significantly, at the cost of having a space overhead of $O(2^{tw(G)})$, where $tw(G)$ is the treewidth of $G$.~\cite{Markov2008}
-The pairwise tensor contraction also makes it possible to utilize fast basic linear algebra subprograms (BLAS) functions for certain tensor element types.
+    \begin{align*}
+        \sum_{s_a,s_b,s_c,s_d,s_e} W(x_a)_{s_a} W(x_b)_{s_b} W(x_c)_{s_c} W(x_d)_{s_d} W(x_e)_{s_e} B_{s_a s_b} B_{s_b s_d} B_{s_a s_c} B_{s_b s_c} B_{s_d s_e}.
+    \end{align*}
+\end{example}
 
 Before contracting the einsum network and evaluating the independence polynomial numerically, let us first give up thinking $0$s and $1$s in tensors $W(x)$ and $B$ as regular computer numbers such as integers and floating point numbers.
 Instead, we treat them as the additive identity and multiplicative identity of a commutative semiring.
@@ -407,7 +462,7 @@ a \odot \mymathbb{0} = \mymathbb{0} \odot a = \mymathbb{0}
 \end{align*}
 
 In the rest of this paper, we show how to obtain the independence polynomial, the maximum independent set size and optimal configurations of a general graph $G$ by designing tensor element types as commutative semirings,
-i.e. making the einsum network programming generic~\cite{Stepanov2014}.
+i.e. making the einsum network generic~\cite{Stepanov2014}.
 
 \subsection{The polynomial approach}
 A straight forward approach to evaluate the independence polynomial is treating the tensor elements as polynomials, and evaluate the polynomial directly.
@@ -418,7 +473,7 @@ We define the algebra between the polynomials $a$ of order $k_a$ and $b$ of orde
     a \oplus b &= (a_0 + b_0, a_1 + b_1, \ldots, a_{\max(k_a, k_b)} + b_{\max(k_a, k_b)}),\\
     a \odot b &= (a_0 + b_0, a_1b_0 + a_0b_1, \ldots, a_{k_a} b_{k_b}),\\
     \mymathbb{0} &= (),\\
-    \mymathbb{1} &= (1).
+    \mymathbb{1} &= (1).\label{eq:polynomial}
     \end{split}
 \end{align}
 By contracting the einsum network with polynomial type, the final result is the exact representation of the independence polynomial.
@@ -451,7 +506,7 @@ a_0 \\ a_1 \\ \vdots \\ a_m
 \end{matrix}\right)
 = \left(\begin{matrix}
 y_0 \\ y_1 \\ \vdots \\ y_m
-\end{matrix}\right).
+\end{matrix}\right).\label{eq:lineareq}
 \end{align}
 
 In practise, the fitting can suffer from the non-negligible round off errors of floating point operations and produce unreliable results.
@@ -477,9 +532,10 @@ Then we can obtain the factors using the inverse fourier transformation $\vec a_
 By choosing diferent $r$, one can obtain better precision in low independant set size region  ($\omega<1$) and high independant set size region ($\omega>1$).
 
 \subsection{The finite field algebra approach}
-It is possible to compute the independence polynomials exactly using 64 bit integers types only,
-even when the factors are larger than that can be represented by 64 bit integers.
-We achieve this by designing a finite field algebra $GF(p)$
+It sounds a bit over ambitious to compute the independence polynomial regorously using integer number types only,
+because the fixed width integer types are often too small to store the countings,
+while big integer with arbituary precision can be very slow and imcompatible with graphic processing units (GPU) devices.
+The solution we found is to computation on a finite field algebra $GF(p)$
 
 \begin{align}
 \begin{split}
@@ -492,15 +548,15 @@ We achieve this by designing a finite field algebra $GF(p)$
 
 In a finite field algebra, we have the following observations
 \begin{enumerate}
-    \item One can still use Gaussian elimination~\cite{Golub2013} to solve a linear equation.
+    \item One can still use Gaussian elimination~\cite{Golub2013} to solve a linear equation \Eq{eq:lineareq}.
     This is because a field has the property that the multiplicative inverse exists for any non-zero value.
     The multiplicative inverse here can be computed with the extended Euclidean algorithm.
     \item Given the remainders of a larger integer $x$ over a set of coprime integers $\{p_1, p_2, \ldots, p_n\}$,
     $x \pmod {p_1 \times p_2 \times \ldots \times p_n}$ can be computed using the chinese remainder theorem.
     With this, one can infer big integers even though its bit width is larger than the register size.
 \end{enumerate}
-With these observations, we developed Algorithm~\ref{alg:finitefield} to compute independent polynomial exactly without introducing space overheads.
-In the algorithm, except the computation of chinese remainder theorem, all computations are done with integers with fixed width $W$.
+With these observations, we developed Algorithm~\ref{alg:finitefield} to compute independence polynomial exactly without introducing space overheads.
+In the algorithm, except the computation of chinese remainder theorem, all computations are done with integers of fixed width $W$.
 
 \begin{algorithm}[!ht]
     \small
@@ -565,17 +621,46 @@ We design a new element type that having algebra
         s_y\infty^{\max(x,y)}, & x < y\\
         s_x\infty^{\max(x,y)}, & x > y
     \end{cases},\\
-    s_x\infty^x \odot s_y\infty^y &= \{\sigma + \tau | \sigma \in s_x, \tau \in s_y\}\infty^{x+y},\\
+    s_x\infty^x \odot s_y\infty^y &= \{\sigma \lor^\circ \tau | \sigma \in s_x, \tau \in s_y\}\infty^{x+y},\\
     \mymathbb{0} &= \{\}\infty^{-\infty},\\
-    \mymathbb{1} &= \{\boldsymbol 0\}\infty^{0},
+    \mymathbb{1} &= \{0^{\otimes n}\}\infty^{0},
 \end{split}
 \end{align}
+
 One can easily check that this replacement does not change the fact that the algebra is a commutative semiring.
 We first initialize the bit strings of the variable $x$ in the vertex tensor to a vertex index $i$ dependent onehot vector $x_i = \boldsymbol{e}_{i}$,
 then we contract the tensor network. The resulting object will give us the set of all optimal configurations.
 By slightly modifying the above algebra, it can also be used to obtain just a single configuration to save computational effort.
-We leave this as an exercise for readers.
-This algorithm is parallelizable.
+%We leave this as an exercise for readers.
+
+\begin{align}
+\begin{split}
+    \sigma_x\infty^x \oplus \sigma_y\infty^y &= \begin{cases}
+        {\rm select}(\sigma_x, \sigma_y)\infty^{\max(x,y)}, & x = y\\
+        \sigma_y\infty^{\max(x,y)}, & x < y\\
+        \sigma_x\infty^{\max(x,y)}, & x > y
+    \end{cases},\\
+    \sigma_x\infty^x \odot \sigma_y\infty^y &= (\sigma_x \lor^\circ \sigma_y)\infty^{x+y},\\
+    \mymathbb{0} &= 1^{\otimes n}\infty^{-\infty},\\
+    \mymathbb{1} &= 0^{\otimes n}\infty^{0},
+\end{split}
+\end{align}
+where the \texttt{select} function picks one of $\sigma_x$ and $\sigma_y$.
+One can decide an order by some criteria to make the algebra commutative and associative.
+In most cases, it does not matter if one pick randomly from them, the program just output one of optimal configuration randomly.
+
+\subsection{counting sub-optimal solutions}
+Some times people are interested in finding sub-optimal solutions efficiently.
+We modify the polynomial algebra a bit by keeping only largest two factors in the polynomial in \Eq{eq:polynomial}.
+\begin{align}
+    \begin{split}
+    a \oplus b &= (a_{\max(k_a, k_b)-1} + b_{\max(k_a, k_b)-1}, a_{\max(k_a, k_b)} + b_{\max(k_a, k_b)}),\\
+    a \odot b &= (a_{k_a-1} b_{k_b}+a_{k_a} b_{k_b-1}, a_{k_a} b_{k_b}),\\
+    \mymathbb{0} &= (),\\
+    \mymathbb{1} &= (1).\label{eq:polynomial}
+    \end{split}
+\end{align}
+By changing the factors to sets, and plus and multiplication operations on factors to set union and product, one can get all suboptimal solutions too.
 
 \subsection{bounding the enumeration space}
 When we try to implement the above algebra for enumerating configurations, we find the space overhead is larger than than we have expected.
@@ -626,7 +711,7 @@ As an example, for a vertex of degree 2, the resulting rank 3 tensor is
     \end{matrix}\right).
 \end{align}
 
-We do the same computation as independence polynoimal, the coefficients of resulting polynomial gives the counting of maximal independent sets.
+We do the same computation as independence polynomial, the coefficients of resulting polynomial gives the counting of maximal independent sets.
 In many sparse graphs, this tensor network contraction approach is much faster than computing the maximal cliques of its complement and use Bron Kerbosch algorithms for finding maximum cliques.
 However, the treewidth of this new tensor network is larger than the one for independence polynomial because it can not utilize some structures of the original graph,
 while the original tensor network can be trivially reduced to this one.
@@ -907,7 +992,7 @@ The following gadget is equivalent to the above diagram up to a constant $2$.
     \end{matrix}\right)
 \end{align}
 
-We can 
+We can see these two subgraphs produce exactly the same tensors.
 
 \section{benchmarks}
 We run a sequetial program benchmark on CPU Intel(R) Core(TM) i5-10400 CPU @ 2.90GHz, and show the results bellow.
@@ -917,6 +1002,7 @@ We run a sequetial program benchmark on CPU Intel(R) Core(TM) i5-10400 CPU @ 2.9
     \caption{Benchmark results for computing different properties with different element types.
     }\label{fig:benchmark}
 \end{figure}
+Einsum network contraction is parallelizable. When the element type is immutable, one can just upload the data to GPU to enjoy the speed up.
 
 \section{discussion}
 We introduced in the main text how to compute the indenpendence polynomial, maximum independent set and optimal configurations.
@@ -1011,58 +1097,114 @@ Given a graph
 Its tensor network representation is
 
 \centerline{\begin{tikzpicture}
-    \def\r{0.1}
+    \def\r{0.08}
     \def\a{0.1}
     \foreach \x in {1,...,5}
         \foreach \y in {1,...,5}
-            \filldraw[fill=black] (\x,\y) circle [radius=\r];
+            \filldraw[fill=black] (\x,\y) circle [radius=0.7*\r];
     \foreach \x in {1,...,5}
         \foreach \y in {1,...,4}{
-            \filldraw[fill=black] (\x-\a,\y+0.5-\a) rectangle (\x+\a, \y+0.5+\a);
-            \filldraw[fill=black] (\y+0.5-\a,\x-\a) rectangle (\y+0.5+\a, \x+\a);
+            \filldraw[fill=black] (\x,\y+0.5) circle [radius=\r];
+            \filldraw[fill=black] (\y+0.5,\x) circle [radius=\r];
             \draw [black,thick] (\x,\y) -- (\x,\y+1);
             \draw [black,thick] (\y,\x) -- (\y+1,\x);
         }
     \foreach \x in {1,...,4}
         \foreach \y in {1,...,4}{
-            \filldraw[fill=black] (\x+0.3-\a,\y+0.3-\a) rectangle (\x+0.3+\a, \y+0.3+\a);
-            \filldraw[fill=black] (\y+0.3-\a,\x+0.7-\a) rectangle (\y+0.3+\a, \x+0.7+\a);
+            \filldraw[fill=black] (\x+0.3,\y+0.3) circle [radius=\r];
+            \filldraw[fill=black] (\y+0.3,\x+0.7) circle [radius=\r];
             \draw [black,thick] (\x,\y) -- (\x+1,\y+1);
             \draw [black,thick] (\y+1,\x) -- (\y,\x+1);
         }
+    \tikzset{decoration={snake,amplitude=.4mm,segment length=2mm,
+                    post length=0mm,pre length=0mm}}
+    \draw [decorate] (2.7, 0.5) -- (2.7, 5.5);
 \end{tikzpicture}}
 
 Once we represent a $\delta$ tensor as a general tensor, the complexity of this contraction is $\approx 2^{2L}$.
 Its einsum network representation is
 
 \centerline{\begin{tikzpicture}
-    \def\r{0.1}
+    \def\r{0.08}
     \def\a{0.07}
     \def\L{0.6}
     \def\l{0.1}
     \def\sql{0.24}
+    \foreach[evaluate={\cr=0.1+0.5*Mod(\x,2)}] \x in {1,...,5}
+        \foreach[evaluate={\cg=0.1+0.3*Mod(\y,2); \cy=0.5-0.5*Mod(\y,2)}] \y in {1,...,5}{
+            %\filldraw [red, opacity=0.3] plot [smooth cycle] coordinates {(\x-\L,\y+\l) (\x-\l*2.5,\y+\l) (\x-\L*0.75,\y+\L*0.6) (\x-\L*0.6,\y+\L*0.75) (\x-\l,\y+\l*2.5) (\x-\l, \y+\L) (\x+\l,\y+\L) (\x+\l,\y+\l*2.5) (\x+\L*0.6,\y+\L*0.75) (\x+\L*0.75,\y+\L*0.6) (\x+\l*2.5,\y+\l) (\x+\L,\y+\l) (\x+\L,\y-\l) (\x+\l,\y-\l) (\x+\l,\y-\L) (\x-\l,\y-\L) (\x-\l,\y-\l) (\x-\L,\y-\l)};
+            \ifnum \x < 5
+                \draw [thick, color={rgb:red,\cr;green,\cg;yellow,\cy}, opacity=1.0, line cap=round] (\x,\y) -- (\x+0.5,\y);
+                \ifnum \y < 5
+                \draw [thick, color={rgb:red,\cr;green,\cg;yellow,\cy}, opacity=1.0, line cap=round] (\x,\y) -- (\x+0.3,\y+0.3);
+                \fi
+                \ifnum \y > 1
+                \draw [thick, color={rgb:red,\cr;green,\cg;yellow,\cy}, opacity=1.0, line cap=round] (\x,\y) -- (\x+0.3,\y-0.3);
+                \fi
+            \fi
+            \ifnum \x > 1
+                \draw [thick, color={rgb:red,\cr;green,\cg;yellow,\cy}, opacity=1.0, line cap=round] (\x,\y) -- (\x-0.5,\y);
+                \ifnum \y < 5
+                \draw [thick, color={rgb:red,\cr;green,\cg;yellow,\cy}, opacity=1.0, line cap=round] (\x,\y) -- (\x-0.7,\y+0.7);
+                \fi
+                \ifnum \y > 1
+                \draw [thick, color={rgb:red,\cr;green,\cg;yellow,\cy}, opacity=1.0, line cap=round] (\x,\y) -- (\x-0.7,\y-0.7);
+                \fi
+            \fi
+            \ifnum \y < 5
+                \draw [thick, color={rgb:red,\cr;green,\cg;yellow,\cy}, opacity=1.0, line cap=round] (\x,\y) -- (\x,\y+0.5);
+            \fi
+            \ifnum \y > 1
+                \draw [thick, color={rgb:red,\cr;green,\cg;yellow,\cy}, opacity=1.0, line cap=round] (\x,\y) -- (\x,\y-0.5);
+            \fi
+        }
     \foreach \x in {1,...,5}
         \foreach \y in {1,...,5}{
-        \node[fill, regular polygon, 
-            regular polygon sides=3, scale=0.3] at (\x, \y) {};
+            \filldraw[fill=black] (\x,\y) circle [radius=0.7*\r];
         }
     \foreach \x in {1,...,5}
         \foreach \y in {1,...,5}{
             \ifnum \y < 5
-                \filldraw[fill=black] (\x-\a,\y+0.5-\a) rectangle (\x+\a, \y+0.5+\a);
-                \filldraw[fill=black] (\y+0.5-\a,\x-\a) rectangle (\y+0.5+\a, \x+\a);
+                \filldraw[fill=black] (\x,\y+0.5) circle [radius=\r];
+                \filldraw[fill=black] (\y+0.5,\x) circle [radius=\r];
             \fi
-            \filldraw [red, opacity=0.3] plot [smooth cycle] coordinates {(\x-\L,\y+\l) (\x-\l,\y+\l) (\x-\l, \y+\L) (\x+\l,\y+\L) (\x+\l,\y+\l) (\x+\L,\y+\l) (\x+\L,\y-\l) (\x+\l,\y-\l) (\x+\l,\y-\L) (\x-\l,\y-\L) (\x-\l,\y-\l) (\x-\L,\y-\l)};
         }
     \foreach \x in {1,...,4}
         \foreach \y in {1,...,4}{
-            \filldraw[fill=black] (\x+0.3-\a,\y+0.3-\a) rectangle (\x+0.3+\a, \y+0.3+\a);
-            \filldraw[fill=black] (\y+0.3-\a,\x+0.7-\a) rectangle (\y+0.3+\a, \x+0.7+\a);
+            \filldraw[fill=black] (\x+0.3,\y+0.3) circle [radius=\r];
+            \filldraw[fill=black] (\y+0.3,\x+0.7) circle [radius=\r];
         }
+    \tikzset{decoration={snake,amplitude=.4mm,segment length=2mm,
+                    post length=0mm,pre length=0mm}}
+    \draw [decorate] (2.7, 0.5) -- (2.7, 5.5);
 \end{tikzpicture}}
 
-\section{matching polynomial}
-One can generalize the generic einsum network for solving another \#P-complete problem, the matching polynomials.
+\section{Generalizing to other graph problems}
+Courcelle’s theorem~\cite{Courcelle1990,Barr2020} states that a problem quantified by monadic second order logic (MSO) on a graph with bounded treewidth $k$ can be solved in linear time with respect to the graph size.
+Dynamic programming is a traditional approach to attack a $MSO$ problem, it can solve the MIS problem in $O(2^k)n$.
+An einsum network is closely related to dynamic programming.
+To be specific, the contraction of a einsum network is a special type of dynamic programming that its update rule can be characterized by a linear operation.
+An einsum network is strictly less expressive than $MSO$, the einsum network described by \Eq{eq:wtensor} and \Eq{eq:btensor} can be expressed in MSO as
+\begin{align}
+    \begin{split}
+    \exists_X\forall_{u} (\forall_{v} {\rm adj}(u, v) \land (
+        &(u \not\in X \land v \not\in X \land B_{00}) \lor\\
+        &(u \not\in X \land v \in X \land B_{01}) \lor\\
+        &(u \in X \land v \not\in X \land B_{10}) \lor\\
+        &(u \in X \land v \in X \land B_{11})
+    ))\land\\
+    (
+        &(u \not\in X \land W_{0}) \lor\\
+        &(u \in X \land W_{1})
+    ),
+    \end{split}
+\end{align}
+while not all monadic second order logic can be represented as an einsum network contraction,
+for example, it is hard to construct a tensor network to decide whether a graph is connected or not.
+At the cost of lossing expressiveness, we can encode the properties of the graph into the tensor elements.
+
+In the following, we introduce several other problems that can be solved in the framework of generic einsum network in $O(2^k n)$.
+The first one is the matching polynomials.
 A match polynomial of a graph $G$ is defined as
 \begin{align}
     M(G, x) = \sum\limits_{k=1}^{|V|/2} c_k x^k,
