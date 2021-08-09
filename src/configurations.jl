@@ -26,6 +26,17 @@ end
 
 Base.zero(::Type{ConfigEnumerator{N,C}}) where {N,C} = ConfigEnumerator{N,C}(StaticBitVector{N,C}[])
 Base.one(::Type{ConfigEnumerator{N,C}}) where {N,C} = ConfigEnumerator{N,C}([TropicalNumbers.staticfalses(StaticBitVector{N,C})])
+Base.zero(::ConfigEnumerator{N,C}) where {N,C} = zero(ConfigEnumerator{N,C})
+Base.one(::ConfigEnumerator{N,C}) where {N,C} = one(ConfigEnumerator{N,C})
+Base.show(io::IO, x::ConfigEnumerator) = print(io, "{", join(x.data, ", "), "}")
+Base.show(io::IO, ::MIME"text/plain", x::ConfigEnumerator) = Base.show(io, x)
+
+# patch
+function Base.:*(a::Int, y::ConfigEnumerator)
+    a == 0 && return zero(y)
+    a == 1 && return y
+    error("multiplication between int and config enumerator is not defined.")
+end
 
 function symbols(::EinCode{ixs}) where ixs
     res = []
@@ -99,6 +110,25 @@ function mis_max2_config(code)
         else
             s = TropicalNumbers.onehot(StaticBitVector{N,C}, vertex_index[ix[1]])
             misv(T, Max2Poly(zero(ConfigEnumerator{N,C}), ConfigEnumerator([s]), 1.0))
+        end
+    end
+    return dynamic_einsum(code, xs)
+end
+
+export all_config
+function all_config(code)
+    flatten_code = flatten(code)
+    syms = unique(Iterators.flatten(filter(x->length(x)==1,OMEinsum.getixs(flatten_code))))
+    vertex_index = Dict([s=>i for (i, s) in enumerate(syms)])
+    N = length(vertex_index)
+    C = TropicalNumbers._nints(N)
+    xs = map(getixs(flatten_code)) do ix
+        T = Polynomial{ConfigEnumerator{N,C}, :x}
+        if length(ix) == 2
+            return misb(T)
+        else
+            s = TropicalNumbers.onehot(StaticBitVector{N,C}, vertex_index[ix[1]])
+            misv(T, Polynomial([zero(ConfigEnumerator{N,C}), ConfigEnumerator([s])]))
         end
     end
     return dynamic_einsum(code, xs)

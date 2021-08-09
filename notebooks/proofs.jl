@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.15.0
+# v0.14.2
 
 using Markdown
 using InteractiveUtils
@@ -41,7 +41,8 @@ begin
 		return img
 	end
 	
-	mis_solve(code) = mis_contract(Tropical(1.0), code)
+	mis_solve(code) = mis_contract(Tropical(1.0), OMEinsum.optimize_greedy(code, uniformsize(code, 2)))
+	mis_configs(code) = all_config(OMEinsum.optimize_greedy(code, uniformsize(code, 2)))
 end;
 
 # ╔═╡ a8ac2b58-86c7-4964-ac10-46c842cbe731
@@ -424,6 +425,12 @@ end;
 # ╔═╡ 91fb9192-22c6-4135-81c7-efa7ea681722
 compress!(basic_res)
 
+# ╔═╡ 1cb4f4fe-2b5c-4ecf-88b5-3c7fec5d9b87
+basic_res2 = let
+	code = ein"v,u,w,j,k,vw,vj,vk,vu->juwk"
+	mis_configs(code)
+end
+
 # ╔═╡ cb1d664e-4efe-4d65-a2be-239c8cd3cfcb
 md"## Satelitte Rule"
 
@@ -467,7 +474,7 @@ end
 satelite_res = let
 	code = ein"u,v,w,j,k,vw,vj,vk,ku,wu,wk->juk"
 	mis_solve(code)
-end;
+end
 
 # ╔═╡ 23fcfe1a-e7ce-4cdc-abcb-651b8f069606
 compress!(copy(satelite_res))
@@ -491,10 +498,16 @@ end
 mirror_res = let
 	code = ein"u,v,w,j,k,vw,vj,vk,ku,wj,wk->juwk"
 	mis_solve(code)
-end;
+end
 
 # ╔═╡ 5b3d225f-a168-4bdb-827f-9bdf85b87e46
 compress!(copy(mirror_res))
+
+# ╔═╡ 7a70783a-b9d6-409f-93e7-73443e55d4ca
+mirror_res2 = let
+	code = ein"u,v,w,j,k,vw,vj,vk,ku,wj,wk->juwk"
+	mis_configs(code)
+end
 
 # ╔═╡ Cell order:
 # ╠═c8c14900-b7f5-11eb-3dbe-4390dd0fcc0a
@@ -565,6 +578,7 @@ compress!(copy(mirror_res))
 # ╟─300114b5-d8f7-47bb-a569-2835321f9695
 # ╠═6b590957-d846-407a-99fe-b570d5e92107
 # ╠═91fb9192-22c6-4135-81c7-efa7ea681722
+# ╠═1cb4f4fe-2b5c-4ecf-88b5-3c7fec5d9b87
 # ╟─cb1d664e-4efe-4d65-a2be-239c8cd3cfcb
 # ╟─30b2968f-413d-4e10-bb80-e71a5596dc5c
 # ╟─6766e2fa-795d-47fb-9e95-47471f9cd8e2
@@ -578,3 +592,4 @@ compress!(copy(mirror_res))
 # ╟─792d4aaf-b247-48d7-a321-2a3ae73cb988
 # ╠═185b0604-3cc6-42d5-b67f-68c1cb985649
 # ╠═5b3d225f-a168-4bdb-827f-9bdf85b87e46
+# ╠═7a70783a-b9d6-409f-93e7-73443e55d4ca

@@ -41,7 +41,9 @@ for (n, seeds) in [
     #(15, [612, 907, 758])
     #(10, [982, 456, 843]),  # easy, ~25
     #(10, [347, 793, 82]),  # intermediate, ~85
-    (8, [188, 970, 91]),
+    #(8, [188, 970, 91]),
+    (8, [100, 72]),
+    (9, [805, 144, 560, 651, 234]),
     ]
     for seed in seeds
         @time mis_configurations(n, seed; writefile=true, sc_target=14)

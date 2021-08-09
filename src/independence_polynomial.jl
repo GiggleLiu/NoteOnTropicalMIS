@@ -99,13 +99,15 @@ end
 
 using LightGraphs
 
-export maximal_polynomial, maximal_code, idp_code
+export maximal_polynomial, maximal_code, idp_code, coloring_code
 
 function idp_code(g::SimpleGraph; method=:kahypar, sc_target=17, max_group_size=40, nrepeat=10, imbalances=0.0:0.01:0.2)
     code = EinCode(([minmax(e.src,e.dst) for e in LightGraphs.edges(g)]..., # labels for edge tensors
                     [(i,) for i in LightGraphs.vertices(g)]...), ())        # labels for vertex tensors
     _optimize_code(code, method, sc_target, max_group_size, nrepeat, imbalances)
 end
+
+coloring_code(args...;kwargs...) = idp_code(args...; kwargs...)
 
 function match_code(g::SimpleGraph; method=:kahypar, sc_target=17, max_group_size=40, nrepeat=10, imbalances=0.0:0.01:0.2)
     code = EinCode(([(minmax(e.src,e.dst),) for e in LightGraphs.edges(g)]..., # labels for edge tensors
@@ -269,3 +271,25 @@ Base.zero(::Type{Max2Poly{T}}) where T = Max2Poly(zero(T), zero(T), -Inf)
 Base.one(::Type{Max2Poly{T}}) where T = Max2Poly(zero(T), one(T), 0.0)
 Base.zero(::Max2Poly{T}) where T = zero(Max2Poly{T})
 Base.one(::Max2Poly{T}) where T = one(Max2Poly{T})
+
+export coloring_contract
+function coloring_contract(xs, code; usecuda=false)
+    tensors = map(getixs(flatten(code))) do ix
+        # if the tensor rank is 1, create a vertex tensor.
+        # otherwise the tensor rank must be 2, create a bond tensor.
+        t = length(ix)==1 ? coloringv(collect(xs)) : coloringb(eltype(xs), length(xs))
+        usecuda ? CuArray(t) : t
+    end
+	dynamic_einsum(code, tensors)
+end
+
+# coloring bond tensor
+function coloringb(::Type{T}, k::Int) where T
+    x = ones(T, k, k)
+    for i=1:k
+        x[i,i] = zero(T)
+    end
+    return x
+end
+# coloring vertex tensor
+coloringv(vals::Vector{T}) where T = vals
