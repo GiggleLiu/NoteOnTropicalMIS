@@ -183,15 +183,13 @@ Listing \thelstlisting: #1\hfill%\hfill%
 \newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
 
 %%%%%% Comment related
-\newcommand{\red}[1]{[{\bf  \color{red}{LW: #1}}]}
-\newcommand{\xred}[1]{[{\bf  \color{red}{\sout{LW: #1}}}]}
+\newcommand{\red}[1]{[{\bf  \color{red}{ST: #1}}]}
+\newcommand{\xred}[1]{[{\bf  \color{red}{\sout{ST: #1}}}]}
+\newcommand{\green}[1]{[{\bf  \color{green}{XG: #1}}]}
+\newcommand{\xgreen}[1]{[{\bf  \color{green}{\sout{XG: #1}}}]}
 \newcommand{\blue}[1]{[{\bf  \color{blue}{JG: #1}}]}
-\newcommand{\violet}[1]{[{\bf  \color{violet}{MLS: #1}}]}
-\newcommand{\green}[1]{[{\bf  \color{green}{TZ: #1}}]}
-\newcommand{\xgreen}[1]{[{\bf  \color{green}{\sout{TZ: #1}}}]}
 \newcommand{\xblue}[1]{[{\bf  \color{blue}{\sout{JG: #1}}}]}
 \newcommand{\material}[1]{\iffalse[{\bf  \color{cyan}{Material: #1}}]\fi}
-\newcommand{\orange}[1]{\iffalse[{\bf  \color{orange}{Jo: #1}}]\fi}
 
 \newcounter{example}
 \newenvironment{example}[1][]{\refstepcounter{example}\par\medskip
@@ -206,7 +204,7 @@ Listing \thelstlisting: #1\hfill%\hfill%
 
 %\externaldocument{ex_supplement}
 
-\title{Solving the maximum independant set problem by generic programming einsum networks
+\title{Solving the independent set problem by generic programming einsum networks
 \thanks{\funding{...}}
 }
 
@@ -221,7 +219,7 @@ Listing \thelstlisting: #1\hfill%\hfill%
 \maketitle
 
 \begin{abstract}
-	Solving the maximum independent set size problem by mapping the graph to an einsum network. 
+	This paper is about solving the independent set problem by eincoding this problem to an einsum network. 
     We show how to obtain the maximum independent set size, the independence polynomial and optimal configurations of a graph by engineering the tensor element algebra.
     We also show how to analyse the local properties of a graph by contracting an open einsum network.
 \end{abstract}
@@ -240,68 +238,71 @@ Listing \thelstlisting: #1\hfill%\hfill%
 \section{Introduction}
 In this work, we introduce a tensor based framework to study the famous graph problem of finding independent sets.
 Given an undirected graph $G = (V,E)$, an independent set $I \subseteq V$ is a set that for any $u,v \in I$, there is no edge connecting $u$ and $v$ in $G$.
-Finding the maximum independent set (MIS) size $\alpha(G) \equiv \max_{I}|I|$ belongs to the complexity class NP-complete~\cite{Hastad1996}, which is unlikely to be decided in polynomial time.
-It is hard to even approximate this size in polynomial time within a factor $|V|^{1-\epsilon}$ for an arbituarily small possitive $\epsilon$.
-The naive algorithm of enumerating all configuration space gives a $2^{|V|}$ time solution.
+The problem of finding the maximum independent set (MIS) size $\alpha(G) \equiv \max_{I}|I|$ belongs to the complexity class NP-complete~\cite{Hastad1996}, which is unlikely to be decided in polynomial time.
+It is hard to even approximate this size in polynomial time within a factor $|V|^{1-\epsilon}$ for an arbitrarily small positive $\epsilon$.
+The exhaustive search for a solution costs time $2^{|V|}$.
 More efficient algorithms to compute the MIS size exactly includes the branching algorithm and dynamic programming.
 Without changing the fact of exponential scaling in computing time, the branching algorithm gives a smaller base.
-For example, in ~\cite{Xiao2017}, a sophisticated branching algorithm gives a time complexity $1.1893^n n ^{O(1)}$.
+For example, in ~\cite{Xiao2017}, a sophisticated branching algorithm has a time complexity $1.1893^n n ^{O(1)}$.
 The dynamic programming approach~\cite{Courcelle1990,Fomin2013} works better for graphs with small tree width $tw(G)$, it gives an algorithms of complexity $O(2^{tw(G)}tw(G)n)$.
-People are interested in solving the independent set problem better not only because it is a NP-complete problem that directly related to other NP-complete prolems like maximal cliques and vertex cover~\cite{Moore2011},
+People are interested in solving the independent set problem better not only because it is an NP-complete problem that directly related to other NP-complete problems like maximal cliques and vertex cover~\cite{Moore2011},
 but also for its close relation with physical applications like hard spheres lattice gas model~\cite{Dyre2016}, and Rydberg hamiltonian~\cite{Pichler2018}.
-However, in these applications, knowing the MIS size and one of the optimal solution is not the only goal.
+However, in these applications, knowing the MIS size and one of the optimum solutions is not the only goal.
 %A set is independent if and only if it is a clique in the graph's complement, so the two concepts are complementary.
 %A set is independent if and only if its complement is a vertex cover. Therefore, the sum of the size of the largest independent set $\alpha (G)$ and the size of a minimum vertex cover $\beta (G)$ is equal to the number of vertices in the graph.
 People often ask different questions about independent sets in order to understand the landscape of their models better.
-These questions includes but not limited to, counting all independent sets, obtaining all indenepent sets of size $\alpha(G)$ and $\alpha(G)-1$,
+These questions includes but not limited to, counting all independent sets, obtaining all independent sets of size $\alpha(G)$ and $\alpha(G)-1$,
 counting the number of (maximal) independent sets of different sizes, and understanding the effect of a local gadget.
 In this work, we attack this problem by mapping it to an generic ``einsum'' network.
 It does not give a better time complexity comparing to dynamic programming, but is versatile enough to answer the above questions by engineering the tensor elements with minimum effort.
 
-\section{Einsum network}
+\section{Einsum networks}
 %The word ``einsum'' is a shorthand for Einstein's summation, however, modern einsum notation in program is actually invented by a group of programmers.
 Einstein's notation is originally proposed as a generalization to of binary matrix multiplication to n-ary tensor contraction.
 Let $A, B$ be two matrices, the matrix multiplication is defined as $C_{ik} = \sum_{j}A_{ij}B_{jk}$.
 In Einstein's notation, it is denoted as $C_i^k = A_i^j B_j^k$, where the paired subscript and superscript $j$ is a dummy index summed over, hence each index appears precisely twice.
 When we have multiple tensors doing the above sum-product operation, we get a tensor network~\cite{Orus2014}.
-A tensor network has a nice a muti-graph with open edges. We view a tensor on the right hand side as a vertex in a graph, a label pairing two tensors as an edge, and the remaining unpaired labels as open edges.
+A tensor network can be represented as a mutigraph with open edges by viewing a tensor as a vertex, a label pairing two tensors as an edge, and the remaining unpaired labels as open edges.
 
 \begin{example}
-    A tensor networks $C_i^l = A_{ij}^k B^l_k V^j$ has the following graphical representation.
+    A tensor networks $C_i^l = A_{ij}^{km} B^l_{km} V^j$ has the following multigraph representation.
 
-\centerline{\begin{tikzpicture}
+\centerline{\begin{tikzpicture}[
+    dot/.style = {circle, fill, minimum size=#1,
+                inner sep=0pt, outer sep=0pt},
+    dot/.default = 6pt  % size of the circle diameter 
+                    ]  
     \def\dx{0};
-    \def\r{0.25}
+    \def\r{0.25cm}
     \def\ax{0}
     \def\ay{0}
     \def\bx{1}
     \def\by{1}
     \def\cx{1}
     \def\cy{-1}
-    \filldraw[fill=black] (\ax+\dx,\ax) circle [radius=\r];
-    \filldraw[fill=black] (\bx+\dx,\by) circle [radius=\r];
-    \filldraw[fill=black] (\cx+\dx,\cy) circle [radius=\r];
+    \node[color=white, fill=black, dot=2*\r] at (\ax+\dx,\ax) (a) {A};
+    \node[color=white, fill=black, dot=2*\r] at (\bx+\dx,\by) (b) {B};
+    \node[color=white, fill=black, dot=2*\r] at (\cx+\dx,\cy) (c) {V};
     %\draw [black,thick] (\ax+\dx,\ay) .. controls (0.5*\ax+0.5*\bx+\dx+0.2,0.5*\ay+0.5*\by-0.2) .. (\bx+\dx,\by);
     %\draw [black,thick] (\ax+\dx,\ay) .. controls (0.5*\ax+0.5*\bx+\dx-0.2,0.5*\ay+0.5*\by+0.2) .. (\bx+\dx,\by);
-    \draw [black,thick] (\ax+\dx,\ay) -- (\bx+\dx,\by);
-    \draw [black,thick] (\ax+\dx,\ay) -- (\cx+\dx,\cy);
-    \draw [black,thick] (\ax+\dx,\ay) -- (\ax+\dx-0.8,\ay);
-    \draw [black,thick] (\bx+\dx,\by) -- (\bx+\dx+0.8,\by);
-    \node[color=white] at (\ax+\dx,\ax) {A};
-    \node[color=white] at (\bx+\dx,\by) {B};
-    \node[color=black] at (0.5*\ax+0.5*\bx-0.2+\dx,0.5*\ay+0.5\by+0.2) {k};
+    \draw [black,thick] (a) .. controls (0.4, 0.6) .. (b);
+    \draw [black,thick] (a) .. controls (0.6, 0.4) .. (b);
+    \draw [black,thick] (a) -- (c);
+    \draw [black,thick] (a) -- (\ax+\dx-0.8,\ay);
+    \draw [black,thick] (b) -- (\bx+\dx+0.8,\by);
+    \node[color=black] at (0.5*\ax+0.5*\bx-0.3+\dx,0.5*\ay+0.5\by+0.3) {k};
+    \node[color=black] at (0.5*\ax+0.5*\bx+0.3+\dx,0.5*\ay+0.5\by-0.3) {m};
     \node[color=black] at (0.5*\ax+0.5*\cx+\dx+0.2,0.5*\ay+0.5\cy+0.2) {j};
     \node[color=black] at (\ax+\dx-0.5,\ay-0.2) {i};
     \node[color=black] at (\bx+\dx+0.5,\by-0.2) {l};
-    \node[color=white] at (\cx+\dx,\cy) {V};
 \end{tikzpicture}}
 
 \end{example}
 
-Einsum network is a generalization of tensor network by not restricting the number of times a label appears,
+Einsum network is a generalization of tensor network by not restricting the number of times a label appears in the notation,
 hence whether an index is a superscript or a subscript makes no sense now.
 It is also called sum-product network or factor graph~\cite{Bishop2006} in some contexts.
-The graphical representation of an einsum is a hypergraph, where an edge (label) can be shared by an arbituary number of vertices (tensors).
+The graphical representation of an einsum is a hypergraph, where an edge (label) can be shared by an arbitrary number of vertices (tensors).
 
 \begin{example}
 $C_{ijk} = A_{jkm} B_{mil} V_{jm}$ is an einsum network, it represents $C_{ijk} = \sum_{ml}A_{jkm} B_{mia} V_{jm}$.
@@ -345,48 +346,50 @@ Its hypergraph representation is as the following, where we use different color 
 In the main text, we stick to the einsum notation rather than the tensor network notation.
 As a note to those who are more familiar with tensor network representation,
 although one can easily translate an einsum network to the equivalent tensor network by adding $\delta$ tensors (a generalization of identity matrix to higher order).
-It can sometime increase the contraction complexity of a graph. We have an example demonstrating this in \App{app:tensorbad}.
+It can sometime increase the contraction complexity of a graph. We have an example demonstrating this point in \App{app:tensorbad}.
 
 \section{Independence polynomial}
-One can encode the independent set problem on graph $G$ to an einsum network by placing a rank one tensor of size $2$ on vertex $i$
+One can encode the independence polynomial~\cite{Ferrin2014, Harvey2017} of $G$ to an einsum network.
+Independence polynomial is an important graph polynomial that contains the counting information of an independent set problem. It is defined as
+\begin{equation}
+I(G, x) = \sum_{k=1}^{\alpha(G)} a_k x^k,
+\end{equation}
+where $a_k$ is the number of independent sets of size $k$ in $G$, and $\alpha(G)$ is the maximum independent set size.
+We encode this polynomial to an einsum network by placing a rank one tensor of size $2$ parametrized by $x_i$ on a vertex $i$
 \begin{equation}
     W(x_i)_{s_i} = \left(\begin{matrix}
         1 \\
         x_i
     \end{matrix}\right)_{s_i},\label{eq:wtensor}
 \end{equation}
-and a rank two tensor of size $2 \times 2$ on edge $(i,j)$
+and a rank two tensor of size $2 \times 2$ on an edge $(i,j)$
 \begin{equation}
     B_{s_i s_j} = \left(\begin{matrix}
         1  & 1\\
         1 & 0
     \end{matrix}\right)_{s_is_j},\label{eq:btensor}
 \end{equation}
-where a tensor index $s_i$ is a boolean variable that being 1 if vertex $i$ is in the independent set, 0 otherwise.
+where a tensor index $s_i$ is a boolean variable that having the meaning of being 1 if vertex $i$ is in the independent set, 0 otherwise.
 It corresponds to a hyperedge in the hypergraph.
-$x_i$ is a variable.
 The contraction of such an einsum network gives
 \begin{equation}
-    A(G, \{x_1,\ldots,x_n\}) = \sum\limits_{s_1, s_2, \ldots, s_n = 0}^{1} \prod\limits_{i=1}^n W(x_i)_{s_i} \prod\limits_{(i,j) \in E(G)} B_{s_i s_j}.
+    P(G, \{x_1,\ldots,x_n\}) = \sum\limits_{s_1, s_2, \ldots, s_n = 0}^{1} \prod\limits_{i=1}^n W(x_i)_{s_i} \prod\limits_{(i,j) \in E(G)} B_{s_i s_j},
 \end{equation}
-Here, the einsum runs over all vertex configurations $\{s_1,\ldots,s_n\}$ and accumulates the product of tensor elements to the scalar output.
-Let $x_i = x$, then the product over vertex tensors gives a factor $x^k$, where $k=\sum_i s_i$ is the vertex set size, 
-and the product over edge tensors gives a factor $0$ for configurations not being an independent set.
-The contraction of this einsum network gives the independence polynomial~\cite{Ferrin2014, Harvey2017} of $G$
-\begin{equation}
-I(G, x) = \sum_{k=1}^{\alpha(G)} a_k x^k,
-\end{equation}
-where $a_k$ is the number of independent sets of size $k$ in $G$, and $\alpha(G)$ is the maximum independent set size.
-The benefit of mapping the independent set problem to the einsum network is one can take the advantage of recently developed techiniques in tensor network based quantum circuit simulations ~\cite{Gray2021,Pan2021},
-where people evaluate a tensor network by pairwise contracting tensors in a heuristic order.
-A good contraction order can reduce the time complexity significantly, at the cost of having a space overhead of $O(2^{tw(G)})$, where $tw(G)$ is the treewidth of the line graph of a tensor network, 
-here it corresponds to the original graph $G$ that we mapped from.~\cite{Markov2008}
-The pairwise tensor contraction also makes it possible to utilize fast basic linear algebra subprograms (BLAS) functions for certain tensor element types.
+where the summation runs over all vertex configurations $\{s_1,\ldots,s_n\}$ and accumulates the product of tensor elements to the scalar output $P$.
+We can see an edge tensor represents the restriction on an edge that if both vertices connected by it are included in the set, then such configuration has no contribution to the output.
+When we set $x_i = x$, the contraction result corresponds to the independence polynomial.
+One can see the connection from the fact that the product over vertex tensor elements gives a factor $x^k$, where $k=\sum_i s_i$ counts the set size, 
+and the product over edge tensor elements gives a factor $1$ for a configuration being in an independent set, $0$ otherwise.
+One directly benefit of mapping the independent set problem to an einsum network is one can take the advantage of recently developed techniques in tensor network based quantum circuit simulations ~\cite{Gray2021,Pan2021},
+where people evaluate an einsum network by pairwise contracting tensors in a heuristic order.
+A good contraction order can reduce the time complexity significantly, at the cost of having a space overhead of $O(2^{tw(G)})$.
+Here $tw(G)$ is the tree width of the line graph of an einsum hypergraph, while the line graph of an einsum hypergraph corresponds to the original graph $G$ that we mapped from.~\cite{Markov2008}
+The pairwise tensor contraction also makes it possible to utilize basic linear algebra subprograms (BLAS) functions to speed up our computation for certain tensor element types.
 
 \begin{example}
     Mapping a graph (left) to an einsum network, the resulting einsum network is shown in the right panel.
-    A vertex is mapped to a hyperedge in the einsum's graphical notation.
-    An edge is mapped to an edge tensor.
+    In the einsum's graphical representation, a vertex is mapped to a hyperedge,
+    and an edge is mapped to an edge tensor.
 
     \centerline{\begin{tikzpicture}[
     dot/.style = {circle, fill, minimum size=#1,
@@ -444,15 +447,17 @@ The pairwise tensor contraction also makes it possible to utilize fast basic lin
     \begin{align*}
         &\sum_{s_a,s_b,s_c,s_d,s_e} W(x_a)_{s_a} W(x_b)_{s_b} W(x_c)_{s_c} W(x_d)_{s_d} W(x_e)_{s_e} B_{s_a s_b} B_{s_b s_d} B_{s_a s_c} B_{s_b s_c} B_{s_d s_e}.\\
         =&\sum_{s_b,s_c}\left(\sum_{s_d}\left(\left(\left(\left(\sum_{s_e}B_{s_d s_e}W(x_e)_{s_e}\right) W(x_d)_{s_d}\right) \left(B_{s_bs_d} W(x_b)_{s_b}\right)\right) \left(B_{s_cs_d} W(x_c)_{s_c}\right)\right)\right.\\
-        &\phantom{XXX}\left.\left(B_{s_bs_c}\sum_{s_a}B_{s_as_b}\left(B_{s_as_c}W(x_a)_{s_a}\right)\right)\right)\\
-        =&1 + x_a + x_b + x_c + x_d + x_e + x_ax_d + x_ax_e + x_cx_e + x_bx_e
+        &\phantom{XXX}\left.\left(B_{s_bs_c}\left(\sum_{s_a}B_{s_as_b}\left(B_{s_as_c}W(x_a)_{s_a}\right)\right)\right)\right)\\
+        =&1 + x_a + x_b + x_c + x_d + x_e + x_ax_d + x_ax_e + x_cx_e + x_bx_e\\
+        =&1+5x+4x^2
     \end{align*}
 \end{example}
+
 
 Before contracting the einsum network and evaluating the independence polynomial numerically, let us first give up thinking $0$s and $1$s in tensors $W(x)$ and $B$ as regular computer numbers such as integers and floating point numbers.
 Instead, we treat them as the additive identity and multiplicative identity of a commutative semiring.
 A semiring is a ring without additive inverse, while a commutative semiring is a semiring that multiplication commutative.
-To define a commutative semiring with addition algebra $\oplus$ and multiplication algebra $\odot$ on a set $R$, the following relations must hold for arbituary three elements $a, b, c \in R$.
+To define a commutative semiring with addition algebra $\oplus$ and multiplication algebra $\odot$ on a set $R$, the following relations must hold for arbitrary three elements $a, b, c \in R$.
 \begin{align*}
 (a \oplus b) \oplus c = a \oplus (b \oplus c) & \hspace{5em}\text{$\triangleright$ commutative monoid $\oplus$ with identity $\mymathbb{0}$}\\
 a \oplus \mymathbb{0} = \mymathbb{0} \oplus a = a &\\
@@ -484,8 +489,8 @@ We define the algebra between the polynomials $a$ of order $k_a$ and $b$ of orde
     \end{split}
 \end{align}
 By contracting the einsum network with polynomial type, the final result is the exact representation of the independence polynomial.
-In the program, the multiplication can be evaluated efficiently with the convolution theorem.
-The only problem of this method is it suffers from a space overhead that propotional to the maximum independant set size because each polynomial requires a vector of such size to store the factors.
+In the program, the multiplication can be evaluated efficiently with the convolution theorem~\cite{Schonhage1971}.
+The only problem of this method is it suffers from a space overhead that proportional to the maximum independent set size because each polynomial requires a vector of such size to store the factors.
 In the following subsections, we managed to solve this problem.
 
 \subsection{The fitting and Fourier transformation approaches}
@@ -500,7 +505,7 @@ a_0 + a_1 x_m + a_2 x_m^2 + \ldots + a_m x_m^m& = y_m
     \end{split}
 \end{align}
 The polynomial fitting between $X$ and $Y = \{y_0, y_1, \ldots, y_m\}$ gives us the factors.
-The polynomial fitting is esentially about solving the following linear equation
+The polynomial fitting is essentially about solving the following linear equation
 \begin{align}
 \left(\begin{matrix}
 1 & x_1 & x_1^2 & \ldots & x_1^m \\
@@ -534,15 +539,16 @@ y_0 \\ y_1 \\ \vdots \\ y_m
 \end{matrix}\right).
 \end{align}
 
-Let us rearange the factors $r^j$ to $a_j$, the matrix on left side is exactly the a descrete fourier transformation (DFT) matrix.
-Then we can obtain the factors using the inverse fourier transformation $\vec a_r = {\rm FFT^{-1}}(\omega) \cdot \vec y$, where $(\vec a_r)_j = a_j r ^j$.
-By choosing diferent $r$, one can obtain better precision in low independant set size region  ($\omega<1$) and high independant set size region ($\omega>1$).
+Let us rearrange the factors $r^j$ to $a_j$, the matrix on left side is exactly the a discrete Fourier transformation (DFT) matrix.
+Then we can obtain the factors using the inverse Fourier transformation $\vec a_r = {\rm FFT^{-1}}(\omega) \cdot \vec y$, where $(\vec a_r)_j = a_j r ^j$.
+By choosing different $r$, one can obtain better precision in low independent set size region  ($\omega<1$) and high independent set size region ($\omega>1$).
 
 \subsection{The finite field algebra approach}
-It sounds a bit over ambitious to compute the independence polynomial regorously using integer number types only,
-because the fixed width integer types are often too small to store the countings,
-while big integer with varying width can be very slow and imcompatible with graphic processing units (GPU) devices.
-This problem will be solved if we computate on a finite field algebra $GF(p)$
+It is possible but not trivial to compute the independence polynomial rigorously using integer number types only.
+The hardness originates from the practical consideration of computing speed and precision.
+Fixed width integer types are often too small to store the counting,
+while big integer with varying width can be very slow and incompatible with graphic processing units (GPU) devices.
+This problem can be solved by introducing finite field algebra $GF(p)$
 
 \begin{align}
 \begin{split}
@@ -555,15 +561,15 @@ This problem will be solved if we computate on a finite field algebra $GF(p)$
 
 In a finite field algebra, we have the following observations
 \begin{enumerate}
-    \item One can still use Gaussian elimination~\cite{Golub2013} to solve a linear equation \Eq{eq:lineareq}.
-    This is because a field has the property that the multiplicative inverse exists for any non-zero value.
-    The multiplicative inverse here can be computed with the extended Euclidean algorithm.
-    \item Given the remainders of a larger integer $x$ over a set of coprime integers $\{p_1, p_2, \ldots, p_n\}$,
-    $x \pmod {p_1 \times p_2 \times \ldots \times p_n}$ can be computed using the chinese remainder theorem.
-    With this, one can infer big integers even though its bit width is larger than the register size.
+    \item One can use Gaussian elimination~\cite{Golub2013} to solve a linear equation \Eq{eq:lineareq}
+    because it is a generic function that works for any elements with field algebra.
+    The multiplicative inverse of a finite field algebra can be computed with the extended Euclidean algorithm.
+    \item Given the remainders of a larger unkown integer $x$ over a set of co-prime integers $\{p_1, p_2, \ldots, p_n\}$,
+    $x \pmod {p_1 \times p_2 \times \ldots \times p_n}$ can be computed using the Chinese remainder theorem.
+    With this, one can infer big integers from small integers.
 \end{enumerate}
 With these observations, we developed Algorithm~\ref{alg:finitefield} to compute independence polynomial exactly without introducing space overheads.
-In the algorithm, except the computation of chinese remainder theorem, all computations are done with integers of fixed width $W$.
+In the algorithm, except the computation of Chinese remainder theorem, all computations are done with integers of fixed width $W$.
 
 \begin{algorithm}[!ht]
     \small
@@ -572,9 +578,9 @@ In the algorithm, except the computation of chinese remainder theorem, all compu
     Let $P = 1$, vector $X = (0,1,2,\ldots,m)$, matrix $\hat X_{ij} = X_i^j$, where $i,j = 0, 1, \ldots m$\;
 
     \While{true}{
-        compute the largest prime $p$ that $\gcd(p, P) = 1 \land p \leq 2^W$\;
+        compute the largest prime $p$ that $\gcd(p, P) = 1$ and $p \leq 2^W$\;
 
-        compute the tensor network contraction on $GF(p)$ and obtain $Y = (y_0, y_1, \ldots , y_m) \pmod p $\;
+        compute the tensor contraction on $GF(p)$ and obtain $Y = (y_0, y_1, \ldots , y_m) \pmod p $\;
 
         $A_p = (a_0, a_1, \ldots, a_m) \pmod p = {\rm gaussian\_elimination}(\hat X, Y \pmod p) $\;
 
@@ -588,36 +594,38 @@ In the algorithm, except the computation of chinese remainder theorem, all compu
 \end{algorithm}
 
 \subsection{Maximal independence polynomial}
-Let us denote the neighbor of a vertex $v$ as $N(v)$ and $N[v] = N(v)\cup \{v\}$.
+Some times people are interested in knowing maximal solutions to understand why their program is trapped in a local minimal.
+Then they might want to compute the maximal independence polynomial.
+Let us denote the neighbour of a vertex $v$ as $N(v)$ and $N[v] = N(v)\cup \{v\}$.
 A maximal independent set $I_m$ is an independent sets that there does not exist a vertex $v$ that $N[v] \cap I_m = \emptyset$.
-Let us modify the einsum network for computing independence polynomial to count maximal independent sets.
-We define a tensor on $N[v]$ to capture this property
+Let us modify the einsum network for computing independence polynomial by adding this restriction.
+Instead of defining the restriction on vertices and edges, we define it on $N[v]$
 \begin{align}
-    T(x)_{s_1,s_2,\ldots,s_{|N(v)|},s_v} = \begin{cases}
-        s_vx & s_1=s_2=\ldots=s_{|N(v)|}=0,\\
+    T(x_v)_{s_1,s_2,\ldots,s_{|N(v)|},s_v} = \begin{cases}
+        s_vx_v & s_1=s_2=\ldots=s_{|N(v)|}=0,\\
         1-s_v& otherwise.\\
     \end{cases}
 \end{align}
 As an example, for a vertex of degree 2, the resulting rank 3 tensor is
 \begin{align}
-    T(x)=\left(\begin{matrix}
+    T(x_v)=\left(\begin{matrix}
     \left(\begin{matrix}
         0 &1 \\
         1 &1
     \end{matrix}\right)\\
     \left(\begin{matrix}
-        x &0 \\
+        x_v &0 \\
         0 &0
     \end{matrix}\right)
     \end{matrix}\right).
 \end{align}
 
-We do the same computation as independence polynomial, the coefficients of resulting polynomial gives the counting of maximal independent sets, or the maximal independence polynoimal.
-The treewidth of this new tensor network is often larger than the one for computing independence polynomial.
-However, in many sparse graphs, this tensor network contraction approach is still much faster than computing the maximal cliques on its complement by applying the Bron Kerbosch algorithm.
+We do the same computation as independence polynomial, the coefficients of resulting polynomial gives the counting of maximal independent sets, or the maximal independence polynomial.
+The computational complexity of this new einsum network is often larger than the one for computing independence polynomial.
+However, in many sparse graphs, this einsum network contraction approach is still much faster than computing the maximal cliques on its complement by applying the Bron-Kerbosch algorithm.
 
 \section{Maximum independent sets and its counting problem}
-In the previous section, we mentioned how to compute independence polynomial for a given maximum independent set size $\alpha(G)$, but we didn't mention how to compute this number.
+In the previous section, we focused on computing independence polynomial for a given maximum independent set size $\alpha(G)$, but we didn't mention how to compute this number.
 The method we use to compute this quantity is based on the following observations. Let $x=\infty$, the independence polynomial becomes
 \begin{equation}
 I(G, \infty) = a_k \infty^{\alpha(G)},
@@ -637,11 +645,11 @@ where the lower orders terms disappear automatically. We can define a new algebr
 \end{align}
 In the program, we only store the power $x$ and the corresponding factor $a_x$ that initialized to $1$.
 This algebra is the same as the one in ~\cite{Liu2021} for counting spin glass ground states.
-If one is only interested in obtaining $\alpha(G)$, he can drop the factor parts, then the algebra of $x$ becomes the max-plus tropical algebra~\cite{Maclagan2015,Moore2011}.
+If one is only interested in obtaining $\alpha(G)$, he can drop the factor parts, then the new algebra becomes the max-plus tropical algebra~\cite{Maclagan2015,Moore2011}.
 
 \subsection{Sub-optimal solutions}
 Some times people are interested in finding sub-optimal solutions efficiently.
-We modify the polynomial algebra a bit by keeping only largest two factors in the polynomial in \Eq{eq:polynomial}.
+We define a truncated polynomial algebra by keeping only largest two factors in the polynomial in \Eq{eq:polynomial}.
 \begin{align}
     \begin{split}
     a \oplus b &= (a_{\max(k_a, k_b)-1} + b_{\max(k_a, k_b)-1}, a_{\max(k_a, k_b)} + b_{\max(k_a, k_b)}),\\
@@ -650,11 +658,12 @@ We modify the polynomial algebra a bit by keeping only largest two factors in th
     \mymathbb{1} &= (1).\label{eq:max2poly}
     \end{split}
 \end{align}
-By changing the factors to sets, and plus and multiplication operations on factors to set union and product, one can get all suboptimal solutions too.
+%By changing the factors to sets, and plus and multiplication operations on factors to set union and product, one can get all suboptimal solutions too.
+In the program, we need a data structure that contains three fields, the largest order $k$ and factors for two largest orders $a_k$ and $a_{k-1}$.
 
 \section{Enumerating configurations}
 One may also want to obtain all solutions, it can be achieved replacing the factors $a_x$ with a set of bit strings $s_x$,
-We design a new element type that having algebra
+We design a new element type having the following algebra
 \begin{align}
 \begin{split}
     s \oplus t &= s \cup t\\
@@ -679,9 +688,9 @@ We design a new element type that having algebra
 \fi
 where $\lor^\circ$ is the Hadamard logic or operation over two bit strings, which means joining of two local configurations.
 The variable $x$ in the vertex tensor is initialized to $x_i = \{\boldsymbol{e}_{i}\}$,
-where $e_i$ is a one hot vector of size $|G|$.
+where $\boldsymbol{e}_i$ is a one hot vector of size $|G|$.
 One can easily check this algebra is a commutative semiring.
-When we use the above algebra as factors in \Eq{eq:countingtropical}, the resulting algebra is also a commutative semiring.
+When we use the above algebra as factors of independence polynomials, the resulting algebra is also a commutative semiring.
 With this new element type, the einsum network contraction will give all solutions rather than just a number for counting.
 By slightly modifying the above algebra, it can also be used to obtain just a single configuration to save the computational effort.
 %We leave this as an exercise for readers.
@@ -709,57 +718,56 @@ By slightly modifying the above algebra, it can also be used to obtain just a si
 \end{split}\label{eq:singleconfig}
 \end{align}
 where the \texttt{select} function picks one of $\sigma_x$ and $\sigma_y$ by some criteria to make the algebra commutative and associative, e.g. by their integer values.
-In practise, one can just pick randomly from them, then the program will output one of the optimal configurations randomly.
+In practise, one can just pick randomly from them, then the program will output one of the configurations randomly.
 
 \subsection{Bounding the enumeration space}
-If one implements the above algebra for enumerating configurations naively, he will find the program stores more than nessesary intermedite configurations and cause significant overheads in space.
-To speed up the computation, we use $\alpha(G)$ to bound the search space.
+When one uses the set algebra in \Eq{eq:set} to represent the factors in \Eq{eq:countingtropical} for enumerating all optimum configurations, he will find the program stores more than necessary intermediate configurations and cause significant overheads in space.
+To speed up the computation, we use $\alpha(G)$ to bound the searching space.
 We first compute the value of $\alpha(G)$ with tropical numbers and cache all intermediate tensors.
-Then we compute a boolean masks for each cached tensor, where we use a boolean true to represent a tensor element having contribution to the maximum independent set (i.e. with a nonzero gradient) and boolean false otherwise.
+Then we compute a boolean masks for each cached tensor, where we use a boolean true to represent a tensor element having contribution to the maximum independent set (i.e. with a non-zero gradient) and boolean false otherwise.
 Finally, we perform masked matrix multiplication using the new element type with the above algebra for obtaining all configurations.
-Notice that these masks are in fact tensor elements with nonzero gradients with respect to MIS size, we compute these masks by back propagating gradients.
+Notice that these masks are in fact tensor elements with non-zero gradients with respect to MIS size, we compute these masks by back propagating gradients.
 To derive the backward rule, we consider a tropical matrix multiplication $C = A B$, we have the following inequality
 \begin{align}
     A_{ij} \odot B_{jk} &\leq C_{ik}.
 \end{align}
-
 Moving $B_{ik}$ to the right hand side, we have
 \begin{align}
     A_{ij} &\leq (\oplus_{k} (C_{ik}^{-1} \odot B_{jk}))^{-1}
 \end{align}
-where the tropical multiplicative inverse is defined as the additive inverse of the regular algebra. The equality holds if and only if element $A_{ij}$ contributions to $C$ (i.e. has nonzero gradient).
+where the tropical multiplicative inverse is defined as the additive inverse of the regular algebra. The equality holds if and only if element $A_{ij}$ contributions to $C$ (i.e. has non-zero gradient).
 Let the mask for $C$ being $\overline C$, the backward rule for ``gradient'' masks reads
 \begin{align}
 \overline{A}_{ij} = \delta(A_{ij}, ((C^{\circ-1} \circ \overline C )B^T)_{ij}^{\circ -1}),
 \end{align}
 where ${}^{\circ -1}$ is the Hadamard inverse, $\circ$ is the Hadamard product, boolean false is treated as tropical zero and boolean true is treated as tropical one.
-This rule defined on matrix multiplication can be easily generalized to the einsum of two tensors by replacing the matrix multiplication between $C^{\circ-1} \circ \overline C$ and $B^T$ by an einsum.
+This rule defined on matrix multiplication can be easily generalized to einsum by replacing the matrix multiplication between $C^{\circ-1} \circ \overline C$ and $B^T$ by an einsum operation.~\cite{} \blue{maybe add an appendix?}  % my blog
 
-\section{Tropical tensors for automated branching}
+\section{Tropical tensors for automated branching}\blue{$?$}
 % check http://www.tcs.rwth-aachen.de/independentset/ for more rules
-Branching rules can be automatically discovered by contracting the tropical einsum network for a subgraph $R \subseteq G$.
-Let us denote the resulting tropical tensor of rank $|C|$ as $A$, where $C$ is the set of boundary vertices defined as $C := \{c | c\in R \land c \in G\backslash R\}$ and $|C|$ the size of $C$.
-Each tensor entry $A_{\sigma}$ is a local maximum independant set size with a fixed boundary configuration $\sigma \in \{0,1\}^{|C|}$ by marginalizing the inner degrees of freedom.
-If we are only interested in finding a single maximum independent set rather than enumerating all possible solutions,
-this tensor can be further ``compresed'' by setting some entries to tropical zero.
-Let us define a relation of \textit{less restrictive} as
+Branching rules can be automatically discovered by contracting the einsum network on a subgraph $R \subseteq G$ with tropical numbers as its element type.
+Let $C$ be the set of boundary vertices defined as $C := \{u | u\in R \land (\exists v \in (G\backslash R) \land {\rm adj}(u, v))\}$, then the rank of the resulting tensor $A$ is $|C|$.
+Here, we use ${\rm adj}(u, v)$ to denote two vertices $u$ and $v$ are adjacent to each other.
+Each tensor entry $A_{\sigma}$ is a local maximum independent set size for the fixed boundary configuration $\sigma \in \{0,1\}^{|C|}$.
+Suppose our goal is to find the maximum independent set size,
+then this tensor can be further ``compactified'' by removing some entries.
+To determine which entry can be removed, let us define a relation of \textit{less restrictive} as
 \begin{align}
 (\sigma_a \prec \sigma_b) := (\sigma_a \neq \sigma_b) \land (\sigma_a \leq^\circ \sigma_b)
 \end{align}
 where $\leq^\circ$ is the Hadamard less or equal to operation.
 
 \begin{definition}
-A tensors $A$ is \textit{MIS-compact} if are no two nonzero entries of it that one is ``better'' than another,
-where an entry $A_{\sigma_a}$ is ``better'' than $A_{\sigma_b}$ if
+A tensors $A$ is \textit{MIS-compact} if
 \begin{align}
-(\sigma_a \prec \sigma_b) \land (A_{\sigma_a} \geq A_{\sigma_b})\label{eq:compactifying}.
+\forall{\sigma_b}\neg \exists{\sigma_a}(\sigma_a \prec \sigma_b) \land (A_{\sigma_a} \geq A_{\sigma_b})\label{eq:compactifying}.
 \end{align}
 \end{definition}
 
-If we remove such $A_{\sigma_b}$, the contraction over the whole graph is guaranted to give the same maximum independant set size.
+If we remove such $A_{\sigma_b}$, the contraction over the whole graph is guaranteed to give the same maximum independent set size.
 It can be seen by considering two entries with the same local maximum independent set sizes and different boundary configurations as shown in \Fig{fig:compactifying} (a) and (b).
-If we have $\sigma_b \cup \overline{\sigma_b}$ being one of the solutions for maximum independant sets in $G$, then $\sigma_a \cup \overline{\sigma_b}$ is another solution giving the same $\alpha(G)$.
-Hence, we can set $A_{\sigma_b}$ to tropical zero safely.
+If we have $\sigma_b \cup \overline{\sigma_b}$ being one of the solutions for maximum independent sets in $G$, then $\sigma_a \cup \overline{\sigma_b}$ is another solution giving the same $\alpha(G)$.
+Hence, we can remove entry $A_{\sigma_b}$ safely.
 %among boundary configurations with equal local maximum independent sizes,
 %we only retain those least restrictive (less ones at the boundary) to exterial configurations.
 
@@ -770,46 +778,43 @@ Hence, we can set $A_{\sigma_b}$ to tropical zero safely.
 \end{figure}
 
 \begin{theorem}
-    A MIS-compact tropical tensor is optimal, i.e. any of its nonzero entries can produce the only global optimal solution given a proper environment.
+    A MIS-compact tropical tensor can not be further reduce without gloal information, i.e. any of its non-zero entries can produce the only global optimal solution given a proper environment.
 \end{theorem}
 
 \begin{proof}
     %Given $A_\{\sigma_a}$ is better than $A_\{\sigma_b\}$, any exterior configuration $\overline{\sigma}$ making $\overline{\sigma} \cup \sigma_b$ a global maximum independent set also makes $\overline{\sigma} \cup \sigma_a$ a maximum independent set.
-    Let use prove it by showing $\forall \sigma$ in a MIS-compact tropical tensor for a subgraph $R$, there exists a graph $G$ that $R\subseteq G$ and $\sigma$ is the only boundary configuration that produces the maximum independent set.
-    i.e. no tensor entry can be removed without knowledge about $G\backslash R$.
-    Let $A$ be a tropical tensor, and an entry of it being $A_{\sigma}$, where $\sigma$ is the bounary configuration.
-    Let us construct a graph $G$ such that for a vertex $v \in C$, if $\sigma_v=1$, $\alpha(N[v] \cap (G \backslash R)) = 0$, otherwise, $\alpha(N[v] \cap (G\backslash R)) = \infty$, meanwhile, for any $v, w \in C$, $N[v]\cap N[w] = \emptyset$.
-    The simplest construction is connecting vertices that $\sigma_v=0$ with infinite many mutually disconnected vertices as illustrated in the following graph.
+    Let us prove it by showing for any $\sigma$ in a MIS-compact tropical tensor of a subgraph $R$, there exists a parent graph $G$ that $R\subseteq G$ and $\sigma$ is the boundary configuration that gives the only maximum independent set.
+    Let $A$ be a tropical tensor, and an entry of it being $A_{\sigma}$, where $\sigma$ is the boundary configuration.
+    Let us construct a graph $G$ such that for a vertex $v \in C$, if $\sigma_v=1$, we connect it with two vertices $u, w \in G \backslash R$ that ${\rm adj}(v, u) \land {\rm adj}(u, w) \land \neg{\rm adj}(v, w)$. Otherwise, we attach infinite many disconnected neighbors to $v$.
 
-    \centerline{\includegraphics[width=0.35\textwidth, trim={0cm 2cm 6cm 0cm}, clip]{proofoptimal.pdf}}
-
-    Then we have the maximum independent set size with boundary configuration $\sigma$ being $\alpha(G,\sigma) = \infty (|C|-|\sigma|) + A_{\sigma}$,
-    where $|\sigma|$ is defined as the number of $1$s in $\sigma$.
-    Let us assume there exists another configuration $\tau$ that generating the same or even better maximum independent set size $\alpha(G, \tau) \geq \alpha(G, \sigma)$.
-    Then we have $\tau \prec \sigma$, otherwise it will suffer from infinite punishment from $G\backslash R$.
+    \centerline{\includegraphics[width=0.35\textwidth, trim={0cm 2cm 5cm 0cm}, clip]{proofoptimal.pdf}}
+    Then we have the maximum independent set size $\alpha(G,\sigma) = A_{\sigma} + \infty (|C|-\sum_{v=1}^{|C|}\sigma_v) + \sum_{v=1}^{|C|} 1-\sigma_v$.
+    Let us assume there exists another configuration $\tau$ that generating the same or better maximum independent set size $\alpha(G, \tau) \geq \alpha(G, \sigma)$.
+    Then we have $\tau \prec \sigma$, otherwise it will loss infinite contribution from the environment.
     For such a $\tau$, we have $A_\tau < A_\sigma$, otherwise $A_\sigma \prec A_\tau$ contradicts with $A$ being MIS-compact.
-    Finally, we have $\alpha(G,\tau) = \infty (|C|-|\sigma|) + A_{\tau} < \alpha(G,\sigma)$, which contradicts with our preassumtion. Such $\tau$ does not exist and $\sigma$ is the only boundary configuration that $\alpha(G) = \alpha(G, \sigma)$.
+    Finally, we have $\alpha(G,\tau) = \infty (|C|-|\sigma|) + A_{\tau} + \sum_{v=1}^{|C|} 1-\sigma_v < \alpha(G,\sigma)$, hence $\sigma$ is the only boundary configuration that gives the maximum independent set for this graph.
 \end{proof}
 
-\subsection{The tensor network compactifying detects branching rules automatically}
+\subsection{The einsum network compactification detects branching rules automatically}
 Almost all branching rules are based on the same idea of analysing a local subgraph induced by a vertex $v$
-by including its neighborhoods,
-and keep only the configurations that has the potential to produce the only maximum independent sets.
-Since an MIS-compact tensor is optimal, by analysing the correlation of vertex configurations on the resulting tensor for $N^3[v]$, one can discover the optimal branching vector automatically.
+by including its neighbourhoods,
+and keep only the configurations that has the potential to produce the only maximum independent set.
+Since an MIS-compact tensor is optimal, by analysing the correlation of vertex configurations on the resulting tensor for the $k$-th neighbourhood $N^k[v]$, one can discover the optimal branching vector automatically.
+In the following, we are going to introduce several important rules for branching in the literature and show how it is connected to our tensor formulation.
 
 \begin{corollary}\label{rule:one} % basic
-  If a vertex $v$ is in an independent set $I$, then none of its neighbors can be in $I$.
+  If a vertex $v$ is in an independent set $I$, then none of its Neighbors can be in $I$.
 On the other hand, if $I$ is a maximum (and thus maximal) independent set,
-and thus if $v$ is not in $I$ then at least one of its neighbors is in $I$.
+and thus if $v$ is not in $I$ then at least one of its Neighbors is in $I$.
 \end{corollary}
 
-Contract $N[v]$ and the resulting tensor $A$ has a rank $|N(v)|$. Each tensor entry $A_{\sigma}$ corresponds to a locally maximized independant set size with fixed boundary configuration $\sigma \in \{0, 1\}^{|N(v)|}$.
-If the boundary configuration is a bit string of 0s, $\sigma_v$ will takes value $1$ to maximize the local independant set size.
+Contract $N[v]$ and the resulting tensor $A$ has a rank $|N(v)|$. Each tensor entry $A_{\sigma}$ corresponds to a locally maximized independent set size with fixed boundary configuration $\sigma \in \{0, 1\}^{|N(v)|}$.
+If the boundary configuration is a bit string of 0s, $\sigma_v$ will takes value $1$ to maximize the local independent set size.
 
 \centerline{\includegraphics[width=0.4\columnwidth,trim={0 3.5cm 0 1cm},clip]{../notebooks/basic.pdf}}
 
 After contracting $N[v]$, $v$ becomes an internal degree of freedom.
-Applying tensor compactifying rule \Eq{eq:compactifying}, the resulting rank 4 tropical tensor is
+Applying tensor compactification rule \Eq{eq:compactifying}, the resulting rank 4 tropical tensor is
 
 \begin{align}
     T_{juwk} = \left(\begin{matrix}
@@ -829,38 +834,43 @@ Applying tensor compactifying rule \Eq{eq:compactifying}, the resulting rank 4 t
         ~~~~2 & ~~~~3 \\
         ~~~~3 & ~~~~4
         \end{matrix}\right)_{ju}
-    \end{matrix}\right)_{wk}.
+    \end{matrix}\right)_{wk},
 \end{align}
-
-If we use sets for counting, one can check all configurations too.
-By studying the correlation between vertex variables, one can easily see $x_v$ does not co-exist with other vertex variables.
-These anti-correlation determines possible branching vectors in the maximum independent set problem.
-
+where we use ``-'' to denote an entry is forbidden.
+If we use sets for counting, one can check all configurations too. The resulting polynomial tensor is
 \begin{align}
-    S_{juwk} = \left(\begin{matrix}
+    P_{juwk} = \left(\begin{matrix}
         \left(\begin{matrix}
         1+x_v & - \\
-        - & ~~~~x_jx_u
+        - & ~~x_jx_u
         \end{matrix}\right)_{ju}&
         \left(\begin{matrix}
-        - & ~~~~x_ux_k \\
+        - & x_ux_k \\
         ~~~~x_jx_k & ~~~~x_ux_jx_k
         \end{matrix}\right)_{ju}\\
         \left(\begin{matrix}
-        - & ~~~~x_wx_u \\
-        ~~~~x_wx_j & ~~~~x_wx_jx_u
+        - & x_wx_u \\
+        x_wx_j & x_wx_jx_u
         \end{matrix}\right)_{ju} &
         \left(\begin{matrix}
-        ~~~~x_wx_k & ~~~~x_wx_kx_u \\
-        ~~~~x_wx_kx_j & ~~~~x_jx_ux_wx_k
+        x_wx_k & x_wx_kx_u \\
+        x_wx_kx_j & x_jx_ux_wx_k
         \end{matrix}\right)_{ju}
-    \end{matrix}\right)_{wk},
+    \end{matrix}\right)_{wk}.
 \end{align}
-where we use ``-'' to denote an entry is forbiden.
 
+By studying the correlation between vertex variables, one can easily see $x_v$ does not co-exist with other vertex variables.
+These anti-correlation determines possible branching vectors in the maximum independent set problem.
+It is easier to see if we list the set of optimal solutions as
+\begin{align}
+    \begin{split}
+    S_{juwkv} = \{&00001, 10001, 01010, 10010, 11010, 10100,\\&01100, 11100, 00110, 01110, 10110, 11110\}.
+    \end{split}
+\end{align}
 %If we denote the effective branching number of contracting the local degrees of freedoms as $\left|\{A_{\sigma} \neq \mymathbb{0}\right|\sigma \in \{0, 1\}^{|C|}\}|/2^{|R|}$.
 %The effective branching value is $11^{1/5} \approx 1.6154$, which is larger than the branching number $\tau(1, 5) \approx 1.3247$.
 %It does not mean the tropical tensor does not find all the branches, if we contract $N^2[v]$.
+The corresponding branching vector $(1,5)$ gives a branching number $\tau(1, 5) \approx 1.3247$
 
 \begin{corollary}[mirror rule] % 2.7
 For some $v \in V$, a node $u \in N^2(v)$ is called mirror of $v$, if $N(v) \backslash N(u)$ is a clique. We denote the set of of a node $v$ mirrors~\cite{Fomin2013} by $M(v)$.
@@ -872,16 +882,16 @@ Let $G = (V, E)$ be a graph and $v$ a vertex of $G$. Then
 
 This rule states that if $v$ is not in $M$, there exists an MIS $I$ that $M(v)\notin I$.
 otherwise, there must be one of $N(v)$ in the MIS (\textit{local maximum rule}).
-Although this statement involves $N(u)$, however, deriving this rule only requires information upto second neighborhood of $v$.
+Although this statement involves $N(u)$, however, deriving this rule only requires information upto second neighbourhood of $v$.
 If $w$ is in $I$, then none of $N(v) \cap N(w)$ is in $I$, then there must be one of node in the clique $N(v)\backslash N(w)$ in $I$ (\textit{local maximum rule}),
-since clique has at most one node in the MIS, by moving the occuppied node to the interior, we obtain a ``better'' solution.
+since clique has at most one node in the MIS, by moving the occupied node to the interior, we obtain a ``better'' solution.
 %Hence, the \textit{least restrictive principle} captures the mirror rule.
 In the following example, since $u\in N^2(v)$ and $N(v) \backslash N(u)$ is a clique, $u$ is a mirror of $v$.
 
 \centerline{\includegraphics[width=0.4\columnwidth,trim={0 3.5cm 0 1cm},clip]{../notebooks/mirror.pdf}}
 
 After contracting $N[v]\cup u$, $v$ becomes an internal degree of freedom.
-Applying tensor compactifying rule \Eq{eq:compactifying}, the resulting rank 4 tropical tensor is
+Applying tensor compactification rule \Eq{eq:compactifying}, the resulting rank 4 tropical tensor is
 
 \begin{align}
     T_{juwk} = \left(\begin{matrix}
@@ -903,14 +913,41 @@ Applying tensor compactifying rule \Eq{eq:compactifying}, the resulting rank 4 t
         \end{matrix}\right)_{ju}
     \end{matrix}\right)_{wk},
 \end{align}
-where entries striked through are removed by compactifying.
+where entries stroked through are removed by compactification. The corresponding polynomial tensor is
+
+\begin{align}
+    P_{juwk} = \left(\begin{matrix}
+        \left(\begin{matrix}
+        1+x_v & x_u+x_ux_v \\
+        ~~~~~~~\cancel{} & ~~~~~~~~~~~~~\cancel{}\\
+        \end{matrix}\right)_{ju}&
+        \left(\begin{matrix}
+        ~~~~\cancel{} & - \\
+        x_jx_k & -
+        \end{matrix}\right)_{ju}\\
+        \left(\begin{matrix}
+        ~~~~~~~\cancel{} & ~~~~~~~~~~~~~\cancel{} \\
+        ~~~~~~~- & ~~~~~~~~~~~~~-
+        \end{matrix}\right)_{ju} &
+        \left(\begin{matrix}
+        ~~~~- & - \\
+        ~~~~- & -
+        \end{matrix}\right)_{ju}
+    \end{matrix}\right)_{wk}.
+\end{align}
+One can see $w$, as a mirror of $v$ does not appear in the maximum independent set after compactification.
 
 %In this case, the effective branching number is $3^{1/5}\approx 1.2457$,
 %which is smaller than the branching number $\tau(4, 2) = 1.2721$ by simply applying the mirror rule.
+\begin{align}
+    \begin{split}
+    S_{juwkv} = \{&00001, 01001, 10010\}.
+    \end{split}
+\end{align}
 
 \begin{corollary}[satellite rule] % satellite rule
 Let $G$ be a graph, $v \in V$. A node $u \in N^2(v)$ is called satellite~\cite{Kneis2009} of $v$, if there is some $u' \in N(v)$ such that $N[u'] \backslash N[v] = \{u\}$.
-The set of satellites of a node $v$ is denotedby $S(v)$, and we also use the notation $S[v] := S(v) \cup {v}$. Then 
+The set of satellites of a node $v$ is denoted by $S(v)$, and we also use the notation $S[v] := S(v) \cup {v}$. Then 
 \begin{equation}
 \alpha(G) = \max\{\alpha(G \backslash \{v\}), \alpha(G \backslash N[S[v]]) + |S(v)| + 1\}.
 \end{equation}
@@ -922,7 +959,8 @@ In the following example, since $u \in N^2(v)$ and $w \in N(v)$ satisfies $N[w] 
 \centerline{\includegraphics[width=0.4\columnwidth,trim={0 3.5cm 0 1cm},clip]{../notebooks/satellite.pdf}}
 
 After contracting $N[v] \cup u$, both $v$ and $w$ become internal degrees of freedoms.
-Applying tensor compactifying rule \Eq{eq:compactifying}, the resulting rank 3 tropical tensor is
+Applying tensor compactification rule \Eq{eq:compactifying}, the resulting rank 3 polynomial tensor is
+\iffalse
 \begin{align}
     T_{juk} = \left(\begin{matrix}
         \left(\begin{matrix}
@@ -935,14 +973,41 @@ Applying tensor compactifying rule \Eq{eq:compactifying}, the resulting rank 3 t
         \end{matrix}\right)_{ju}
     \end{matrix}\right)_{k}.
 \end{align}
+\fi
 
-There are 3 nonzero entries. The internal configurations of entry $T(j=1, u=0, k=0) = 2$ is $(v=0, w =1)$,
-that of entry $T(j=0, u=1, k=0)=2$ is $(v=1, w=0)$, and that of entry $T(j=0, u=0, k=0)=1$ is $(v=1, w=0)$ or $(v=0, w=1)$.
-For entry $T(j=0, u=0, k=0)=1$, we post-select the internal degree of freedom as $(v=0, w=1)$.
-Then we can see the satellite rule either ${v, u} \in I$ or $v \notin I$ is satisfied.
-In this case, the effective branching number is $3^{1/5}\approx 1.2457$. 
+\begin{align}
+    P_{juk} = \left(\begin{matrix}
+        \left(\begin{matrix}
+        1+x_w+x_v & x_u + x_ux_v \\
+        x_j+x_wx_j & ~~~~~~~~~~~~\cancel{}
+        \end{matrix}\right)_{ju}\\
+        \left(\begin{matrix}
+        ~~~~~~~~~~~~~~~~\cancel{} & ~~~~~~~~~~~~~~~- \\
+        ~~~~~~~~~~~~~~~~\cancel{} & ~~~~~~~~~~~~~~~-
+        \end{matrix}\right)_{ju}
+    \end{matrix}\right)_{k}.
+\end{align}
 
-\subsection{gadget design}
+By choosing one of the optimal configurations in each entry,
+we can see the satellite rule of either ${v, u} \in I$ or $v \notin I$ is satisfied.
+
+\begin{align}
+    \begin{split}
+    S_{juwkv} = \{&\{00100,00001\}, 10100, 01001\}.
+    \end{split}
+\end{align}
+%In this case, the effective branching number is $3^{1/5}\approx 1.2457$. 
+
+%We can use the conditional entropy to discover branching rules automatically. 
+%Let us take one best configuration a time from each entry of the compact polynomial matrix,
+%and denote the resulting configuration set as $S$.
+%The conditional entropy matrix here can be defined as
+%\begin{align}
+%    C_{uv} = H(s_u|s_v)
+%\end{align}
+%when two variables are strongly correlated to each other, the corresponding entry should be zero.
+
+\subsection{gadget design}\blue{$\times$}
 
 Suppose we have a local structure as the following.
 
@@ -1042,7 +1107,7 @@ The following gadget is equivalent to the above diagram up to a constant $2$.
 We can see these two subgraphs produce exactly the same compact tensor.
 When we replace the original tensor with this gadget, the solution.
 
-\section{benchmarks}
+\section{Benchmarks and case study}
 We run a sequetial program benchmark on CPU Intel(R) Core(TM) i5-10400 CPU @ 2.90GHz, and show the results bellow.
 \begin{figure}
     \centering
@@ -1053,21 +1118,22 @@ The right axis is only for the dashed line.
 \end{figure}
 Einsum network contraction is parallelizable. When the element type is immutable, one can just upload the data to GPU to enjoy the speed up.
 
-\section{discussion}
-We introduced in the main text how to compute the indenpendence polynomial, maximum independent set and optimal configurations.
-It is interesting that although these properties are global,
-they can be solved by designing different element types that having two operations $\oplus$ and $\odot$ and two special elements $\mymathbb{0}$ and $\mymathbb{1}$.
-One thing in common is that they all defines a commutative semiring.
-Here, we want the $\oplus$ and $\odot$ operations being commutative because we do not want the contraction result of an einsum network to be sensitive to the contraction order.
-We show most of the implementation in Appendix \ref{sec:technical}. It is supprisingly short.
+\section{Discussion}
+We introduced in the main text how to compute the independence polynomial, maximum independent set and optimal configurations,
+derived the backward rule for tropical einsum to bound the search of solution space.
+%And, we also discussed how to use tensor network to study the local properties of a graph.
+Although many of these properties are global,
+we can encode it to different tensor element types as commutative semirings.
+The power of Einsum network's is not limited to the indenepent set problem, in \App{app:otherproblems} we show how to map matching problem and k-coloring to an einsum network.
+Here, we want to discuss more from the programming perspective.
+We show some of the Julia language~\cite{Bezanson2012} implementations in Appendix \ref{sec:technical}, you will find it being surprisingly short.
+What we need to do is just defining two operations $\oplus$ and $\odot$ and two special elements $\mymathbb{0}$ and $\mymathbb{1}$.
 The style that we program is called generic programming,
-it is about writing a single copy of code, feeding different types into it, and the program computing the result with a proper performance.
-It is language dependent feature. If someone want to implement this algorithm in python,
-one has to rewrite the matrix multiplication for different element types in C and then export the interface to python.
+meaning one can feed different data types into a same program, and the program will compute the result with a proper performance.
 In C++, users can use templates for such a purpose.
-In our work, we chose Julia because its just in time compiling is very powerful that it can generate fast code dynamically for users.
-Elements of fixed size, such as the finite field algebra, tropical number, tropical number with counting/configuration field used in the main text can be inlined in an array.
-Furthermore, these inlined arrays can be upload to GPU devices for faster generic matrix multiplication implemented in CUDA.jl.
+We chose Julia because its just in time compiling is very powerful that it can generate fast code dynamically for users.
+Elements of fixed size, such as the finite field algebra, truncated polynomial, tropical number and tropical number with counting or configuration field used in the main text can be inlined in an array.
+Furthermore, these inlined arrays can be upload to GPU devices for faster generic matrix multiplication implemented in CUDA.jl~\cite{Besard2018}.
 
 \begin{table}[h!]\centering
 \begin{minipage}{0.9\columnwidth}
@@ -1109,19 +1175,19 @@ Furthermore, these inlined arrays can be upload to GPU devices for faster generi
 	\item[Mods and Primes] packages providing finite field algebra and prime number generators.
 \end{description}
 
-One can install these packages by opening a julia REPL, type \colorbox{lightgray}{\texttt{]}} to enter the \texttt{pkg>} mode and type, e.g.
+One can install these packages by opening a Julia REPL, type \colorbox{lightgray}{\texttt{]}} to enter the \texttt{pkg>} mode and type, e.g.
 \begin{lstlisting}
 pkg> add OMEinsum LightGraphs Mods Primes FFTW Polynomials TropicalNumbers
 \end{lstlisting}
 
-It may supprise you that the Julia implementation of algorithms introduced in the paper is so short that except the bounding and sparsity related parts,
+It may surprise you that the Julia implementation of algorithms introduced in the paper is so short that except the bounding and sparsity related parts,
 all are contained in this appendix. After installing required packages, one can open a Julia REPL and copy the following code into it.
 
 \lstinputlisting[breaklines]{../democode/demo.jl}
 
 In the above examples, the configuration enumeration is very slow, one should use the optimal MIS size for bounding as decribed in the main text.
 We will not show any example about implementing the backward rule here because it has approximately 100 lines of code.
-Please checkout our Github repository \href{https://github.com/Happy-Diode/NoteOnTropicalMIS}{https://github.com/Happy-Diode/NoteOnTropicalMIS}.
+Please checkout our GitHub repository \href{https://github.com/Happy-Diode/NoteOnTropicalMIS}{https://github.com/Happy-Diode/NoteOnTropicalMIS}.
 
 \section{When a tensor network is worse than an einsum network}\label{app:tensorbad}
 
@@ -1170,7 +1236,7 @@ Its tensor network representation is
                     post length=0mm,pre length=0mm}}
     \draw [decorate] (2.7, 0.5) -- (2.7, 5.5);
 \end{tikzpicture}}
-where a small circle on an edge is a diagonal tensor. Its rank is $8$ in the bulk. If we contract this tensor network in a naive columwise order, the maximum intermediate tensor is approximately $3L$, giving a space complexity $\approx 2^{3L}$.
+where a small circle on an edge is a diagonal tensor. Its rank is $8$ in the bulk. If we contract this tensor network in a naive column-wise order, the maximum intermediate tensor is approximately $3L$, giving a space complexity $\approx 2^{3L}$.
 If we treat it as the following einsum network
 
 \centerline{\begin{tikzpicture}
@@ -1236,13 +1302,13 @@ where we use different colors to distinguish different hyperedges.
 Now, the vertex tensor is always rank $1$.
 With the same naive contraction order, we can see the maximum intermediate tensor is approximately of size $2^L$ by counting the colors.
 
-\section{Generalizing to other graph problems}
+\section{Generalizing to other graph problems}\label{app:otherproblems}
 There are some other graph problems that can be encoded in an einsum network.
 To understand its representation power, it is a good starting point to connect it with dynamic programming because
 an einsum network can be viewed as a special type of dynamic programming where its update rule can be characterized by a linear operation.
-Courcelle’s theorem~\cite{Courcelle1990,Barr2020} states that a problem quantified by monadic second order logic (MSO) on a graph with bounded treewidth $k$ can be solved in linear time with respect to the graph size.
+Courcelle’s theorem~\cite{Courcelle1990,Barr2020} states that a problem quantified by monadic second order logic (MSO) on a graph with bounded tree width $k$ can be solved in linear time with respect to the graph size.
 Dynamic programming is a traditional approach to attack a MSO problem, it can solve the maximum independent set problem in $O(2^k)n$, which is similar to the einsum network approach.
-We mentioned in the main text that einsum network has nice mathematic property make it easier for generic programming.
+We mentioned in the main text that einsum network has nice analytic property make it easier for generic programming.
 The cost is, the einsum network is less expressive than dynamic programming,
 \iffalse
 The cost is, it is less expressive than MSO because the einsum network described by \Eq{eq:wtensor} and \Eq{eq:btensor} can be expressed in MSO as
@@ -1265,8 +1331,8 @@ The cost is, it is less expressive than MSO because the einsum network described
     \end{split}
 \end{align}
 while not all monadic second order logic can be represented as an einsum network contraction,
-for example, it is hard to construct a tensor network to decide whether a graph is connected or not.
-At the cost of lossing expressiveness, we can encode the properties of the graph into the tensor elements.
+for example, it is hard to construct a einsum network to decide whether a graph is connected or not.
+At the cost of losing expressiveness, we can encode the properties of the graph into the tensor elements.
 \fi
 However, that are still some other problems that can be expressed in the framework of generic einsum network.
 \subsection{Matching problem}
@@ -1292,8 +1358,8 @@ and a tensor of rank $1$ on the bond
 \end{align}
 Here, we use bond index $v \rightarrow w$ to label tensors.
 
-\subsection{k-Coloring}
-Let us use 3-coloring on the vertex as an example. We can define a vertex tensor as
+\subsection{k-Colouring}
+Let us use 3-colouring on the vertex as an example. We can define a vertex tensor as
 \begin{align}
     W = \left(\begin{matrix}
         r_v\\
@@ -1309,8 +1375,8 @@ and an edge tensor as
         1 & 1 & 0
     \end{matrix}\right).
 \end{align}
-The number of possible coloring can be obtained by contracting this tensor network by setting vertex tensor elements $r_v, g_v$ and $b_v$ to $1$.
-By designing generic types as tensor elements, one should be able to get all possible colorings.
-It is straight forward to define the k-coloring problem on edges hence we will not discuss the detailed construction here.
+The number of possible colouring can be obtained by contracting this einsum network by setting vertex tensor elements $r_v, g_v$ and $b_v$ to $1$.
+By designing generic types as tensor elements, one should be able to get all possible colourings.
+It is straight forward to define the k-colouring problem on edges hence we will not discuss the detailed construction here.
 
 \end{document}

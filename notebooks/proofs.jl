@@ -479,6 +479,12 @@ end
 # ╔═╡ 23fcfe1a-e7ce-4cdc-abcb-651b8f069606
 compress!(copy(satelite_res))
 
+# ╔═╡ 20c8acaf-12e4-4557-aff8-6d04c7b5a9d6
+satelite_res2 = let
+	code = ein"u,v,w,j,k,vw,vj,vk,ku,wu,wk->juk"
+	mis_configs(code)
+end
+
 # ╔═╡ c9c09456-767a-4634-bca0-6897b7c5e923
 md"## Mirror rule"
 
@@ -506,7 +512,7 @@ compress!(copy(mirror_res))
 # ╔═╡ 7a70783a-b9d6-409f-93e7-73443e55d4ca
 mirror_res2 = let
 	code = ein"u,v,w,j,k,vw,vj,vk,ku,wj,wk->juwk"
-	mis_configs(code)
+	mis_configs(code)[:,:,1,2]
 end
 
 # ╔═╡ Cell order:
@@ -586,6 +592,7 @@ end
 # ╟─8c97d833-0c37-40cc-9460-58ea5f1d2e0b
 # ╠═687a88e1-76ad-4563-82aa-8487f65c441f
 # ╠═23fcfe1a-e7ce-4cdc-abcb-651b8f069606
+# ╠═20c8acaf-12e4-4557-aff8-6d04c7b5a9d6
 # ╟─c9c09456-767a-4634-bca0-6897b7c5e923
 # ╟─70b13ee9-7282-4677-8d27-e7f3f83dc79e
 # ╠═a7d0bcd6-a303-4133-9bb1-ba0bb30d294b
