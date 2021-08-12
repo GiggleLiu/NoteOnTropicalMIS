@@ -204,7 +204,7 @@ Listing \thelstlisting: #1\hfill%\hfill%
 
 %\externaldocument{ex_supplement}
 
-\title{Solving the independent set problem by generic programming einsum networks
+\title{Solving the independent set problem by generic programming tensor networks
 \thanks{\funding{...}}
 }
 
@@ -219,14 +219,14 @@ Listing \thelstlisting: #1\hfill%\hfill%
 \maketitle
 
 \begin{abstract}
-	This paper is about solving the independent set problem by eincoding this problem to an einsum network. 
+	This paper is about solving the independent set problem by eincoding this problem to a tensor network. 
     We show how to obtain the maximum independent set size, the independence polynomial and optimal configurations of a graph by engineering the tensor element algebra.
-    We also show how to analyse the local properties of a graph by contracting an open einsum network.
+    We also show how to analyse the local properties of a graph by contracting an open tensor network.
 \end{abstract}
 
 % REQUIRED
 \begin{keywords}
-  maximum independent set, einsum network
+  maximum independent set, tensor network
 \end{keywords}
 
 % REQUIRED
@@ -253,19 +253,19 @@ However, in these applications, knowing the MIS size and one of the optimum solu
 People often ask different questions about independent sets in order to understand the landscape of their models better.
 These questions includes but not limited to, counting all independent sets, obtaining all independent sets of size $\alpha(G)$ and $\alpha(G)-1$,
 counting the number of (maximal) independent sets of different sizes, and understanding the effect of a local gadget.
-In this work, we attack this problem by mapping it to an generic ``einsum'' network.
+In this work, we attack this problem by mapping it to an generic tensor network.
 It does not give a better time complexity comparing to dynamic programming, but is versatile enough to answer the above questions by engineering the tensor elements with minimum effort.
 
-\section{Einsum networks}
+\section{Tensor networks}
 %The word ``einsum'' is a shorthand for Einstein's summation, however, modern einsum notation in program is actually invented by a group of programmers.
-Einstein's notation is originally proposed as a generalization to of binary matrix multiplication to n-ary tensor contraction.
+A tensor network can be viewed as a generalization to of binary matrix multiplication to n-ary tensor contraction.
 Let $A, B$ be two matrices, the matrix multiplication is defined as $C_{ik} = \sum_{j}A_{ij}B_{jk}$.
-In Einstein's notation, it is denoted as $C_i^k = A_i^j B_j^k$, where the paired subscript and superscript $j$ is a dummy index summed over, hence each index appears precisely twice.
-When we have multiple tensors doing the above sum-product operation, we get a tensor network~\cite{Orus2014}.
-A tensor network can be represented as a mutigraph with open edges by viewing a tensor as a vertex, a label pairing two tensors as an edge, and the remaining unpaired labels as open edges.
+A traditional tensor network refers to the Einstein's notation. In this notation, the matrix multiplication is denoted as $C_i^k = A_i^j B_j^k$, where the paired subscript and superscript $j$ is a dummy index summed over, hence each index appears precisely twice.
+When we have multiple tensors doing the above sum-product operation, we get a traditional tensor network~\cite{Orus2014}.
+A traditional tensor network can be represented as a mutigraph with open edges by viewing a tensor as a vertex, a label pairing two tensors as an edge, and the remaining unpaired labels as open edges.
 
 \begin{example}
-    A tensor networks $C_i^l = A_{ij}^{km} B^l_{km} V^j$ has the following multigraph representation.
+   A traditional tensor network $C_i^l = A_{ij}^{km} B^l_{km} V^j$ has the following multigraph representation.
 
 \centerline{\begin{tikzpicture}[
     dot/.style = {circle, fill, minimum size=#1,
@@ -299,13 +299,13 @@ A tensor network can be represented as a mutigraph with open edges by viewing a 
 
 \end{example}
 
-Einsum network is a generalization of tensor network by not restricting the number of times a label appears in the notation,
+Here, we want to use a generalized tensor network notation by not restricting the number of times a label appears in the notation,
 hence whether an index is a superscript or a subscript makes no sense now.
-It is also called sum-product network or factor graph~\cite{Bishop2006} in some contexts.
-The graphical representation of an einsum is a hypergraph, where an edge (label) can be shared by an arbitrary number of vertices (tensors).
+It is also called einsum, sum-product network or factor graph~\cite{Bishop2006} in some contexts.
+The graphical representation of a tensor network in this paper is a hypergraph, where an edge (label) can be shared by an arbitrary number of vertices (tensors).
 
 \begin{example}
-$C_{ijk} = A_{jkm} B_{mil} V_{jm}$ is an einsum network, it represents $C_{ijk} = \sum_{ml}A_{jkm} B_{mia} V_{jm}$.
+$C_{ijk} = A_{jkm} B_{mil} V_{jm}$ is a tensor network, it represents $C_{ijk} = \sum_{ml}A_{jkm} B_{mia} V_{jm}$.
 Its hypergraph representation is as the following, where we use different color to annotate different hyperedges.
 
 \centerline{\begin{tikzpicture}[
@@ -343,19 +343,23 @@ Its hypergraph representation is as the following, where we use different color 
 \end{tikzpicture}}
 \end{example}
 
-In the main text, we stick to the einsum notation rather than the tensor network notation.
-As a note to those who are more familiar with tensor network representation,
-although one can easily translate an einsum network to the equivalent tensor network by adding $\delta$ tensors (a generalization of identity matrix to higher order).
+In the main text, we stick to the our generalized tensor network notation rather than the traditional notation.
+As a note to those who are more familiar with the traditional tensor network representation,
+although one can easily translate a generalized tensor network to the equivalent traditional tensor network by adding $\delta$ tensors (a generalization of identity matrix to higher order).
 It can sometime increase the contraction complexity of a graph. We have an example demonstrating this point in \App{app:tensorbad}.
 
 \section{Independence polynomial}
-One can encode the independence polynomial~\cite{Ferrin2014, Harvey2017} of $G$ to an einsum network.
+One can encode the independence polynomial~\cite{Ferrin2014, Harvey2017} of $G$ to a tensor network.
 Independence polynomial is an important graph polynomial that contains the counting information of an independent set problem. It is defined as
 \begin{equation}
 I(G, x) = \sum_{k=1}^{\alpha(G)} a_k x^k,
 \end{equation}
 where $a_k$ is the number of independent sets of size $k$ in $G$, and $\alpha(G)$ is the maximum independent set size.
-We encode this polynomial to an einsum network by placing a rank one tensor of size $2$ parametrized by $x_i$ on a vertex $i$
+The problem of computing independence polynomial belongs to the complexity class \#P-hard.
+A traditional approach to compute independence polynomial rigorusly requires a computing time $O(1.442^n)$~\cite{Ferrin2014}\blue{I am not sure about this complexity, this is baed on the naive analysis of theorem 2.2 in ~\cite{Ferrin2014}}.
+%with which computing the independence polynomial for a square lattice of size $30\times 30$ would be impossible.
+There are some interests in approximating this polynomial efficiently~\cite{Harvey2018}, but here, we focus on the rigorous approaches.
+We encode this polynomial to a tensor network by placing a rank one tensor of size $2$ parametrized by $x_i$ on a vertex $i$
 \begin{equation}
     W(x_i)_{s_i} = \left(\begin{matrix}
         1 \\
@@ -371,7 +375,7 @@ and a rank two tensor of size $2 \times 2$ on an edge $(i,j)$
 \end{equation}
 where a tensor index $s_i$ is a boolean variable that having the meaning of being 1 if vertex $i$ is in the independent set, 0 otherwise.
 It corresponds to a hyperedge in the hypergraph.
-The contraction of such an einsum network gives
+The contraction of such a tensor network gives
 \begin{equation}
     P(G, \{x_1,\ldots,x_n\}) = \sum\limits_{s_1, s_2, \ldots, s_n = 0}^{1} \prod\limits_{i=1}^n W(x_i)_{s_i} \prod\limits_{(i,j) \in E(G)} B_{s_i s_j},
 \end{equation}
@@ -380,15 +384,15 @@ We can see an edge tensor represents the restriction on an edge that if both ver
 When we set $x_i = x$, the contraction result corresponds to the independence polynomial.
 One can see the connection from the fact that the product over vertex tensor elements gives a factor $x^k$, where $k=\sum_i s_i$ counts the set size, 
 and the product over edge tensor elements gives a factor $1$ for a configuration being in an independent set, $0$ otherwise.
-One directly benefit of mapping the independent set problem to an einsum network is one can take the advantage of recently developed techniques in tensor network based quantum circuit simulations ~\cite{Gray2021,Pan2021},
-where people evaluate an einsum network by pairwise contracting tensors in a heuristic order.
+One directly benefit of mapping the independent set problem to a tensor network is one can take the advantage of recently developed techniques in tensor network based quantum circuit simulations ~\cite{Gray2021,Pan2021},
+where people evaluate a tensor network by pairwise contracting tensors in a heuristic order.
 A good contraction order can reduce the time complexity significantly, at the cost of having a space overhead of $O(2^{tw(G)})$.
-Here $tw(G)$ is the tree width of the line graph of an einsum hypergraph, while the line graph of an einsum hypergraph corresponds to the original graph $G$ that we mapped from.~\cite{Markov2008}
+Here $tw(G)$ is the tree width of the line graph of a tensor network hypergraph, while the line graph of a tensor network hypergraph corresponds to the original graph $G$ that we mapped from.~\cite{Markov2008}
 The pairwise tensor contraction also makes it possible to utilize basic linear algebra subprograms (BLAS) functions to speed up our computation for certain tensor element types.
 
 \begin{example}
-    Mapping a graph (left) to an einsum network, the resulting einsum network is shown in the right panel.
-    In the einsum's graphical representation, a vertex is mapped to a hyperedge,
+    Mapping a graph (left) to a tensor network, the resulting tensor network is shown in the right panel.
+    In the generalize tensor network's graphical representation, a vertex is mapped to a hyperedge,
     and an edge is mapped to an edge tensor.
 
     \centerline{\begin{tikzpicture}[
@@ -454,7 +458,7 @@ The pairwise tensor contraction also makes it possible to utilize basic linear a
 \end{example}
 
 
-Before contracting the einsum network and evaluating the independence polynomial numerically, let us first give up thinking $0$s and $1$s in tensors $W(x)$ and $B$ as regular computer numbers such as integers and floating point numbers.
+Before contracting the tensor network and evaluating the independence polynomial numerically, let us first give up thinking $0$s and $1$s in tensors $W(x)$ and $B$ as regular computer numbers such as integers and floating point numbers.
 Instead, we treat them as the additive identity and multiplicative identity of a commutative semiring.
 A semiring is a ring without additive inverse, while a commutative semiring is a semiring that multiplication commutative.
 To define a commutative semiring with addition algebra $\oplus$ and multiplication algebra $\odot$ on a set $R$, the following relations must hold for arbitrary three elements $a, b, c \in R$.
@@ -474,7 +478,7 @@ a \odot \mymathbb{0} = \mymathbb{0} \odot a = \mymathbb{0}
 \end{align*}
 
 In the following, we show how to obtain the independence polynomial, the maximum independent set size and optimal configurations of a general graph $G$ by designing tensor element types as commutative semirings,
-i.e. making the einsum network generic~\cite{Stepanov2014}.
+i.e. making the tensor network generic~\cite{Stepanov2014}.
 
 \subsection{The polynomial approach}
 A straight forward approach to evaluate the independence polynomial is treating the tensor elements as polynomials, and evaluate the polynomial directly.
@@ -488,14 +492,14 @@ We define the algebra between the polynomials $a$ of order $k_a$ and $b$ of orde
     \mymathbb{1} &= (1).\label{eq:polynomial}
     \end{split}
 \end{align}
-By contracting the einsum network with polynomial type, the final result is the exact representation of the independence polynomial.
+By contracting the tensor network with polynomial type, the final result is the exact representation of the independence polynomial.
 In the program, the multiplication can be evaluated efficiently with the convolution theorem~\cite{Schonhage1971}.
 The only problem of this method is it suffers from a space overhead that proportional to the maximum independent set size because each polynomial requires a vector of such size to store the factors.
 In the following subsections, we managed to solve this problem.
 
 \subsection{The fitting and Fourier transformation approaches}
 Let $m=\alpha(G)$ be the maximum independent set size and $X$ be a set of real numbers of cardinality $m+1$.
-We compute the einsum contraction for each $x_i \in X$ and obtain the following relations
+We compute the tensor network contraction for each $x_i \in X$ and obtain the following relations
 \begin{align}
     \begin{split}
 a_0 + a_1 x_1 + a_1 x_1^2 + \ldots + a_m x_1^m &= y_0\\
@@ -598,7 +602,7 @@ Some times people are interested in knowing maximal solutions to understand why 
 Then they might want to compute the maximal independence polynomial.
 Let us denote the neighbour of a vertex $v$ as $N(v)$ and $N[v] = N(v)\cup \{v\}$.
 A maximal independent set $I_m$ is an independent sets that there does not exist a vertex $v$ that $N[v] \cap I_m = \emptyset$.
-Let us modify the einsum network for computing independence polynomial by adding this restriction.
+Let us modify the tensor network for computing independence polynomial by adding this restriction.
 Instead of defining the restriction on vertices and edges, we define it on $N[v]$
 \begin{align}
     T(x_v)_{s_1,s_2,\ldots,s_{|N(v)|},s_v} = \begin{cases}
@@ -621,8 +625,8 @@ As an example, for a vertex of degree 2, the resulting rank 3 tensor is
 \end{align}
 
 We do the same computation as independence polynomial, the coefficients of resulting polynomial gives the counting of maximal independent sets, or the maximal independence polynomial.
-The computational complexity of this new einsum network is often larger than the one for computing independence polynomial.
-However, in many sparse graphs, this einsum network contraction approach is still much faster than computing the maximal cliques on its complement by applying the Bron-Kerbosch algorithm.
+The computational complexity of this new tensor network is often larger than the one for computing independence polynomial.
+However, in many sparse graphs, this tensor network contraction approach is still much faster than computing the maximal cliques on its complement by applying the Bron-Kerbosch algorithm.
 
 \section{Maximum independent sets and its counting problem}
 In the previous section, we focused on computing independence polynomial for a given maximum independent set size $\alpha(G)$, but we didn't mention how to compute this number.
@@ -691,7 +695,7 @@ The variable $x$ in the vertex tensor is initialized to $x_i = \{\boldsymbol{e}_
 where $\boldsymbol{e}_i$ is a one hot vector of size $|G|$.
 One can easily check this algebra is a commutative semiring.
 When we use the above algebra as factors of independence polynomials, the resulting algebra is also a commutative semiring.
-With this new element type, the einsum network contraction will give all solutions rather than just a number for counting.
+With this new element type, the tensor network contraction will give all solutions rather than just a number for counting.
 By slightly modifying the above algebra, it can also be used to obtain just a single configuration to save the computational effort.
 %We leave this as an exercise for readers.
 
@@ -741,11 +745,11 @@ Let the mask for $C$ being $\overline C$, the backward rule for ``gradient'' mas
 \overline{A}_{ij} = \delta(A_{ij}, ((C^{\circ-1} \circ \overline C )B^T)_{ij}^{\circ -1}),
 \end{align}
 where ${}^{\circ -1}$ is the Hadamard inverse, $\circ$ is the Hadamard product, boolean false is treated as tropical zero and boolean true is treated as tropical one.
-This rule defined on matrix multiplication can be easily generalized to einsum by replacing the matrix multiplication between $C^{\circ-1} \circ \overline C$ and $B^T$ by an einsum operation.~\cite{} \blue{maybe add an appendix?}  % my blog
+This rule defined on matrix multiplication can be easily generalized to tensor contraction by replacing the matrix multiplication between $C^{\circ-1} \circ \overline C$ and $B^T$ by a tensor contraction.~\cite{} \blue{maybe add an appendix?}  % my blog
 
 \section{Tropical tensors for automated branching}\blue{$?$}
 % check http://www.tcs.rwth-aachen.de/independentset/ for more rules
-Branching rules can be automatically discovered by contracting the einsum network on a subgraph $R \subseteq G$ with tropical numbers as its element type.
+Branching rules can be automatically discovered by contracting the tensor network on a subgraph $R \subseteq G$ with tropical numbers as its element type.
 Let $C$ be the set of boundary vertices defined as $C := \{u | u\in R \land (\exists v \in (G\backslash R) \land {\rm adj}(u, v))\}$, then the rank of the resulting tensor $A$ is $|C|$.
 Here, we use ${\rm adj}(u, v)$ to denote two vertices $u$ and $v$ are adjacent to each other.
 Each tensor entry $A_{\sigma}$ is a local maximum independent set size for the fixed boundary configuration $\sigma \in \{0,1\}^{|C|}$.
@@ -795,7 +799,7 @@ Hence, we can remove entry $A_{\sigma_b}$ safely.
     Finally, we have $\alpha(G,\tau) = \infty (|C|-|\sigma|) + A_{\tau} + \sum_{v=1}^{|C|} 1-\sigma_v < \alpha(G,\sigma)$, hence $\sigma$ is the only boundary configuration that gives the maximum independent set for this graph.
 \end{proof}
 
-\subsection{The einsum network compactification detects branching rules automatically}
+\subsection{The tensor network compactification detects branching rules automatically}
 Almost all branching rules are based on the same idea of analysing a local subgraph induced by a vertex $v$
 by including its neighbourhoods,
 and keep only the configurations that has the potential to produce the only maximum independent set.
@@ -870,7 +874,7 @@ It is easier to see if we list the set of optimal solutions as
 %If we denote the effective branching number of contracting the local degrees of freedoms as $\left|\{A_{\sigma} \neq \mymathbb{0}\right|\sigma \in \{0, 1\}^{|C|}\}|/2^{|R|}$.
 %The effective branching value is $11^{1/5} \approx 1.6154$, which is larger than the branching number $\tau(1, 5) \approx 1.3247$.
 %It does not mean the tropical tensor does not find all the branches, if we contract $N^2[v]$.
-The corresponding branching vector $(1,5)$ gives a branching number $\tau(1, 5) \approx 1.3247$
+The branching vector $(1,5)$ gives a branching number $\tau(1, 5) \approx 1.3247$
 
 \begin{corollary}[mirror rule] % 2.7
 For some $v \in V$, a node $u \in N^2(v)$ is called mirror of $v$, if $N(v) \backslash N(u)$ is a clique. We denote the set of of a node $v$ mirrors~\cite{Fomin2013} by $M(v)$.
@@ -1116,15 +1120,15 @@ We run a sequetial program benchmark on CPU Intel(R) Core(TM) i5-10400 CPU @ 2.9
 The right axis is only for the dashed line.
     }\label{fig:benchmark}
 \end{figure}
-Einsum network contraction is parallelizable. When the element type is immutable, one can just upload the data to GPU to enjoy the speed up.
+Tensor network contraction is parallelizable. When the element type is immutable, one can just upload the data to GPU to enjoy the speed up.
 
 \section{Discussion}
 We introduced in the main text how to compute the independence polynomial, maximum independent set and optimal configurations,
-derived the backward rule for tropical einsum to bound the search of solution space.
-%And, we also discussed how to use tensor network to study the local properties of a graph.
+derived the backward rule for tropical tensor network to bound the search of solution space.
+%And, we also discussed how to use @tensor network to study the local properties of a graph.
 Although many of these properties are global,
 we can encode it to different tensor element types as commutative semirings.
-The power of Einsum network's is not limited to the indenepent set problem, in \App{app:otherproblems} we show how to map matching problem and k-coloring to an einsum network.
+The power of tensor network's is not limited to the indenepent set problem, in \App{app:otherproblems} we show how to map matching problem and k-coloring to a tensor network.
 Here, we want to discuss more from the programming perspective.
 We show some of the Julia language~\cite{Bezanson2012} implementations in Appendix \ref{sec:technical}, you will find it being surprisingly short.
 What we need to do is just defining two operations $\oplus$ and $\odot$ and two special elements $\mymathbb{0}$ and $\mymathbb{1}$.
@@ -1166,8 +1170,8 @@ Furthermore, these inlined arrays can be upload to GPU devices for faster generi
 
 \section{Technical guide}\label{sec:technical}
 \begin{description}
-	\item[OMEinsum] a package for einsum,
-	\item[OMEinsumContractionOrders] a package for finding the optimal contraction order for einsum \\ \href{https://github.com/Happy-Diode/OMEinsumContractionOrders.jl}{https://github.com/Happy-Diode/OMEinsumContractionOrders.jl},
+	\item[OMEinsum] a package for the \texttt{einsum} function,
+	\item[OMEinsumContractionOrders] a package for finding the optimal contraction order for the \texttt{einsum} function \\ \href{https://github.com/Happy-Diode/OMEinsumContractionOrders.jl}{https://github.com/Happy-Diode/OMEinsumContractionOrders.jl},
 	\item[TropicalGEMM] a package for efficient tropical matrix multiplication (compatible with OMEinsum),
 	\item[TropicalNumbers] a package providing tropical number types and tropical algebra, one o the dependency of TropicalGEMM,
 	\item[LightGraphs] a package providing graph utilities, like random regular graph generator,
@@ -1189,7 +1193,7 @@ In the above examples, the configuration enumeration is very slow, one should us
 We will not show any example about implementing the backward rule here because it has approximately 100 lines of code.
 Please checkout our GitHub repository \href{https://github.com/Happy-Diode/NoteOnTropicalMIS}{https://github.com/Happy-Diode/NoteOnTropicalMIS}.
 
-\section{When a tensor network is worse than an einsum network}\label{app:tensorbad}
+\section{Why not introducing $\delta$ tensors}\label{app:tensorbad}
 
 Given a graph
 
@@ -1210,7 +1214,7 @@ Given a graph
         }
 \end{tikzpicture}}
 
-Its tensor network representation is
+Its traditional tensor network representation with $\delta$ tensors is
 
 \centerline{\begin{tikzpicture}
     \def\r{0.08}
@@ -1237,7 +1241,7 @@ Its tensor network representation is
     \draw [decorate] (2.7, 0.5) -- (2.7, 5.5);
 \end{tikzpicture}}
 where a small circle on an edge is a diagonal tensor. Its rank is $8$ in the bulk. If we contract this tensor network in a naive column-wise order, the maximum intermediate tensor is approximately $3L$, giving a space complexity $\approx 2^{3L}$.
-If we treat it as the following einsum network
+If we treat it as the following generalized tensor network
 
 \centerline{\begin{tikzpicture}
     \def\r{0.08}
@@ -1303,15 +1307,15 @@ Now, the vertex tensor is always rank $1$.
 With the same naive contraction order, we can see the maximum intermediate tensor is approximately of size $2^L$ by counting the colors.
 
 \section{Generalizing to other graph problems}\label{app:otherproblems}
-There are some other graph problems that can be encoded in an einsum network.
+There are some other graph problems that can be encoded in a tensor network.
 To understand its representation power, it is a good starting point to connect it with dynamic programming because
-an einsum network can be viewed as a special type of dynamic programming where its update rule can be characterized by a linear operation.
+a tensor network can be viewed as a special type of dynamic programming where its update rule can be characterized by a linear operation.
 Courcelle’s theorem~\cite{Courcelle1990,Barr2020} states that a problem quantified by monadic second order logic (MSO) on a graph with bounded tree width $k$ can be solved in linear time with respect to the graph size.
-Dynamic programming is a traditional approach to attack a MSO problem, it can solve the maximum independent set problem in $O(2^k)n$, which is similar to the einsum network approach.
-We mentioned in the main text that einsum network has nice analytic property make it easier for generic programming.
-The cost is, the einsum network is less expressive than dynamic programming,
+Dynamic programming is a traditional approach to attack a MSO problem, it can solve the maximum independent set problem in $O(2^k)n$, which is similar to the tensor network approach.
+We mentioned in the main text that tensor network has nice analytic property make it easier for generic programming.
+The cost is, the tensor network is less expressive than dynamic programming,
 \iffalse
-The cost is, it is less expressive than MSO because the einsum network described by \Eq{eq:wtensor} and \Eq{eq:btensor} can be expressed in MSO as
+The cost is, it is less expressive than MSO because the tensor network described by \Eq{eq:wtensor} and \Eq{eq:btensor} can be expressed in MSO as
 \begin{align}
     \begin{split}
     \exists_X\forall_{u}&(\\
@@ -1330,11 +1334,11 @@ The cost is, it is less expressive than MSO because the einsum network described
     &),
     \end{split}
 \end{align}
-while not all monadic second order logic can be represented as an einsum network contraction,
-for example, it is hard to construct a einsum network to decide whether a graph is connected or not.
+while not all monadic second order logic can be represented as a tensor network contraction,
+for example, it is hard to construct a tensor network to decide whether a graph is connected or not.
 At the cost of losing expressiveness, we can encode the properties of the graph into the tensor elements.
 \fi
-However, that are still some other problems that can be expressed in the framework of generic einsum network.
+However, that are still some other problems that can be expressed in the framework of generic tensor network.
 \subsection{Matching problem}
 A matching polynomial of a graph $G$ is defined as
 \begin{align}
@@ -1375,7 +1379,7 @@ and an edge tensor as
         1 & 1 & 0
     \end{matrix}\right).
 \end{align}
-The number of possible colouring can be obtained by contracting this einsum network by setting vertex tensor elements $r_v, g_v$ and $b_v$ to $1$.
+The number of possible colouring can be obtained by contracting this tensor network by setting vertex tensor elements $r_v, g_v$ and $b_v$ to $1$.
 By designing generic types as tensor elements, one should be able to get all possible colourings.
 It is straight forward to define the k-colouring problem on edges hence we will not discuss the detailed construction here.
 
