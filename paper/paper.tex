@@ -236,6 +236,7 @@ Listing \thelstlisting: #1\hfill%\hfill%
 \end{AMS}
 
 \section{Introduction}
+\blue{efficient counting maximal independent sets~\cite{Manne2013}}
 In this work, we introduce a tensor based framework to study the famous graph problem of finding independent sets.
 Given an undirected graph $G = (V,E)$, an independent set $I \subseteq V$ is a set that for any $u,v \in I$, there is no edge connecting $u$ and $v$ in $G$.
 The problem of finding the maximum independent set (MIS) size $\alpha(G) \equiv \max_{I}|I|$ belongs to the complexity class NP-complete~\cite{Hastad1996}, which is unlikely to be decided in polynomial time.
@@ -479,8 +480,6 @@ a \odot \mymathbb{0} = \mymathbb{0} \odot a = \mymathbb{0}
 The property of being commutative is required here because we want the contraction result independent of the contraction order.
 In the following, we show how to obtain the independence polynomial, the maximum independent set size and optimal configurations of a general graph $G$ by designing tensor element types as commutative semirings,
 i.e. making the tensor network generic~\cite{Stepanov2014}.
-
-\subsection{The polynomial approach}
 A straight forward approach to evaluate the independence polynomial is treating the tensor elements as polynomials, and evaluate the polynomial directly.
 Let us create a polynomial type, and represent a polynomial $a_0 + a_1 x + \ldots + a_k x^k$ as a vector $(a_0, a_1, \ldots, a_k) \in R^k$, e.g. $x$ is represented as $(0, 1)$.
 We define the algebra between the polynomials $a$ of order $k_a$ and $b$ of order $k_b$ as
@@ -494,66 +493,16 @@ We define the algebra between the polynomials $a$ of order $k_a$ and $b$ of orde
 \end{align}
 By contracting the tensor network with polynomial type, the final result is the exact representation of the independence polynomial.
 In the program, the multiplication can be evaluated efficiently with the convolution theorem~\cite{Schonhage1971}.
-The only problem of this method is it suffers from a space overhead that proportional to the maximum independent set size because each polynomial requires a vector of such size to store the factors.
-In the following subsections, we managed to solve this problem.
-
-\subsection{The fitting and Fourier transformation approaches}
-Let $m=\alpha(G)$ be the maximum independent set size and $X$ be a set of real numbers of cardinality $m+1$.
-We compute the tensor network contraction for each $x_i \in X$ and obtain the following relations
-\begin{align}
-    \begin{split}
-a_0 + a_1 x_1 + a_1 x_1^2 + \ldots + a_m x_1^m &= y_0\\
-a_0 + a_1 x_2 + a_2 x_2^2 + \ldots + a_m x_2^m &= y_1\\
-\ldots&\\
-a_0 + a_1 x_m + a_2 x_m^2 + \ldots + a_m x_m^m& = y_m
-    \end{split}
-\end{align}
-The polynomial fitting between $X$ and $Y = \{y_0, y_1, \ldots, y_m\}$ gives us the factors.
-The polynomial fitting is essentially about solving the following linear equation
-\begin{align}
-\left(\begin{matrix}
-1 & x_1 & x_1^2 & \ldots & x_1^m \\
-1 & x_2 & x_2^2 & \ldots & x_2^m \\
-\vdots & \vdots & \vdots &\ddots & \vdots \\
-1 & x_m & x_m^2 & \ldots & x_m^m
-\end{matrix}\right)
-\left(\begin{matrix}
-a_0 \\ a_1 \\ \vdots \\ a_m
-\end{matrix}\right)
-= \left(\begin{matrix}
-y_0 \\ y_1 \\ \vdots \\ y_m
-\end{matrix}\right).\label{eq:lineareq}
-\end{align}
-
-In practise, the fitting can suffer from the non-negligible round off errors of floating point operations and produce unreliable results.
-This is because the factors of independence polynomial can be different in magnitude by many orders.
-Instead of choosing $X$ as a set of random real numbers, we make it form a geometric sequence in the complex domain $x_j = r\omega^j$, where $r \in \mathbb{R}$ and $\omega = e^{-2\pi i/(m+1)}$. The above linear equation becomes
-\begin{align}
-\left(\begin{matrix}
-1 & r\omega & r^2\omega^2 & \ldots & r^m\omega^m \\
-1 & r\omega^2 & r^2\omega^4 & \ldots & r^m\omega^{2m} \\
-\vdots & \vdots & \vdots &\ddots & \vdots \\
-1 & r\omega^m & r^2\omega^{2m} & \ldots & r^m\omega^{m^2}
-\end{matrix}\right)
-\left(\begin{matrix}
-a_0 \\ a_1 \\ \vdots \\ a_m
-\end{matrix}\right)
-= \left(\begin{matrix}
-y_0 \\ y_1 \\ \vdots \\ y_m
-\end{matrix}\right).
-\end{align}
-
-Let us rearrange the factors $r^j$ to $a_j$, the matrix on left side is exactly the a discrete Fourier transformation (DFT) matrix.
-Then we can obtain the factors using the inverse Fourier transformation $\vec a_r = {\rm FFT^{-1}}(\omega) \cdot \vec y$, where $(\vec a_r)_j = a_j r ^j$.
-By choosing different $r$, one can obtain better precision in low independent set size region  ($\omega<1$) and high independent set size region ($\omega>1$).
-
-\subsection{The finite field algebra approach}
-It is possible but not trivial to compute the independence polynomial rigorously using integer number types only.
-The hardness originates from the practical consideration of computing speed and precision.
-Fixed width integer types are often too small to store the counting,
-while big integer with varying width can be very slow and incompatible with graphic processing units (GPU) devices.
+However, this approach suffers from a space overhead that proportional to the maximum independent set size because each polynomial requires a vector of such size to store the factors.
+In \App{app:fft}, we provide a fitting based approach to compute the independence polynomial.
+One just set $x$ to $\alpha(G)+1$ random values, compute the result and use the polynomial fitting to get the factors.
+In this way, we do not have linear overheads in space, however, 
+due to fact that countings of different MIS sizes can be different in many orders, 
+the round off error dominates the high MIS size region that we are most interested about if we use floating point numbers in computation, 
+meanwhile the number easily overflows if we use fixed width integer types.
+The big integer type is not an option because big integers with varying width can be very slow and incompatible with graphic processing units (GPU) devices.
+Then we want to resort to integer numbers, however, fixed width integer types are often too small to store the counting,
 This problem can be solved by introducing finite field algebra $GF(p)$
-
 \begin{align}
 \begin{split}
     x ~\oplus~ y &= x+y\pmod p,\\
@@ -562,7 +511,6 @@ This problem can be solved by introducing finite field algebra $GF(p)$
     \mymathbb{1} &= 1.
 \end{split}\label{eq:finitefield}
 \end{align}
-
 In a finite field algebra, we have the following observations
 \begin{enumerate}
     \item One can use Gaussian elimination~\cite{Golub2013} to solve a linear equation \Eq{eq:lineareq}
@@ -598,7 +546,7 @@ In the algorithm, except the computation of Chinese remainder theorem, all compu
 \end{algorithm}
 
 \subsection{Maximal independence polynomial}
-Some times people are interested in knowing maximal solutions to understand why their program is trapped in a local minimal.
+Some times people are interested in knowing maximal solutions to understand why their programs are trapped in a local minimal.
 Then they might want to compute the maximal independence polynomial.
 Let us denote the neighbour of a vertex $v$ as $N(v)$ and $N[v] = N(v)\cup \{v\}$.
 A maximal independent set $I_m$ is an independent sets that there does not exist a vertex $v$ that $N[v] \cap I_m = \emptyset$.
@@ -666,7 +614,7 @@ We define a truncated polynomial algebra by keeping only largest two factors in 
 In the program, we need a data structure that contains three fields, the largest order $k$ and factors for two largest orders $a_k$ and $a_{k-1}$.
 
 \section{Enumerating configurations}
-One may also want to obtain all solutions, it can be achieved replacing the factors $a_x$ with a set of bit strings $s_x$,
+One may also want to obtain all solutions, it can be achieved replacing the factors with a set of solutions,
 We design a new element type having the following algebra
 \begin{align}
 \begin{split}
@@ -676,7 +624,11 @@ We design a new element type having the following algebra
     \mymathbb{1} &= \{0^{\otimes n}\}
 \end{split}\label{eq:set}
 \end{align}
-\iffalse
+where $\lor^\circ$ is the Hadamard logic or operation over two bit strings, which means joining of two local configurations.
+The variable $x$ in the vertex tensor is initialized to $x_i = \{\boldsymbol{e}_{i}\}$,
+where $\boldsymbol{e}_i$ is a one hot vector of size $|G|$.
+As an example, if we want to enumerate all maximum independent sets, we can use the above set as the factors in \Eq{eq:countingtropical}.
+We get the following new algebra.
 \begin{align}
 \begin{split}
     s_x\infty^x \oplus s_y\infty^y &= \begin{cases}
@@ -689,14 +641,10 @@ We design a new element type having the following algebra
     \mymathbb{1} &= \{0^{\otimes n}\}\infty^{0},
 \end{split}
 \end{align}
-\fi
-where $\lor^\circ$ is the Hadamard logic or operation over two bit strings, which means joining of two local configurations.
-The variable $x$ in the vertex tensor is initialized to $x_i = \{\boldsymbol{e}_{i}\}$,
-where $\boldsymbol{e}_i$ is a one hot vector of size $|G|$.
-One can easily check this algebra is a commutative semiring.
-When we use the above algebra as factors of independence polynomials, the resulting algebra is also a commutative semiring.
-With this new element type, the tensor network contraction will give all solutions rather than just a number for counting.
-By slightly modifying the above algebra, it can also be used to obtain just a single configuration to save the computational effort.
+One can easily check if the factor algebra is a commutative semiring,
+when we use the above algebra as factors of independence polynomials, the resulting algebra is also a commutative semiring.
+If one is only interested in obtaining a single configuration, one can also just keep a single configuration to save the computational effort.
+We arrive at a new algebra defined on bit strings.
 %We leave this as an exercise for readers.
 
 \iffalse
@@ -731,16 +679,28 @@ We first compute the value of $\alpha(G)$ with tropical numbers and cache all in
 Then we compute a boolean masks for each cached tensor, where we use a boolean true to represent a tensor element having contribution to the maximum independent set (i.e. with a non-zero gradient) and boolean false otherwise.
 Finally, we perform masked matrix multiplication using the new element type with the above algebra for obtaining all configurations.
 Notice that these masks are in fact tensor elements with non-zero gradients with respect to MIS size, we compute these masks by back propagating gradients.
-To derive the backward rule, we consider a tropical matrix multiplication $C = A B$, we have the following inequality
+To derive the backward rule for tensor contraction,
+we first reduce the problem to finding the backward rule of a tropical matrix multiplication $C = A B$,
+where we have the following inequality
 \begin{align}
     A_{ij} \odot B_{jk} &\leq C_{ik}.
 \end{align}
-Moving $B_{ik}$ to the right hand side, we have
+Here is $\leq$ on tropical numbers are same as regular algebra.
+The tropical multiplication $\odot$ is the same as the regular $+$, then
+one can move $B_{ik}$ to the right hand side and get
 \begin{align}
-    A_{ij} &\leq (\oplus_{k} (C_{ik}^{-1} \odot B_{jk}))^{-1}
+    A_{ij} &\leq C_{ik} \odot B_{jk}^{\circ -1}
 \end{align}
-where the tropical multiplicative inverse is defined as the additive inverse of the regular algebra. The equality holds if and only if element $A_{ij}$ contributions to $C$ (i.e. has non-zero gradient).
-Let the mask for $C$ being $\overline C$, the backward rule for ``gradient'' masks reads
+where the tropical multiplicative inverse is defined as the additive inverse of the regular algebra.
+The inequality still holds if we take the minimum over $k$
+\begin{align}
+    \begin{split}
+    A_{ij} &\leq \min_{k}(C_{ik} \odot B_{jk}^{\circ -1}) = (\oplus_{k} (C_{ik}^{-1} \odot B_{jk}))^{\circ -1}.
+    \end{split}
+\end{align}
+On the right hand side, we transformed the operation into a tropical matrix multiplication so that we can utilize the fast tropical BLAS routines.
+The equality holds if and only if element $A_{ij}$ has contribution to $C$ (i.e. has non-zero gradient).
+Let the gradient mask for $C$ being $\overline C$, the backward rule for gradient masks reads
 \begin{align}
 \overline{A}_{ij} = \delta(A_{ij}, ((C^{\circ-1} \circ \overline C )B^T)_{ij}^{\circ -1}),
 \end{align}
@@ -1382,5 +1342,56 @@ and an edge tensor as
 The number of possible colouring can be obtained by contracting this tensor network by setting vertex tensor elements $r_v, g_v$ and $b_v$ to $1$.
 By designing generic types as tensor elements, one should be able to get all possible colourings.
 It is straight forward to define the k-colouring problem on edges hence we will not discuss the detailed construction here.
+
+\section{The fitting and Fourier transformation approaches to computing independence polynomial}\label{app:fft}
+Let $m=\alpha(G)$ be the maximum independent set size and $X$ be a set of real numbers of cardinality $m+1$.
+We compute the tensor network contraction for each $x_i \in X$ and obtain the following relations
+\begin{align}
+    \begin{split}
+a_0 + a_1 x_1 + a_1 x_1^2 + \ldots + a_m x_1^m &= y_0\\
+a_0 + a_1 x_2 + a_2 x_2^2 + \ldots + a_m x_2^m &= y_1\\
+\ldots&\\
+a_0 + a_1 x_m + a_2 x_m^2 + \ldots + a_m x_m^m& = y_m
+    \end{split}
+\end{align}
+The polynomial fitting between $X$ and $Y = \{y_0, y_1, \ldots, y_m\}$ gives us the factors.
+The polynomial fitting is essentially about solving the following linear equation
+\begin{align}
+\left(\begin{matrix}
+1 & x_1 & x_1^2 & \ldots & x_1^m \\
+1 & x_2 & x_2^2 & \ldots & x_2^m \\
+\vdots & \vdots & \vdots &\ddots & \vdots \\
+1 & x_m & x_m^2 & \ldots & x_m^m
+\end{matrix}\right)
+\left(\begin{matrix}
+a_0 \\ a_1 \\ \vdots \\ a_m
+\end{matrix}\right)
+= \left(\begin{matrix}
+y_0 \\ y_1 \\ \vdots \\ y_m
+\end{matrix}\right).\label{eq:lineareq}
+\end{align}
+
+In practise, the fitting can suffer from the non-negligible round off errors of floating point operations and produce unreliable results.
+This is because the factors of independence polynomial can be different in magnitude by many orders.
+Instead of choosing $X$ as a set of random real numbers, we make it form a geometric sequence in the complex domain $x_j = r\omega^j$, where $r \in \mathbb{R}$ and $\omega = e^{-2\pi i/(m+1)}$. The above linear equation becomes
+\begin{align}
+\left(\begin{matrix}
+1 & r\omega & r^2\omega^2 & \ldots & r^m\omega^m \\
+1 & r\omega^2 & r^2\omega^4 & \ldots & r^m\omega^{2m} \\
+\vdots & \vdots & \vdots &\ddots & \vdots \\
+1 & r\omega^m & r^2\omega^{2m} & \ldots & r^m\omega^{m^2}
+\end{matrix}\right)
+\left(\begin{matrix}
+a_0 \\ a_1 \\ \vdots \\ a_m
+\end{matrix}\right)
+= \left(\begin{matrix}
+y_0 \\ y_1 \\ \vdots \\ y_m
+\end{matrix}\right).
+\end{align}
+
+Let us rearrange the factors $r^j$ to $a_j$, the matrix on left side is exactly the a discrete Fourier transformation (DFT) matrix.
+Then we can obtain the factors using the inverse Fourier transformation $\vec a_r = {\rm FFT^{-1}}(\omega) \cdot \vec y$, where $(\vec a_r)_j = a_j r ^j$.
+By choosing different $r$, one can obtain better precision in low independent set size region  ($\omega<1$) and high independent set size region ($\omega>1$).
+
 
 \end{document}

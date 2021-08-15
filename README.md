@@ -36,7 +36,7 @@ $ git reset
 ```
 and restart from begining.
 
-#### To write comments
+### To write comments
 1. open an issue in this repository
 2. write comments directly in the file `paper/paper.tex`
     * \red{contents...}  # Shengtao Wang

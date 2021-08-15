@@ -18,9 +18,9 @@ function mis_configurations(n, seed; writefile, sc_target=12)
     @assert s == s2
     @assert length(config0) == c
     ofname = joinpath(folder, "configurations_$(n)x$(n)_$seed.dat")
-    ofname1 = joinpath(folder, "configurations_suboptimal_$(n)x$(n)_$seed.dat")
+    #ofname1 = joinpath(folder, "configurations_suboptimal_$(n)x$(n)_$seed.dat")
     writefile && write(ofname, toMatrix(config0))
-    writefile && write(ofname1, toMatrix(config1))
+    #writefile && write(ofname1, toMatrix(config1))
     return s, config0, config1
 end
 
@@ -42,8 +42,12 @@ for (n, seeds) in [
     #(10, [982, 456, 843]),  # easy, ~25
     #(10, [347, 793, 82]),  # intermediate, ~85
     #(8, [188, 970, 91]),
-    (8, [100, 72]),
-    (9, [805, 144, 560, 651, 234]),
+    #(8, [100, 72]),
+    #(9, [805, 144, 560, 651, 234]),
+    (8, [188, 970, 91, 100, 72, 316, 747, 216, 168, 852,  7, 743, 32,
+       573, 991, 957, 555, 936, 342, 950]),
+    (9, [805, 144, 560, 651, 234, 442, 408, 866, 263, 873, 91, 99, 566,
+       849, 854, 57, 64, 953, 43, 210])
     ]
     for seed in seeds
         @time mis_configurations(n, seed; writefile=true, sc_target=14)
