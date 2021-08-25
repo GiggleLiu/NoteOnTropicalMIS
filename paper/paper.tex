@@ -236,7 +236,7 @@ Listing \thelstlisting: #1\hfill%\hfill%
 \end{AMS}
 
 \section{Introduction}
-\blue{efficient counting maximal independent sets~\cite{Manne2013}}
+\blue{efficient counting maximal independent sets~\cite{Manne2013}, overlap gap property~\cite{Gamarnik2013, Gamarnik2019}, independence polynomial at -1~\cite{Bousquet2008,Levit2009}}
 In this work, we introduce a tensor based framework to study the famous graph problem of finding independent sets.
 Given an undirected graph $G = (V,E)$, an independent set $I \subseteq V$ is a set that for any $u,v \in I$, there is no edge connecting $u$ and $v$ in $G$.
 The problem of finding the maximum independent set (MIS) size $\alpha(G) \equiv \max_{I}|I|$ belongs to the complexity class NP-complete~\cite{Hastad1996}, which is unlikely to be decided in polynomial time.
@@ -1122,6 +1122,11 @@ Furthermore, these inlined arrays can be upload to GPU devices for faster generi
 \end{minipage}
 \end{table}
 
+\section*{Acknowledgments}
+We would like to acknowledge Sepehr Ebadi, Maddie Cain and Leo Zhou for popping up inspiring questions,
+their questions are the driving force of this project.
+Thank Chris Elord for helping us writting the fastest matrix multiplication libary for GEMM, TropicalGEMM.jl, he is a remarkable guy!
+\blue{funding information}
 
 \bibliographystyle{siamplain}
 \bibliography{refs}
