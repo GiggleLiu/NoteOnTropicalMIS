@@ -221,7 +221,6 @@ Listing \thelstlisting: #1\hfill%\hfill%
 \begin{abstract}
 	This paper is about solving the independent set problem by eincoding this problem to a tensor network. 
     We show how to obtain the maximum independent set size, the independence polynomial and optimal configurations of a graph by engineering the tensor element algebra.
-    We also show how to analyse the local properties of a graph by contracting an open tensor network.
 \end{abstract}
 
 % REQUIRED
@@ -236,16 +235,16 @@ Listing \thelstlisting: #1\hfill%\hfill%
 \end{AMS}
 
 \section{Introduction}
-\blue{efficient counting maximal independent sets~\cite{Manne2013}, overlap gap property~\cite{Gamarnik2013, Gamarnik2019}, independence polynomial at -1~\cite{Bousquet2008,Levit2009}}
+\blue{some literature does not distinguish maximal and maximum, efficient counting maximal independent sets~\cite{Manne2013}, overlap gap property~\cite{Gamarnik2013, Gamarnik2019}, independence polynomial at -1~\cite{Bousquet2008,Levit2009}, treewidth of 3-regular graphs ~\cite{Fomin2006}}
 In this work, we introduce a tensor based framework to study the famous graph problem of finding independent sets.
 Given an undirected graph $G = (V,E)$, an independent set $I \subseteq V$ is a set that for any $u,v \in I$, there is no edge connecting $u$ and $v$ in $G$.
 The problem of finding the maximum independent set (MIS) size $\alpha(G) \equiv \max_{I}|I|$ belongs to the complexity class NP-complete~\cite{Hastad1996}, which is unlikely to be decided in polynomial time.
 It is hard to even approximate this size in polynomial time within a factor $|V|^{1-\epsilon}$ for an arbitrarily small positive $\epsilon$.
 The exhaustive search for a solution costs time $2^{|V|}$.
-More efficient algorithms to compute the MIS size exactly includes the branching algorithm and dynamic programming.
+More efficient algorithms to compute the MIS size exactly includes the branching algorithm~\cite{Tarjan1977,Robson1986} and dynamic programming.
 Without changing the fact of exponential scaling in computing time, the branching algorithm gives a smaller base.
-For example, in ~\cite{Xiao2017}, a sophisticated branching algorithm has a time complexity $1.1893^n n ^{O(1)}$.
-The dynamic programming approach~\cite{Courcelle1990,Fomin2013} works better for graphs with small tree width $tw(G)$, it gives an algorithms of complexity $O(2^{tw(G)}tw(G)n)$.
+For example, in ~\cite{Xiao2017}, a sophisticated branching algorithm has a time complexity $1.1996^n n ^{O(1)}$.
+The dynamic programming approach~\cite{Courcelle1990,Fomin2013} works better for sparse graphs with small tree width $tw(G)$~\cite{Fomin2006}, it gives an algorithms of complexity $O(2^{tw(G)}tw(G)n)$.
 People are interested in solving the independent set problem better not only because it is an NP-complete problem that directly related to other NP-complete problems like maximal cliques and vertex cover~\cite{Moore2011},
 but also for its close relation with physical applications like hard spheres lattice gas model~\cite{Dyre2016}, and Rydberg hamiltonian~\cite{Pichler2018}.
 However, in these applications, knowing the MIS size and one of the optimum solutions is not the only goal.
@@ -253,7 +252,7 @@ However, in these applications, knowing the MIS size and one of the optimum solu
 %A set is independent if and only if its complement is a vertex cover. Therefore, the sum of the size of the largest independent set $\alpha (G)$ and the size of a minimum vertex cover $\beta (G)$ is equal to the number of vertices in the graph.
 People often ask different questions about independent sets in order to understand the landscape of their models better.
 These questions includes but not limited to, counting all independent sets, obtaining all independent sets of size $\alpha(G)$ and $\alpha(G)-1$,
-counting the number of (maximal) independent sets of different sizes, and understanding the effect of a local gadget.
+counting independent sets of different sizes, and understanding the effect of a local gadget.
 In this work, we attack this problem by mapping it to an generic tensor network.
 It does not give a better time complexity comparing to dynamic programming, but is versatile enough to answer the above questions by engineering the tensor elements with minimum effort.
 
@@ -350,7 +349,7 @@ although one can easily translate a generalized tensor network to the equivalent
 It can sometime increase the contraction complexity of a graph. We have an example demonstrating this point in \App{app:tensorbad}.
 
 \section{Independence polynomial}
-One can encode the independence polynomial~\cite{Ferrin2014, Harvey2017} of $G$ to a tensor network.
+One can encode the independence polynomial~\cite{Levit2005, Ferrin2014, Harvey2017} of $G$ to a tensor network.
 Independence polynomial is an important graph polynomial that contains the counting information of an independent set problem. It is defined as
 \begin{equation}
 I(G, x) = \sum_{k=1}^{\alpha(G)} a_k x^k,
@@ -546,8 +545,8 @@ In the algorithm, except the computation of Chinese remainder theorem, all compu
 \end{algorithm}
 
 \subsection{Maximal independence polynomial}
-Some times people are interested in knowing maximal solutions to understand why their programs are trapped in a local minimal.
-Then they might want to compute the maximal independence polynomial.
+Sometimes people are interested in knowing maximal solutions to understand why their programs are trapped in a local minimal.
+In this paper, the word ``maximal'' is different with the ``maximum'' discussed the previous discussion in such a way that it is not necessarily refer to the gloal optimum.
 Let us denote the neighbour of a vertex $v$ as $N(v)$ and $N[v] = N(v)\cup \{v\}$.
 A maximal independent set $I_m$ is an independent sets that there does not exist a vertex $v$ that $N[v] \cap I_m = \emptyset$.
 Let us modify the tensor network for computing independence polynomial by adding this restriction.
@@ -706,370 +705,6 @@ Let the gradient mask for $C$ being $\overline C$, the backward rule for gradien
 \end{align}
 where ${}^{\circ -1}$ is the Hadamard inverse, $\circ$ is the Hadamard product, boolean false is treated as tropical zero and boolean true is treated as tropical one.
 This rule defined on matrix multiplication can be easily generalized to tensor contraction by replacing the matrix multiplication between $C^{\circ-1} \circ \overline C$ and $B^T$ by a tensor contraction.~\cite{} \blue{maybe add an appendix?}  % my blog
-
-\section{Tropical tensors for automated branching}\blue{$?$}
-% check http://www.tcs.rwth-aachen.de/independentset/ for more rules
-Branching rules can be automatically discovered by contracting the tensor network on a subgraph $R \subseteq G$ with tropical numbers as its element type.
-Let $C$ be the set of boundary vertices defined as $C := \{u | u\in R \land (\exists v \in (G\backslash R) \land {\rm adj}(u, v))\}$, then the rank of the resulting tensor $A$ is $|C|$.
-Here, we use ${\rm adj}(u, v)$ to denote two vertices $u$ and $v$ are adjacent to each other.
-Each tensor entry $A_{\sigma}$ is a local maximum independent set size for the fixed boundary configuration $\sigma \in \{0,1\}^{|C|}$.
-Suppose our goal is to find the maximum independent set size,
-then this tensor can be further ``compactified'' by removing some entries.
-To determine which entry can be removed, let us define a relation of \textit{less restrictive} as
-\begin{align}
-(\sigma_a \prec \sigma_b) := (\sigma_a \neq \sigma_b) \land (\sigma_a \leq^\circ \sigma_b)
-\end{align}
-where $\leq^\circ$ is the Hadamard less or equal to operation.
-
-\begin{definition}
-A tensors $A$ is \textit{MIS-compact} if
-\begin{align}
-\forall{\sigma_b}\neg \exists{\sigma_a}(\sigma_a \prec \sigma_b) \land (A_{\sigma_a} \geq A_{\sigma_b})\label{eq:compactifying}.
-\end{align}
-\end{definition}
-
-If we remove such $A_{\sigma_b}$, the contraction over the whole graph is guaranteed to give the same maximum independent set size.
-It can be seen by considering two entries with the same local maximum independent set sizes and different boundary configurations as shown in \Fig{fig:compactifying} (a) and (b).
-If we have $\sigma_b \cup \overline{\sigma_b}$ being one of the solutions for maximum independent sets in $G$, then $\sigma_a \cup \overline{\sigma_b}$ is another solution giving the same $\alpha(G)$.
-Hence, we can remove entry $A_{\sigma_b}$ safely.
-%among boundary configurations with equal local maximum independent sizes,
-%we only retain those least restrictive (less ones at the boundary) to exterial configurations.
-
-\begin{figure}
-    \centering
-    \includegraphics[width=0.8\textwidth, trim={5cm 4cm 5cm 4cm}, clip]{compressionrule.pdf}
-    \caption{Two configurations with the same local independent size $A_{\sigma_a} = A_{\sigma_b} = 3$ and different boundary configurations (a) $\sigma_a=\{001\}$ and (b) $\sigma_b = \{101\}$, where black nodes are $1$s (in the independent set) and white nodes are $0$s (not in the independent set).}\label{fig:compactifying}
-\end{figure}
-
-\begin{theorem}
-    A MIS-compact tropical tensor can not be further reduce without gloal information, i.e. any of its non-zero entries can produce the only global optimal solution given a proper environment.
-\end{theorem}
-
-\begin{proof}
-    %Given $A_\{\sigma_a}$ is better than $A_\{\sigma_b\}$, any exterior configuration $\overline{\sigma}$ making $\overline{\sigma} \cup \sigma_b$ a global maximum independent set also makes $\overline{\sigma} \cup \sigma_a$ a maximum independent set.
-    Let us prove it by showing for any $\sigma$ in a MIS-compact tropical tensor of a subgraph $R$, there exists a parent graph $G$ that $R\subseteq G$ and $\sigma$ is the boundary configuration that gives the only maximum independent set.
-    Let $A$ be a tropical tensor, and an entry of it being $A_{\sigma}$, where $\sigma$ is the boundary configuration.
-    Let us construct a graph $G$ such that for a vertex $v \in C$, if $\sigma_v=1$, we connect it with two vertices $u, w \in G \backslash R$ that ${\rm adj}(v, u) \land {\rm adj}(u, w) \land \neg{\rm adj}(v, w)$. Otherwise, we attach infinite many disconnected neighbors to $v$.
-
-    \centerline{\includegraphics[width=0.35\textwidth, trim={0cm 2cm 5cm 0cm}, clip]{proofoptimal.pdf}}
-    Then we have the maximum independent set size $\alpha(G,\sigma) = A_{\sigma} + \infty (|C|-\sum_{v=1}^{|C|}\sigma_v) + \sum_{v=1}^{|C|} 1-\sigma_v$.
-    Let us assume there exists another configuration $\tau$ that generating the same or better maximum independent set size $\alpha(G, \tau) \geq \alpha(G, \sigma)$.
-    Then we have $\tau \prec \sigma$, otherwise it will loss infinite contribution from the environment.
-    For such a $\tau$, we have $A_\tau < A_\sigma$, otherwise $A_\sigma \prec A_\tau$ contradicts with $A$ being MIS-compact.
-    Finally, we have $\alpha(G,\tau) = \infty (|C|-|\sigma|) + A_{\tau} + \sum_{v=1}^{|C|} 1-\sigma_v < \alpha(G,\sigma)$, hence $\sigma$ is the only boundary configuration that gives the maximum independent set for this graph.
-\end{proof}
-
-\subsection{The tensor network compactification detects branching rules automatically}
-Almost all branching rules are based on the same idea of analysing a local subgraph induced by a vertex $v$
-by including its neighbourhoods,
-and keep only the configurations that has the potential to produce the only maximum independent set.
-Since an MIS-compact tensor is optimal, by analysing the correlation of vertex configurations on the resulting tensor for the $k$-th neighbourhood $N^k[v]$, one can discover the optimal branching vector automatically.
-In the following, we are going to introduce several important rules for branching in the literature and show how it is connected to our tensor formulation.
-
-\begin{corollary}\label{rule:one} % basic
-  If a vertex $v$ is in an independent set $I$, then none of its Neighbors can be in $I$.
-On the other hand, if $I$ is a maximum (and thus maximal) independent set,
-and thus if $v$ is not in $I$ then at least one of its Neighbors is in $I$.
-\end{corollary}
-
-Contract $N[v]$ and the resulting tensor $A$ has a rank $|N(v)|$. Each tensor entry $A_{\sigma}$ corresponds to a locally maximized independent set size with fixed boundary configuration $\sigma \in \{0, 1\}^{|N(v)|}$.
-If the boundary configuration is a bit string of 0s, $\sigma_v$ will takes value $1$ to maximize the local independent set size.
-
-\centerline{\includegraphics[width=0.4\columnwidth,trim={0 3.5cm 0 1cm},clip]{../notebooks/basic.pdf}}
-
-After contracting $N[v]$, $v$ becomes an internal degree of freedom.
-Applying tensor compactification rule \Eq{eq:compactifying}, the resulting rank 4 tropical tensor is
-
-\begin{align}
-    T_{juwk} = \left(\begin{matrix}
-        \left(\begin{matrix}
-        ~~~~1 & -\infty \\
-        -\infty & ~~~~2
-        \end{matrix}\right)_{ju}&
-        \left(\begin{matrix}
-        -\infty & ~~~~2 \\
-        ~~~~2 & ~~~~3
-        \end{matrix}\right)_{ju}\\
-        \left(\begin{matrix}
-        -\infty & ~~~~2 \\
-        ~~~~2 & ~~~~3
-        \end{matrix}\right)_{ju} &
-        \left(\begin{matrix}
-        ~~~~2 & ~~~~3 \\
-        ~~~~3 & ~~~~4
-        \end{matrix}\right)_{ju}
-    \end{matrix}\right)_{wk},
-\end{align}
-where we use ``-'' to denote an entry is forbidden.
-If we use sets for counting, one can check all configurations too. The resulting polynomial tensor is
-\begin{align}
-    P_{juwk} = \left(\begin{matrix}
-        \left(\begin{matrix}
-        1+x_v & - \\
-        - & ~~x_jx_u
-        \end{matrix}\right)_{ju}&
-        \left(\begin{matrix}
-        - & x_ux_k \\
-        ~~~~x_jx_k & ~~~~x_ux_jx_k
-        \end{matrix}\right)_{ju}\\
-        \left(\begin{matrix}
-        - & x_wx_u \\
-        x_wx_j & x_wx_jx_u
-        \end{matrix}\right)_{ju} &
-        \left(\begin{matrix}
-        x_wx_k & x_wx_kx_u \\
-        x_wx_kx_j & x_jx_ux_wx_k
-        \end{matrix}\right)_{ju}
-    \end{matrix}\right)_{wk}.
-\end{align}
-
-By studying the correlation between vertex variables, one can easily see $x_v$ does not co-exist with other vertex variables.
-These anti-correlation determines possible branching vectors in the maximum independent set problem.
-It is easier to see if we list the set of optimal solutions as
-\begin{align}
-    \begin{split}
-    S_{juwkv} = \{&00001, 10001, 01010, 10010, 11010, 10100,\\&01100, 11100, 00110, 01110, 10110, 11110\}.
-    \end{split}
-\end{align}
-%If we denote the effective branching number of contracting the local degrees of freedoms as $\left|\{A_{\sigma} \neq \mymathbb{0}\right|\sigma \in \{0, 1\}^{|C|}\}|/2^{|R|}$.
-%The effective branching value is $11^{1/5} \approx 1.6154$, which is larger than the branching number $\tau(1, 5) \approx 1.3247$.
-%It does not mean the tropical tensor does not find all the branches, if we contract $N^2[v]$.
-The branching vector $(1,5)$ gives a branching number $\tau(1, 5) \approx 1.3247$
-
-\begin{corollary}[mirror rule] % 2.7
-For some $v \in V$, a node $u \in N^2(v)$ is called mirror of $v$, if $N(v) \backslash N(u)$ is a clique. We denote the set of of a node $v$ mirrors~\cite{Fomin2013} by $M(v)$.
-Let $G = (V, E)$ be a graph and $v$ a vertex of $G$. Then
-\begin{equation}
-\alpha(G) = \max(1 + \alpha(G \backslash N[v]), \alpha(G \backslash (M(v) \cup \{v\})).
-\end{equation}
-\end{corollary}
-
-This rule states that if $v$ is not in $M$, there exists an MIS $I$ that $M(v)\notin I$.
-otherwise, there must be one of $N(v)$ in the MIS (\textit{local maximum rule}).
-Although this statement involves $N(u)$, however, deriving this rule only requires information upto second neighbourhood of $v$.
-If $w$ is in $I$, then none of $N(v) \cap N(w)$ is in $I$, then there must be one of node in the clique $N(v)\backslash N(w)$ in $I$ (\textit{local maximum rule}),
-since clique has at most one node in the MIS, by moving the occupied node to the interior, we obtain a ``better'' solution.
-%Hence, the \textit{least restrictive principle} captures the mirror rule.
-In the following example, since $u\in N^2(v)$ and $N(v) \backslash N(u)$ is a clique, $u$ is a mirror of $v$.
-
-\centerline{\includegraphics[width=0.4\columnwidth,trim={0 3.5cm 0 1cm},clip]{../notebooks/mirror.pdf}}
-
-After contracting $N[v]\cup u$, $v$ becomes an internal degree of freedom.
-Applying tensor compactification rule \Eq{eq:compactifying}, the resulting rank 4 tropical tensor is
-
-\begin{align}
-    T_{juwk} = \left(\begin{matrix}
-        \left(\begin{matrix}
-        ~~~~1 & ~~~~2 \\
-        ~~~~\cancel{1} & ~~~~\cancel{2}
-        \end{matrix}\right)_{ju}&
-        \left(\begin{matrix}
-        ~~~~\cancel{1} & -\infty \\
-        ~~~~2 & -\infty
-        \end{matrix}\right)_{ju}\\
-        \left(\begin{matrix}
-        ~~~~\cancel{1} & ~~~~\cancel{2} \\
-        -\infty & -\infty
-        \end{matrix}\right)_{ju} &
-        \left(\begin{matrix}
-        -\infty & -\infty \\
-        -\infty & -\infty
-        \end{matrix}\right)_{ju}
-    \end{matrix}\right)_{wk},
-\end{align}
-where entries stroked through are removed by compactification. The corresponding polynomial tensor is
-
-\begin{align}
-    P_{juwk} = \left(\begin{matrix}
-        \left(\begin{matrix}
-        1+x_v & x_u+x_ux_v \\
-        ~~~~~~~\cancel{} & ~~~~~~~~~~~~~\cancel{}\\
-        \end{matrix}\right)_{ju}&
-        \left(\begin{matrix}
-        ~~~~\cancel{} & - \\
-        x_jx_k & -
-        \end{matrix}\right)_{ju}\\
-        \left(\begin{matrix}
-        ~~~~~~~\cancel{} & ~~~~~~~~~~~~~\cancel{} \\
-        ~~~~~~~- & ~~~~~~~~~~~~~-
-        \end{matrix}\right)_{ju} &
-        \left(\begin{matrix}
-        ~~~~- & - \\
-        ~~~~- & -
-        \end{matrix}\right)_{ju}
-    \end{matrix}\right)_{wk}.
-\end{align}
-One can see $w$, as a mirror of $v$ does not appear in the maximum independent set after compactification.
-
-%In this case, the effective branching number is $3^{1/5}\approx 1.2457$,
-%which is smaller than the branching number $\tau(4, 2) = 1.2721$ by simply applying the mirror rule.
-\begin{align}
-    \begin{split}
-    S_{juwkv} = \{&00001, 01001, 10010\}.
-    \end{split}
-\end{align}
-
-\begin{corollary}[satellite rule] % satellite rule
-Let $G$ be a graph, $v \in V$. A node $u \in N^2(v)$ is called satellite~\cite{Kneis2009} of $v$, if there is some $u' \in N(v)$ such that $N[u'] \backslash N[v] = \{u\}$.
-The set of satellites of a node $v$ is denoted by $S(v)$, and we also use the notation $S[v] := S(v) \cup {v}$. Then 
-\begin{equation}
-\alpha(G) = \max\{\alpha(G \backslash \{v\}), \alpha(G \backslash N[S[v]]) + |S(v)| + 1\}.
-\end{equation}
-\end{corollary}
-
-This rule can be capture by contracting $N[v] \cup S(v)$.
-In the following example, since $u \in N^2(v)$ and $w \in N(v)$ satisfies $N[w] \backslash N[v] = \{u\}$, $u$ is a satellite of $v$.
-
-\centerline{\includegraphics[width=0.4\columnwidth,trim={0 3.5cm 0 1cm},clip]{../notebooks/satellite.pdf}}
-
-After contracting $N[v] \cup u$, both $v$ and $w$ become internal degrees of freedoms.
-Applying tensor compactification rule \Eq{eq:compactifying}, the resulting rank 3 polynomial tensor is
-\iffalse
-\begin{align}
-    T_{juk} = \left(\begin{matrix}
-        \left(\begin{matrix}
-        ~~~~1 & ~~~~2 \\
-        ~~~~2 & ~~~~\cancel{2}
-        \end{matrix}\right)_{ju}\\
-        \left(\begin{matrix}
-        ~~~~\cancel{1} & -\infty \\
-        ~~~~\cancel{2} & -\infty
-        \end{matrix}\right)_{ju}
-    \end{matrix}\right)_{k}.
-\end{align}
-\fi
-
-\begin{align}
-    P_{juk} = \left(\begin{matrix}
-        \left(\begin{matrix}
-        1+x_w+x_v & x_u + x_ux_v \\
-        x_j+x_wx_j & ~~~~~~~~~~~~\cancel{}
-        \end{matrix}\right)_{ju}\\
-        \left(\begin{matrix}
-        ~~~~~~~~~~~~~~~~\cancel{} & ~~~~~~~~~~~~~~~- \\
-        ~~~~~~~~~~~~~~~~\cancel{} & ~~~~~~~~~~~~~~~-
-        \end{matrix}\right)_{ju}
-    \end{matrix}\right)_{k}.
-\end{align}
-
-By choosing one of the optimal configurations in each entry,
-we can see the satellite rule of either ${v, u} \in I$ or $v \notin I$ is satisfied.
-
-\begin{align}
-    \begin{split}
-    S_{juwkv} = \{&\{00100,00001\}, 10100, 01001\}.
-    \end{split}
-\end{align}
-%In this case, the effective branching number is $3^{1/5}\approx 1.2457$. 
-
-%We can use the conditional entropy to discover branching rules automatically. 
-%Let us take one best configuration a time from each entry of the compact polynomial matrix,
-%and denote the resulting configuration set as $S$.
-%The conditional entropy matrix here can be defined as
-%\begin{align}
-%    C_{uv} = H(s_u|s_v)
-%\end{align}
-%when two variables are strongly correlated to each other, the corresponding entry should be zero.
-
-\subsection{gadget design}\blue{$\times$}
-
-Suppose we have a local structure as the following.
-
-\centerline{\begin{tikzpicture}[scale=1.0]
-    \def\r{0.2}
-    \foreach \x/\y [count=\i] in {0.17/0.5,0.83/0.5,0.5/0.67,0.5/0.33}
-        \node[fill=red,circle,radius=\r] at (\x*8, \y*8) (\i) {};
-    \draw (1) -- (2);
-    \draw (3) -- (4);
-\end{tikzpicture}}
-
-
-Contract this local structure gives the tropical tensor
-
-\begin{align}
-    \left(\begin{matrix}
-        \left(\begin{matrix}
-            ~~~~0 & ~~~~1\\
-            ~~~~1 & ~~~~2
-        \end{matrix}\right) &
-        \left(\begin{matrix}
-            ~~~~1 & -\infty\\
-            ~~~~2 & -\infty
-        \end{matrix}\right) \\
-        \left(\begin{matrix}
-            ~~~~1 & ~~~~2\\
-            -\infty & -\infty
-        \end{matrix}\right) &
-        \left(\begin{matrix}
-            ~~~~2 & -\infty\\
-            -\infty & -\infty
-        \end{matrix}\right)
-    \end{matrix}\right).
-\end{align}
-
-The following gadget is equivalent to the above diagram up to a constant $2$.
-
-\centerline{\begin{tikzpicture}
-    \def\nodes{(0.5, 0.33), (0.17, 0.5), (0.5, 0.67), (0.83, 0.5), (0.32, 0.44), (0.44, 0.44), (0.56, 0.44), (0.68, 0.44), (0.32, 0.56), (0.44, 0.56), (0.56, 0.56), (0.68, 0.56)}
-    \def\edges{(1, 5), (1, 6), (1, 7), (1, 8), (2, 5), (2, 9), (3, 9), (3, 10), (3, 11), (3, 12), (4, 8), (4, 12), (5, 6), (5, 9), (5, 10), (6, 7), (6, 9), (6, 10), (6, 11), (7, 8), (7, 10), (7, 11), (7, 12), (8, 11), (8, 12), (9, 10), (10, 11), (11, 12)}
-    \def\r{0.2}
-    \foreach \p [count=\i] in \nodes{
-        \parsept{\x}{\y}{\p}
-        \pgfmathparse{((\x<0.2 || \x>0.8 || \y<0.35 || \y>0.65) ? 1 : 0)}
-        \ifnum\pgfmathresult>0
-            \node[fill=red,circle,radius=\r] at (\x*8, \y*8) (\i) {};
-        \else
-            \node[fill,circle,radius=\r] at (\x*8, \y*8) (\i) {};
-        \fi
-    }
-    \foreach \e [count=\i] in \edges{
-        \parsept{\x}{\y}{\e}
-        \draw (\x) -- (\y);
-    }
-\end{tikzpicture}}
-
-\begin{align}
-    \left(\begin{matrix}
-        \left(\begin{matrix}
-            ~~~~2 & ~~~~3\\
-            ~~~~3 & ~~~~4
-        \end{matrix}\right) &
-        \left(\begin{matrix}
-            ~~~~3 & ~~~~3\\
-            ~~~~4 & ~~~~4
-        \end{matrix}\right) \\
-        \left(\begin{matrix}
-            ~~~~3 & ~~~~4\\
-            ~~~~2 & ~~~~3
-        \end{matrix}\right) &
-        \left(\begin{matrix}
-            ~~~~4 & ~~~~4\\
-            ~~~~3 & ~~~~4
-        \end{matrix}\right)
-    \end{matrix}\right)
-    \xrightarrow[\text{compactify, -2}]{}
-    \left(\begin{matrix}
-        \left(\begin{matrix}
-            ~~~~0 & ~~~~1\\
-            ~~~~1 & ~~~~2
-        \end{matrix}\right) &
-        \left(\begin{matrix}
-            ~~~~1 & ~~~~\cancel{1}\\
-            ~~~~2 & ~~~~\cancel{2}
-        \end{matrix}\right) \\
-        \left(\begin{matrix}
-            ~~~~1 & ~~~~2\\
-            ~~~~\cancel{0} & \cancel{1}
-        \end{matrix}\right) &
-        \left(\begin{matrix}
-            ~~~~2 & ~~~~\cancel{2}\\
-            ~~~~\cancel{1} & ~~~~\cancel{2}
-        \end{matrix}\right)
-    \end{matrix}\right)
-\end{align}
-
-We can see these two subgraphs produce exactly the same compact tensor.
-When we replace the original tensor with this gadget, the solution.
 
 \section{Benchmarks and case study}
 We run a sequetial program benchmark on CPU Intel(R) Core(TM) i5-10400 CPU @ 2.90GHz, and show the results bellow.

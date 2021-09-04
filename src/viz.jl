@@ -5,7 +5,7 @@ using Compose
 vizconfig(ud::UnitdiskWidget; kwargs...) = vizconfig(ud.nodes, edges(ud); kwargs...)
 vizeinsum(ud::UnitdiskWidget; kwargs...) = vizeinsum(ud.nodes, edges(ud); kwargs...)
 
-function vizconfig(g::SimpleGraph; locs, config=zeros(Int, length(nodes)), unit=1.0, graphsize=12cm)
+function vizconfig(g::SimpleGraph; locs, config=zeros(Int, length(locs)), unit=1.0, graphsize=12cm)
     vizconfig([string(v)=>locs[v] for v in LightGraphs.vertices(g)], [(e.src, e.dst) for e in edges(g)]; config=config, unit=unit, graphsize=graphsize)
 end
 
