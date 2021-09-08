@@ -368,36 +368,34 @@ In the main text, we use the generalized tensor network notation. The generalize
 The example above can be written as $C_{ijkl} = A_{jkm} B_{mil} V_{jm} = A_{ukm} B_{pil} V_{vq} \delta_{mpq} \delta_{juv}$ in the standard notion. However, by adding the $\delta$ tensors, one may unnecessarily increase the contraction complexity of a graph, which we illustrate in \App{app:tensorbad}.
 
 \section{Generic programming}\label{sec:generic}
-\red{I suggest we have a section on generic programming, putting both the semiring stuff and the summary table to this section, since generic programming is one of the highlights of this paper as well. I think it doesn't need to be long. Jinguo, could you write one or two paragraphs introducing generic programming?}
-
-\red{Generic programming is ...}
-\red{dispatch to different types etc. ...} 
-
-In previous works combining tensor network and combinatoric problems~\cite{},
+\red{I suggest we have a section on generic programming, putting both the semiring stuff and the summary table to this section, since generic programming is one of the highlights of this paper as well. I think it doesn't need to be long. Jinguo, could you write one or two paragraphs introducing generic programming?}\blue{I wrote a draft here, does it look ok in general?}
+In previous works combining tensor network and combinatoric problems~\cite{Kourtis2019,Biamonte2017},
 the elements in tensor networks are limited to regular number types such as floating point numbers and integers.
 As the development of modern compiling technology, we do not need to limit our imaginations to regular number types anymore.
-The key technology is called the generic programming:
+The key technology playing the role is called the generic programming:
 
 \begin{definition}[Generic programming]
    Generic programming is an approach to programming that focuses on designing algorithms and data structures so that they work in the most general setting without loss of efficiency. ~\cite{Stepanov2014}
 \end{definition}
 
-This definition of generic programming contains two major pieces, one is a single program for the general setting, and another is performance.
-To understand the first point, suppose we want to write a function to take the power of an element $f(x, n) := x^n$,
-the generic programming approach does not assume $x$ being a regular number,
+This definition of generic programming contains two major pieces, one is a single program for the general setting, and another is about efficiency.
+To understand the first point, suppose we want to write a function to take the power of an element $f(x, n) := x^n$.
+One can easily write a function for regular numbers that computes the power of $x$ in $\log(n)$ steps using the multiply and square trick.
+A generic programmer does not assume $x$ being a regular number type,
 instead it treats $x$ as an element with an associative multiplication operation $\odot$ and multiplicative identity $\mymathbb{1}$.
-In such a way, when the program takes a matrix as input, it computes the matrix power without rewriting this function for matrices.
-The second point about performance basically rules out dynamic typed languages like Python,
-because in these languages, the efficiency of a generic type is not guaranteed.
+In such a way, when the program takes a matrix as input, it computes the matrix power without extra efforts.
+The second point about performance. For dynamic typed languages like Python,
+one can easily write very general codes, however, the efficiency is not guaranteed.
 Imagine the speed of computing the matrix multiplication between two numpy arrays with python objects as elements.
 The generic programming that we want to discuss is those in static types languages like C++, and Julia~\cite{Bezanson2012}.
 C++ uses templates for generic programming while Julia has just in time compiling and multiple dispatch.
-When the program ``sees'' a new input type, the compiler recompiles the generic program for the new type.
-A lot optimization can be done during the compiling, like inlining immutable elements with fixed sizes in an array.
+When they ``sees'' a new input type, the compiler recompiles the generic program for the new type.
+A lot optimization can be done during the compiling, like inlining immutable elements with fixed sizes in an array to decrease the cache miss rate when accessing data.
 In Julia, these inlined arrays can even be compiled to GPU devices for faster computation~\cite{Besard2018}.
 
 This leads us to think about what is the most general element type that allowed in a tensor network contraction program.
-We find as long as the tensor elements form a commutative semiring, the tensor network contraction result can be contraction order independent.
+Our finding is: as long as the tensor elements form a commutative semiring, the tensor network contraction result can be contraction order independent.
+So what is a commutative semiring?
 A semiring is a ring without additive inverse, while a commutative semiring is a semiring where the multiplication operation is commutative.
 To define a commutative semiring with the addition operation $\oplus$ and the multiplication operation $\odot$ on a set $R$, the following relations must hold for arbitrary three elements $a, b, c \in R$.
 \begin{align*}
@@ -482,7 +480,8 @@ A good contraction order can reduce the time complexity significantly, at the co
 The pairwise tensor contraction also makes it possible to utilize basic linear algebra subprograms (BLAS) functions to speed up the computation for certain tensor element types.
 
 \begin{example}\label{eg:tensorcontraction}
-Mapping a graph (left) to a tensor network (right) that encodes the independence polynomial. In the generalized tensor network's graphical representation, a vertex is mapped to a hyperedge, and an edge is mapped to an edge tensor. \red{a vertex is mapped to a hyperedge?}
+Mapping a graph (left) to a tensor network (right) that encodes the independence polynomial. In the generalized tensor network's graphical representation, a vertex is mapped to a hyperedge, and an edge is mapped to an edge tensor.
+\red{a vertex is mapped to a hyperedge?}\blue{$\checkmark$}
     
     \centerline{\begin{tikzpicture}[
     dot/.style = {circle, fill, minimum size=#1,
@@ -555,7 +554,7 @@ We define the algebra between the polynomials $a$ of order $k_a$ and $b$ of orde
     \begin{split}
     a \oplus b &= (a_0 + b_0, a_1 + b_1, \ldots, a_{\max(k_a, k_b)} + b_{\max(k_a, k_b)}),\\
     a \odot b &= (a_0 + b_0, a_1b_0 + a_0b_1, a_{2}b_{0} + a_{1}b_{1} + a_{0}b_{2},  \ldots, a_{k_a} b_{k_b}),\\
-    \mymathbb{0} &= (), \text{\red{should this be (0)?}} \\
+    \mymathbb{0} &= (), \text{\red{should this be (0)?}}\blue{\text{both are ok}} \\
     \mymathbb{1} &= (1).\label{eq:polynomial}
     \end{split}
 \end{equation}
@@ -606,7 +605,13 @@ With a finite-field algebra, we have the following observations:
     \item Given the remainders of a larger unknown integer $x$ over a set of co-prime integers $\{p_1, p_2, \ldots, p_n\}$,
     $x \pmod {p_1 \times p_2 \times \ldots \times p_n}$ can be computed using the Chinese remainder theorem. With this, one can infer big integers from small integers.
 \end{enumerate}
-With these observations, we develop Algorithm~\ref{alg:finitefield} to compute the independence polynomial exactly without introducing space overheads. In the algorithm, except the computation using the Chinese remainder theorem, all computations are done with integers of fixed width $W$.
+With these observations, we develop Algorithm~\ref{alg:finitefield} to compute the independence polynomial exactly without introducing space overheads.
+This is an iterative algorithm that tries different prime numbers $p$ until convergence.
+In each iteration, we contract tensor networks to evaluate the polynomial for each $x\in X$ on the finite field algebra ${\rm GF}(p)$.
+Let use denote the results as $Y$, then we solve a linear equation $Y = \hat X A_p$ using the gaussian elimination on ${\rm GF}(p)$ to find the coefficient moduluses $A_p \equiv A \pmod p$.
+Finally we apply the Chinese remainder theorem to get $A \pmod P$, where $P$ is a product of all prime numbers chosen in current and previous iterations.
+If this number does not change comparing with the previous iteration, it indicates a convergent result.
+All computations are done with integers of fixed width $W$ except the last step of applying Chinese remainder theorem.
 In \App{app:fft}, we provide another method to solve the linear equation using discrete Fourier transform.
 
 \begin{algorithm}[!ht]
@@ -618,7 +623,7 @@ In \App{app:fft}, we provide another method to solve the linear equation using d
     \While{true}{
         compute the largest prime $p$ that $\gcd(p, P) = 1$ and $p \leq 2^W$\;
 
-        compute the tensor contraction on $\text{GF}(p)$ and obtain $Y = (y_0, y_1, \ldots , y_{\alpha(G)}) \pmod p $\; \red{tensor network contraction for each $i$}
+        compute the tensor contraction for each $x = X_i \pmod p$ on $\text{GF}(p)$ and obtain $Y = (y_0, y_1, \ldots , y_{\alpha(G)}) \pmod p $\;
 
         $A_p = (a_0, a_1, \ldots, a_{\alpha(G)}) \pmod p = {\rm gaussian\_elimination}(\hat X, Y \pmod p) $\;
 
@@ -628,11 +633,11 @@ In \App{app:fft}, we provide another method to solve the linear equation using d
             \Return $A_P$ \tcp*[l]{converged}
         }
         $P = P \times p$\;
-    }\caption{Exactly compute the independence polynomial of a graph $G$ without integer overflow}\label{alg:finitefield} \red{discuss this algorithm table, $X_{ij}$, etc.}
+    }\caption{Compute the independence polynomial exactly without integer overflow}\label{alg:finitefield} \red{discuss this algorithm table, $X_{ij}$, etc.}\blue{done}
 \end{algorithm}
 
 \subsection{Maximal independence polynomial}
-\red{It might be helpful to add a figure of the tensor network for computing the maximal independence polynomial.} 
+\red{It might be helpful to add a figure of the tensor network for computing the maximal independence polynomial.} \blue{done}
 Sometimes people are interested in knowing maximal solutions to understand why their programs are trapped in a local minimal.
 In this paper, the word ``maximal'' is different with the ``maximum'' discussed the previous discussion in such a way that it is not necessarily refer to the gloal optimum.
 Instead of counting all independent sets, the maximal independence polynomial counts the number of maximal independent sets of various sizes~\cite{Hu2017}.
@@ -671,8 +676,42 @@ As an example, for a vertex of degree 2, the resulting rank-3 tensor is
 \end{equation}
  
 With the tensors defined as $T(x_v)$, we can perform a similar computation of contracting the tensor network with the same tensor element types as described in the previous section~\ref{sec:indpoly}, the result of which then produces the maximal independence polynomial.
+
+    \centerline{\begin{tikzpicture}[
+    dot/.style = {circle, fill, minimum size=#1,
+                inner sep=0pt, outer sep=0pt},
+    dot/.default = 6pt  % size of the circle diameter 
+                    ]  
+        \def\dx{0};
+        \def\r{0.5cm}
+        \def\G{1.0}
+        \foreach \x/\y/\v in {0/0/a, 1/0/b, 2/0/c, 3/0/d, 4/0/e}
+            \node[color=black] at (\x*\G+\dx,\y) (\v) {$s_\v$};
+        \foreach \x/\v/\t in {0/A/$T_a$, 1/B/$T_b$, 2/C/$T_c$, 3/D/$T_d$, 4/E/$T_e$}
+            \node[color=white,fill=black,dot=\r] at (\x*\G+\dx,1.5) (\v) {\t};
+        \draw [cyan,thick] (a) -- (A);
+        \draw [cyan,thick] (a) -- (B);
+        \draw [cyan,thick] (a) -- (C);
+        \draw [blue,thick] (b) -- (B);
+        \draw [blue,thick] (b) -- (A);
+        \draw [blue,thick] (b) -- (C);
+        \draw [blue,thick] (b) -- (D);
+        \draw [red,thick] (c) -- (C);
+        \draw [red,thick] (c) -- (A);
+        \draw [red,thick] (c) -- (B);
+        \draw [red,thick] (c) -- (D);
+        \draw [green,thick] (d) -- (D);
+        \draw [green,thick] (d) -- (B);
+        \draw [green,thick] (d) -- (C);
+        \draw [green,thick] (d) -- (E);
+        \draw [orange,thick] (e) -- (E);
+        \draw [orange,thick] (e) -- (D);
+    \end{tikzpicture}}
+ 
+One can see the average degree of a tensor is increase.
 The computational complexity of this new tensor network contraction is often greater than the one for computing the independence polynomial.
 However, in most sparse graphs, this tensor network contraction approach is still significantly faster than enumerating all the maximal cliques on its complement graph using the Bron-Kerbosch algorithm~\cite{Bron1973}, which is the standard algorithm that we are aware of to compute the maximal independence polynomial.
+Let us consider the example in \Sec{eg:tensorcontraction}, its corresponding tensor network structure for computing maximal independent sets now becomes:
 
 \section{Maximum independent sets and its counting problem}
 \subsection{Tropical algebra for finding the independence number and counting MISs}
@@ -684,6 +723,7 @@ I(G, \infty) = a_{\alpha(G)} \infty^{\alpha(G)},
 where the lower-order terms vanish. We can thus replace the polynomial type $a = (a_0, a_1, \ldots, a_k)$ with $a(k) = (a_{k}, k)$, where the second element stores the largest exponent $k$ and the first element stores the corresponding coefficient $a_{k}$.
 From this, we can define a new algebra as \red{I've changed this, but I don't have strong feelings about this. We can certainly consider changing back.
 I thought this would be more consistent with the earlier notations and show how it's stored in the program as well.}
+\blue{I prefer the previous one, what about you @XG?}
 \begin{equation}
 \begin{split}
     a(k) \oplus a(j) &= \begin{cases}
@@ -731,13 +771,15 @@ For example, if one is interested in counting only $a_{\alpha(G)}$ and $a_{\alph
     \begin{split}
     a \oplus b &= (a_{\max(k_a, k_b)-1} + b_{\max(k_a, k_b)-1}, a_{\max(k_a, k_b)} + b_{\max(k_a, k_b)}),\\
     a \odot b &= (a_{k_a-1} b_{k_b}+a_{k_a} b_{k_b-1}, a_{k_a} b_{k_b}),\\
-    \mymathbb{0} &= (), \text{\red{should this be (0)?}}  \\
+    \mymathbb{0} &= (), \text{\red{should this be (0)?}} \blue{\text{both are fine}} \\
     \mymathbb{1} &= (1).\label{eq:max2poly}
     \end{split}
 \end{equation}
 In the program, we thus need a data structure that contains three fields, the largest order $k$, and the coefficients for the two largest orders $a_k$ and $a_{k-1}$.
 This approach can clearly be extended to calculate more independence polynomial coefficients and is more efficient than calculating the entire independence polynomial.
+As will be shown bellow, this algebra can also be extended to enumerate suboptimal solutions.
 \red{can be used to enumerate suboptimal solution as well?}
+\blue{added some description}
 
 \section{Enumeration of configurations and enumeration bounds}
 \subsection{Enumeration of MIS configurations}
@@ -757,7 +799,23 @@ To enumerate all independent sets, we input a set of configurations into the ten
 \end{split}\label{eq:set}
 \end{equation}
 where $s$ and $t$ are each a set of $|V|$-bit strings and $\lor^\circ$ is the bitwise OR operation over two bit strings. \red{This is the bitwise OR operation right? I can't seem to find online what you call Hadamard. Is there a definition somewhere?}
+\blue{bitwise OR is more often used. I think Hadamard xxx means broadcasted xxx, is this confusing?}
 \red{it would be useful to give an example of the operations above, $s = ... , t = ..., s \oplus t = ..., s \odot t = ...$.} \red{do we need to define $ \{\} \lor^\circ \sigma  = \sigma \lor^\circ \{\} = \{\}$?}
+\blue{we do not need an extra definition, see my example.}
+\begin{example}\label{eg:setalgebra}
+    For elements being bit vectors of length $5$, we have the following set algebra
+\begin{equation*}
+\begin{split}
+    &\{00001\} \oplus \{01110, 01000\} = \{01110, 01000\} \oplus \{00001\} = \{00001,01110, 01000\}\\
+    &\{00001\} \oplus \{\} = \{\}\\
+&\\
+    &\{00001\} \odot \{01110, 01000\} = \{01110, 01000\} \odot \{00001\} = \{01111, 01001\}\\
+    &\{00001\} \odot \{\} = \{\}\\
+    &\{00001\} \odot \{00000\} = \{00001\}
+\end{split}
+\end{equation*}
+\end{example}
+
 The variable $x_{i}$ in the vertex tensor is initialized to $x_i = \{\boldsymbol{e}_{i}\}$, where $\boldsymbol{e}_i$ is the standard basis vector of size $|V|$ and having 1 at index $i$. The vertex and edge tensors are thus
 \begin{equation}
     W_{s_i}^{\rm enum} = \left(\begin{matrix}
@@ -832,7 +890,8 @@ Here is a new algebra defined on the bit strings, replacing the sets of bit stri
 \begin{split}
     \sigma \oplus \tau &= {\rm select}(\sigma, \tau), \\
     \sigma \odot \tau &= (\sigma\lor^\circ \tau),\\
-    \mymathbb{0} &= 1^{\otimes |V|}, \red{\text{should be } \mymathbb{0} = \{\}?} \\
+    \mymathbb{0} &= 1^{\otimes |V|}, \red{\text{should be } \mymathbb{0} = \{\}?}\\
+     &\blue{\text{I do not think so, in that way, we need an extra bit to represent an empty set}} \\
     \mymathbb{1} &= 0^{\otimes |V|},
 \end{split}\label{eq:singleconfig}
 \end{equation}
@@ -873,7 +932,7 @@ The inequality still holds if we take the minimum over $k$:
 \begin{equation}
     A_{ij} \leq \min_{k}(C_{ik} \odot B_{jk}^{\circ -1}) = \left(\max_{k} \left(C_{ik}^{\circ -1} \odot B_{jk} \right) \right)^{\circ -1} = \left(\bigoplus_{k} \left(C_{ik}^{\circ -1} \odot B_{jk} \right) \right)^{\circ -1} = \left( C^{\circ-1} B^{\mathsf{T}} \right)^{\circ -1}_{ij}.
 \end{equation}
-On the right hand side, we transform the operation into a tropical matrix multiplication so that we can utilize the fast tropical BLAS routines \red{do we need to cite here?}.
+On the right hand side, we transform the operation into a tropical matrix multiplication so that we can utilize the fast tropical BLAS routines~\cite{TropicalGEMM} \red{do we need to cite here?}\blue{would a link to github be good?}.
 Again, the equality holds if and only if the element $A_{ij}$ has a contribution to $C$ (i.e.\ having a non-zero gradient).
 Let the gradient mask for $C$ being $\overline C$, the back-propagation rule for gradient masks reads
 \begin{equation}
@@ -882,7 +941,6 @@ Let the gradient mask for $C$ being $\overline C$, the back-propagation rule for
 where $\circ$ is the element-wise product, boolean false is treated as the tropical number $\mymathbb{0}$, and boolean true is treated as the tropical number $\mymathbb{1}$.
 This rule defined on matrix multiplication can be easily generalized to tensor contraction by replacing the matrix multiplication between $C^{\circ-1} \circ \overline C$ and $B^{\mathsf{T}}$ by a tensor contraction.
 With the above method, one can significantly reduce the space needed to store the intermediate configurations.
-\blue{maybe add an appendix?} \red{I've edited this section a bit, and I think it's okay now - probably don't need an appendix.}  % my blog
 
 \section{Benchmarks and case studies}
 \subsection{Performance benchmarks}
@@ -1184,7 +1242,7 @@ y_0 \\ y_1 \\ \vdots \\ y_{\alpha(G)}
 \end{equation}
 
 Let us rearrange the coefficients $r^j$ to $a_j$, the matrix on the left side becomes the discrete Fourier transform matrix. Thus, we can obtain the coefficients by inverse Fourier transform $\vec a_r = {\rm FFT^{-1}}(\omega) \cdot \vec y$, where $(\vec a_r)_j = a_j r ^j$.
-By choosing different $r$, one can obtain better precision in low independent set size region  ($\omega<1$) or high independent set size region ($\omega>1$). \red{is that $\omega < 1$ or $r <1$?}
+By choosing different $r$, one can obtain better precision in low independent set size region  ($r<1$) or high independent set size region ($r>1$). \red{is that $\omega < 1$ or $r <1$?}\blue{it is $r$, fixed}
 
 \section{Integer sequences formed by the number of independent sets}
 
