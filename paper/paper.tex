@@ -238,7 +238,7 @@ independent set, tensor network, maximum independent set, independence polynomia
 \end{AMS}
 
 \section{Introduction}
-\blue{some literature does not distinguish maximal and maximum, efficient counting maximal independent sets~\cite{Manne2013}, overlap gap property~\cite{Gamarnik2013, Gamarnik2019}, independence polynomial at -1~\cite{Bousquet2008,Levit2009}, treewidth of 3-regular graphs ~\cite{Fomin2006},
+\blue{overlap gap property~\cite{Gamarnik2013, Gamarnik2019}, independence polynomial at -1~\cite{Bousquet2008,Levit2009}, treewidth of 3-regular graphs ~\cite{Fomin2006},
 branching algorithm~\cite{Tarjan1977,Robson1986}
 }
 In graph theory and combinatorics, there are many interesting but hard computational problems concerning properties of independent sets.
@@ -398,7 +398,7 @@ Table~\ref{tbl:generictypes} summarizes the problems that can be solved by vario
             {tropical number} (\Eq{eq:countingtropical})    & {finding the independence number} \\
             {tropical number with counting} (\Eq{eq:countingtropical})     & {finding the independence number and the number of MISs} \\
             {tropical number with configurations} (\Eq{eq:singleconfig})     & {finding the independence number and one MIS} \\
-            {tropical number with sets} (\Eq{eq:set})    & {finding the independence number and enumeration of all MISs} \\
+            {tropical number with sets} (\Eq{eq:countingtropicalset})    & {finding the independence number and enumeration of all MISs} \\
             {polynomial} (\Eq{eq:polynomial})     & {computing the independence polynomial exactly} \\
             {truncated polynomial} (\Eq{eq:max2poly})     & {counting MISs and independent sets of size $\alpha(G)-1$} \\
             {complex number}     & {fitting the independence polynomial with fast Fourier transform} \\
@@ -420,7 +420,7 @@ The problem of computing the independence polynomial belongs to the complexity c
 \blue{I am not sure about this complexity, this is based on the naive analysis of theorem 2.2 in ~\cite{Ferrin2014}}. There are some interesting works on efficiently approximating the independence polynomial~\cite{Harvey2018}, but in this work, we focus on exact methods to compute the independence polynomial.
 
 The independence polynomial is closely related to the matching polynomial, the clique polynomial, and the vertex cover polynomial.
-In fact, the independence polynomial can be viewed as a generalization of the matching polynomial, since the matching polynomial of a graph $G$ is the same as the independence polynomial of the line graph of $G$~\cite{levit2005Independence}.
+In fact, the independence polynomial can be viewed as a generalization of the matching polynomial, since the matching polynomial of a graph $G$ is the same as the independence polynomial of the line graph of $G$~\cite{Levit2005}.
 Thus, our algorithm to compute the independence polynomial can also be used to compute the above graph polynomials. Some properties of the independence polynomial, such as the uni-modality, log-concavity, and roots of the polynomial, are well studied in the literature for special classes of graphs~\cite{Levit2005}.
 We hope our algorithms to calculate the independence polynomial can also help further research in these directions. 
 
@@ -601,7 +601,7 @@ In \App{app:fft}, we provide another method to solve the linear equation using d
 \end{algorithm}
 
 \subsection{Maximal independence polynomial}
-\subsection{Maximal independence polynomial} \red{It might be helpful to add a figure of the tensor network for computing the maximal independence polynomial.} 
+\red{It might be helpful to add a figure of the tensor network for computing the maximal independence polynomial.} 
 Sometimes people are interested in knowing maximal solutions to understand why their programs are trapped in a local minimal.
 In this paper, the word ``maximal'' is different with the ``maximum'' discussed the previous discussion in such a way that it is not necessarily refer to the gloal optimum.
 Instead of counting all independent sets, the maximal independence polynomial counts the number of maximal independent sets of various sizes~\cite{Hu2017}.
@@ -610,7 +610,7 @@ Instead of counting all independent sets, the maximal independence polynomial co
 I_{\rm max}(G, x) = \sum_{k=0}^{\alpha(G)} b_k x^k,
 \end{equation}
 where $b_k$ is the number of maximal independent sets of size $k$ in $G$.
-Obviously, $b_{k} \leq a_{k}$ and $b_{\alpha(G)} = a_{\alpha(G)}$. $I_{\rm max}(G, 1)$ counts the total number of maximal independent sets~\cite{Gaspers2012On, Manne2013}, where the fastest algorithm currently has a runtime of $O(1.3642^{|V|})$~\cite{Gaspers2012}.
+Obviously, $b_{k} \leq a_{k}$ and $b_{\alpha(G)} = a_{\alpha(G)}$. $I_{\rm max}(G, 1)$ counts the total number of maximal independent sets~\cite{Gaspers2012, Manne2013}, where the fastest algorithm currently has a runtime of $O(1.3642^{|V|})$~\cite{Gaspers2012}.
 For the problem of finding the MIS, $b_{k}$ counts the number of local optimum at size $k < \alpha(G)$, and can, in some cases, provide hints on the difficulty of finding the MIS using local algorithms~\red{cite experiment}.
 The uni-modality, log-concavity, and real-rootness properties of the maximal independence polynomial for special classes of graphs have also been studied~\cite{Hu2017}. 
 
@@ -641,7 +641,7 @@ As an example, for a vertex of degree 2, the resulting rank-3 tensor is
  
 With the tensors defined as $T(x_v)$, we can perform a similar computation of contracting the tensor network with the same tensor element types as described in the previous section~\ref{sec:indpoly}, the result of which then produces the maximal independence polynomial.
 The computational complexity of this new tensor network contraction is often greater than the one for computing the independence polynomial.
-However, in most sparse graphs, this tensor network contraction approach is still significantly faster than enumerating all the maximal cliques on its complement graph using the Bron-Kerbosch algorithm~\cite{Bron1973Algorithm}, which is the standard algorithm that we are aware of to compute the maximal independence polynomial.
+However, in most sparse graphs, this tensor network contraction approach is still significantly faster than enumerating all the maximal cliques on its complement graph using the Bron-Kerbosch algorithm~\cite{Bron1973}, which is the standard algorithm that we are aware of to compute the maximal independence polynomial.
 
 \section{Maximum independent sets and its counting problem}
 \subsection{Tropical algebra for finding the independence number and counting MISs}
@@ -710,9 +710,9 @@ This approach can clearly be extended to calculate more independence polynomial 
 
 \section{Enumeration of configurations and enumeration bounds}
 \subsection{Enumeration of MIS configurations}
-The enumeration problems of independent sets are also interesting and has been studied extensively in the literature~\cite{Bron1973Algorithm, Eppstein2010Listing, Johnson1988On}, including,
+The enumeration problems of independent sets are also interesting and has been studied extensively in the literature~\cite{Bron1973, Eppstein2010, Johnson1988}, including,
 for example, the enumeration of all independent sets, the enumeration of all maximal independent sets, or the enumeration of all MISs.
-The standard algorithm to enumerate all maximal independent sets is the Bron-Kerbosch algorithm~\cite{Bron1973Algorithm}, which, of course, includes the enumeration of all MISs and can be used to enumerate all independent sets as well.
+The standard algorithm to enumerate all maximal independent sets is the Bron-Kerbosch algorithm~\cite{Bron1973}, which, of course, includes the enumeration of all MISs and can be used to enumerate all independent sets as well.
 Here, we adapt the tensor element types for different enumeration problems.
 For example, our tensor-network based algorithm to enumerate all MISs is expectedly much faster and more space-efficient than the Bron-Kerbosch algorithm, which lists all maximal independent sets. 
 
@@ -751,7 +751,7 @@ The combined operations become:
     \end{cases}, \\
     s(k) \odot s(j) &= (\{\sigma \lor^\circ \tau \, | \, \sigma \in s_k, \tau \in s_j\}, k+j) \\
     \mymathbb{0} &= (\{ \}, -\infty)\\
-    \mymathbb{1} &= (\{0^{\otimes |V|}\}, 0). \label{eq:countingtropical}
+    \mymathbb{1} &= (\{0^{\otimes |V|}\}, 0). \label{eq:countingtropicalset}
 \end{split}
 \end{equation}
 %\begin{equation}
@@ -819,11 +819,11 @@ a \odot \mymathbb{0} = \mymathbb{0} \odot a = \mymathbb{0}
 
 
 \subsection{Bounding the MIS enumeration space}
-When we use the algebra in \Eq{eq:set} and \Eq{eq:countingtropical} to enumerate all MIS configurations, we find that the program stores significantly more intermediate configurations than necessary and thus incur significant overheads in space.
+When we use the algebra in \Eq{eq:countingtropicalset} to enumerate all MIS configurations, we find that the program stores significantly more intermediate configurations than necessary and thus incur significant overheads in space.
 To speed up the computation and reduce space overhead, we use $\alpha(G)$ to bound the searching space.
 First, we compute the value of $\alpha(G)$ with tropical algebra and cache all intermediate tensors.
 Then, we compute a boolean mask for each cached tensor, where we use a boolean true to represent a tensor element having a contribution to the MIS (i.e.\ with a non-zero gradient) and boolean false otherwise.
-Finally, we perform masked matrix multiplication using the new element type with the above algebra, \Eq{eq:set} and \Eq{eq:countingtropical}, for obtaining all configurations.
+Finally, we perform masked matrix multiplication using the new element type with the above algebra, \Eq{eq:countingtropicalset}, for obtaining all configurations.
 Note that these masks in fact correspond to tensor elements with non-zero gradients with respect to the MIS size; we compute these masks by back propagation of the gradients.
 To derive the back-propagation rule for tensor contraction,
 we first reduce the problem to finding the back-propagation rule of a tropical matrix multiplication $C = A B$.
@@ -944,7 +944,7 @@ In the above examples, the configuration enumeration is very slow, one should us
 We will not show any example about implementing the backward rule here because it has approximately 100 lines of code.
 Please checkout our GitHub repository \href{https://github.com/Happy-Diode/NoteOnTropicalMIS}{https://github.com/Happy-Diode/NoteOnTropicalMIS}.
 
-\section{Why not introducing $\delta$ tensors}\label{app:tensorbad}
+\section{Why not introducing \texorpdfstring{$\delta$} tensors}\label{app:tensorbad}
 
 Given a graph
 
@@ -1207,15 +1207,15 @@ By choosing different $r$, one can obtain better precision in low independent se
 \begin{center}
 \begin{tabular}{|c| >{\centering\arraybackslash} p{0.85\linewidth}|}
  \hline $L$  & King's graphs \\
- \hline $ 1$ &   \\
- \hline $ 2$ &   \\
- \hline $ 3$ &   \\
- \hline $ 4$ &   \\
- \hline $ 5$ &   \\
- \hline $ 6$ &   \\
- \hline $ 7$ &   \\
- \hline $ 8$ &   \\
- \hline $ 9$ &   \\
+ \hline $ 1$ & 2  \\
+ \hline $ 2$ & 5  \\
+ \hline $ 3$ & 35  \\
+ \hline $ 4$ & 314 \\
+ \hline $ 5$ & 6 427 \\
+ \hline $ 6$ & 202 841 \\
+ \hline $ 7$ & 12 727 570  \\
+ \hline $ 8$ & 1 355 115 601 \\
+ \hline $ 9$ & 269 718 819 131 \\
  \hline $ 10$ & 94 707 789 944 544 \\
  \hline $ 11$ & 60 711 713 670 028 729  \\
  \hline $ 12$ & 69 645 620 389 200 894 313  \\
@@ -1238,7 +1238,7 @@ By choosing different $r$, one can obtain better precision in low independent se
   \hline
 \end{tabular}
 \end{center}
-\label{tbl:squaregrid}
+\label{tbl:kingsgrid}
 \end{table}
 
 
