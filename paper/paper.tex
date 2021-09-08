@@ -272,7 +272,7 @@ We benchmark our algorithms, the implementation of which benefits from recent ad
 Lastly, we provide a few examples and show that the toolbox can be used to calculate the hard-square entropy constant,
 Euler characteristics of the independence complex, partition functions, and finite-temperature phase transitions on square-lattice graphs. 
 
-\section{Tensor networks}\red{I removed the superscript and subscript, since I think it's not necessary to introduce those.}
+\section{Tensor networks}
 A tensor network~\cite{Cirac2020, Orus2014} can be viewed as a generalization of matrix multiplication to multi-dimensional tensor contraction.
 Let $A, B$ be two matrices; the matrix multiplication is defined as $C_{ik} = \sum_{j}A_{ij}B_{jk}$.
 Using the Einstein notation, we can write $C_{ik} = A_{ij}B_{jk}$, where $j$ is implicitly summed over.
@@ -320,8 +320,10 @@ sum-product network or factor graph~\cite{Bishop2006} in different contexts.
 The graphical representation of a tensor network we use in this paper is a hypergraph, where an edge (label) can be shared by an arbitrary number of vertices (tensors).
 
 \begin{example}
-$C_{ijkl} = A_{jkm} B_{mil} V_{jm}$ is a tensor network representing $C_{ijkl} = \sum_{m}A_{jkm} B_{mil} V_{jm}$  \red{I've changed this. please check. The original was $C_{ijk} = A_{jkm} B_{mil} V_{jm}$ and $C_{ijk} = \sum_{ml}A_{jkm} B_{mil} V_{jm}$}.
-Its hypergraph representation is shown below, where we use different colors to annotate different hyperedges.
+$C_{ijk} = A_{jkm} B_{mil} V_{jm}$ is a tensor network representing $C_{ijk} = \sum_{ml}A_{jkm} B_{mil} V_{jm}$ 
+\red{I've changed this. please check. The original was $C_{ijk} = A_{jkm} B_{mil} V_{jm}$ and $C_{ijk} = \sum_{ml}A_{jkm} B_{mil} V_{jm}$}.
+\blue{changed back because $l$ is not an open edge. Is it still confusing if I introduce open circles for open edges?}
+Its hypergraph representation is shown below, where we use different colors to annotate different hyperedges and open circles to denote open edges.
 
 \centerline{\begin{tikzpicture}[
     dot/.style = {circle, fill, minimum size=#1,
@@ -330,6 +332,7 @@ Its hypergraph representation is shown below, where we use different colors to a
                     ]  
     \def\dx{0};
     \def\r{0.5cm}
+    \def\sr{0.15cm}
     \def\ax{0}
     \def\ay{0}
     \def\bx{1}
@@ -339,22 +342,25 @@ Its hypergraph representation is shown below, where we use different colors to a
     \node[color=white,fill=black,dot=\r] at (\ax+\dx,\ax) (a) {A};
     \node[color=white,fill=black,dot=\r] at (\bx+\dx,\by) (b) {B};
     \node[color=white,fill=black,dot=\r] at (\cx+\dx,\cy) (v) {V};
+    \node[color=white,draw=black,dot=\sr] at (\ax-1,\by) (o1) {};
+    \node[color=white,draw=black,dot=\sr] at (\ax-1.5,\ay) (o2) {};
+    \node[color=white,draw=black,dot=\sr] at (\ax-1,\cy) (o3) {};
     \node at (\ax-0.8,\ay) (k) {k};
     \node at (\bx+0.4,\ay) (m) {m};
     \node at (\ax,\cy) (j) {j};
     \node at (\bx+1,\by) (l) {l};
     \node at (\bx-1,\by) (i) {i};
-    \draw[color=blue] (i) -- (b);
-    \draw[color=blue] (i) -- (\ax-1,\by);
+    \draw[color=blue,thick] (i) -- (b);
+    \draw[color=blue,thick] (i) -- (o1);
     \draw[color=cyan,thick] (l) -- (b);
     \draw[color=violet,thick] (k) -- (a);
-    \draw[color=violet,thick] (k) -- (\ax-1.5,\ay);
+    \draw[color=violet,thick] (k) -- (o2);
     \draw[color=black,thick] (b) -- (m);
     \draw[color=black,thick] (m) -- (a);
     \draw[color=black,thick] (m) -- (v);
     \draw[color=red,thick] (a) -- (j);
     \draw[color=red,thick] (v) -- (j);
-    \draw[color=red,thick] (\ax-1,\cy) -- (j);
+    \draw[color=red,thick] (o3) -- (j);
 \end{tikzpicture}}
 \end{example}
 
@@ -367,7 +373,31 @@ The example above can be written as $C_{ijkl} = A_{jkm} B_{mil} V_{jm} = A_{ukm}
 \red{Generic programming is ...}
 \red{dispatch to different types etc. ...} 
 
-In the spirit of generic programming, the elements of the tensors in the tensor network do not always need to be floating point numbers or integers. In fact, for the tensor network contraction to make sense, one only needs the tensor elements to form a commutative semiring.
+In previous works combining tensor network and combinatoric problems~\cite{},
+the elements in tensor networks are limited to regular number types such as floating point numbers and integers.
+As the development of modern compiling technology, we do not need to limit our imaginations to regular number types anymore.
+The key technology is called the generic programming:
+
+\begin{definition}[Generic programming]
+   Generic programming is an approach to programming that focuses on designing algorithms and data structures so that they work in the most general setting without loss of efficiency. ~\cite{Stepanov2014}
+\end{definition}
+
+This definition of generic programming contains two major pieces, one is a single program for the general setting, and another is performance.
+To understand the first point, suppose we want to write a function to take the power of an element $f(x, n) := x^n$,
+the generic programming approach does not assume $x$ being a regular number,
+instead it treats $x$ as an element with an associative multiplication operation $\odot$ and multiplicative identity $\mymathbb{1}$.
+In such a way, when the program takes a matrix as input, it computes the matrix power without rewriting this function for matrices.
+The second point about performance basically rules out dynamic typed languages like Python,
+because in these languages, the efficiency of a generic type is not guaranteed.
+Imagine the speed of computing the matrix multiplication between two numpy arrays with python objects as elements.
+The generic programming that we want to discuss is those in static types languages like C++, and Julia~\cite{Bezanson2012}.
+C++ uses templates for generic programming while Julia has just in time compiling and multiple dispatch.
+When the program ``sees'' a new input type, the compiler recompiles the generic program for the new type.
+A lot optimization can be done during the compiling, like inlining immutable elements with fixed sizes in an array.
+In Julia, these inlined arrays can even be compiled to GPU devices for faster computation~\cite{Besard2018}.
+
+This leads us to think about what is the most general element type that allowed in a tensor network contraction program.
+We find as long as the tensor elements form a commutative semiring, the tensor network contraction result can be contraction order independent.
 A semiring is a ring without additive inverse, while a commutative semiring is a semiring where the multiplication operation is commutative.
 To define a commutative semiring with the addition operation $\oplus$ and the multiplication operation $\odot$ on a set $R$, the following relations must hold for arbitrary three elements $a, b, c \in R$.
 \begin{align*}
@@ -426,6 +456,7 @@ We hope our algorithms to calculate the independence polynomial can also help fu
 
 To compute the independence polynomial of a graph $G$, we encode it to a tensor network. On the vertex $i$ of the graph $G$, we place a rank-one vertex tensor, $W(x_i)$, of size $2$ parametrized by $x_{i}$ and a rank-two edge tensor, $B$, of size $2 \times 2$ on an edge $(i,j)$
 \red{I removed the indices $s_{i}$ etc, on the right of the equations, since that looks confusing to me. If I understand correctly, $s_{i}, s_{j}$ just denotes the index of the vector/matrix.}
+\blue{To be consistent, we should also remove the index on the LHS. It is better not removing the label information.}
 \begin{equation}
     W(x_i)_{s_i} = \left(\begin{matrix}
         1 \\
@@ -831,7 +862,6 @@ Since $ C_{ik} = \bigoplus_{j} \ A_{ij} \odot B_{jk} = \max_{j} \ A_{ij} \odot B
 \begin{equation}
     A_{ij} \odot B_{jk} \leq C_{ik}.
 \end{equation}
-<<<<<<< HEAD
 Here $\leq$ on tropical numbers are the same as the real-number algebra.
 The equality holds for some $j'$, which means $A_{ij'}$ and $B_{j'k}$ have contributions to $C_{ik}$.
 Since $A_{ij} \odot B_{jk} = A_{ij} + B_{jk}$, one can move $B_{jk}$ to the right hand side of the inequality: 
@@ -911,7 +941,7 @@ Furthermore, these inlined arrays can be uploaded to GPU devices for faster comp
 We would like to thank Pan Zhang for sharing his code for optimizing contraction orders of a tensor network, his code plays a crucial role in our code base.
 We would like to acknowledge Sepehr Ebadi, Maddie Cain and Leo Zhou for popping up inspiring questions,
 their questions are the driving force of this project.
-Thank Chris Elord for helping us writting the fastest matrix multiplication libary for GEMM, TropicalGEMM.jl, he is a remarkable guy!
+Thank Chris Elord for helping us writing the fastest matrix multiplication libary for GEMM, TropicalGEMM.jl, he is a remarkable guy!
 \blue{funding information}
 
 \bibliographystyle{siamplain}
@@ -1094,7 +1124,7 @@ A matching polynomial of a graph $G$ is defined as
 \begin{equation}
     M(G, x) = \sum\limits_{k=1}^{|V|/2} c_k x^k,
 \end{equation}
-where $k$ is the number of matches, and coefficients $c_k$ are countings.
+where $k$ is the number of matches, and coefficients $c_k$ are the corresponding counting.
 
 We define a tensor of rank $d(v) = |N(v)|$ on vertex $v$ such that,
 \begin{equation}
