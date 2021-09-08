@@ -158,5 +158,9 @@ edges = [(1, 28), (2, 29), (3, 30), (4, 31), (5, 32), (6, 33), (7, 34), (8, 35),
 open_edges = getindex.(filter(d->d[3], dims), 1)
 size_dict = Dict([i=>d for (i,d,b) in dims])
 code = EinCode((edges...,), (open_edges...,))
-optcode=optimize_greedy(code, size_dict, nrepeat=10);
+#using NoteOnTropicalMIS
+#code = random_regular_eincode(50, 3)
+optcode_g = optimize_greedy(code, size_dict, nrepeat=10);
+using SparseArrays
+optcode=optimize_sa(code, size_dict, sc_target=25, βs=0.1:0.2:15.0, ntrials=1, initializer=:random);
 OMEinsum.timespace_complexity(optcode, size_dict)
