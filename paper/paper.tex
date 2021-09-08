@@ -219,7 +219,7 @@ Listing \thelstlisting: #1\hfill%\hfill%
 \maketitle
 
 \begin{abstract}
-We introduce a new approach to compute various properties of independent sets by encoding the problems into tensor networks with different tensor element algebra. The type of graph problems that can be computed using this method includes: independence number, the number of independent sets, independence polynomial, maximal independence polynomial, and enumeration of the maximum independence set configurations. Although the computational complexity inevitably scales exponentially with the graph size, the performance of our method using tensor network contraction with generic programming is on par or outperforms state-of-the-art, sophisticated methods; on the other hand, our algorithms are very simple to implement and one can directly utilize recent advances in tensor network contraction techniques. To demonstrate the versatility of this tool, we apply it to a few examples including the calculations of the hard-square constant, Euler characteristics of the independence complex, partition functions, and finite-temperature phase transitions on square-lattice graphs.
+We introduce a new approach to compute various properties of independent sets by encoding the problems into tensor networks with different tensor element algebra. The type of graph problems that can be computed using this method includes: independence number, the number of independent sets, independence polynomial, maximal independence polynomial, and enumeration of the maximum independence set configurations. Although the computational complexity inevitably scales exponentially with the graph size, the performance of our method using tensor network contraction with generic programming is on par or outperforms state-of-the-art, sophisticated methods; on the other hand, our algorithms are very simple to implement and one can directly utilize recent advances in tensor network contraction techniques. To demonstrate the versatility of this tool, we apply it to a few examples including the calculations of the hard-square entropy constant, Euler characteristics of the independence complex, partition functions, and finite-temperature phase transitions on square-lattice graphs.
 \end{abstract}
 
 % REQUIRED
@@ -241,7 +241,7 @@ Finding $\alpha(G)$ is a hard computational problem; moreover, it is NP-hard to 
 
 The independent set problem is closely related to the clique problem and the vertex cover problem~\cite{Moore2011}; more concretely, an MIS of a graph $G$ corresponds to a maximum clique in the complement graph of $G$, and the complement vertex set of an MIS corresponds to a minimum vertex cover of the graph $G$. Together, these problems find a wide range of applications in scheduling, logistics, social network analysis, bioinformatics, wireless networks and telecommunication, map labelling, computer vision, etc.~\cite{Butenko2003Maximum, Wu2015review}. Besides the standard MIS problem, there are many other interesting problems pertaining to independent sets, such as the number of independent sets, independence polynomial, maximal independence polynomial, and enumeration of optimal and sub-optimal configurations. Some of these problems are of great interest in physics applications such as the hard-core lattice gas model~\cite{Dyre2016, Fernandes2007Monte} in statistical mechanics and the Rydberg hamiltonian with neutral atoms~\cite{Pichler2018} \red{cite experiment when it's ready}; they can, for example, be used to understand phase transitions and to identify harder graphs in an ensemble of graphs \red{cite experiment}.
 
-In this work, we introduce a tensor-network based framework to compute the various properties pertaining to independent sets. We map different problems into generic tensor network contraction with various tensor element algebra. Our approach does not necessarily provide a better time complexity compared to dynamic programming, but the tensor network approach is highly versatile so different problems can be generically solved with minimal implementation efforts. We benchmark our algorithms, the implementation of which benefits from recent advances in tensor-network contraction for the purposes of quantum circuit simulations~\cite{Gray2021, Pan2021}. Lastly, we provide a few examples and show that the toolbox can be used to calculate the hard-square constant, Euler characteristics of the independence complex, partition functions, and finite-temperature phase transitions on square-lattice graphs. 
+In this work, we introduce a tensor-network based framework to compute the various properties pertaining to independent sets. We map different problems into generic tensor network contraction with various tensor element algebra. Our approach does not necessarily provide a better time complexity compared to dynamic programming, but the tensor network approach is highly versatile so different problems can be generically solved with minimal implementation efforts. We benchmark our algorithms, the implementation of which benefits from recent advances in tensor-network contraction for the purposes of quantum circuit simulations~\cite{Gray2021, Pan2021}. Lastly, we provide a few examples and show that the toolbox can be used to calculate the hard-square entropy constant, Euler characteristics of the independence complex, partition functions, and finite-temperature phase transitions on square-lattice graphs. 
 
 \section{Tensor networks}\red{I removed the superscript and subscript, since I think it's not necessary to introduce those.}
 A tensor network~\cite{Cirac2020Matrix, Orus2014} can be viewed as a generalization of matrix multiplication to multi-dimensional tensor contraction. Let $A, B$ be two matrices; the matrix multiplication is defined as $C_{ik} = \sum_{j}A_{ij}B_{jk}$. Using the Einstein notation, we can write $C_{ik} = A_{ij}B_{jk}$, where $j$ is implicitly summed over. In the standard notation, each index can appear at most twice. A tensor network consists of multiple tensors performing the sum-product operation, i.e., contraction, and the tensor network can be represented as a multigraph with open edges by viewing a tensor as a vertex, a label pairing two tensors as an edge, and the remaining unpaired labels as open edges.
@@ -346,9 +346,8 @@ a \odot \mymathbb{0} = \mymathbb{0} \odot a = \mymathbb{0}
 The requirement of being commutative is for the tensor contraction result to be independent of the contraction order, which could be relaxed in certain cases. In the following sections, we show how to compute the independence polynomial, the maximal independence polynomial, independence number, the number of independent sets, and enumeration of the MIS configurations of a general graph $G$ by designing tensor element types as commutative semirings while keeping the tensor network generic~\cite{Stepanov2014}. Table~\ref{tbl:generictypes} summarizes the problems that can be solved by various tensor element types. 
 
 \begin{table}[t!]\centering
-\begin{minipage}{0.9\columnwidth}
+\begin{minipage}{\columnwidth}
 \ra{1.3}
-    \scalebox{1.0}{
         \begin{tabularx}{\textwidth}{bb}\toprule
             \hline
             \textbf{element type}     & \textbf{purpose} \\
@@ -363,7 +362,6 @@ The requirement of being commutative is for the tensor contraction result to be 
             {finite-field algebra (\Eq{eq:finitefield})} & {fitting the independence polynomial exactly using number theory} \\
             \bottomrule
         \end{tabularx}
-    }
     \caption{Tensor element types and their purposes in calculating various independent set properties.}\label{tbl:generictypes}
 \end{minipage}
 \end{table}
@@ -1128,8 +1126,17 @@ We run a sequential program benchmark on CPU Intel(R) Core(TM) i5-10400 CPU @ 2.
     \label{fig:benchmark}
 \end{figure}
 
-\subsection{Example case studies}
-\subsubsection{Hard-square constant}
+\subsection{Example case studies} In this section, we give a few examples where the different properties of independence sets are used. In all the examples, the types of graphs we used are shown in Figure~\ref{fig:lattices}, where vertices are all placed on square lattices with lattice dimensions $L \times L$. The graphs include: the square grid graphs, denoted as SG; the square grid graphs with a filling factor $p$, denoted as SG$(p)$, where $\lfloor pL^{2} \rfloor$ square grids are occupied with vertices; the King's graphs, denoted as K; the King's graphs with a filling factor $p$, denoted as K$(p)$. 
+
+\begin{figure}[t] 
+    \centering
+    \includegraphics[width=\textwidth, trim={0cm 0cm 0cm 0cm}, clip]{lattices.pdf}
+    \caption{The types of graphs used in the benchmark and case studies. The lattice dimensions are $L\times L$. (a) Square grid graph denoted as SG. (b) Square grid graph with a filling factor $p=0.8$, denoted as SG(0.8). (c) King's graph denoted as K. (d) King's graph with a filling factor $p=0.8$, denoted as K(0.8).}
+    \label{fig:lattices}
+\end{figure}
+
+\subsubsection{Number of independent sets and hard-square entropy constant}
+The number of independent sets for square grid graphs of size $L \times L$ form a well-known integer sequence (\href{https://oeis.org/A006506}{OEIS A006506}), which is thought as a two-dimensional generalization of the Fibonacci numbers.
 
 \subsubsection{Euler characteristics of independence complex}
 
@@ -1383,5 +1390,93 @@ y_0 \\ y_1 \\ \vdots \\ y_{\alpha(G)}
 
 Let us rearrange the coefficients $r^j$ to $a_j$, the matrix on the left side becomes the discrete Fourier transform matrix. Thus, we can obtain the coefficients by inverse Fourier transform $\vec a_r = {\rm FFT^{-1}}(\omega) \cdot \vec y$, where $(\vec a_r)_j = a_j r ^j$.
 By choosing different $r$, one can obtain better precision in low independent set size region  ($\omega<1$) or high independent set size region ($\omega>1$). \red{is that $\omega < 1$ or $r <1$?}
+
+\section{Integer sequences formed by the number of independent sets}
+
+\begin{table}[h]
+\caption{The number of independent sets for square grid graphs of size $L\times L$. This forms the integer sequence \href{https://oeis.org/A006506}{OEIS A006506}.}
+\begin{center}
+\scalebox{0.9}{
+\begin{tabular}{|c| >{\centering\arraybackslash} p{0.95\linewidth}|}
+ \hline $L$  & square grid graphs \\
+ \hline $ 1$ & 2  \\
+ \hline $ 2$ & 7  \\
+ \hline $ 3$ & 63  \\
+ \hline $ 4$ & 1 234  \\
+ \hline $ 5$ & 55 447  \\
+ \hline $ 6$ & 5 598 861  \\
+ \hline $ 7$ & 1 280 128 950  \\
+ \hline $ 8$ & 660 647 962 955  \\
+ \hline $ 9$ & 770 548 397 261 707  \\
+ \hline $ 10$ & 2 030 049 051 145 980 050  \\
+ \hline $ 11$ & 12 083 401 651 433 651 945 979  \\
+ \hline $ 12$ & 162 481 813 349 792 588 536 582 997  \\
+ \hline $ 13$ & 4 935 961 285 224 791 538 367 780 371 090  \\
+ \hline $ 14$ & 338 752 110 195 939 290 445 247 645 371 206 783  \\
+ \hline $ 15$ & 52 521 741 712 869 136 440 040 654 451 875 316 861 275  \\
+ \hline $ 16$ &  18 396 766 424 410 124 752 958 806 046 933 947 217 821 482 942 \\
+ \hline $ 17$ &  14 557 601 701 834 111 295 974 187 104 248 827 765 798 599 152 358 303 \\
+ \hline $ 18$ &  26 024 585 612 650 837 861 658 126 921 792 857 026 992 497 268 285 945 167 621 \\
+ \hline $ 19$ &  105 105 055 066 577 962 012 604 229 608 317 915 229 737 651 637 019 975 757 755 051 314 \\
+ \hline $ 20$ &  958 979 036 662 929 619 406 859 624 886 958 746 851 620 546 557 485 230 898 539 651 354 907 499 \\
+ \hline $ 21$ &  19 766 982 580 727 525 559 447 459 703 066 410 506 378 295 841 376 040 664 015 562 851 325 369 819 076 327 \\
+ \hline $ 22$ &  920 486 427 724 231 647 653 646 535 134 255 190 048 558 085 587 696 509 535 085 179 014 710 020 739 303 637 413 062 \\
+ \hline $ 23$ & 96 836 737 362 332 577 228 126 233 146 266 027 907 220 602 904 916 569 863 928 397 932 638 147 313 462 817 836 132 159 477 643 \\
+ \hline $ 24$ & 23 014 876 830 102 973 080 295 375 510 481 185 265 791 418 130 718 634 637 816 237 986 620 978 856 344 595 418 898 906 840 911 239 867 869 \\
+ \hline $ 25$ & 12 357 280 628 458 621 610 261 003 683 798 282 889 567 362 022 871 449 310 490 079 744 330 288 088 293 888 381 458 751 196 205 785 114 467 063 479 978 \\
+ \hline $ 26$ & 14 989 353 830 657 887 045 253 535 577 369 170 604 561 059 504 403 111 230 207 533 142 521 161 755 543 754 839 412 836 401 335 298 693 619 461 437 872 472 165 615 \\
+ \hline $ 27$ &  41 076 048 814 756 904 170 038 431 958 637 474 710 328 322 517 168 428 037 124 975 797 939 221 729 929 250 098 889 601 666 346 169 376 778 430 801 983 574 787 538 529 309 191 \\
+ \hline $ 28$ &  254 296 368 874 677 123 746 928 211 898 730 495 474 495 246 876 690 760 159 507 126 754 738 599 026 016 292 991 448 162 576 157 292 681 301 528 315 863 006 160 203 433 527 765 235 617 478 \\
+ \hline $ 29$ & 3 556 619 491 488 838 337 298 644 336 171 591 528 960 687 731 348 622 394 588 805 214 244 031 766 315 339 709 627 465 589 460 212 852 431 000 227 410 783 701 037 177 097 019 793 172 369 009 198 594 591 \\
+ \hline $ 30$ &  112 377 766 778 527 126 203 646 648 402 050 958 984 330 252 199 994 469 198 044 986 979 798 657 215 652 532 005 142 877 926 040 203 499 014 641 860 333 039 219 325 350 361 465 468 647 055 420 204 598 509 312 491 705 \\
+  \hline
+\end{tabular}
+}
+\end{center}
+\label{tbl:squaregrid}
+\end{table}
+
+
+\begin{table}[h]
+\caption{The number of independent sets for King's graphs of size $L\times L$.}
+\begin{center}
+\begin{tabular}{|c| >{\centering\arraybackslash} p{0.85\linewidth}|}
+ \hline $L$  & King's graphs \\
+ \hline $ 1$ &   \\
+ \hline $ 2$ &   \\
+ \hline $ 3$ &   \\
+ \hline $ 4$ &   \\
+ \hline $ 5$ &   \\
+ \hline $ 6$ &   \\
+ \hline $ 7$ &   \\
+ \hline $ 8$ &   \\
+ \hline $ 9$ &   \\
+ \hline $ 10$ & 94 707 789 944 544 \\
+ \hline $ 11$ & 60 711 713 670 028 729  \\
+ \hline $ 12$ & 69 645 620 389 200 894 313  \\
+ \hline $ 13$ &  144 633 664 064 386 054 815 370 \\
+ \hline $ 14$ & 540 156 683 236 043 677 756 331 721  \\
+ \hline $ 15$ & 3 641 548 665 525 780 178 990 584 908 643  \\
+ \hline $ 16$ & 44 222 017 282 082 621 251 230 960 522 832 336 \\
+ \hline $ 17$ & 968 503 939 616 343 947 563 582 929 715 005 880 647 \\
+ \hline $ 18$ & 38 227 887 218 717 761 202 510 261 178 854 062 185 464 315 \\
+ \hline $ 19$ & 2 720 444 488 584 821 384 410 936 779 813 343 554 469 758 172 682 \\
+ \hline $ 20$ & 348 970 226 122 589 397 373 342 369 495 005 120 745 703 462 667 115 175 \\
+ \hline $ 21$ & 80 700 603 403 721 730 646 640 814 391 653 008 712 705 595 500 769 624 448 529 \\
+ \hline $ 22$ & 33 641 616 174 796 469 294 898 513 022 199 100 689 671 634 779 118 656 571 910 751 320 \\
+ \hline $ 23$ & 25 281 578 706 433 684 460 290 055 263 926 749 952 595 755 044 481 112 956 327 672 312 862 611  \\
+ \hline $ 24$ & 34 249 181 078 331 384 968 700 380 345 306 575 903 108 280 266 841 066 358 396 857 518 201 026 192 547 \\
+ \hline $ 25$ & 83 641 072 313 734 275 009 578 098 702 552 656 178 287 685 025 530 905 558 603 555 359 601 823 180 929 638 318  \\
+ \hline $ 26$ & 368 222 048 967 797 645 785 624 418 568 072 838 671 415 214 857 177 141 161 824 615 541 365 640 076 045 923 328 316 979  \\
+ \hline $ 27$ & 2 922 282 601 123 898 422 508 409 690 495 824 015 239 663 506 989 438 099 254 205 806 998 557 618 858 143 959 252 475 337 777 029  \\
+ \hline $ 28$ & 41 807 680 908 633 213 277 041 952 346 680 116 482 996 387 928 973 684 599 097 559 098 879 721 953 006 036 791 335 134 446 016 561 667 772 \\
+  \hline
+\end{tabular}
+\end{center}
+\label{tbl:squaregrid}
+\end{table}
+
+
+
 
 \end{document}
