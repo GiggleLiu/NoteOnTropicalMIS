@@ -945,7 +945,8 @@ With the above method, one can significantly reduce the space needed to store th
 \section{Benchmarks and case studies}
 \subsection{Performance benchmarks}
 We run a sequential program benchmark on CPU Intel(R) Core(TM) i5-10400 CPU @ 2.90GHz, and show the results in Figure~\ref{fig:benchmark}.
-Tensor network contraction can be parallelized. When the element type is immutable, one can also run it on GPUs to speed up the computation.
+%Tensor network contraction can be parallelized. 
+When the element type is immutable, one can also run it on GPUs to speed up the computation.
 The graph we use are random 3 regular graphs, a typical type of sparse graph that having small tree width $tw(G) \leq |V|/6$~\cite{Fomin2006}.
 
 

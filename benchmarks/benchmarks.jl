@@ -1,6 +1,33 @@
-using NoteOnTropicalMIS, DelimitedFiles
+using GraphTensorNetworks, DelimitedFiles
 using LightGraphs
 using BenchmarkTools
+
+function case_r3(n, k=3; sc_target, seed=2)
+    # generate a random regular graph of size 100, degree 3
+    graph = (Random.seed!(seed); LightGraphs.random_regular_graph(n, k))
+    @assert length(connected_components(graph)) == 1  # connected graph
+    # optimize the contraction order using KaHyPar + Greedy
+    optcode = Independence(graph; optmethod=:kahypar, sc_target=sc_target, max_group_size=40, imbalances=0:0.001:1)
+    return optcode
+end
+
+function case_dc(L::Int, ρ; sc_target, seed=2)
+    # generate a random regular graph of size 100, degree 3
+    Random.seed!(seed)
+    graph = diagonal_coupled_graph(rand(L, L) .< ρ)
+    # optimize the contraction order using KaHyPar + Greedy, target space complexity is 2^20
+    optcode = Independence(graph; optmethod=:kahypar, sc_target=sc_target, max_group_size=40)
+    return optcode
+end
+
+function case_sq(L::Int, ρ; sc_target, seed=2)
+    # generate a random regular graph of size 100, degree 3
+    Random.seed!(seed)
+    graph = square_lattice_graph(rand(L, L) .< ρ)
+    # optimize the contraction order using KaHyPar + Greedy, target space complexity is 2^20
+    optcode = idp_code(graph; method=:kahypar, sc_target=sc_target, max_group_size=40)
+    return optcode
+end
 
 # setup global arguments
 const GRAPH = length(ARGS) >= 1 ? ARGS[1] : "r3"
@@ -56,11 +83,12 @@ const truncatedict = Dict(
     "r3"=>Dict([string(task)=>ntruncate for (task, ntruncate) in [
         (:totalsize, 0), (:maxsize, 0), (:counting, 0),
         (:idp_polynomial, 3), (:idp_fft, 0), (:idp_finitefield, 3),
-        (:config_single, 0), (:config_all, 6), (:config_single_bounded, 0), (:config_all_bounded, 3)
+        (:config_single, 0), (:config_all, 3), (:config_single_bounded, 0), (:config_all_bounded, 0)
         ]]),
     "dc"=>Dict([string(task)=>ntruncate for (task, ntruncate) in [
         (:totalsize, 0), (:maxsize, 0), (:counting, 0),
         (:idp_polynomial, 0), (:idp_fft, 0), (:idp_finitefield, 0),
         (:config_single, 0), (:config_all, 5), (:config_single_bounded, 0), (:config_all_bounded, 0)
     ]]))
+
 runcase(case_set=Symbol(GRAPH), task=Symbol(TASK), usecuda=DEVICE>=0, ntruncate=truncatedict[GRAPH][TASK])
