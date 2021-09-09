@@ -1,6 +1,9 @@
 using GraphTensorNetworks, DelimitedFiles
 using LightGraphs
-using BenchmarkTools
+using BenchmarkTools, Random
+using LinearAlgebra
+
+BLAS.set_num_threads(1)
 
 function case_r3(n, k=3; sc_target, seed=2)
     # generate a random regular graph of size 100, degree 3
@@ -75,20 +78,20 @@ function runcase(;
         ][1:end-ntruncate]]
     end
 
-    run_benchmarks([("n$(10*i)", ()->run_task(case, task)) for (i, case) in enumerate(cases)],
-                output_file=NoteOnTropicalMIS.project_relative_path("benchmarks", "data", "$(task)-$(case_set)-$(usecuda ? "GPU" : "CPU").dat"))
+    run_benchmarks([("n$(10*i)", ()->solve(case, replace(task, "_"=>" "); usecuda=usecuda)) for (i, case) in enumerate(cases)],
+                   output_file=joinpath(@__DIR__, "data", "$(task)-$(case_set)-$(usecuda ? "GPU" : "CPU").dat"))
 end
 
 const truncatedict = Dict(
     "r3"=>Dict([string(task)=>ntruncate for (task, ntruncate) in [
-        (:totalsize, 0), (:maxsize, 0), (:counting, 0),
-        (:idp_polynomial, 3), (:idp_fft, 0), (:idp_finitefield, 3),
-        (:config_single, 0), (:config_all, 3), (:config_single_bounded, 0), (:config_all_bounded, 0)
+        ("counting_sum", 0), ("size_max", 0), ("counting_max", 0), ("counting_max2", 0),
+        ("counting_all", 3), ("counting_all_(fft)", 0), ("counting_all (finitefield)", 3),
+        ("config_max", 0), ("configs_all", 3), ("configs_max2", 3), ("config_max_(bounded)", 0), ("configs_all_(bounded)", 0)
         ]]),
     "dc"=>Dict([string(task)=>ntruncate for (task, ntruncate) in [
-        (:totalsize, 0), (:maxsize, 0), (:counting, 0),
-        (:idp_polynomial, 0), (:idp_fft, 0), (:idp_finitefield, 0),
-        (:config_single, 0), (:config_all, 5), (:config_single_bounded, 0), (:config_all_bounded, 0)
+        ("counting_sum", 0), ("size_max", 0), ("counting_max", 0), ("counting_max2", 0),
+        ("counting_all", 2), ("counting_all_(fft)", 0), ("counting_all (finitefield)", 2),
+        ("config_max", 0), ("configs_all", 2), ("configs_max2", 2), ("config_max_(bounded)", 0), ("configs_all_(bounded)", 0)
     ]]))
 
-runcase(case_set=Symbol(GRAPH), task=Symbol(TASK), usecuda=DEVICE>=0, ntruncate=truncatedict[GRAPH][TASK])
+runcase(case_set=Symbol(GRAPH), task=TASK, usecuda=DEVICE>=0, ntruncate=truncatedict[GRAPH][TASK])
