@@ -10,11 +10,12 @@ function random_graph(n::Int, m::Int)
     return g
 end
 
+# count ones (number of vertices) in a static bit vector
 function Base.count_ones(x::StaticBitVector)
     sum(v->count_ones(v),x.data)
 end
 
-function phase_space_reachable(g)
+function config_space_reachable(g)
     code = NoteOnTropicalMIS.idp_code(g; method=:greedy)
     s, c = (res = mis_contract(CountingTropical{Int,Int}(1,1), code)[]; (res.n, res.c))
     println("Graph size = $(nv(g)), MIS size = $s, degeneracy = $c")
@@ -22,8 +23,8 @@ function phase_space_reachable(g)
     @assert s == s2
     @assert length(config0) == c
     configs = config0.data ∪ config1.data
-    @show config0, config1
     G = SimpleGraph(length(configs))
+    @show length(configs)
     for (ic,c) in enumerate(configs)
         for (id,d) in enumerate(configs)
             diffpos = c ⊻ d
@@ -48,11 +49,9 @@ function phase_space_reachable(g)
             end
         end
     end
-    @show connected_components(G)
     all(sg->any(v->v<=length(config0.data), sg), connected_components(G))
 end
 
-#=
 for s in [
         (:diamond        , 4, 5, false),
         (:bull           , 5, 5, false),
@@ -77,16 +76,17 @@ for s in [
         (:tutte          , 46, 69, false)]
     @show s
     g = LightGraphs.smallgraph(s[1])
-    @assert phase_space_reachable(g)
+    @assert config_space_reachable(g)
 end
-=#
 
+#= code for search graph with unreachable sub-optimal configurations
 using Random
 for i=1:100
     Random.seed!(i)
     println(i)
     g = random_graph(5, 8)
-    if !phase_space_reachable(g)
+    if !config_space_reachable(g)
         break
     end
 end
+=#

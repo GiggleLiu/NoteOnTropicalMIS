@@ -1,32 +1,27 @@
-using DelimitedFiles, NoteOnTropicalMIS
-using NoteOnTropicalMIS.OMEinsumContractionOrders
-using NoteOnTropicalMIS.OMEinsum
+using DelimitedFiles, GraphTensorNetworks
+#using GraphTensorNetworks.OMEinsumContractionOrders
+#using GraphTensorNetworks.OMEinsum
+#using GraphTensorNetworks.TropicalNumbers
 
-function mis_configurations(n, seed, round; writefile=false)
-    folder = joinpath("/home/leo/.julia/dev/TropicalMIS/", "project", "data")
-    if round == 'A'
-        fname = joinpath(folder, "atom_configuration_$(n)x$(n)_$seed.txt")
-    elseif round == 'B'
-        fname = joinpath(folder, "MISGraph_$(n)x$(n)_5.3x5.3_$seed.txt")
+function mis_configurations(n, seed; writefile, sc_target=12)
+    folder = joinpath("/home/leo/.julia/dev/TropicalMIS", "project", "data")
+    fname = joinpath(folder, "mis_degeneracy_L$n.dat")
+    mask = Matrix{Bool}(reshape(readdlm(fname)[seed+1,4:end], n, n))
+    g = diagonal_coupled_graph(mask)
+    code = Independence(g; optmethod=:kahypar, sc_target=sc_target, max_group_size=50, imbalances=0.0:0.003:0.8)
+    s, c = max_size_count(code)
+    println("Graph $seed, n = $n, MIS size = $s, degeneracy = $c")
+    if c > 1000000
+        @warn "degeneracy too high, got: $c"
     end
-    mask = Matrix{Bool}(readdlm(fname))
-    rawcode = diagonal_coupled_eincode(mask)
-    code = optimize_kahypar(rawcode, uniformsize(rawcode, 2); sc_target=17, max_group_size=40)
-    n = mis_size(code)
-    c = mis_count(code)
-    println("Graph $seed, n = $n, MIS size = $(n), degeneracy = $(c)")
-    if c < 10000000
-        res = mis_config(code; all=true)[]
-        @show res.n, n
-        @assert res.n == n
-        config = res.c
-        @assert length(config) == c
-
-        ofname = joinpath(folder, "configurations_$(n)x$(n)_5.3x5.3_$seed.dat")
-
-        writefile && write(ofname, toMatrix(config))
-        return n, config
-    end
+    s2, config1, config0 = (res = best2_solutions(code; all=true)[]; (res.maxorder, res.a, res.b))
+    @assert s == s2
+    @assert length(config0) == c
+    ofname = joinpath(folder, "configurations_$(n)x$(n)_$seed.dat")
+    ofname1 = joinpath(folder, "configurations_suboptimal_$(n)x$(n)_$seed.dat")
+    writefile && write(ofname, toMatrix(config0))
+    writefile && write(ofname1, toMatrix(config1))
+    return s, config0, config1
 end
 
 function toMatrix(x::ConfigEnumerator{N,C}) where {N,C}
@@ -37,19 +32,28 @@ function toMatrix(x::ConfigEnumerator{N,C}) where {N,C}
     return m
 end
 
-if false
-    mis_configurations(15, 1, 'A')
-    mis_configurations(15, 3, 'A')
-    mis_configurations(13, 1, 'A')
-    mis_configurations(13, 3, 'A')
-else
-    #for n in [7, 10], seed in 1:6
-    #    mis_configurations(n, seed, 'B'; writefile=true)
-    #end
-    #for n in [13, 15], seed in [1, 2, 3, "Easy_1", "Medium_1", "Hard_1"]
-    #    mis_configurations(n, seed, 'B', writefile=true)
-    #end
-    for n in [15], seed in ["Wang"]
-        mis_configurations(n, seed, 'B', writefile=true)
+for (n, seeds) in [
+    #(5, [410, 407, 396]),
+    #(6, [667, 557, 78]),
+    #(7, [189, 623, 354]),
+    #(10, [983, 828, 61]),
+    #(11, [571, 808, 438]),
+    #(15, [612, 907, 758])
+    #(10, [982, 456, 843]),  # easy, ~25
+    #(10, [347, 793, 82]),  # intermediate, ~85
+    #(8, [188, 970, 91]),
+    #(8, [100, 72]),
+    #(9, [805, 144, 560, 651, 234]),
+    #(8, [188, 970, 91, 100, 72, 316, 747, 216, 168, 852,  7, 743, 32,
+       #573, 991, 957, 555, 936, 342, 950]),
+    #(9, [805, 144, 560, 651, 234, 442, 408, 866, 263, 873, 91, 99, 566,
+       #849, 854, 57, 64, 953, 43, 210])
+    #(8, [100, 72, 316, 747, 216, 168, 852, 7, 743, 32, 573, 991, 957, 555, 936, 342, 950]),
+    #(9, [805, 144, 560, 651, 234, 442, 408, 866, 263, 873, 91, 99, 566, 849, 854, 57, 64, 953, 43, 210])
+    #(7, [189,623,354,40,323,173,661,345,813,35,162,965,336,667,870,1,156,901,576,346])
+    (7, [40, 323, 173, 661, 345, 813, 35, 162, 965, 336, 667, 870, 1, 156, 901, 576, 346])
+    ]
+    for seed in seeds
+        @time mis_configurations(n, seed; writefile=true, sc_target=14)
     end
 end

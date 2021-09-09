@@ -238,7 +238,7 @@ independent set, tensor network, maximum independent set, independence polynomia
 \end{AMS}
 
 \section{Introduction}
-\blue{overlap gap property~\cite{Gamarnik2013, Gamarnik2019}, independence polynomial at -1~\cite{Bousquet2008,Levit2009}, treewidth of 3-regular graphs ~\cite{Fomin2006},
+\blue{overlap gap property~\cite{Gamarnik2013, Gamarnik2019}, independence polynomial at -1~\cite{Bousquet2008,Levit2009},
 branching algorithm~\cite{Tarjan1977,Robson1986}
 }
 In graph theory and combinatorics, there are many interesting but hard computational problems concerning properties of independent sets.
@@ -946,6 +946,7 @@ With the above method, one can significantly reduce the space needed to store th
 \subsection{Performance benchmarks}
 We run a sequential program benchmark on CPU Intel(R) Core(TM) i5-10400 CPU @ 2.90GHz, and show the results in Figure~\ref{fig:benchmark}.
 Tensor network contraction can be parallelized. When the element type is immutable, one can also run it on GPUs to speed up the computation.
+The graph we use are random 3 regular graphs, a typical type of sparse graph that having small tree width $tw(G) \leq |V|/6$~\cite{Fomin2006}.
 
 
 \begin{figure} 

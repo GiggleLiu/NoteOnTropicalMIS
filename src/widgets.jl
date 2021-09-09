@@ -1,3 +1,4 @@
+using GraphTensorNetworks: misv, misb
 export widget16, widget12, unitdisk_edges, uniformsize, compress!
 
 ⪰(a, b) = b ⪯ a
@@ -16,8 +17,8 @@ function compress!(a::AbstractArray{T}) where T
 	return a
 end
 
-function cross(::Type{T}) where T
-	ein"((((a,c),b),d),bd,ac)->abcd"([misv(T, 1, 1.0) for i=1:4]..., misb(T), misb(T))
+function cross(x::T) where T
+	ein"((((a,c),b),d),bd,ac)->abcd"([misv(x) for i=1:4]..., misb(T), misb(T))
 end
 
 struct UnitdiskWidget{LT}
@@ -70,10 +71,10 @@ function widget12()
     UnitdiskWidget(locs, 0.23)
 end
 
-function contract16(::Type{T}, x) where T
+function contract16(x::AbstractVector{T}) where T
 	code = ein"a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,ae,bf,cg,dh,ei,ej,ek,el,fi,fm,gm,gn,go,gp,hl,hp,ij,im,in,jk,jm,jn,jo,kl,kn,ko,kp,lo,lp,mn,no,op->abcd"
     code = optimize_greedy(code, uniformsize(code, 2))
-    code([misv(T, 1, xi) for xi in x]..., [misb(T) for i=1:32]...)
+    code([misv(xi) for xi in x]..., [misb(T) for i=1:32]...)
 end
 
 function is_diff_by_const(t1::AbstractArray{T}, t2::AbstractArray{T}) where T
