@@ -78,7 +78,7 @@ function runcase(;
         ][1:end-ntruncate]]
     end
 
-    run_benchmarks([("n$(10*i)", ()->solve(case, replace(task, "_"=>" "); usecuda=usecuda)) for (i, case) in enumerate(cases)],
+    run_benchmarks([("n$(10*i)", ()->(CUDA.@sync solve(case, replace(task, "_"=>" "); usecuda=usecuda))) for (i, case) in enumerate(cases)],
                    output_file=joinpath(@__DIR__, "data", "$(task)-$(case_set)-$(usecuda ? "GPU" : "CPU").dat"))
 end
 
