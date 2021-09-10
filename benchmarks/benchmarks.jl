@@ -86,8 +86,8 @@ end
 const truncatedict = Dict(
     "r3"=>Dict([string(task)=>ntruncate for (task, ntruncate) in [
         ("counting_sum", 0), ("size_max", 0), ("counting_max", 0), ("counting_max2", 0),
-        ("counting_all", 3), ("counting_all_(fft)", 0), ("counting_all_(finitefield)", 0),
-        ("config_max", 0), ("configs_all", 3), ("configs_max2", 3), ("config_max_(bounded)", 0), ("configs_all_(bounded)", 0)
+        ("counting_all", 3), ("counting_all_(fft)", 0), ("counting_all_(finitefield)", 3),
+        ("config_max", 0), ("configs_all", 10), ("configs_max2", 3), ("config_max_(bounded)", 0), ("configs_max_(bounded)", 0)
         ]]),
     "dc"=>Dict([string(task)=>ntruncate for (task, ntruncate) in [
         ("counting_sum", 0), ("size_max", 0), ("counting_max", 0), ("counting_max2", 0),
@@ -96,8 +96,13 @@ const truncatedict = Dict(
     ]]))
 
 for TASK in [
-        "counting_sum", "size_max", "counting_max", "counting_max2",
-        "counting_all", "counting_all_(fft)",
-        "config_max", "configs_all", "configs_max2", "config_max_(bounded)", "configs_all_(bounded)", "counting_all_(finitefield)"]
+        #"counting_sum", "size_max", "counting_max", "counting_max2",
+        #"counting_all", "counting_all_(fft)",]
+        #"config_max",
+	"configs_all",]
+	#"configs_max2",]
+	#"config_max_(bounded)", 
+	#"configs_max_(bounded)"]
+	#"counting_all_(finitefield)"]
     runcase(case_set=Symbol(GRAPH), task=TASK, usecuda=DEVICE>=0, ntruncate=truncatedict[GRAPH][TASK])
 end
