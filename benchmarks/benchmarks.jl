@@ -79,14 +79,14 @@ function runcase(;
         ][1:end-ntruncate]]
     end
 
-    run_benchmarks([("n$(10*i)", ()->(CUDA.@sync solve(case, replace(task, "_"=>" "); usecuda=usecuda))) for (i, case) in enumerate(cases)],
+    run_benchmarks([("n$(10*i)", ()->(usecuda ? (CUDA.@sync solve(case, replace(task, "_"=>" "); usecuda=true)) : solve(case, replace(task, "_"=>" "); usecuda=false))) for (i, case) in enumerate(cases)],
                    output_file=joinpath(@__DIR__, "data", "$(task)-$(case_set)-$(usecuda ? "GPU" : "CPU").dat"))
 end
 
 const truncatedict = Dict(
     "r3"=>Dict([string(task)=>ntruncate for (task, ntruncate) in [
         ("counting_sum", 0), ("size_max", 0), ("counting_max", 0), ("counting_max2", 0),
-        ("counting_all", 3), ("counting_all_(fft)", 0), ("counting_all_(finitefield)", 3),
+        ("counting_all", 3), ("counting_all_(fft)", 0), ("counting_all_(finitefield)", 0),
         ("config_max", 0), ("configs_all", 3), ("configs_max2", 3), ("config_max_(bounded)", 0), ("configs_all_(bounded)", 0)
         ]]),
     "dc"=>Dict([string(task)=>ntruncate for (task, ntruncate) in [
