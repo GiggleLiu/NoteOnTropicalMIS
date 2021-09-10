@@ -239,7 +239,8 @@ independent set, tensor network, maximum independent set, independence polynomia
 
 \section{Introduction}
 \blue{overlap gap property~\cite{Gamarnik2013, Gamarnik2019}, independence polynomial at -1~\cite{Bousquet2008,Levit2009},
-branching algorithm~\cite{Tarjan1977,Robson1986}
+branching algorithm~\cite{Tarjan1977,Robson1986},
+two motivations of computing independence polynomial: 1. Lee-Yang zero~\cite{Lee1952,Yang1952}, 2. Lov{\'a}sz local lemma~\cite{Scott2005}.
 }
 In graph theory and combinatorics, there are many interesting but hard computational problems concerning properties of independent sets.
 An independent set is a set of vertices in a graph where no two vertices are adjacent to each other.
@@ -394,9 +395,8 @@ A lot optimization can be done during the compiling, like inlining immutable ele
 In Julia, these inlined arrays can even be compiled to GPU devices for faster computation~\cite{Besard2018}.
 
 This leads us to think about what is the most general element type that allowed in a tensor network contraction program.
-Our finding is: as long as the tensor elements form a commutative semiring, the tensor network contraction result can be contraction order independent.
-So what is a commutative semiring?
-A semiring is a ring without additive inverse, while a commutative semiring is a semiring where the multiplication operation is commutative.
+Our finding is: as long as the algebra of tensor elements forms a commutative semiring, the tensor network contraction result is contraction order independent.
+A commutative semiring is a semiring with its multiplication operation being commutative, while a semiring is a ring without additive inverse.
 To define a commutative semiring with the addition operation $\oplus$ and the multiplication operation $\odot$ on a set $R$, the following relations must hold for arbitrary three elements $a, b, c \in R$.
 \begin{align*}
 (a \oplus b) \oplus c = a \oplus (b \oplus c) & \hspace{5em}\text{$\triangleright$ commutative monoid $\oplus$ with identity $\mymathbb{0}$}\\
@@ -944,20 +944,29 @@ With the above method, one can significantly reduce the space needed to store th
 
 \section{Benchmarks and case studies}
 \subsection{Performance benchmarks}
-We run a sequential program benchmark on CPU Intel(R) Core(TM) i5-10400 CPU @ 2.90GHz, and show the results in Figure~\ref{fig:benchmark}.
-%Tensor network contraction can be parallelized. 
-When the element type is immutable, one can also run it on GPUs to speed up the computation.
+We run a single thread benchmark on CPU Intel(R) Xeon(R) CPU E5-2686 v4 @ 2.30GHz,
+and its CUDA version on a GPU Tesla V100.
+The results are shown in Figure~\ref{fig:benchmark}.
 The graph we use are random 3 regular graphs, a typical type of sparse graph that having small tree width $tw(G) \leq |V|/6$~\cite{Fomin2006}.
 
 
 \begin{figure} 
     \centering
-    \includegraphics[width=0.8\textwidth, trim={0cm 0cm 0cm 0cm}, clip]{benchmark.pdf}
-    \caption{\red{label x-axis as ``number of vertices, $|V|$''} Benchmark results for computing different properties of independent sets with different tensor element types. The right axis is only for the dashed line.
+    \includegraphics[width=\textwidth, trim={0cm 0cm 0cm 0cm}, clip]{figures/fig1.pdf}
+    \caption{Benchmark results for computing different properties of independent sets on a random three regular graph with different tensor element types.
+    (b) is the computing time for computing maximum independent set size, number of independent sets and suboptimal sets.
+    (c) is the computing time for independence polynomials with different approaches.
+    (d) is the computing time for finding all configurations and a single configuration, with or without bounding.
     }\red{split into two graphs: one with time versus number of vertices, $|V|$, and one with time versus tree width.}
     \red{We also need to show/say what types of graphs is used here for benchmarking.}
     \label{fig:benchmark}
 \end{figure}
+
+Among the benchmarks shown in \Fig{fig:benchmark}, computing \texttt{max size (CPU)},
+\texttt{total size (CPU)}, \texttt{total size (GPU)}, \texttt{IDP (FFT) (CPU)}, \texttt{IDP (FFT) (GPU)} and \texttt{single configuration (bounding) (CPU)} can utilize fast BLAS libraries,
+hence they are relatively faster comparing to other methods in the same category.
+Only algebras requiring dynamic sized structures can not be computed on GPU, here are polynomial algebra for computing independence polynomial and set algebra for enumerating configurations.
+When computing the independence polynomial, the finite field approach is the only method without round off error that can run on GPU.
 
 \subsection{Example case studies} In this section, we give a few examples where the different properties of independence sets are used.
 In all the examples, the types of graphs we used are shown in Figure~\ref{fig:lattices}, where vertices are all placed on square lattices with lattice dimensions $L \times L$.
