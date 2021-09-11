@@ -368,34 +368,32 @@ In the main text, we use the generalized tensor network notation. The generalize
 The example above can be written as $C_{ijk} = A_{jkm} B_{mil} V_{jm} = A_{ukm} B_{pil} V_{vq} \delta_{mpq} \delta_{juv}\delta_l$ in the standard notion. However, by adding the $\delta$ tensors, one may unnecessarily increase the contraction complexity of a graph, which we illustrate in \App{app:tensorbad}.
 
 \section{Generic programming}\label{sec:generic}
-In previous works combining tensor network and combinatoric problems~\cite{Kourtis2019,Biamonte2017},
-the elements in tensor networks are limited to regular number types such as floating point numbers and integers.
-As the development of modern compiling technology, we do not need to limit our imaginations to regular number types anymore.
-The key technology playing the role is called the generic programming:
+In previous works relating tensor networks and combinatoric problems~\cite{Kourtis2019, Biamonte2017},
+the elements in the tensor networks are limited to standard number types such as floating point numbers and integers.
+Owning to the development of modern compiling technology, we no longer need to limit our imagination to standard number types.
+One of the key concepts that push the technology forward is called generic programming:
 
 \begin{definition}[Generic programming]
    Generic programming is an approach to programming that focuses on designing algorithms and data structures so that they work in the most general setting without loss of efficiency. ~\cite{Stepanov2014}
 \end{definition}
 
-This definition of generic programming contains two major pieces, one is a single program for the general setting, and another is about efficiency.
-To understand the first point, suppose we want to write a function to take the power of an element $f(x, n) := x^n$.
-One can easily write a function for regular numbers that computes the power of $x$ in $\log(n)$ steps using the multiply and square trick.
-A generic programmer does not assume $x$ being a regular number type,
-instead it treats $x$ as an element with an associative multiplication operation $\odot$ and multiplicative identity $\mymathbb{1}$.
-In such a way, when the program takes a matrix as input, it computes the matrix power without extra efforts.
-The second point about performance. For dynamic typed languages like Python,
-one can easily write very general codes, however, the efficiency is not guaranteed.
-Imagine the speed of computing the matrix multiplication between two numpy arrays with python objects as elements.
-The generic programming that we want to discuss is those in static types languages like C++, and Julia~\cite{Bezanson2012}.
-C++ uses templates for generic programming while Julia has just in time compiling and multiple dispatch.
-When they ``sees'' a new input type, the compiler recompiles the generic program for the new type.
-A lot optimization can be done during the compiling, like inlining immutable elements with fixed sizes in an array to decrease the cache miss rate when accessing data.
+This definition of generic programming contains two major aspects: a single program for the general setting and efficiency.
+To understand the first aspect, suppose we want to write a function that raises an element to a power, $f(x, n) := x^n$.
+One can easily write a function for standard number types that computes the power of $x$ in $\log(n)$ steps using the multiply and square trick.
+Generic programming does not require $x$ to be a standard number type,
+instead it treats $x$ as an element with an associative multiplication operation $\odot$ and a multiplicative identity $\mymathbb{1}$.
+In such a way, when the program takes a matrix as an input, it computes the matrix power without extra efforts.
+The second aspect is about performance. For dynamically typed languages such as Python,
+one can easily write very general codes, but the efficiency is not guaranteed; for example, the speed of computing the matrix multiplication between two numpy arrays with python objects as elements is much slower than statically typed languages such as C++ and Julia~\cite{Bezanson2012}.
+C++ uses templates for generic programming while Julia takes advantage of just-in-time compilation and multiple dispatch.
+When these languages ``see'' a new input type, the compiler can recompile the generic program for the new type.
+A myriad of optimizations can be done during the compilation, such as inlining immutable elements with fixed sizes in an array to decrease the cache miss rate when accessing data.
 In Julia, these inlined arrays can even be compiled to GPU devices for faster computation~\cite{Besard2018}.
 
-This leads us to think about what is the most general element type that allowed in a tensor network contraction program.
-Our finding is: as long as the algebra of tensor elements forms a commutative semiring, the tensor network contraction result is contraction order independent.
+This motivates us to think about what is the most general element type that is allowed in a tensor network contraction program.
+We find that as long as the algebra of tensor elements forms a commutative semiring, the tensor network contraction result will be valid and be independent of the contraction order.
 A commutative semiring is a semiring with its multiplication operation being commutative, while a semiring is a ring without additive inverse.
-To define a commutative semiring with the addition operation $\oplus$ and the multiplication operation $\odot$ on a set $R$, the following relations must hold for arbitrary three elements $a, b, c \in R$.
+To define a commutative semiring with the addition operation $\oplus$ and the multiplication operation $\odot$ on a set $R$, the following relations must hold for any arbitrary three elements $a, b, c \in R$.
 \begin{align*}
 (a \oplus b) \oplus c = a \oplus (b \oplus c) & \hspace{5em}\text{$\triangleright$ commutative monoid $\oplus$ with identity $\mymathbb{0}$}\\
 a \oplus \mymathbb{0} = \mymathbb{0} \oplus a = a &\\
@@ -411,7 +409,7 @@ a \odot (b\oplus c) = a\odot b \oplus a\odot c  &  \hspace{5em}\text{$\triangler
 a \odot \mymathbb{0} = \mymathbb{0} \odot a = \mymathbb{0}
 \end{align*}
 The requirement of being commutative is for the tensor contraction result to be independent of the contraction order, which could be relaxed in certain cases. In the following sections, we show how to compute the independence polynomial,
-the maximal independence polynomial, independence number, the number of independent sets, and enumeration of the MIS configurations of a general graph $G$ by designing tensor element types as commutative semirings while keeping the tensor network generic~\cite{Stepanov2014}.
+the maximal independence polynomial, independence number, the number of independent sets, and enumeration of the MIS and maximal independent set configurations of a general graph $G$ by designing tensor element types as commutative semirings while keeping the tensor network generic~\cite{Stepanov2014}.
 Table~\ref{tbl:generictypes} summarizes the problems that can be solved by various tensor element types. 
 
 \begin{table}[t!]\centering
