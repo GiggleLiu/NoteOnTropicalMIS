@@ -14,7 +14,7 @@ class PLT(object):
         nw = [(10, 3), (20, 4), (30, 6), (40, 7), (50, 8), (60, 10), (70, 11), (80, 11), (90, 15), (100, 15),
             (110, 15), (120, 18), (130, 17), (140, 16), (150, 21), (160, 20), (170, 22), (180, 24), (190, 26), (200, 25)]
         ns = [x[0] for x in nw]
-        FS = 11
+        FS = 10
         with DataPlt(filename="fig1.%s"%tp, figsize=(10,6)) as dp:
             ax = plt.subplot(221)   # treewidth
             cornertex("(a)", ax, offset=(0,0))
@@ -52,7 +52,7 @@ class PLT(object):
 
             ax = plt.subplot(224)  # configurations
             cornertex("(d)", ax, offset=(0,0))
-            for k,(prefix, l) in enumerate([("config_max", "single configuration"), ("config_max_(bounded)", "single configuration (bounding)"), ("configs_max", "all optimal configurations"), ("configs_max2", "max 2 configurations")]):
+            for k,(prefix, l) in enumerate([("config_max", "single MIS"), ("config_max_(bounded)", "single MIS (bounding)"), ("configs_max_(bounded)", "all MIS (bounding)"), ("configs_max", "all MIS"), ("configs_max2", "all MIS and MIS-1"), ("configs_all", "all IS")]):
                 datafile = "../../benchmarks/data/"+prefix+"-r3-"+device+".dat"
                 for device in ["CPU", "GPU"]:
                     datafile = "../../benchmarks/data/"+prefix+"-r3-"+device+".dat"

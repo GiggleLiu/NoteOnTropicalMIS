@@ -321,9 +321,8 @@ sum-product network or factor graph~\cite{Bishop2006} in different contexts.
 The graphical representation of a tensor network we use in this paper is a hypergraph, where an edge (label) can be shared by an arbitrary number of vertices (tensors).
 
 \begin{example}
-$C_{ijk} = A_{jkm} B_{mil} V_{jm}$ is a tensor network representing $C_{ijk} = \sum_{ml}A_{jkm} B_{mil} V_{jm}$ 
-\red{I've changed this. please check. The original was $C_{ijk} = A_{jkm} B_{mil} V_{jm}$ and $C_{ijk} = \sum_{ml}A_{jkm} B_{mil} V_{jm}$}.
-\blue{changed back because $l$ is not an open edge. Is it still confusing if I introduce open circles for open edges?}
+$C_{ijk} = A_{jkm} B_{mil} V_{jm}$ is a tensor network representing $C_{ijk} = \sum_{ml}A_{jkm} B_{mil} V_{jm}$,
+where $i,j,k$ in the output tensor are open edges.
 Its hypergraph representation is shown below, where we use different colors to annotate different hyperedges and open circles to denote open edges.
 
 \centerline{\begin{tikzpicture}[
@@ -343,9 +342,9 @@ Its hypergraph representation is shown below, where we use different colors to a
     \node[color=white,fill=black,dot=\r] at (\ax+\dx,\ax) (a) {A};
     \node[color=white,fill=black,dot=\r] at (\bx+\dx,\by) (b) {B};
     \node[color=white,fill=black,dot=\r] at (\cx+\dx,\cy) (v) {V};
-    \node[color=white,draw=black,dot=\sr] at (\ax-1,\by) (o1) {};
-    \node[color=white,draw=black,dot=\sr] at (\ax-1.5,\ay) (o2) {};
-    \node[color=white,draw=black,dot=\sr] at (\ax-1,\cy) (o3) {};
+    \node[color=transparent,draw=transparent,dot=0] at (\ax-1,\by) (o1) {};
+    \node[color=transparent,draw=transparent,dot=0] at (\ax-1.5,\ay) (o2) {};
+    \node[color=transparent,draw=transparent,dot=0] at (\ax-1,\cy) (o3) {};
     \node at (\ax-0.8,\ay) (k) {k};
     \node at (\bx+0.4,\ay) (m) {m};
     \node at (\ax,\cy) (j) {j};
@@ -366,10 +365,9 @@ Its hypergraph representation is shown below, where we use different colors to a
 \end{example}
 
 In the main text, we use the generalized tensor network notation. The generalized tensor network can be easily translated to the standard notation by adding identity tensors denoted as $\delta$ tensors.
-The example above can be written as $C_{ijkl} = A_{jkm} B_{mil} V_{jm} = A_{ukm} B_{pil} V_{vq} \delta_{mpq} \delta_{juv}$ \red{update this} in the standard notion. However, by adding the $\delta$ tensors, one may unnecessarily increase the contraction complexity of a graph, which we illustrate in \App{app:tensorbad}.
+The example above can be written as $C_{ijk} = A_{jkm} B_{mil} V_{jm} = A_{ukm} B_{pil} V_{vq} \delta_{mpq} \delta_{juv}\delta_l$ in the standard notion. However, by adding the $\delta$ tensors, one may unnecessarily increase the contraction complexity of a graph, which we illustrate in \App{app:tensorbad}.
 
 \section{Generic programming}\label{sec:generic}
-\red{I suggest we have a section on generic programming, putting both the semiring stuff and the summary table to this section, since generic programming is one of the highlights of this paper as well. I think it doesn't need to be long. Jinguo, could you write one or two paragraphs introducing generic programming?}\blue{I wrote a draft here, does it look ok in general?}
 In previous works combining tensor network and combinatoric problems~\cite{Kourtis2019,Biamonte2017},
 the elements in tensor networks are limited to regular number types such as floating point numbers and integers.
 As the development of modern compiling technology, we do not need to limit our imaginations to regular number types anymore.
@@ -450,28 +448,30 @@ The problem of computing the independence polynomial belongs to the complexity c
 The independence polynomial is closely related to the matching polynomial, the clique polynomial, and the vertex cover polynomial.
 In fact, the independence polynomial can be viewed as a generalization of the matching polynomial, since the matching polynomial of a graph $G$ is the same as the independence polynomial of the line graph of $G$~\cite{Levit2005}.
 Thus, our algorithm to compute the independence polynomial can also be used to compute the above graph polynomials. Some properties of the independence polynomial, such as the uni-modality, log-concavity, and roots of the polynomial, are well studied in the literature for special classes of graphs~\cite{Levit2005}.
-We hope our algorithms to calculate the independence polynomial can also help further research in these directions. \red{possibly add set packing problem relationship} 
+We hope our algorithms to calculate the independence polynomial can also help further research in these directions. \red{possibly add set packing problem relationship} \blue{I added a subsection in \App{app:otherproblems}?}
 
-To compute the independence polynomial of a graph $G$, we encode it to a tensor network. On the vertex $i$ of the graph $G$, we place a rank-one vertex tensor, $W(x_i)$, of size $2$ parametrized by $x_{i}$ and a rank-two edge tensor, $B$, of size $2 \times 2$ on an edge $(i,j)$
+To compute the independence polynomial of a graph $G$, we encode it to a tensor network. On the vertex $i$ of the graph $G$, we place a rank-one vertex tensor, $W(x_i)$, of size $2$ parametrized by $x_{i}$ and a rank-two edge tensor, $B$, of size $2 \times 2$ on an edge
 \red{I removed the indices $s_{i}$ etc, on the right of the equations, since that looks confusing to me. If I understand correctly, $s_{i}, s_{j}$ just denotes the index of the vector/matrix.}
 \blue{To be consistent, we should also remove the index on the LHS. It is better not removing the label information.}
+\blue{now?}
 \begin{equation}
-    W(x_i)_{s_i} = \left(\begin{matrix}
+    W(x_i) = \left(\begin{matrix}
         1 \\
         x_i
     \end{matrix}\right),
     \qquad \quad 
-       B_{s_i s_j} = \left(\begin{matrix}
+       B = \left(\begin{matrix}
         1  & 1\\
         1 & 0
     \end{matrix}\right), \label{eq:tensor}
-\end{equation} \red{remove subscript $s_{i} s_{j}$ and add description after the next equation}
-where the tensor index $s_i$ is a boolean variable; $s_{i} = 1$ corresponds that the vertex $i$ is in the independent set, and $s_{i} = 0$ means otherwise. Let us assume the tensor elements are real numbers for now.
-The edge tensor element $B_{s_{i}=1, s_{j}=1} = 0$ encodes the independent set constraint, meaning vertex $i$ and $j$ cannot be both in the independent set if they are connected by an edge $(i,j)$. The contraction of the tensor network representing $G$ gives
+\end{equation}
+The corresponding tensor network contraction gives
 \begin{equation}
     P(G, \{x_1, x_{2}, \ldots,x_{|V|}\}) = \sum\limits_{s_1, s_2, \ldots, s_{|V|} = 0}^{1} \prod\limits_{i=1}^{|V|} W(x_i)_{s_i} \prod\limits_{(i,j) \in E(G)} B_{s_i s_j},
 \end{equation}
-where the summation runs over all vertex configurations $\{s_1, s_{2}, \ldots,s_{|V|}\}$ and accumulates the product of tensor elements to the scalar output $P$ (see Example \ref{eg:tensorcontraction} for a concrete example).
+where the summation runs over all vertex configurations $\{s_1, s_{2}, \ldots,s_{|V|}\}$ and accumulates the product of tensor elements to the output $P$ (see Example \ref{eg:tensorcontraction} for a concrete example).
+The tensor index $s_i$ is a boolean variable; $s_{i} = 1$ corresponds that the vertex $i$ is in the independent set, and $s_{i} = 0$ means otherwise. Let us assume the tensor elements are real numbers for now.
+The edge tensor element $B_{s_{i}=1, s_{j}=1} = 0$ encodes the independent set constraint, meaning vertex $i$ and $j$ cannot be both in the independent set if they are connected by an edge $(i,j)$. The contraction of the tensor network representing $G$ gives
 In the special case of $x_i = x$, the contraction result directly corresponds to the independence polynomial.
 The connection can be understood as follows: the product over vertex tensor elements produces a factor $x^k$, where $k=\sum_i s_i$ counts the set size,
 and the product over edge tensor elements gives a factor $1$ for a configuration being in an independent set and $0$ otherwise. In the implementation of the algorithm, we benefit from recent advances in tensor network contraction,
@@ -480,8 +480,10 @@ A good contraction order can reduce the time complexity significantly, at the co
 The pairwise tensor contraction also makes it possible to utilize basic linear algebra subprograms (BLAS) functions to speed up the computation for certain tensor element types.
 
 \begin{example}\label{eg:tensorcontraction}
-Mapping a graph (left) to a tensor network (right) that encodes the independence polynomial. In the generalized tensor network's graphical representation, a vertex is mapped to a hyperedge, and a vertex tensor is connected to the hyperedge. An edge is mapped to an edge tensor connected to the hyperedge.
-\red{come back to this to change}\blue{$\checkmark$}
+Mapping a graph (left) to a tensor network (right) that encodes the independence polynomial.
+In the generalized tensor network's graphical representation, a vertex is mapped to a hyperedge.
+We attach a vertex tensor on each hyperedge and an edge tensor between two hyperedges if vertices of the two hyperedges are connected in the original graph.
+\red{come back to this to change}\blue{now?}
     
     \centerline{\begin{tikzpicture}[
     dot/.style = {circle, fill, minimum size=#1,
@@ -609,21 +611,26 @@ With these observations, we develop Algorithm~\ref{alg:finitefield} to compute t
 This is an iterative algorithm that tries different prime numbers $p$ until convergence.
 In each iteration, we contract tensor networks to evaluate the polynomial for each $x\in X$ on the finite field algebra ${\rm GF}(p)$.
 Let use denote the results as $Y$, then we solve a linear equation $Y = X A_p$ using the gaussian elimination on ${\rm GF}(p)$ to find the coefficient moduluses $A_p \equiv A \pmod p$.
-Finally we apply the Chinese remainder theorem to get $A \pmod P$, where $P$ is a product of all prime numbers chosen in current and previous iterations.
+Finally we apply the Chinese remainder theorem to get $A \pmod {P\times p}$, where $P$ is a product of all prime numbers chosen in previous iterations.
 If this number does not change comparing with the previous iteration, it indicates a convergent result.
 All computations are done with integers of fixed width $W$ except the last step of applying Chinese remainder theorem.
 In \App{app:fft}, we provide another method to solve the linear equation using discrete Fourier transform.
 
+\LinesNumberedHidden
 \begin{algorithm}[!ht]
     \small
     \SetAlgoNoLine
-    \LinesNumbered
+    %\LinesNumbered
     Let $P = 1$, $W$ be the integer width, vector $\chi = (0,1,2, \ldots, \alpha(G))$, matrix $X_{ij} = (\chi_i)^j$, where $i,j = 0, 1, \ldots, \alpha(G)$\;
 
     \While{true}{
         compute the largest prime $p$ that $\gcd(p, P) = 1$ and $p \leq 2^W$\;
 
-        compute the tensor contraction for each $x = \chi_i \pmod p$ on $\text{GF}(p)$ and obtain $Y = (y_0, y_1, \ldots , y_{\alpha(G)}) \pmod p $\; \red{for each $i$}
+        \For{$i=1\ldots\alpha(G)$}{
+            t = ${\rm tensor\_network}(\chi_i\pmod p)$ \tcp*[l]{defined on $\text{GF}(p)$}
+
+            $Y_i \pmod p  = {\rm contract}(t)$\;
+        }
 
         $A_p = (a_0, a_1, \ldots, a_{\alpha(G)}) \pmod p = {\rm gaussian\_elimination}(X, Y \pmod p) $\;
 
@@ -822,8 +829,10 @@ The variable $x_{i}$ in the vertex tensor is initialized to $x_i = \{\boldsymbol
         \mymathbb{1} & \mymathbb{0}
     \end{matrix}\right).
 \end{equation}
-Contraction of the tensor network enumerates all the independent sets.
-To enumerate only the MISs, we can combine the above algebra \Eq{eq:set} with the tropical algebra in \Eq{eq:countingtropical} and define $s(k) = (s_{k}, k)$, where the first element follows the algebra in \Eq{eq:set} and the second element follows the max-plus tropical algebra.
+
+This sets algebra can serve as the coefficients in \Eq{eq:countingtropical} to enumerate all MISs, \Eq{eq:polynomial} to enumerate independent sets of different sizes,
+or \Eq{eq:max2poly} to enumerate all independent sets of size $\alpha(G)$ and $\alpha(G)-1$.
+For example, to enumerate only the MISs, with the tropical algebra, we define $s(k) = (s_{k}, k)$, where the first element follows the algebra in \Eq{eq:set} and the second element follows the max-plus tropical algebra.
 The combined operations become: 
 \begin{equation}
 \begin{split}
@@ -862,6 +871,7 @@ Clearly, the vertex tensor and edge tensor become
     \end{matrix}\right).
 \end{equation}
 The contraction of the corresponding tensor network yields an enumeration of all MIS configurations.
+
 If one is interested in obtaining only a single MIS configuration, one can just keep a single configuration in the intermediate computations to save the computational effort.
 Here is a new algebra defined on the bit strings, replacing the sets of bit strings in \Eq{eq:set}, 
 %We leave this as an exercise for readers.
@@ -891,7 +901,10 @@ Here is a new algebra defined on the bit strings, replacing the sets of bit stri
 where the \texttt{select} function picks one of $\sigma$ and $\tau$ by some criteria to make the algebra commutative and associative, e.g. by picking one with a smaller integer value.
 %In practice, we can just pick randomly from them, in which case the program will output one of the MIS configurations randomly.
 \red{Can we also enumerate all maximal independent sets by combining with \Eq{eq:maximal} or enumerate suboptimal solutions by combining with the truncated polynomial?}
+\blue{now?}
 
+Although the above discussion is in the context of the the MIS problem, we can also combine the above algebras with the maximal independence network in \Eq{eq:maximal} to enumerate or sample maximal independent sets,
+as well as other problems in \App{app:otherproblems} for configuration enumeration and sampling.
 
 \subsection{Bounding the MIS enumeration space}
 When we use the algebra in \Eq{eq:countingtropicalset} to enumerate all MIS configurations, we find that the program stores significantly more intermediate configurations than necessary and thus incur significant overheads in space.
@@ -942,16 +955,17 @@ The graph we use are random 3 regular graphs, a typical type of sparse graph tha
     (b) is the computing time for computing maximum independent set size, number of independent sets and suboptimal sets.
     (c) is the computing time for independence polynomials with different approaches.
     (d) is the computing time for finding all configurations and a single configuration, with or without bounding.
-    }\red{split into two graphs: one with time versus number of vertices, $|V|$, and one with time versus tree width.}
-    \red{We also need to show/say what types of graphs is used here for benchmarking.}
+    }
     \label{fig:benchmark}
 \end{figure}
 
 Among the benchmarks shown in \Fig{fig:benchmark}, computing \texttt{max size (CPU)},
-\texttt{total size (CPU)}, \texttt{total size (GPU)}, \texttt{IDP (FFT) (CPU)}, \texttt{IDP (FFT) (GPU)} and \texttt{single configuration (bounding) (CPU)} can utilize fast BLAS libraries,
+\texttt{total size (CPU)}, \texttt{total size (GPU)}, \texttt{IDP (FFT) (CPU)}, \texttt{IDP (FFT) (GPU)} and \texttt{single configuration (bounding) (CPU)} can utilize fast BLAS functions,
 hence they are relatively faster comparing to other methods in the same category.
 Only algebras requiring dynamic sized structures can not be computed on GPU, here are polynomial algebra for computing independence polynomial and set algebra for enumerating configurations.
 When computing the independence polynomial, the finite field approach is the only method without round off error that can run on GPU.
+To enumerate the MISs, the technique to bound the enumeration space is important,
+without which the largest enumeratible size is only $150$ with 32G memory while being one order slower.
 
 \subsection{Example case studies} In this section, we give a few examples where the different properties of independence sets are used.
 In all the examples, the types of graphs we used are shown in Figure~\ref{fig:lattices}, where vertices are all placed on square lattices with lattice dimensions $L \times L$.
@@ -1217,6 +1231,29 @@ The number of possible coloring can be obtained by contracting this tensor netwo
 By designing generic types as tensor elements, one should be able to get all possible colorings.
 It is straight forward to define the k-coloring problem on edges hence we will not discuss the detailed construction here.
 
+\subsection{Max cut problem}
+Max cut problem is also known as the boolean spinglass problem.
+Its tensor network representation does not contain vertex tensors.
+The edge tensor can be defined as
+\begin{equation}
+    B(x_{ij}) = \left(\begin{matrix}
+        1 & x_{ij}\\
+        x_{ij} & 1
+    \end{matrix}\right).
+\end{equation}
+We can also define a polynomial about edges variables by setting $x_{ij} = x$,
+its $k$th coefficient is two times the number of configurations of cut size $k$.
+
+\subsection{Set packing}
+Set packing the the hypergraph version of the maximum independent set problem, where each set corresponds to a vertex, each element corresponds to a hyperedge.
+To solve the set packing problem, we just remove the rank 2 restriction of an edge tensor
+\begin{equation}
+    B_{v,w,\ldots, z} = \begin{cases}
+        1, & v+w+\ldots+z\leq 1,\\
+        0, & otherwise
+    \end{cases}
+\end{equation}
+
 \section{Discrete Fourier transform for computing the independence polynomial}\label{app:fft}
 
 In section~\ref{sec:indpoly}, we show that the independence polynomial can be obtained by solving the linear equation \Eq{eq:lineareq}. Since the coefficients of the independence polynomial can range many orders of magnitude, the round-off errors in fitting can be significant if we use random floating point numbers for $x_{i}$.
@@ -1325,7 +1362,6 @@ By choosing different $r$, one can obtain better precision in low independent se
 \label{tbl:kingsgrid}
 \end{table}
 
-
-
+We also computed independence polynomial rigorously for these lattices in our Github repo\blue{add link to the repo}.
 
 \end{document}
