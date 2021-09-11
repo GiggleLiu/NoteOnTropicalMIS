@@ -322,8 +322,8 @@ The graphical representation of a tensor network we use in this paper is a hyper
 
 \begin{example}
 $C_{ijk} = A_{jkm} B_{mil} V_{jm}$ is a tensor network representing $C_{ijk} = \sum_{ml}A_{jkm} B_{mil} V_{jm}$,
-where $i,j,k$ in the output tensor are open edges.
-Its hypergraph representation is shown below, where we use different colors to annotate different hyperedges and open circles to denote open edges.
+where $i,j,k$ in the output tensor are open edges (note that $j$ is not an open edge and thus summed over).
+Its hypergraph representation is shown below, where we use different colors to annotate different hyperedges.
 
 \centerline{\begin{tikzpicture}[
     dot/.style = {circle, fill, minimum size=#1,
