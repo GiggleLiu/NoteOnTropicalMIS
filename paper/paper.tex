@@ -431,6 +431,7 @@ Table~\ref{tbl:generictypes} summarizes the problems that can be solved by vario
         \end{tabularx}
     \caption{Tensor element types and their purposes in calculating various independent set properties.}\label{tbl:generictypes}
 \end{minipage}
+\red{we should include maximal independence polynomial and counting, enumeration in this table as well.}
 \end{table}
 
 \section{Independence polynomial and maximal independence polynomial}
@@ -933,30 +934,44 @@ With the above method, one can significantly reduce the space needed to store th
 \subsection{Performance benchmarks}
 We run a single thread benchmark on CPU Intel(R) Xeon(R) CPU E5-2686 v4 @ 2.30GHz,
 and its CUDA version on a GPU Tesla V100.
-The results are shown in Figure~\ref{fig:benchmark}.
-The graph we use are random 3 regular graphs, a typical type of sparse graph that having small tree width $\text{tw}(G) \leq |V|/6$~\cite{Fomin2006}.
+The results are summarized in Figure~\ref{fig:benchmark}.
+The type of graphs we used for benchmarks here are random 3 regular graphs, a typical type of sparse graphs that has a small tree width $\text{tw}(G) \leq |V|/6$~\cite{Fomin2006}.
 
 
 \begin{figure} 
     \centering
     \includegraphics[width=\textwidth, trim={0cm 0cm 0cm 0cm}, clip]{figures/fig1.pdf}
-    \caption{Benchmark results for computing different properties of independent sets on a random three regular graph with different tensor element types.
-    (b) is the computing time for computing maximum independent set size, number of independent sets and suboptimal sets.
-    (c) is the computing time for independence polynomials with different approaches.
-    (d) is the computing time for finding all configurations and a single configuration, with or without bounding.
+    \caption{Benchmark results for computing different properties of independent sets on a random three regular graph with different tensor element types. \red{for each graph size, is there only one graph?} (a) treewidth versus the number of vertices for the benchmarked graphs. 
+    (b) The computing time for calculating the independence number and for counting of the number of independent sets, the number of MISs, and the number of independent sets having size $\alpha(G)$ and $\alpha(G)-1$.
+    (c) The computing time for calculating the independence polynomials with different approaches.
+    (d) The computing time for enumeration problems, including the enumeration of all independent set configurations, a single MIS configuration, all MIS configurations, all independent set configurations having size $\alpha(G)$ and $\alpha(G)-1$,  with or without bounding the enumeration space.
+    \red{suggestions for the figure: 1. the legend seems to overlap the lines, especially the large subfigure. Not sure what's a better way to include the legend there. 2. I see you guys don't typically use markers. We typically use markers to distinguish the different lines, as well as using the color. Especially, for some journals, there is a physical non-color copy, so some requires the figures to be understandable without colors.}
     }
     \label{fig:benchmark}
 \end{figure}
 
-Among the benchmarks shown in \Fig{fig:benchmark}, computing \texttt{max size (CPU)},
-\texttt{total size (CPU)}, \texttt{total size (GPU)}, \texttt{IDP (FFT) (CPU)}, \texttt{IDP (FFT) (GPU)} and \texttt{single configuration (bounding) (CPU)} can utilize fast BLAS functions,
-hence they are relatively faster comparing to other methods in the same category.
-Only algebras requiring dynamic sized structures can not be computed on GPU, here are polynomial algebra for computing independence polynomial and set algebra for enumerating configurations.
-When computing the independence polynomial, the finite field approach is the only method without round off error that can run on GPU.
-To enumerate the MISs, the technique to bound the enumeration space is important,
-without which the largest enumeratible size is only $150$ with 32G memory while being one order slower.
-All these computing times have strong correlation with the tree width,
-while the computing times of configurations enumeration also depends on the size of target configuration space.
+The computations shown in \Fig{fig:benchmark} include \texttt{max size} (independence number, $\alpha(G)$), \red{we can consider changing `max size' to `ind number', but I am okay with both}
+ \texttt{total counting} (total number of independent sets) \red{should we change total size to total counting here, since max size meant max size of the set}, 
+ \texttt{max counting} (counting of MISs), 
+ \texttt{max2 counting} (counting of independent sets having a size $\alpha(G)$ or $\alpha(G)-1$), \red{we can consider changing `max counting' and `max2 counting' to `MIS counting' and `MIS and MIS-1 counting', but I am okay with both notations}
+ \texttt{IDP} (independence polynomial), 
+ \texttt{single MIS} (find one MIS configuration), 
+ \texttt{single MIS (bounding)} (find one MIS configuration including the bounding of enumeration space), \texttt{all MIS} (enumerate all MIS configurations), 
+\texttt{all MIS (bounding)} (enumerate all MIS configurations including the bounding of enumeration space),
+\texttt{all MIS and MIS-1} (enumeration of all independent sets having a size $\alpha(G)$ or $\alpha(G)-1$),
+\texttt{all IS} (enumeration of all independent sets).
+\red{Jinguo, should we include maximal independence polynomial and enumeration of all maximal independent sets as well? I think that will make the benchmark more complete.}
+
+
+Among the benchmarks, computing \texttt{max size (CPU)},
+\texttt{total size (CPU)}, \texttt{total size (GPU)}, \texttt{IDP (FFT) (CPU)}, \texttt{IDP (FFT) (GPU)} and \texttt{single configuration (bounding) (CPU)} can utilize fast BLAS functions, and hence 
+they are faster comparing to non-BLAS methods in the same category.
+Only algebras requiring dynamic sized structures cannot be computed on GPU, which includes the polynomial algebra for computing the independence polynomial and the set algebra for enumerating configurations.
+When computing the independence polynomial, the finite field approach is the only method that does not incur round-off errors and that can be run on a GPU.
+To enumerate the MISs, the technique to bound the enumeration space is indispensible,
+without which the largest enumerable size is about $150$ vertices with 32G memory while also being one order-of-magnitude slower.
+All these computing times have a strong correlation with the treewidth, 
+and the computing times of configuration enumeration also depend on the size of the target configuration space.
 
 \subsection{Example case studies} In this section, we give a few examples where the different properties of independence sets are used.
 In all the examples, the types of graphs we used are shown in Figure~\ref{fig:lattices}, where vertices are all placed on square lattices with lattice dimensions $L \times L$.
