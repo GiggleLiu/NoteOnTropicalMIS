@@ -219,10 +219,10 @@ Listing \thelstlisting: #1\hfill%\hfill%
 \maketitle
 
 \begin{abstract}
-We introduce a new approach to compute various properties of independent sets by encoding the problems into tensor networks with different tensor element algebra.
-The type of graph problems that can be computed using this method includes: independence number, the number of independent sets, independence polynomial, maximal independence polynomial, and enumeration of the maximum independence set configurations.
-Although the computational complexity inevitably scales exponentially with the graph size, the performance of our method using tensor network contraction with generic programming is on par or outperforms state-of-the-art, sophisticated methods;
-on the other hand, our algorithms are very simple to implement and one can directly utilize recent advances in tensor network contraction techniques.
+We introduce a new approach to compute various properties of independent sets by encoding the problems and the graph into tensor networks with different tensor element algebra.
+The type of graph problems that can be computed using this method includes: independence number, the number of independent sets, independence polynomial, maximal independence polynomial, and both counting and enumeration of all maximum independence sets, the large-size independent sets, and all maximal independent sets.
+Although the computational complexity inevitably scales exponentially with the graph size, our method using tensor network contraction with generic programming is highly versatile and is able to compute properties that are otherwise not known to be possible for up to several hundred vertices.
+At the same time, our algorithms are very simple to implement and one can directly utilize recent advances in tensor network contraction techniques.
 To demonstrate the versatility of this tool, we apply it to a few examples including the calculations of the hard-square entropy constant, Euler characteristics of the independence complex, partition functions, and finite-temperature phase transitions on square-lattice graphs.
 \end{abstract}
 
@@ -249,8 +249,8 @@ The problem of finding an independent set of the largest possible size, the maxi
 The size of the MIS of a graph $G$ is called the independence number, denoted as $\alpha(G) \equiv \max_{I}|I|$. 
 
 Finding $\alpha(G)$ is a hard computational problem; moreover, it is NP-hard to even approximate $\alpha(G)$ within a factor $|V|^{1-\epsilon}$ for an arbitrarily small positive $\epsilon$.
-Naive exhaustive search for the MIS requires time $O(2^{|V|})$. More efficient exact algorithms include the branching algorithms and dynamic programming.
-Sophisticated branching algorithms can reduce the base of the exponential time scaling to, e.g., $1.1996^n n ^{O(1)}$~\cite{Xiao2017}.
+Naive exhaustive search for the MIS requires time $O\left(2^{|V|} \right)$. More efficient exact algorithms include the branching algorithms and dynamic programming.
+Sophisticated branching algorithms can reduce the base of the exponential time scaling to, e.g., $1.1996^{|V|} {|V|}^{O(1)}$~\cite{Xiao2017}.
 Dynamic programming approaches~\cite{Courcelle1990, Fomin2013} works better for graphs with a small treewidth $\text{tw}(G)$;
 these methods can produce algorithms of complexity $O(2^{\text{tw}(G)} \text{tw}(G) |V|)$.
 
@@ -259,8 +259,8 @@ more concretely, an MIS of a graph $G$ corresponds to a maximum clique in the co
 and the complement vertex set of an MIS corresponds to a minimum vertex cover of the graph $G$.
 Together, these problems find a wide range of applications in scheduling, logistics, social network analysis, bioinformatics, wireless networks and telecommunication,
 map labelling, computer vision, etc.~\cite{Butenko2003, Wu2015}.
-Besides the standard MIS problem, there are many other interesting problems pertaining to independent sets, such as the number of independent sets,
-independence polynomial, maximal independence polynomial, and enumeration of optimal and sub-optimal configurations.
+Besides the standard problem of finding the independence number and an MIS, there are many other interesting problems pertaining to independent sets, such as the number of independent sets,
+independence polynomial, maximal independence polynomial, and enumeration of MIS or maximal independent set configurations.
 Some of these problems are of great interest in physics applications such as the hard-core lattice gas model~\cite{Dyre2016, Fernandes2007}
 in statistical mechanics and the Rydberg hamiltonian with neutral atoms~\cite{Pichler2018} \red{cite experiment when it's ready};
 they can, for example, be used to understand phase transitions and to identify harder graphs in an ensemble of graphs \red{cite experiment}.
@@ -268,8 +268,8 @@ they can, for example, be used to understand phase transitions and to identify h
 In this work, we introduce a tensor-network based framework to compute the various properties pertaining to independent sets.
 We map different problems into generic tensor network contraction with various tensor element algebra.
 Our approach does not necessarily provide a better time complexity compared to dynamic programming,
-but the tensor network approach is highly versatile so different problems can be generically solved with minimal implementation efforts.
-We benchmark our algorithms, the implementation of which benefits from recent advances in tensor-network contraction for the purposes of quantum circuit simulations~\cite{Gray2021, Pan2021}.
+but the tensor network approach is highly versatile so different problems can be generically solved with minimal implementation efforts without loss of efficiency.
+We benchmark our algorithms by computing various independent set properties on CPUs and GPUs, the implementation of which benefits from recent advances in tensor-network contraction for the purposes of quantum circuit simulations~\cite{Gray2021, Pan2021}.
 Lastly, we provide a few examples and show that the toolbox can be used to calculate the hard-square entropy constant,
 Euler characteristics of the independence complex, partition functions, and finite-temperature phase transitions on square-lattice graphs. 
 
@@ -322,8 +322,8 @@ The graphical representation of a tensor network we use in this paper is a hyper
 
 \begin{example}
 $C_{ijk} = A_{jkm} B_{mil} V_{jm}$ is a tensor network representing $C_{ijk} = \sum_{ml}A_{jkm} B_{mil} V_{jm}$,
-where $i,j,k$ in the output tensor are open edges.
-Its hypergraph representation is shown below, where we use different colors to annotate different hyperedges and open circles to denote open edges.
+where $i,j,k$ in the output tensor are open edges (note that $j$ is not an open edge and thus summed over).
+Its hypergraph representation is shown below, where we use different colors to annotate different hyperedges.
 
 \centerline{\begin{tikzpicture}[
     dot/.style = {circle, fill, minimum size=#1,
@@ -368,34 +368,32 @@ In the main text, we use the generalized tensor network notation. The generalize
 The example above can be written as $C_{ijk} = A_{jkm} B_{mil} V_{jm} = A_{ukm} B_{pil} V_{vq} \delta_{mpq} \delta_{juv}\delta_l$ in the standard notion. However, by adding the $\delta$ tensors, one may unnecessarily increase the contraction complexity of a graph, which we illustrate in \App{app:tensorbad}.
 
 \section{Generic programming}\label{sec:generic}
-In previous works combining tensor network and combinatoric problems~\cite{Kourtis2019,Biamonte2017},
-the elements in tensor networks are limited to regular number types such as floating point numbers and integers.
-As the development of modern compiling technology, we do not need to limit our imaginations to regular number types anymore.
-The key technology playing the role is called the generic programming:
+In previous works relating tensor networks and combinatoric problems~\cite{Kourtis2019, Biamonte2017},
+the elements in the tensor networks are limited to standard number types such as floating point numbers and integers.
+Owning to the development of modern compiling technology, we no longer need to limit our imagination to standard number types.
+One of the key concepts that push the technology forward is called generic programming:
 
 \begin{definition}[Generic programming]
    Generic programming is an approach to programming that focuses on designing algorithms and data structures so that they work in the most general setting without loss of efficiency. ~\cite{Stepanov2014}
 \end{definition}
 
-This definition of generic programming contains two major pieces, one is a single program for the general setting, and another is about efficiency.
-To understand the first point, suppose we want to write a function to take the power of an element $f(x, n) := x^n$.
-One can easily write a function for regular numbers that computes the power of $x$ in $\log(n)$ steps using the multiply and square trick.
-A generic programmer does not assume $x$ being a regular number type,
-instead it treats $x$ as an element with an associative multiplication operation $\odot$ and multiplicative identity $\mymathbb{1}$.
-In such a way, when the program takes a matrix as input, it computes the matrix power without extra efforts.
-The second point about performance. For dynamic typed languages like Python,
-one can easily write very general codes, however, the efficiency is not guaranteed.
-Imagine the speed of computing the matrix multiplication between two numpy arrays with python objects as elements.
-The generic programming that we want to discuss is those in static types languages like C++, and Julia~\cite{Bezanson2012}.
-C++ uses templates for generic programming while Julia has just in time compiling and multiple dispatch.
-When they ``sees'' a new input type, the compiler recompiles the generic program for the new type.
-A lot optimization can be done during the compiling, like inlining immutable elements with fixed sizes in an array to decrease the cache miss rate when accessing data.
+This definition of generic programming contains two major aspects: a single program for the general setting and efficiency.
+To understand the first aspect, suppose we want to write a function that raises an element to a power, $f(x, n) := x^n$.
+One can easily write a function for standard number types that computes the power of $x$ in $\log(n)$ steps using the multiply and square trick.
+Generic programming does not require $x$ to be a standard number type,
+instead it treats $x$ as an element with an associative multiplication operation $\odot$ and a multiplicative identity $\mymathbb{1}$.
+In such a way, when the program takes a matrix as an input, it computes the matrix power without extra efforts.
+The second aspect is about performance. For dynamically typed languages such as Python,
+one can easily write very general codes, but the efficiency is not guaranteed; for example, the speed of computing the matrix multiplication between two numpy arrays with python objects as elements is much slower than statically typed languages such as C++ and Julia~\cite{Bezanson2012}.
+C++ uses templates for generic programming while Julia takes advantage of just-in-time compilation and multiple dispatch.
+When these languages ``see'' a new input type, the compiler can recompile the generic program for the new type.
+A myriad of optimizations can be done during the compilation, such as inlining immutable elements with fixed sizes in an array to decrease the cache miss rate when accessing data.
 In Julia, these inlined arrays can even be compiled to GPU devices for faster computation~\cite{Besard2018}.
 
-This leads us to think about what is the most general element type that allowed in a tensor network contraction program.
-Our finding is: as long as the algebra of tensor elements forms a commutative semiring, the tensor network contraction result is contraction order independent.
+This motivates us to think about what is the most general element type that is allowed in a tensor network contraction program.
+We find that as long as the algebra of tensor elements forms a commutative semiring, the tensor network contraction result will be valid and be independent of the contraction order.
 A commutative semiring is a semiring with its multiplication operation being commutative, while a semiring is a ring without additive inverse.
-To define a commutative semiring with the addition operation $\oplus$ and the multiplication operation $\odot$ on a set $R$, the following relations must hold for arbitrary three elements $a, b, c \in R$.
+To define a commutative semiring with the addition operation $\oplus$ and the multiplication operation $\odot$ on a set $R$, the following relations must hold for any arbitrary three elements $a, b, c \in R$.
 \begin{align*}
 (a \oplus b) \oplus c = a \oplus (b \oplus c) & \hspace{5em}\text{$\triangleright$ commutative monoid $\oplus$ with identity $\mymathbb{0}$}\\
 a \oplus \mymathbb{0} = \mymathbb{0} \oplus a = a &\\
@@ -411,7 +409,7 @@ a \odot (b\oplus c) = a\odot b \oplus a\odot c  &  \hspace{5em}\text{$\triangler
 a \odot \mymathbb{0} = \mymathbb{0} \odot a = \mymathbb{0}
 \end{align*}
 The requirement of being commutative is for the tensor contraction result to be independent of the contraction order, which could be relaxed in certain cases. In the following sections, we show how to compute the independence polynomial,
-the maximal independence polynomial, independence number, the number of independent sets, and enumeration of the MIS configurations of a general graph $G$ by designing tensor element types as commutative semirings while keeping the tensor network generic~\cite{Stepanov2014}.
+the maximal independence polynomial, independence number, the number of independent sets, and enumeration of the MIS and maximal independent set configurations of a general graph $G$ by designing tensor element types as commutative semirings while keeping the tensor network generic~\cite{Stepanov2014}.
 Table~\ref{tbl:generictypes} summarizes the problems that can be solved by various tensor element types. 
 
 \begin{table}[t!]\centering
@@ -448,12 +446,9 @@ The problem of computing the independence polynomial belongs to the complexity c
 The independence polynomial is closely related to the matching polynomial, the clique polynomial, and the vertex cover polynomial.
 In fact, the independence polynomial can be viewed as a generalization of the matching polynomial, since the matching polynomial of a graph $G$ is the same as the independence polynomial of the line graph of $G$~\cite{Levit2005}.
 Thus, our algorithm to compute the independence polynomial can also be used to compute the above graph polynomials. Some properties of the independence polynomial, such as the uni-modality, log-concavity, and roots of the polynomial, are well studied in the literature for special classes of graphs~\cite{Levit2005}.
-We hope our algorithms to calculate the independence polynomial can also help further research in these directions. \red{possibly add set packing problem relationship} \blue{I added a subsection in \App{app:otherproblems}?}
+We hope our algorithms to calculate the independence polynomial can also help further research in these directions.
 
 To compute the independence polynomial of a graph $G$, we encode it to a tensor network. On the vertex $i$ of the graph $G$, we place a rank-one vertex tensor, $W(x_i)$, of size $2$ parametrized by $x_{i}$ and a rank-two edge tensor, $B$, of size $2 \times 2$ on an edge
-\red{I removed the indices $s_{i}$ etc, on the right of the equations, since that looks confusing to me. If I understand correctly, $s_{i}, s_{j}$ just denotes the index of the vector/matrix.}
-\blue{To be consistent, we should also remove the index on the LHS. It is better not removing the label information.}
-\blue{now?}
 \begin{equation}
     W(x_i) = \left(\begin{matrix}
         1 \\
@@ -471,7 +466,7 @@ The corresponding tensor network contraction gives
 \end{equation}
 where the summation runs over all vertex configurations $\{s_1, s_{2}, \ldots,s_{|V|}\}$ and accumulates the product of tensor elements to the output $P$ (see Example \ref{eg:tensorcontraction} for a concrete example).
 The tensor index $s_i$ is a boolean variable; $s_{i} = 1$ corresponds that the vertex $i$ is in the independent set, and $s_{i} = 0$ means otherwise. Let us assume the tensor elements are real numbers for now.
-The edge tensor element $B_{s_{i}=1, s_{j}=1} = 0$ encodes the independent set constraint, meaning vertex $i$ and $j$ cannot be both in the independent set if they are connected by an edge $(i,j)$. The contraction of the tensor network representing $G$ gives
+The edge tensor element $B_{s_{i}=1, s_{j}=1} = 0$ encodes the independent set constraint, meaning vertex $i$ and $j$ cannot be both in the independent set if they are connected by an edge $(i,j)$.
 In the special case of $x_i = x$, the contraction result directly corresponds to the independence polynomial.
 The connection can be understood as follows: the product over vertex tensor elements produces a factor $x^k$, where $k=\sum_i s_i$ counts the set size,
 and the product over edge tensor elements gives a factor $1$ for a configuration being in an independent set and $0$ otherwise. In the implementation of the algorithm, we benefit from recent advances in tensor network contraction,
@@ -483,7 +478,6 @@ The pairwise tensor contraction also makes it possible to utilize basic linear a
 Mapping a graph (left) to a tensor network (right) that encodes the independence polynomial.
 In the generalized tensor network's graphical representation, a vertex is mapped to a hyperedge.
 We attach a vertex tensor on each hyperedge and an edge tensor between two hyperedges if vertices of the two hyperedges are connected in the original graph.
-\red{come back to this to change}\blue{now?}
     
     \centerline{\begin{tikzpicture}[
     dot/.style = {circle, fill, minimum size=#1,
@@ -609,11 +603,11 @@ With a finite-field algebra, we have the following observations:
 \end{enumerate}
 With these observations, we develop Algorithm~\ref{alg:finitefield} to compute the independence polynomial exactly without introducing space overheads.
 This is an iterative algorithm that tries different prime numbers $p$ until convergence.
-In each iteration, we contract tensor networks to evaluate the polynomial for each $x\in X$ on the finite field algebra ${\rm GF}(p)$.
-Let use denote the results as $Y$, then we solve a linear equation $Y = X A_p$ using the gaussian elimination on ${\rm GF}(p)$ to find the coefficient moduluses $A_p \equiv A \pmod p$.
+In each iteration, we contract the tensor networks to evaluate the polynomial for each $x_{i}$ on the finite field algebra ${\rm GF}(p)$.
+Let use denote the results as $Y$, then we solve a linear equation $Y = X A_p$ using the gaussian elimination on ${\rm GF}(p)$ to find the coefficient modulo $p$, $A_p \equiv A \pmod p$.
 Finally we apply the Chinese remainder theorem to get $A \pmod {P\times p}$, where $P$ is a product of all prime numbers chosen in previous iterations.
-If this number does not change comparing with the previous iteration, it indicates a convergent result.
-All computations are done with integers of fixed width $W$ except the last step of applying Chinese remainder theorem.
+If this number does not change compared with the previous iteration, it indicates the result has converged.
+All computations are done with integers of fixed width $W$ except the last step of applying the Chinese remainder theorem.
 In \App{app:fft}, we provide another method to solve the linear equation using discrete Fourier transform.
 
 \LinesNumberedHidden
@@ -644,8 +638,8 @@ In \App{app:fft}, we provide another method to solve the linear equation using d
 \end{algorithm}
 
 \subsection{Maximal independence polynomial}
-Sometimes people are interested in knowing maximal solutions to understand why their programs are trapped in a local minimal.
-In this paper, the word ``maximal'' is different with the ``maximum'' discussed the previous discussion in such a way that it is not necessarily refer to the gloal optimum.
+Sometimes, one may be interested in knowing maximal solutions to understand why his or her programs are trapped in a local minimum.
+In this paper, the term ``maximal'' has a different meaning from ``maximum''  which we discussed in the previous sections; a maximal independent set is an independent set that is not a subset of any other independent set, but its size may not be the maximum.
 Instead of counting all independent sets, the maximal independence polynomial counts the number of maximal independent sets of various sizes~\cite{Hu2017}.
  Concretely, it is defined as
 \begin{equation}
@@ -653,7 +647,7 @@ I_{\rm max}(G, x) = \sum_{k=0}^{\alpha(G)} b_k x^k,
 \end{equation}
 where $b_k$ is the number of maximal independent sets of size $k$ in $G$.
 Obviously, $b_{k} \leq a_{k}$ and $b_{\alpha(G)} = a_{\alpha(G)}$. $I_{\rm max}(G, 1)$ counts the total number of maximal independent sets~\cite{Gaspers2012, Manne2013}, where the fastest algorithm currently has a runtime of $O(1.3642^{|V|})$~\cite{Gaspers2012}.
-For the problem of finding the MIS, $b_{k}$ counts the number of local optimum at size $k < \alpha(G)$, and can, in some cases, provide hints on the difficulty of finding the MIS using local algorithms~\red{cite experiment}.
+If we want to find an MIS, $b_{k}$ counts the number of local optimum at size $k < \alpha(G)$, and can, in some cases, provide hints on the difficulty of finding the MIS using local algorithms~\red{cite experiment}.
 The uni-modality, log-concavity, and real-rootness properties of the maximal independence polynomial for special classes of graphs have also been studied~\cite{Hu2017}. 
 
 Let us denote the neighborhood of a vertex $v$ as $N(v)$ and denote $N[v] = N(v)\cup \{v\}$.
@@ -662,7 +656,7 @@ We can modify the tensor network for computing the independence polynomial to in
 \begin{equation}\label{eq:maximal}
     T(x_v)_{s_1,s_2,\ldots,s_{|N(v)|},s_v} = \begin{cases}
         s_vx_v & s_1=s_2=\ldots=s_{|N(v)|}=0,\\
-        1-s_v& otherwise.\\
+        1-s_v& \text{otherwise}.\\
     \end{cases}
 \end{equation}
 Intuitively, it means if all the neighborhood vertices are not in $I_{m}$, i.e., $ s_1=s_2=\ldots=s_{|N(v)|}=0$, then $v$ should be in $I_{m}$, counted as $x_{v}$,
@@ -681,7 +675,7 @@ As an example, for a vertex of degree 2, the resulting rank-3 tensor is
     \end{matrix}\right).
 \end{equation}
  
-With the tensors defined as $T(x_v)$, we can perform a similar computation of contracting the tensor network with the same tensor element types as described in the previous section~\ref{sec:indpoly}, the result of which then produces the maximal independence polynomial.
+With the tensors defined as $T(x_v)$, we can perform a similar computation of contracting the tensor network with the same tensor element types as described in the previous section~\ref{sec:indpoly}, the result of which then produces the maximal independence polynomial. Let us consider the example in~\Sec{eg:tensorcontraction}: its corresponding tensor network structure for computing the maximal independent polynomial becomes
 
     \centerline{\begin{tikzpicture}[
     dot/.style = {circle, fill, minimum size=#1,
@@ -714,10 +708,9 @@ With the tensors defined as $T(x_v)$, we can perform a similar computation of co
         \draw [orange,thick] (e) -- (D);
     \end{tikzpicture}}
  
-One can see the average degree of a tensor is increase.
+One can see that the average degree of a tensor is increased.
 The computational complexity of this new tensor network contraction is often greater than the one for computing the independence polynomial.
 However, in most sparse graphs, this tensor network contraction approach is still significantly faster than enumerating all the maximal cliques on its complement graph using the Bron-Kerbosch algorithm~\cite{Bron1973}, which is the standard algorithm that we are aware of to compute the maximal independence polynomial.
-Let us consider the example in~\Sec{eg:tensorcontraction}, its corresponding tensor network structure for computing maximal independent sets now becomes:
 
 \section{Maximum independent sets and its counting problem}
 \subsection{Tropical algebra for finding the independence number and counting MISs}
@@ -783,7 +776,7 @@ For example, if one is interested in counting only $a_{\alpha(G)}$ and $a_{\alph
 \end{equation}
 In the program, we thus need a data structure that contains three fields, the largest order $k$, and the coefficients for the two largest orders $a_k$ and $a_{k-1}$.
 This approach can clearly be extended to calculate more independence polynomial coefficients and is more efficient than calculating the entire independence polynomial.
-As will be shown bellow, this algebra can also be extended to enumerate suboptimal solutions.
+As will be shown below, this algebra can also be extended to enumerate those large-size independent sets.
 
 \section{Enumeration of configurations and enumeration bounds}
 \subsection{Enumeration of MIS configurations}
@@ -830,7 +823,7 @@ The variable $x_{i}$ in the vertex tensor is initialized to $x_i = \{\boldsymbol
     \end{matrix}\right).
 \end{equation}
 
-This sets algebra can serve as the coefficients in \Eq{eq:countingtropical} to enumerate all MISs, \Eq{eq:polynomial} to enumerate independent sets of different sizes,
+This set algebra can serve as the first element in \Eq{eq:countingtropical} to enumerate all MISs, \Eq{eq:polynomial} to enumerate independent sets of different sizes,
 or \Eq{eq:max2poly} to enumerate all independent sets of size $\alpha(G)$ and $\alpha(G)-1$.
 For example, to enumerate only the MISs, with the tropical algebra, we define $s(k) = (s_{k}, k)$, where the first element follows the algebra in \Eq{eq:set} and the second element follows the max-plus tropical algebra.
 The combined operations become: 
@@ -900,11 +893,9 @@ Here is a new algebra defined on the bit strings, replacing the sets of bit stri
 \end{equation}
 where the \texttt{select} function picks one of $\sigma$ and $\tau$ by some criteria to make the algebra commutative and associative, e.g. by picking one with a smaller integer value.
 %In practice, we can just pick randomly from them, in which case the program will output one of the MIS configurations randomly.
-\red{Can we also enumerate all maximal independent sets by combining with \Eq{eq:maximal} or enumerate suboptimal solutions by combining with the truncated polynomial?}
-\blue{now?}
 
-Although the above discussion is in the context of the the MIS problem, we can also combine the above algebras with the maximal independence network in \Eq{eq:maximal} to enumerate or sample maximal independent sets,
-as well as other problems in \App{app:otherproblems} for configuration enumeration and sampling.
+% Although the above discussion is in the context of the MIS problem, we can also combine the above algebras with the maximal independence network in \Eq{eq:maximal} to enumerate or sample maximal independent sets,
+% as well as other problems in \App{app:otherproblems} for configuration enumeration and sampling.
 
 \subsection{Bounding the MIS enumeration space}
 When we use the algebra in \Eq{eq:countingtropicalset} to enumerate all MIS configurations, we find that the program stores significantly more intermediate configurations than necessary and thus incur significant overheads in space.
@@ -932,7 +923,7 @@ The inequality still holds if we take the minimum over $k$:
 \end{equation}
 On the right hand side, we transform the operation into a tropical matrix multiplication so that we can utilize the fast tropical BLAS routines~\cite{TropicalGEMM}.
 Again, the equality holds if and only if the element $A_{ij}$ has a contribution to $C$ (i.e.\ having a non-zero gradient).
-Let the gradient mask for $C$ being $\overline C$, the back-propagation rule for gradient masks reads
+Let the gradient mask for $C$ be $\overline C$; the back-propagation rule for gradient masks reads
 \begin{equation}
 \overline{A}_{ij} = \delta \left(A_{ij}, \left( \left( C^{\circ-1} \circ \overline C \right) B^{\mathsf{T}} \right)_{ij}^{\circ -1} \right),
 \end{equation}
