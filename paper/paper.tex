@@ -966,6 +966,8 @@ Only algebras requiring dynamic sized structures can not be computed on GPU, her
 When computing the independence polynomial, the finite field approach is the only method without round off error that can run on GPU.
 To enumerate the MISs, the technique to bound the enumeration space is important,
 without which the largest enumeratible size is only $150$ with 32G memory while being one order slower.
+All these computing times have strong correlation with the tree width,
+while the computing times of configurations enumeration also depends on the size of target configuration space.
 
 \subsection{Example case studies} In this section, we give a few examples where the different properties of independence sets are used.
 In all the examples, the types of graphs we used are shown in Figure~\ref{fig:lattices}, where vertices are all placed on square lattices with lattice dimensions $L \times L$.
