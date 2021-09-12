@@ -446,12 +446,9 @@ The problem of computing the independence polynomial belongs to the complexity c
 The independence polynomial is closely related to the matching polynomial, the clique polynomial, and the vertex cover polynomial.
 In fact, the independence polynomial can be viewed as a generalization of the matching polynomial, since the matching polynomial of a graph $G$ is the same as the independence polynomial of the line graph of $G$~\cite{Levit2005}.
 Thus, our algorithm to compute the independence polynomial can also be used to compute the above graph polynomials. Some properties of the independence polynomial, such as the uni-modality, log-concavity, and roots of the polynomial, are well studied in the literature for special classes of graphs~\cite{Levit2005}.
-We hope our algorithms to calculate the independence polynomial can also help further research in these directions. \red{possibly add set packing problem relationship} \blue{I added a subsection in \App{app:otherproblems}?}
+We hope our algorithms to calculate the independence polynomial can also help further research in these directions.
 
 To compute the independence polynomial of a graph $G$, we encode it to a tensor network. On the vertex $i$ of the graph $G$, we place a rank-one vertex tensor, $W(x_i)$, of size $2$ parametrized by $x_{i}$ and a rank-two edge tensor, $B$, of size $2 \times 2$ on an edge
-\red{I removed the indices $s_{i}$ etc, on the right of the equations, since that looks confusing to me. If I understand correctly, $s_{i}, s_{j}$ just denotes the index of the vector/matrix.}
-\blue{To be consistent, we should also remove the index on the LHS. It is better not removing the label information.}
-\blue{now?}
 \begin{equation}
     W(x_i) = \left(\begin{matrix}
         1 \\
@@ -469,7 +466,7 @@ The corresponding tensor network contraction gives
 \end{equation}
 where the summation runs over all vertex configurations $\{s_1, s_{2}, \ldots,s_{|V|}\}$ and accumulates the product of tensor elements to the output $P$ (see Example \ref{eg:tensorcontraction} for a concrete example).
 The tensor index $s_i$ is a boolean variable; $s_{i} = 1$ corresponds that the vertex $i$ is in the independent set, and $s_{i} = 0$ means otherwise. Let us assume the tensor elements are real numbers for now.
-The edge tensor element $B_{s_{i}=1, s_{j}=1} = 0$ encodes the independent set constraint, meaning vertex $i$ and $j$ cannot be both in the independent set if they are connected by an edge $(i,j)$. The contraction of the tensor network representing $G$ gives
+The edge tensor element $B_{s_{i}=1, s_{j}=1} = 0$ encodes the independent set constraint, meaning vertex $i$ and $j$ cannot be both in the independent set if they are connected by an edge $(i,j)$.
 In the special case of $x_i = x$, the contraction result directly corresponds to the independence polynomial.
 The connection can be understood as follows: the product over vertex tensor elements produces a factor $x^k$, where $k=\sum_i s_i$ counts the set size,
 and the product over edge tensor elements gives a factor $1$ for a configuration being in an independent set and $0$ otherwise. In the implementation of the algorithm, we benefit from recent advances in tensor network contraction,
@@ -481,7 +478,6 @@ The pairwise tensor contraction also makes it possible to utilize basic linear a
 Mapping a graph (left) to a tensor network (right) that encodes the independence polynomial.
 In the generalized tensor network's graphical representation, a vertex is mapped to a hyperedge.
 We attach a vertex tensor on each hyperedge and an edge tensor between two hyperedges if vertices of the two hyperedges are connected in the original graph.
-\red{come back to this to change}\blue{now?}
     
     \centerline{\begin{tikzpicture}[
     dot/.style = {circle, fill, minimum size=#1,
@@ -607,11 +603,11 @@ With a finite-field algebra, we have the following observations:
 \end{enumerate}
 With these observations, we develop Algorithm~\ref{alg:finitefield} to compute the independence polynomial exactly without introducing space overheads.
 This is an iterative algorithm that tries different prime numbers $p$ until convergence.
-In each iteration, we contract tensor networks to evaluate the polynomial for each $x\in X$ on the finite field algebra ${\rm GF}(p)$.
-Let use denote the results as $Y$, then we solve a linear equation $Y = X A_p$ using the gaussian elimination on ${\rm GF}(p)$ to find the coefficient moduluses $A_p \equiv A \pmod p$.
+In each iteration, we contract the tensor networks to evaluate the polynomial for each $x_{i}$ on the finite field algebra ${\rm GF}(p)$.
+Let use denote the results as $Y$, then we solve a linear equation $Y = X A_p$ using the gaussian elimination on ${\rm GF}(p)$ to find the coefficient modulo $p$, $A_p \equiv A \pmod p$.
 Finally we apply the Chinese remainder theorem to get $A \pmod {P\times p}$, where $P$ is a product of all prime numbers chosen in previous iterations.
-If this number does not change comparing with the previous iteration, it indicates a convergent result.
-All computations are done with integers of fixed width $W$ except the last step of applying Chinese remainder theorem.
+If this number does not change compared with the previous iteration, it indicates the result has converged.
+All computations are done with integers of fixed width $W$ except the last step of applying the Chinese remainder theorem.
 In \App{app:fft}, we provide another method to solve the linear equation using discrete Fourier transform.
 
 \LinesNumberedHidden
@@ -642,8 +638,8 @@ In \App{app:fft}, we provide another method to solve the linear equation using d
 \end{algorithm}
 
 \subsection{Maximal independence polynomial}
-Sometimes people are interested in knowing maximal solutions to understand why their programs are trapped in a local minimal.
-In this paper, the word ``maximal'' is different with the ``maximum'' discussed the previous discussion in such a way that it is not necessarily refer to the gloal optimum.
+Sometimes, one may be interested in knowing maximal solutions to understand why his or her programs are trapped in a local minimum.
+In this paper, the term ``maximal'' has a different meaning from ``maximum''  which we discussed in the previous sections; a maximal independent set is an independent set that is not a subset of any other independent set, but its size may not be the maximum.
 Instead of counting all independent sets, the maximal independence polynomial counts the number of maximal independent sets of various sizes~\cite{Hu2017}.
  Concretely, it is defined as
 \begin{equation}
@@ -651,7 +647,7 @@ I_{\rm max}(G, x) = \sum_{k=0}^{\alpha(G)} b_k x^k,
 \end{equation}
 where $b_k$ is the number of maximal independent sets of size $k$ in $G$.
 Obviously, $b_{k} \leq a_{k}$ and $b_{\alpha(G)} = a_{\alpha(G)}$. $I_{\rm max}(G, 1)$ counts the total number of maximal independent sets~\cite{Gaspers2012, Manne2013}, where the fastest algorithm currently has a runtime of $O(1.3642^{|V|})$~\cite{Gaspers2012}.
-For the problem of finding the MIS, $b_{k}$ counts the number of local optimum at size $k < \alpha(G)$, and can, in some cases, provide hints on the difficulty of finding the MIS using local algorithms~\red{cite experiment}.
+If we want to find an MIS, $b_{k}$ counts the number of local optimum at size $k < \alpha(G)$, and can, in some cases, provide hints on the difficulty of finding the MIS using local algorithms~\red{cite experiment}.
 The uni-modality, log-concavity, and real-rootness properties of the maximal independence polynomial for special classes of graphs have also been studied~\cite{Hu2017}. 
 
 Let us denote the neighborhood of a vertex $v$ as $N(v)$ and denote $N[v] = N(v)\cup \{v\}$.
@@ -660,7 +656,7 @@ We can modify the tensor network for computing the independence polynomial to in
 \begin{equation}\label{eq:maximal}
     T(x_v)_{s_1,s_2,\ldots,s_{|N(v)|},s_v} = \begin{cases}
         s_vx_v & s_1=s_2=\ldots=s_{|N(v)|}=0,\\
-        1-s_v& otherwise.\\
+        1-s_v& \text{otherwise}.\\
     \end{cases}
 \end{equation}
 Intuitively, it means if all the neighborhood vertices are not in $I_{m}$, i.e., $ s_1=s_2=\ldots=s_{|N(v)|}=0$, then $v$ should be in $I_{m}$, counted as $x_{v}$,
@@ -679,7 +675,7 @@ As an example, for a vertex of degree 2, the resulting rank-3 tensor is
     \end{matrix}\right).
 \end{equation}
  
-With the tensors defined as $T(x_v)$, we can perform a similar computation of contracting the tensor network with the same tensor element types as described in the previous section~\ref{sec:indpoly}, the result of which then produces the maximal independence polynomial.
+With the tensors defined as $T(x_v)$, we can perform a similar computation of contracting the tensor network with the same tensor element types as described in the previous section~\ref{sec:indpoly}, the result of which then produces the maximal independence polynomial. Let us consider the example in~\Sec{eg:tensorcontraction}: its corresponding tensor network structure for computing the maximal independent polynomial becomes
 
     \centerline{\begin{tikzpicture}[
     dot/.style = {circle, fill, minimum size=#1,
@@ -712,10 +708,9 @@ With the tensors defined as $T(x_v)$, we can perform a similar computation of co
         \draw [orange,thick] (e) -- (D);
     \end{tikzpicture}}
  
-One can see the average degree of a tensor is increase.
+One can see that the average degree of a tensor is increased.
 The computational complexity of this new tensor network contraction is often greater than the one for computing the independence polynomial.
 However, in most sparse graphs, this tensor network contraction approach is still significantly faster than enumerating all the maximal cliques on its complement graph using the Bron-Kerbosch algorithm~\cite{Bron1973}, which is the standard algorithm that we are aware of to compute the maximal independence polynomial.
-Let us consider the example in~\Sec{eg:tensorcontraction}, its corresponding tensor network structure for computing maximal independent sets now becomes:
 
 \section{Maximum independent sets and its counting problem}
 \subsection{Tropical algebra for finding the independence number and counting MISs}
