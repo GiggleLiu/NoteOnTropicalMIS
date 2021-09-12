@@ -776,7 +776,7 @@ For example, if one is interested in counting only $a_{\alpha(G)}$ and $a_{\alph
 \end{equation}
 In the program, we thus need a data structure that contains three fields, the largest order $k$, and the coefficients for the two largest orders $a_k$ and $a_{k-1}$.
 This approach can clearly be extended to calculate more independence polynomial coefficients and is more efficient than calculating the entire independence polynomial.
-As will be shown bellow, this algebra can also be extended to enumerate suboptimal solutions.
+As will be shown below, this algebra can also be extended to enumerate those large-size independent sets.
 
 \section{Enumeration of configurations and enumeration bounds}
 \subsection{Enumeration of MIS configurations}
@@ -823,7 +823,7 @@ The variable $x_{i}$ in the vertex tensor is initialized to $x_i = \{\boldsymbol
     \end{matrix}\right).
 \end{equation}
 
-This sets algebra can serve as the coefficients in \Eq{eq:countingtropical} to enumerate all MISs, \Eq{eq:polynomial} to enumerate independent sets of different sizes,
+This set algebra can serve as the first element in \Eq{eq:countingtropical} to enumerate all MISs, \Eq{eq:polynomial} to enumerate independent sets of different sizes,
 or \Eq{eq:max2poly} to enumerate all independent sets of size $\alpha(G)$ and $\alpha(G)-1$.
 For example, to enumerate only the MISs, with the tropical algebra, we define $s(k) = (s_{k}, k)$, where the first element follows the algebra in \Eq{eq:set} and the second element follows the max-plus tropical algebra.
 The combined operations become: 
@@ -893,11 +893,9 @@ Here is a new algebra defined on the bit strings, replacing the sets of bit stri
 \end{equation}
 where the \texttt{select} function picks one of $\sigma$ and $\tau$ by some criteria to make the algebra commutative and associative, e.g. by picking one with a smaller integer value.
 %In practice, we can just pick randomly from them, in which case the program will output one of the MIS configurations randomly.
-\red{Can we also enumerate all maximal independent sets by combining with \Eq{eq:maximal} or enumerate suboptimal solutions by combining with the truncated polynomial?}
-\blue{now?}
 
-Although the above discussion is in the context of the the MIS problem, we can also combine the above algebras with the maximal independence network in \Eq{eq:maximal} to enumerate or sample maximal independent sets,
-as well as other problems in \App{app:otherproblems} for configuration enumeration and sampling.
+% Although the above discussion is in the context of the MIS problem, we can also combine the above algebras with the maximal independence network in \Eq{eq:maximal} to enumerate or sample maximal independent sets,
+% as well as other problems in \App{app:otherproblems} for configuration enumeration and sampling.
 
 \subsection{Bounding the MIS enumeration space}
 When we use the algebra in \Eq{eq:countingtropicalset} to enumerate all MIS configurations, we find that the program stores significantly more intermediate configurations than necessary and thus incur significant overheads in space.
@@ -925,7 +923,7 @@ The inequality still holds if we take the minimum over $k$:
 \end{equation}
 On the right hand side, we transform the operation into a tropical matrix multiplication so that we can utilize the fast tropical BLAS routines~\cite{TropicalGEMM}.
 Again, the equality holds if and only if the element $A_{ij}$ has a contribution to $C$ (i.e.\ having a non-zero gradient).
-Let the gradient mask for $C$ being $\overline C$, the back-propagation rule for gradient masks reads
+Let the gradient mask for $C$ be $\overline C$; the back-propagation rule for gradient masks reads
 \begin{equation}
 \overline{A}_{ij} = \delta \left(A_{ij}, \left( \left( C^{\circ-1} \circ \overline C \right) B^{\mathsf{T}} \right)_{ij}^{\circ -1} \right),
 \end{equation}
