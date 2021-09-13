@@ -58,8 +58,8 @@ function runcase(;
         run_benchmarks([("n$(10*i)", ()->(usecuda ? (CUDA.@sync solve(case, replace(task, "_"=>" "); usecuda=true)) : solve((@show length(GraphTensorNetworks.labels(case.code)); case), replace(task, "_"=>" "); usecuda=false))) for (i, case) in enumerate(cases)],
                     output_file=joinpath(@__DIR__, "data", "maximal-$(task)-$(case_set)-$(usecuda ? "GPU" : "CPU").dat"))
     elseif case_set == :r3bk
-        graphs = [(Random.seed!(seed); LightGraphs.random_regular_graph(i, 3)) for i=1:10-ntruncate]
-        run_benchmarks([("n$(10*i)", [()->maximal_cliques(complement(g)) for (i, g) in enumerate(graphs)],
+        graphs = [(Random.seed!(seed); LightGraphs.random_regular_graph(i*10, 3)) for i=1:10-ntruncate]
+        run_benchmarks([("n$(10*i)", ()->maximal_cliques(complement(g))) for (i, g) in enumerate(graphs)],
                     output_file=joinpath(@__DIR__, "data", "maximal-$(task)-$(case_set)-$(usecuda ? "GPU" : "CPU").dat"))
     end
 
@@ -67,8 +67,9 @@ end
 
 const truncatedict = Dict(
     "r3"=>Dict([string(task)=>ntruncate for (task, ntruncate) in [
-        ("counting_sum", 0), ("counting_all_(finitefield)", 3), ("configs_all", 16),
+        ("counting_sum", 0), ("counting_all_(finitefield)", 2), ("configs_all", 2),
         ]]),
+    "r3bk"=>Dict(["configs_all"=>3])
     )
 
 runcase(case_set=Symbol(GRAPH), task=TASK, usecuda=DEVICE>=0, ntruncate=truncatedict[GRAPH][TASK])
