@@ -67,9 +67,9 @@ end
 
 const truncatedict = Dict(
     "r3"=>Dict([string(task)=>ntruncate for (task, ntruncate) in [
-        ("counting_sum", 0), ("counting_all_(finitefield)", 0), ("configs_all", 2),
+        ("counting_sum", 0), ("counting_all_(finitefield)", 2), ("configs_all", 3),
         ]]),
-    "r3bk"=>Dict(["configs_all"=>3])
+    "r3bk"=>Dict(["configs_all"=>4])
     )
 
 runcase(case_set=Symbol(GRAPH), task=TASK, usecuda=DEVICE>=0, ntruncate=truncatedict[GRAPH][TASK])
