@@ -48,16 +48,21 @@ function runcase(;
         case_set=:r3,
         task,
         usecuda = false,
-        ntruncate = 0  # truncate benchmark cases
+        ntruncate = 0,  # truncate benchmark cases
+        seed=2
     )
-    cases = if case_set == :r3
-        [case_r3(n, 3; seed=2, sc_target=s) for (n, s) in [
+    if case_set == :r3
+        cases = [case_r3(n, 3; seed=seed, sc_target=s) for (n, s) in [
             (10, 6), (20, 8), (30, 10), (40, 11), (50, 16), (60, 17), (70, 17), (80, 21), (90, 27), (100, 26),
         ][1:end-ntruncate]]
+        run_benchmarks([("n$(10*i)", ()->(usecuda ? (CUDA.@sync solve(case, replace(task, "_"=>" "); usecuda=true)) : solve((@show length(GraphTensorNetworks.labels(case.code)); case), replace(task, "_"=>" "); usecuda=false))) for (i, case) in enumerate(cases)],
+                    output_file=joinpath(@__DIR__, "data", "maximal-$(task)-$(case_set)-$(usecuda ? "GPU" : "CPU").dat"))
+    elseif case_set == :r3bk
+        graphs = [(Random.seed!(seed); LightGraphs.random_regular_graph(i, 3)) for i=1:10-ntruncate]
+        run_benchmarks([("n$(10*i)", [()->maximal_cliques(complement(g)) for (i, g) in enumerate(graphs)],
+                    output_file=joinpath(@__DIR__, "data", "maximal-$(task)-$(case_set)-$(usecuda ? "GPU" : "CPU").dat"))
     end
 
-    run_benchmarks([("n$(10*i)", ()->(usecuda ? (CUDA.@sync solve(case, replace(task, "_"=>" "); usecuda=true)) : solve((@show length(GraphTensorNetworks.labels(case.code)); case), replace(task, "_"=>" "); usecuda=false))) for (i, case) in enumerate(cases)],
-                   output_file=joinpath(@__DIR__, "data", "maximal-$(task)-$(case_set)-$(usecuda ? "GPU" : "CPU").dat"))
 end
 
 const truncatedict = Dict(
