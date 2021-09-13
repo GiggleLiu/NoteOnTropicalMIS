@@ -115,6 +115,7 @@ Listing \thelstlisting: #1\hfill%\hfill%
 %\usepackage[colorlinks, citecolor=blue]{hyperref}
 \DeclareMathOperator*{\argmax}{arg\,max}
 
+\newcommand{\eqname}[1]{\stepcounter{equation}\tag{\theequation : #1}}
 %%%%%% Shortcut related
 \newcommand{\<}{\langle}
 \renewcommand{\>}{\rangle}
@@ -548,6 +549,7 @@ The most natural approach is to treat the tensor elements as polynomials and eva
 Let us create a polynomial type, and represent a polynomial $a_0 + a_1 x + \ldots + a_k x^k$ as a coefficient vector $(a_0, a_1, \ldots, a_k) \in \mathbb{R}^k$, so, e.g., $x$ is represented as $(0, 1)$.
 We define the algebra between the polynomials $a$ of order $k_a$ and $b$ of order $k_b$ as
 \begin{equation}
+    \eqname{PN}
     \begin{split}
     a \oplus b &= (a_0 + b_0, a_1 + b_1, \ldots, a_{\max(k_a, k_b)} + b_{\max(k_a, k_b)}),\\
     a \odot b &= (a_0 + b_0, a_1b_0 + a_0b_1, a_{2}b_{0} + a_{1}b_{1} + a_{0}b_{2},  \ldots, a_{k_a} b_{k_b}),\\
@@ -735,6 +737,7 @@ From this, we can define a new algebra as
 %\end{split}
 %\end{equation}
 \begin{equation}
+    \eqname{P1}
 \begin{split}
     a_x\infty^x \oplus a_y\infty^y &= \begin{cases}
         (a_x + a_y)\infty^{\max(x,y)}, & x = y\\
@@ -743,11 +746,20 @@ From this, we can define a new algebra as
     \end{cases}, \\
     a_x\infty^x \odot a_y\infty^y &= a_x a_y\infty^{x+y}\\
     \mymathbb{0} &= 0\infty^{-\infty}\\
-    \mymathbb{1} &= 1\infty^{0}. \label{eq:countingtropical}
-\end{split}
+    \mymathbb{1} &= 1\infty^{0}.
+\end{split}%& \text{\rlap{(P1)}}
+\label{eq:countingtropical}
 \end{equation}
 In the program, we only need to store the exponent $x$ and the corresponding coefficient $a_x$ initialized to $1$. 
-The algebra of the exponents becomes the max-plus tropical algebra: $x \oplus y = \max(x,y)$ and $x \odot y = x + y$~\cite{Maclagan2015, Moore2011}.
+The algebra of the exponents becomes the max-plus tropical algebra~\cite{Maclagan2015, Moore2011}.:
+\begin{equation}\eqname{T}
+    \begin{split}
+        x \oplus y &= \max(x,y)\\
+        x \odot y &= x + y\\
+        \mymathbb{0} &= -\infty\\
+        \mymathbb{1} &= 0.
+    \end{split}
+\end{equation}
 This algebra is the same as the one used in Liu et al.~\cite{Liu2021} to calculate and count spin glass ground states.
 For independent set calculations here, the vertex tensor and edge tensor becomes:
 \begin{equation}
@@ -766,6 +778,7 @@ For independent set calculations here, the vertex tensor and edge tensor becomes
 Instead of counting just the MISs, one may be interested in counting the independent sets of large sizes close to the MIS size.
 For example, if one is interested in counting only $a_{\alpha(G)}$ and $a_{\alpha(G)-1}$, we can define a truncated polynomial algebra by keeping only the largest two coefficients in the polynomial in \Eq{eq:polynomial}:
 \begin{equation}
+    \eqname{P2}
     \begin{split}
     a \oplus b &= (a_{\max(k_a, k_b)-1} + b_{\max(k_a, k_b)-1}, a_{\max(k_a, k_b)} + b_{\max(k_a, k_b)}),\\
     a \odot b &= (a_{k_a-1} b_{k_b}+a_{k_a} b_{k_b-1}, a_{k_a} b_{k_b}),\\
@@ -787,6 +800,7 @@ For example, our tensor-network based algorithm to enumerate all MISs is expecte
 
 To enumerate all independent sets, we input a set of configurations into the tensor elements. More concretely, we design a new element type having the following algebra
 \begin{equation}
+\eqname{SN}
 \begin{split}
     s \oplus t &= s \cup t\\
     s \odot t &= \{\sigma \lor^\circ \tau \, | \, \sigma \in s, \tau \in t\}\\
@@ -824,7 +838,7 @@ The variable $x_{i}$ in the vertex tensor is initialized to $x_i = \{\boldsymbol
 
 This set algebra can serve as the coefficients in \Eq{eq:countingtropical} to enumerate all MISs, \Eq{eq:polynomial} to enumerate independent sets of different sizes,
 or \Eq{eq:max2poly} to enumerate all independent sets of size $\alpha(G)$ and $\alpha(G)-1$.
-For example, to enumerate only the MISs, with the tropical algebra, we define $s(k) = (s_{k}, k)$, where the first element follows the algebra in \Eq{eq:set} and the second element follows the max-plus tropical algebra.
+For example, to enumerate only the MISs, with the tropical algebra, we define $s(k) = (s_{k}, k)$, where the coefficients follows the algebra in \Eq{eq:set} and the orders follows the max-plus tropical algebra.
 The combined operations become: 
 %\begin{equation}
 %\begin{split}
@@ -839,6 +853,7 @@ The combined operations become:
 %\end{split}
 %\end{equation}
 \begin{equation}
+\eqname{P1+SN}
 \begin{split}
     s_x\infty^x \oplus s_y\infty^y &= \begin{cases}
         (s_x \cup s_y)\infty^{\max(x,y)}, & x = y\\
@@ -883,6 +898,7 @@ Here is a new algebra defined on the bit strings, replacing the sets of bit stri
 %\end{equation}
 %\fi
 \begin{equation}
+\eqname{S1}
 \begin{split}
     \sigma \oplus \tau &= {\rm select}(\sigma, \tau), \\
     \sigma \odot \tau &= (\sigma\lor^\circ \tau),\\
@@ -941,7 +957,7 @@ The type of graphs we used for benchmarks here are random 3 regular graphs, a ty
 \begin{figure} 
     \centering
     \includegraphics[width=\textwidth, trim={0cm 0cm 0cm 0cm}, clip]{figures/fig1.pdf}
-    \caption{Benchmark results for computing different properties of independent sets on a random three regular graph with different tensor element types. \red{for each graph size, is there only one graph?} (a) treewidth versus the number of vertices for the benchmarked graphs. 
+    \caption{Benchmark results for computing different properties of independent sets on a random three regular graph with different tensor element types. \red{for each graph size, is there only one graph?}\blue{yes} (a) treewidth versus the number of vertices for the benchmarked graphs. 
     (b) The computing time for calculating the independence number and for counting of the number of independent sets, the number of MISs, and the number of independent sets having size $\alpha(G)$ and $\alpha(G)-1$.
     (c) The computing time for calculating the independence polynomials with different approaches.
     (d) The computing time for enumeration problems, including the enumeration of all independent set configurations, a single MIS configuration, all MIS configurations, all independent set configurations having size $\alpha(G)$ and $\alpha(G)-1$,  with or without bounding the enumeration space.
