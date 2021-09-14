@@ -416,18 +416,18 @@ Table~\ref{tbl:generictypes} summarizes the problems that can be solved by vario
 \begin{table}[t!]\centering
 \begin{minipage}{\columnwidth}
 \ra{1.3}
-        \begin{tabularx}{\textwidth}{bb}\toprule
+        \begin{tabularx}{\textwidth}{sb}\toprule
             \hline
             \textbf{element type}     & \textbf{purpose} \\
-            {real number}     & {counting all independent sets} \\
-            {tropical number} (\Eq{eq:countingtropical})    & {finding the independence number} \\
-            {tropical number with counting} (\Eq{eq:countingtropical})     & {finding the independence number and the number of MISs} \\
-            {tropical number with configurations} (\Eq{eq:singleconfig})     & {finding the independence number and one MIS} \\
-            {tropical number with sets} (\Eq{eq:countingtropicalset})    & {finding the independence number and enumeration of all MISs} \\
-            {polynomial} (\Eq{eq:polynomial})     & {computing the independence polynomial exactly} \\
-            {truncated polynomial} (\Eq{eq:max2poly})     & {counting MISs and independent sets of size $\alpha(G)-1$} \\
-            {complex number}     & {fitting the independence polynomial with fast Fourier transform} \\
-            {finite-field algebra (\Eq{eq:finitefield})} & {fitting the independence polynomial exactly using number theory} \\
+            {$\mathbbm{R}$}     & {real number for counting all independent sets} \\
+            {$\mathbbm{C}$}     & {complex number for fitting the independence polynomial with fast Fourier transform} \\
+            {$\text{GF}(p)$} (\Eq{eq:finitefield}) & {number on finite field algebra for fitting the independence polynomial exactly using number theory} \\
+            {T} (\Eq{eq:tropical})    & {tropical number for finding the independence number} \\
+            {P1} (\Eq{eq:countingtropical})     & {polynomial truncated to largest order, i.e. the tropical number with counting field for finding the independence number and the number of MISs} \\
+            {P2} (\Eq{eq:max2poly})     & {counting MISs and independent sets of size $\alpha(G)-1$} \\
+            {PN} (\Eq{eq:polynomial})     & {computing the independence polynomial exactly} \\
+            {P1+S1}     & {replacing the counting field in P1 to configuration sampler defined in $\Eq{eq:singleconfig}$ for finding the independence number and one MIS} \\
+            {P1+SN} (\Eq{eq:countingtropicalset})    & {replacing the counting field in P1 to configuration sampler defined in $\Eq{eq:set}$ for finding the independence number and enumeration of all MISs} \\
             \bottomrule
         \end{tabularx}
     \caption{Tensor element types and their purposes in calculating various independent set properties.}\label{tbl:generictypes}
@@ -758,7 +758,7 @@ The algebra of the exponents becomes the max-plus tropical algebra~\cite{Maclaga
         x \odot y &= x + y\\
         \mymathbb{0} &= -\infty\\
         \mymathbb{1} &= 0.
-    \end{split}
+    \end{split}\label{eq:tropical}
 \end{equation}
 This algebra is the same as the one used in Liu et al.~\cite{Liu2021} to calculate and count spin glass ground states.
 For independent set calculations here, the vertex tensor and edge tensor becomes:
@@ -988,6 +988,21 @@ To enumerate the MISs, the technique to bound the enumeration space is indispens
 without which the largest enumerable size is about $150$ vertices with 32G memory while also being one order-of-magnitude slower.
 All these computing times have a strong correlation with the treewidth, 
 and the computing times of configuration enumeration also depend on the size of the target configuration space.
+
+\begin{figure} 
+    \centering
+    \includegraphics[width=\textwidth, trim={0cm 0cm 0cm 0cm}, clip]{figures/fig2.pdf}
+    \caption{Benchmark results for computing different properties of maximal independent sets on a random three regular graph with different tensor element types.
+    (a) treewidth versus the number of vertices for the benchmarked graphs. 
+    (b) The computing time for calculating the number of independent sets and enumerate all MISs.
+    }
+    \label{fig:benchmark-maximal}
+\end{figure}
+
+We also benchmarked our method with the Bron-Kerbosch method to enumerate and count maximal independent sets in \Fig{fig:benchmark-maximal}.
+We can see the tree width of this tensor network is nearly doubled comparing with the one for computing independent sets, hence only small graphs can be benchmarked.
+The time for the tensor netwrok approach and Bron-Kerbosch approach to enumerate all maximal independent sets are comparable,
+while the counting can be much faster.
 
 \subsection{Example case studies} In this section, we give a few examples where the different properties of independence sets are used.
 In all the examples, the types of graphs we used are shown in Figure~\ref{fig:lattices}, where vertices are all placed on square lattices with lattice dimensions $L \times L$.
