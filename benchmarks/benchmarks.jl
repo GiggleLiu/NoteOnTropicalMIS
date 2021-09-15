@@ -103,7 +103,7 @@ if DEVICE >= 0
         runcase(case_set=Symbol(GRAPH), task=TASK, usecuda=DEVICE>=0, ntruncate=truncatedict[GRAPH][TASK])
     end
 else
-    for TASK in keys(truncatedict)
+    for TASK in keys(truncatedict[GRAPH])
         runcase(case_set=Symbol(GRAPH), task=TASK, usecuda=DEVICE>=0, ntruncate=truncatedict[GRAPH][TASK])
     end
 end
