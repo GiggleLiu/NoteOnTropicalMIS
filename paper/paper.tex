@@ -814,7 +814,7 @@ where $s$ and $t$ are each a set of $|V|$-bit strings and $\lor^\circ$ is the bi
 \begin{equation*}
 \begin{split}
     &\{00001\} \oplus \{01110, 01000\} = \{01110, 01000\} \oplus \{00001\} = \{00001,01110, 01000\}\\
-    &\{00001\} \oplus \{\} = \{\}\\
+    &\{00001\} \oplus \{\} = \{00001\}\\
 &\\
     &\{00001\} \odot \{01110, 01000\} = \{01110, 01000\} \odot \{00001\} = \{01111, 01001\}\\
     &\{00001\} \odot \{\} = \{\}\\
@@ -823,7 +823,9 @@ where $s$ and $t$ are each a set of $|V|$-bit strings and $\lor^\circ$ is the bi
 \end{equation*}
 \end{example}
 
-The variable $x_{i}$ in the vertex tensor is initialized to $x_i = \{\boldsymbol{e}_{i}\}$, where $\boldsymbol{e}_i$ is the standard basis vector of size $|V|$ and having 1 at index $i$. The vertex and edge tensors are thus
+To enumerate all independent sets, 
+we initialize variable $x_{i}$ in the vertex tensor to $x_i = \{\boldsymbol{e}_{i}\}$, where $\boldsymbol{e}_i$ is the standard basis vector of size $|V|$ and having 1 at index $i$.
+The vertex and edge tensors are thus
 \begin{equation}
     W^{\rm enum}(\{\boldsymbol{e}_{i}\}) = \left(\begin{matrix}
         \mymathbb{1} \\
@@ -869,7 +871,7 @@ Clearly, the vertex tensor and edge tensor become
 \begin{equation}
     W^{\rm MISenum}(\{\boldsymbol{e}_{i}\}) = \left(\begin{matrix}
         \mymathbb{1} \\
-        \left({\{\boldsymbol{e}_{i}\}, 1} \right)
+        \{\boldsymbol{e}_{i}\}\infty^1
     \end{matrix}\right),   
     \qquad \qquad
         B^{\rm MISenum} = \left(\begin{matrix}
@@ -906,7 +908,7 @@ Here is a new algebra defined on the bit strings, replacing the sets of bit stri
     \mymathbb{1} &= 0^{\otimes |V|},
 \end{split}\label{eq:singleconfig}
 \end{equation}
-where the \texttt{select} function picks one of $\sigma$ and $\tau$ by some criteria to make the algebra commutative and associative, e.g. by picking one with a smaller integer value.
+where the \texttt{select} function picks one of $\sigma$ and $\tau$ by some criteria to make the algebra commutative and associative, e.g. by picking the one with a smaller integer value.
 %In practice, we can just pick randomly from them, in which case the program will output one of the MIS configurations randomly.
 
 % Although the above discussion is in the context of the MIS problem, we can also combine the above algebras with the maximal independence network in \Eq{eq:maximal} to enumerate or sample maximal independent sets,
@@ -951,7 +953,7 @@ With the above method, one can significantly reduce the space needed to store th
 We run a single thread benchmark on CPU Intel(R) Xeon(R) CPU E5-2686 v4 @ 2.30GHz,
 and its CUDA version on a GPU Tesla V100.
 The results are summarized in Figure~\ref{fig:benchmark}.
-The type of graphs we used for benchmarks here are random 3 regular graphs, a typical type of sparse graphs that has a small tree width $\text{tw}(G) \leq |V|/6$~\cite{Fomin2006}.
+The graphs that we use in benchmarks are random 3 regular graphs, a typical type of sparse graphs that has a small tree width $\text{tw}(G) \leq |V|/6$~\cite{Fomin2006}.
 
 
 \begin{figure} 
@@ -977,10 +979,11 @@ computing independence polynomial (panel c) and enumerating and sampling indepen
 Among the benchmarks, computing \texttt{T (CPU)},
 \texttt{$\mathbbm{R}$ (CPU)}, \texttt{$\mathbbm{R}$ (GPU)}, \texttt{$\mathbbm{C}$ (CPU)}, \texttt{$\mathbbm{C}$ (GPU)} and \texttt{T+bounding (CPU)} can utilize fast BLAS functions, and hence 
 they are faster comparing to non-BLAS methods in the same category.
-Only algebras requiring dynamic sized structures cannot be computed on GPU, which includes \texttt{PN} and \texttt{SN}.
-When computing the independence polynomial, the finite field (GF$(p)$) approach is the only method that does not incur round-off errors and that can be run on a GPU.
-To enumerate the MISs, the technique to bound the enumeration space is indispensible,
-without which the largest enumerable size is about $150$ vertices with 32G memory while also being one order-of-magnitude slower.
+Most algebras can be computed on GPU, except those requiring dynamic sized structures, i.e. \texttt{PN} and \texttt{SN}.
+Fourier transformation based method is the fastest in computing the independence polynomial,
+while the finite field (GF$(p)$) approach is the only method that does not incur round-off errors and that can be run on a GPU.
+In the benchmark of enumerating the MISs (panel d), one can see the technique to bound the enumeration space improves the performance for more than one order.
+Bounding can also reduce the memory usage significantly, without which the largest enumerable size is about $150$ vertices on a 32G memory device.
 All these computing times have a strong correlation with the treewidth, 
 and the computing times of configuration enumeration also depend on the size of the target configuration space.
 
@@ -1029,22 +1032,17 @@ The number of independent sets for square grid graphs of size $L \times L$ form 
 We have introduced a new approach based on tensor network contraction to compute the independence number, independence polynomial, maximal independence polynomial, and enumeration of MIS configurations.
 We derived the backward rule for tropical tensor network to bound the search of solution space.
 Although many of these properties are global, we can encode them to different tensor element types as commutative semirings.
-The power of our tensor network approach is not only limited to the independent set problem, in \App{app:otherproblems}, we show how to map the matching problem and $k$-coloring problem to a tensor network.
-Here, we want to discuss more from the programming perspective.
-We show some of the Julia language~\cite{Bezanson2012} implementations in Appendix~\ref{sec:technical} and you will find it surprisingly short.
-What we need to do is just defining two operations $\oplus$ and $\odot$ and two special elements $\mymathbb{0}$ and $\mymathbb{1}$.
-The style that we program is called generic programming,
-meaning one can feed different data types into the same program, and the program will compute the result with a proper performance.
-In C++, one can use templates for such a purpose.
-We chose Julia because its just-in-time compiling is very powerful that it can generate fast code dynamically for users.
-Elements of fixed size, such as the finite-field algebra, truncated polynomial, tropical number and tropical number with counting or configuration field described in this paper can all be inlined in an array.
-Furthermore, these inlined arrays can be uploaded to GPU devices for faster computation with generic matrix multiplication implemented in CUDA.jl~\cite{Besard2018}.
+The power of our tensor network approach is not only limited to the independent set problem, in \App{app:otherproblems}, we show how to map the matching problem, $k$-coloring problem, max cut problem and set packing problem to tensor networks.
+We show some of the Julia language implementations in Appendix~\ref{sec:technical} and you will find it surprisingly short.
+The full code base can be found in ~\cite{GraphTensorNetworks}.
+%What we need to do is just defining two operations $\oplus$ and $\odot$ and two special elements $\mymathbb{0}$ and $\mymathbb{1}$.
+%The style that we program is called generic programming,
 
 \section*{Acknowledgments}
-We would like to thank Pan Zhang for sharing his code for optimizing contraction orders of a tensor network, his code plays a crucial role in our code base.
-We would like to acknowledge Sepehr Ebadi, Maddie Cain and Leo Zhou for popping up inspiring questions,
-their questions are the driving force of this project.
-Thank Chris Elord for helping us writing the fastest matrix multiplication libary for GEMM, TropicalGEMM.jl, he is a remarkable guy!
+We would like to thank Pan Zhang for sharing his code for optimizing contraction orders of a tensor network.
+We would like to acknowledge Sepehr Ebadi, Maddie Cain and Leo Zhou for popping up inspiring questions about independent sets,
+their questions are one of the driving forces of this project.
+Thank Chris Elord for helping us writing the fastest matrix multiplication libary for tropical numbers, TropicalGEMM.jl, he is a remarkable guy!
 \blue{funding information}
 
 \bibliographystyle{siamplain}
