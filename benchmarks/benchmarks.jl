@@ -35,9 +35,8 @@ function case_sq(L::Int, ρ; sc_target, seed=2)
 end
 
 # setup global arguments
-const GRAPH = length(ARGS) >= 1 ? ARGS[1] : "r3"
-const TASK = length(ARGS) >= 2 ? ARGS[2] : "size_max"
-const DEVICE = length(ARGS) >= 3 ? parse(Int, ARGS[3]) : -1
+const TASK = length(ARGS) >= 1 ? ARGS[1] : "size_max"
+const DEVICE = length(ARGS) >= 2 ? parse(Int, ARGS[2]) : -1
 
 if DEVICE >= 0
     CUDA.device!(DEVICE)
@@ -63,47 +62,31 @@ function run_benchmarks(cases; output_file)
     writedlm(output_file, times)
 end
 
-function runcase(;
-        case_set=:r3,
-        task = :maxsize,
-        usecuda = false,
-        ntruncate = 0  # truncate benchmark cases
-    )
-    cases = if case_set == :r3
-        [case_r3(n, 3; seed=2, sc_target=s) for (n, s) in [
-            (10, 3), (20, 4), (30, 4), (40, 5), (50, 8), (60, 8), (70, 8), (80, 10), (90, 13), (100, 13),
-            (110, 15), (120, 15), (130, 13), (140, 17), (150, 18), (160, 20), (170, 19), (180, 25), (190, 24), (200, 25),
-        ][1:end-ntruncate]]
-    else
-        [case_dc(L, 0.8; seed=2, sc_target=s) for (L, s) in [
-            (4, 5), (6, 7), (8, 9), (10, 8), (12, 12), (14, 13), (16, 17), (18, 18), (20, 18), (22, 23), (24, 23),
-        ][1:end-ntruncate]]
-    end
+function runcase(cases; task = :maxsize, usecuda = false)
 
     run_benchmarks([("n$(10*i)", ()->(usecuda ? (CUDA.@sync solve(case, replace(task, "_"=>" "); usecuda=true)) : solve((@show length(GraphTensorNetworks.labels(case.code)); case), replace(task, "_"=>" "); usecuda=false))) for (i, case) in enumerate(cases)],
-                   output_file=joinpath(@__DIR__, "data", "$(task)-$(case_set)-$(usecuda ? "GPU" : "CPU").dat"))
+                   output_file=joinpath(@__DIR__, "data", "$(task)-r3-$(usecuda ? "GPU" : "CPU").dat"))
 end
 
-const truncatedict = Dict(
-    "r3"=>Dict([string(task)=>ntruncate for (task, ntruncate) in [
+const truncatedict = Dict([string(task)=>ntruncate for (task, ntruncate) in [
         ("counting_sum", 0), ("size_max", 0), ("counting_max", 0), ("counting_max2", 0),
-        ("counting_all", 3), ("counting_all_(fft)", 0), ("counting_all_(finitefield)", DEVICE>=0 ? 0 : 3),
+        ("counting_all", 3), ("counting_all_(fft)", 0), ("counting_all_(finitefield)", 0),
         ("config_max", 0), ("configs_max",5), ("configs_all", 16), ("configs_max2", 9), ("config_max_(bounded)", 0), ("configs_max_(bounded)", 0)
-        ]]),
-    "dc"=>Dict([string(task)=>ntruncate for (task, ntruncate) in [
-        ("counting_sum", 0), ("size_max", 0), ("counting_max", 0), ("counting_max2", 0),
-        ("counting_all", 2), ("counting_all_(fft)", 0), ("counting_all (finitefield)", 2),
-        ("config_max", 0), ("configs_all", 2), ("configs_max2", 2), ("config_max_(bounded)", 0), ("configs_all_(bounded)", 0)
-    ]]))
+        ]])
+
+cases = [case_r3(n, 3; seed=2, sc_target=s) for (n, s) in [
+        (10, 3), (20, 4), (30, 4), (40, 5), (50, 8), (60, 8), (70, 8), (80, 10), (90, 13), (100, 13),
+        (110, 15), (120, 15), (130, 13), (140, 17), (150, 18), (160, 20), (170, 19), (180, 25), (190, 24), (200, 25),
+       ]]
 
 if DEVICE >= 0
-    for TASK in ["counting_sum", "size_max", "counting_max", "counting_max2",
+    for TASK in ["size_max", "counting_max", "counting_max2",
         "counting_all_(fft)", "counting_all_(finitefield)",
         "config_max", "config_max_(bounded)"]
-        runcase(case_set=Symbol(GRAPH), task=TASK, usecuda=DEVICE>=0, ntruncate=truncatedict[GRAPH][TASK])
+        runcase(cases[1:end-truncatedict[TASK]]; task=TASK, usecuda=DEVICE>=0)
     end
 else
-    for TASK in keys(truncatedict[GRAPH])
-        runcase(case_set=Symbol(GRAPH), task=TASK, usecuda=DEVICE>=0, ntruncate=truncatedict[GRAPH][TASK])
+    for TASK in collect(keys(truncatedict))[8:end]
+        runcase(cases[1:end-truncatedict[TASK]]; task=TASK, usecuda=DEVICE>=0)
     end
 end
