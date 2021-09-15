@@ -87,7 +87,7 @@ end
 const truncatedict = Dict(
     "r3"=>Dict([string(task)=>ntruncate for (task, ntruncate) in [
         ("counting_sum", 0), ("size_max", 0), ("counting_max", 0), ("counting_max2", 0),
-        ("counting_all", 3), ("counting_all_(fft)", 0), ("counting_all_(finitefield)", 3),
+        ("counting_all", 3), ("counting_all_(fft)", 0), ("counting_all_(finitefield)", DEVICE>=0 ? 0 : 3),
         ("config_max", 0), ("configs_max",5), ("configs_all", 16), ("configs_max2", 9), ("config_max_(bounded)", 0), ("configs_max_(bounded)", 0)
         ]]),
     "dc"=>Dict([string(task)=>ntruncate for (task, ntruncate) in [
@@ -96,4 +96,14 @@ const truncatedict = Dict(
         ("config_max", 0), ("configs_all", 2), ("configs_max2", 2), ("config_max_(bounded)", 0), ("configs_all_(bounded)", 0)
     ]]))
 
-runcase(case_set=Symbol(GRAPH), task=TASK, usecuda=DEVICE>=0, ntruncate=truncatedict[GRAPH][TASK])
+if DEVICE >= 0
+    for TASK in ["counting_sum", "size_max", "counting_max", "counting_max2",
+        "counting_all_(fft)", "counting_all_(finitefield)",
+        "config_max", "config_max_(bounded)"]
+        runcase(case_set=Symbol(GRAPH), task=TASK, usecuda=DEVICE>=0, ntruncate=truncatedict[GRAPH][TASK])
+    end
+else
+    for TASK in keys(truncatedict)
+        runcase(case_set=Symbol(GRAPH), task=TASK, usecuda=DEVICE>=0, ntruncate=truncatedict[GRAPH][TASK])
+    end
+end
