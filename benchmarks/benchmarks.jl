@@ -11,7 +11,8 @@ function case_r3(n, k=3; sc_target, seed=2)
     graph = (Random.seed!(seed); LightGraphs.random_regular_graph(n, k))
     @assert length(connected_components(graph)) == 1  # connected graph
     # optimize the contraction order using KaHyPar + Greedy
-    optcode = Independence(graph; optmethod=:kahypar, sc_target=sc_target, max_group_size=40, imbalances=0:0.001:1)
+    #optcode = Independence(graph; optmethod=:kahypar, sc_target=sc_target, max_group_size=40, imbalances=0:0.001:1)
+    optcode = Independence(graph; optmethod=:tree, sc_target=sc_target, sc_weight=2.0, ntrials=20, βs=0.01 .* 1.03 .^ (0:300), niters=50)
     return optcode
 end
 
@@ -70,8 +71,8 @@ function runcase(;
     )
     cases = if case_set == :r3
         [case_r3(n, 3; seed=2, sc_target=s) for (n, s) in [
-            (10, 3), (20, 4), (30, 5), (40, 6), (50, 8), (60, 9), (70, 8), (80, 11), (90, 13), (100, 13),
-            (110, 15), (120, 16), (130, 14), (140, 18), (150, 18), (160, 22), (170, 19), (180, 25), (190, 24), (200, 26),
+            (10, 3), (20, 4), (30, 4), (40, 5), (50, 8), (60, 8), (70, 8), (80, 10), (90, 13), (100, 13),
+            (110, 15), (120, 15), (130, 13), (140, 17), (150, 18), (160, 20), (170, 19), (180, 25), (190, 24), (200, 25),
         ][1:end-ntruncate]]
     else
         [case_dc(L, 0.8; seed=2, sc_target=s) for (L, s) in [
@@ -86,7 +87,7 @@ end
 const truncatedict = Dict(
     "r3"=>Dict([string(task)=>ntruncate for (task, ntruncate) in [
         ("counting_sum", 0), ("size_max", 0), ("counting_max", 0), ("counting_max2", 0),
-        ("counting_all", 3), ("counting_all_(fft)", 0), ("counting_all_(finitefield)", 3),
+        ("counting_all", 3), ("counting_all_(fft)", 0), ("counting_all_(finitefield)", DEVICE>=0 ? 0 : 3),
         ("config_max", 0), ("configs_max",5), ("configs_all", 16), ("configs_max2", 9), ("config_max_(bounded)", 0), ("configs_max_(bounded)", 0)
         ]]),
     "dc"=>Dict([string(task)=>ntruncate for (task, ntruncate) in [
@@ -95,4 +96,14 @@ const truncatedict = Dict(
         ("config_max", 0), ("configs_all", 2), ("configs_max2", 2), ("config_max_(bounded)", 0), ("configs_all_(bounded)", 0)
     ]]))
 
-runcase(case_set=Symbol(GRAPH), task=TASK, usecuda=DEVICE>=0, ntruncate=truncatedict[GRAPH][TASK])
+if DEVICE >= 0
+    for TASK in ["counting_sum", "size_max", "counting_max", "counting_max2",
+        "counting_all_(fft)", "counting_all_(finitefield)",
+        "config_max", "config_max_(bounded)"]
+        runcase(case_set=Symbol(GRAPH), task=TASK, usecuda=DEVICE>=0, ntruncate=truncatedict[GRAPH][TASK])
+    end
+else
+    for TASK in keys(truncatedict)
+        runcase(case_set=Symbol(GRAPH), task=TASK, usecuda=DEVICE>=0, ntruncate=truncatedict[GRAPH][TASK])
+    end
+end

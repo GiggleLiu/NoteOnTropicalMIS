@@ -3,6 +3,7 @@ using LightGraphs
 using BenchmarkTools, Random
 using LinearAlgebra
 using CUDA
+using OMEinsumContractionOrders
 
 BLAS.set_num_threads(1)
 
@@ -11,7 +12,8 @@ function case_r3(n, k=3; sc_target, seed=2)
     graph = (Random.seed!(seed); LightGraphs.random_regular_graph(n, k))
     @assert length(connected_components(graph)) == 1  # connected graph
     # optimize the contraction order using KaHyPar + Greedy
-    optcode = MaximalIndependence(graph; optmethod=:kahypar, sc_target=sc_target, max_group_size=20, imbalances=0:0.001:1)
+    #optcode = MaximalIndependence(graph; optmethod=:kahypar, sc_target=sc_target, max_group_size=20, imbalances=0:0.001:1)
+    optcode = MaximalIndependence(graph; optmethod=:tree, sc_target=sc_target, sc_weight=1.0, ntrials=20, βs=0.02:0.05:15.0, niters=50, initializer=:greedy)
     return optcode
 end
 
@@ -53,7 +55,7 @@ function runcase(;
     )
     if case_set == :r3
         cases = [case_r3(n, 3; seed=seed, sc_target=s) for (n, s) in [
-            (10, 6), (20, 8), (30, 10), (40, 11), (50, 16), (60, 17), (70, 17), (80, 21), (90, 27), (100, 26),
+            (10, 6), (20, 8), (30, 9), (40, 11), (50, 16), (60, 17), (70, 16), (80, 20), (90, 26), (100, 26),
         ][1:end-ntruncate]]
         run_benchmarks([("n$(10*i)", ()->(usecuda ? (CUDA.@sync solve(case, replace(task, "_"=>" "); usecuda=true)) : solve((@show length(GraphTensorNetworks.labels(case.code)); case), replace(task, "_"=>" "); usecuda=false))) for (i, case) in enumerate(cases)],
                     output_file=joinpath(@__DIR__, "data", "maximal-$(task)-$(case_set)-$(usecuda ? "GPU" : "CPU").dat"))
