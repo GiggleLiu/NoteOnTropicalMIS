@@ -433,6 +433,8 @@ Table~\ref{tbl:generictypes} summarizes the problems that can be solved by vario
     \caption{Tensor element types and their purposes in calculating various independent set properties.}\label{tbl:generictypes}
 \end{minipage}
 \red{we should include maximal independence polynomial and counting, enumeration in this table as well.}
+\blue{I do not think so. Network structure and element types are two degree of freedoms,
+maximal IS is different network structure. We can use the above algebra in any network structure.}
 \end{table}
 
 \section{Independence polynomial and maximal independence polynomial}
@@ -958,32 +960,27 @@ The type of graphs we used for benchmarks here are random 3 regular graphs, a ty
     \centering
     \includegraphics[width=\textwidth, trim={0cm 0cm 0cm 0cm}, clip]{figures/fig1.pdf}
     \caption{Benchmark results for computing different properties of independent sets on a random three regular graph with different tensor element types. \red{for each graph size, is there only one graph?}\blue{yes} (a) treewidth versus the number of vertices for the benchmarked graphs. 
+    Legends are the data types that we used in the computation, one can find the corresponding computational task in \Tbl{tbl:generictypes}.
     (b) The computing time for calculating the independence number and for counting of the number of independent sets, the number of MISs, and the number of independent sets having size $\alpha(G)$ and $\alpha(G)-1$.
     (c) The computing time for calculating the independence polynomials with different approaches.
     (d) The computing time for enumeration problems, including the enumeration of all independent set configurations, a single MIS configuration, all MIS configurations, all independent set configurations having size $\alpha(G)$ and $\alpha(G)-1$,  with or without bounding the enumeration space.
     \red{suggestions for the figure: 1. the legend seems to overlap the lines, especially the large subfigure. Not sure what's a better way to include the legend there. 2. I see you guys don't typically use markers. We typically use markers to distinguish the different lines, as well as using the color. Especially, for some journals, there is a physical non-color copy, so some requires the figures to be understandable without colors.}
+    \blue{If we use markers, the data poitns are too dense. I prefer not adding markers, not much people read papers with kindle or on paper.}
+    \blue{I used a smaller fontsize, there are still some overlaps. Does it look better (or worse) now?}
     }
     \label{fig:benchmark}
 \end{figure}
 
-The computations shown in \Fig{fig:benchmark} include \texttt{max size} (independence number, $\alpha(G)$), \red{we can consider changing `max size' to `ind number', but I am okay with both}
- \texttt{total counting} (total number of independent sets) \red{should we change total size to total counting here, since max size meant max size of the set}, 
- \texttt{max counting} (counting of MISs), 
- \texttt{max2 counting} (counting of independent sets having a size $\alpha(G)$ or $\alpha(G)-1$), \red{we can consider changing `max counting' and `max2 counting' to `MIS counting' and `MIS and MIS-1 counting', but I am okay with both notations}
- \texttt{IDP} (independence polynomial), 
- \texttt{single MIS} (find one MIS configuration), 
- \texttt{single MIS (bounding)} (find one MIS configuration including the bounding of enumeration space), \texttt{all MIS} (enumerate all MIS configurations), 
-\texttt{all MIS (bounding)} (enumerate all MIS configurations including the bounding of enumeration space),
-\texttt{all MIS and MIS-1} (enumeration of all independent sets having a size $\alpha(G)$ or $\alpha(G)-1$),
-\texttt{all IS} (enumeration of all independent sets).
+The computations shown in \Fig{fig:benchmark} include independent set counting, finding maximum independent set size (panel b),
+computing independence polynomial (panel c) and enumerating and sampling independent sets (panel d).
+\blue{I cleaned up this paragraph, because one can check the table \Tbl{tbl:generictypes} now.}
 \red{Jinguo, should we include maximal independence polynomial and enumeration of all maximal independent sets as well? I think that will make the benchmark more complete.}
-
-
-Among the benchmarks, computing \texttt{max size (CPU)},
-\texttt{total size (CPU)}, \texttt{total size (GPU)}, \texttt{IDP (FFT) (CPU)}, \texttt{IDP (FFT) (GPU)} and \texttt{single configuration (bounding) (CPU)} can utilize fast BLAS functions, and hence 
+\blue{added a new paragraph.}
+Among the benchmarks, computing \texttt{T (CPU)},
+\texttt{$\mathbbm{R}$ (CPU)}, \texttt{$\mathbbm{R}$ (GPU)}, \texttt{$\mathbbm{C}$ (CPU)}, \texttt{$\mathbbm{C}$ (GPU)} and \texttt{T+bounding (CPU)} can utilize fast BLAS functions, and hence 
 they are faster comparing to non-BLAS methods in the same category.
-Only algebras requiring dynamic sized structures cannot be computed on GPU, which includes the polynomial algebra for computing the independence polynomial and the set algebra for enumerating configurations.
-When computing the independence polynomial, the finite field approach is the only method that does not incur round-off errors and that can be run on a GPU.
+Only algebras requiring dynamic sized structures cannot be computed on GPU, which includes \texttt{PN} and \texttt{SN}.
+When computing the independence polynomial, the finite field (GF$(p)$) approach is the only method that does not incur round-off errors and that can be run on a GPU.
 To enumerate the MISs, the technique to bound the enumeration space is indispensible,
 without which the largest enumerable size is about $150$ vertices with 32G memory while also being one order-of-magnitude slower.
 All these computing times have a strong correlation with the treewidth, 
@@ -1000,9 +997,12 @@ and the computing times of configuration enumeration also depend on the size of 
 \end{figure}
 
 We also benchmarked our method with the Bron-Kerbosch method to enumerate and count maximal independent sets in \Fig{fig:benchmark-maximal}.
-We can see the tree width of this tensor network is nearly doubled comparing with the one for computing independent sets, hence only small graphs can be benchmarked.
-The time for the tensor netwrok approach and Bron-Kerbosch approach to enumerate all maximal independent sets are comparable,
-while the counting can be much faster.
+Since the network for computing maximal independent set properties is different from the one for computing the independence polynomial,
+the tree width of this tensor network is significantly larger, hence only small graphs can be benchmarked.
+The time for the tensor netwrok approach and the Bron-Kerbosch approach to enumerate all maximal independent sets are comparable,
+while the tensor network does counting much more efficiently.
+The implementation of Bron-Kerbosch algorithm is from the package LightGraphs~\cite{LightGraphs},
+due to the memory limit, this algorithm stops working at size $70$ and above.
 
 \subsection{Example case studies} In this section, we give a few examples where the different properties of independence sets are used.
 In all the examples, the types of graphs we used are shown in Figure~\ref{fig:lattices}, where vertices are all placed on square lattices with lattice dimensions $L \times L$.

@@ -14,7 +14,7 @@ class PLT(object):
         nw = [(10, 3), (20, 4), (30, 6), (40, 7), (50, 8), (60, 10), (70, 11), (80, 11), (90, 15), (100, 15),
             (110, 15), (120, 18), (130, 17), (140, 16), (150, 21), (160, 20), (170, 22), (180, 24), (190, 26), (200, 25)]
         ns = [x[0] for x in nw]
-        FS = 10
+        FS = 8
         with DataPlt(filename="fig1.%s"%tp, figsize=(10,6)) as dp:
             ax = plt.subplot(221)   # treewidth
             cornertex("(a)", ax, offset=(0,0))
@@ -33,7 +33,7 @@ class PLT(object):
             plt.yscale("log")
             plt.xlabel("number of vertices, $|V|$")
             plt.ylabel("time/s")
-            plt.legend(loc="upper left", fontsize=FS)
+            plt.legend(loc="upper left", fontsize=FS, ncol=2)
             plt.ylim(1e-3,3e3)
 
             ax = plt.subplot(223)   # IDP
