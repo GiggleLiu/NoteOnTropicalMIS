@@ -67,7 +67,7 @@ end
 
 const truncatedict = Dict(
     "r3"=>Dict([string(task)=>ntruncate for (task, ntruncate) in [
-        ("counting_sum", 0), ("counting_all_(finitefield)", 2), ("configs_all", 3),
+        ("counting_sum", 0), ("counting_all_(finitefield)", 0), ("configs_all", 3),
         ]]),
     "r3bk"=>Dict(["configs_all"=>4])
     )
