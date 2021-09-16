@@ -65,7 +65,7 @@ end
 function runcase(cases; task = :maxsize, usecuda = false)
 
     run_benchmarks([("n$(10*i)", ()->(usecuda ? (CUDA.@sync solve(case, replace(task, "_"=>" "); usecuda=true)) : solve((@show length(GraphTensorNetworks.labels(case.code)); case), replace(task, "_"=>" "); usecuda=false))) for (i, case) in enumerate(cases)],
-                   output_file=joinpath(@__DIR__, "data", "$(task)-$(case_set)-$(usecuda ? "GPU" : "CPU").dat"))
+                   output_file=joinpath(@__DIR__, "data", "$(task)-r3-$(usecuda ? "GPU" : "CPU").dat"))
 end
 
 const truncatedict = Dict([string(task)=>ntruncate for (task, ntruncate) in [
@@ -80,7 +80,7 @@ cases = [case_r3(n, 3; seed=2, sc_target=s) for (n, s) in [
        ]]
 
 if DEVICE >= 0
-    for TASK in ["size_max", "counting_max", "counting_max2",
+    for TASK in ["counting_max", "counting_max2",
         "counting_all_(fft)", "counting_all_(finitefield)",
         "config_max", "config_max_(bounded)"]
         runcase(cases[1:end-truncatedict[TASK]]; task=TASK, usecuda=DEVICE>=0)
