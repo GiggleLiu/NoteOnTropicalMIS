@@ -35,7 +35,7 @@ function case_sq(L::Int, ρ; sc_target, seed=2)
 end
 
 # setup global arguments
-const TASK = length(ARGS) >= 1 ? ARGS[2] : "size_max"
+const TASK = length(ARGS) >= 1 ? ARGS[1] : "size_max"
 const DEVICE = length(ARGS) >= 2 ? parse(Int, ARGS[2]) : -1
 
 if DEVICE >= 0
@@ -70,7 +70,7 @@ end
 
 const truncatedict = Dict([string(task)=>ntruncate for (task, ntruncate) in [
         ("counting_sum", 0), ("size_max", 0), ("counting_max", 0), ("counting_max2", 0),
-        ("counting_all", 3), ("counting_all_(fft)", 0), ("counting_all_(finitefield)", DEVICE>=0 ? 0 : 3),
+        ("counting_all", 3), ("counting_all_(fft)", 0), ("counting_all_(finitefield)", 0),
         ("config_max", 0), ("configs_max",5), ("configs_all", 16), ("configs_max2", 9), ("config_max_(bounded)", 0), ("configs_max_(bounded)", 0)
         ]])
 
@@ -86,7 +86,7 @@ if DEVICE >= 0
         runcase(cases[1:end-truncatedict[TASK]]; task=TASK, usecuda=DEVICE>=0)
     end
 else
-    for TASK in keys(truncatedict)
+    for TASK in collect(keys(truncatedict))[8:end]
         runcase(cases[1:end-truncatedict[TASK]]; task=TASK, usecuda=DEVICE>=0)
     end
 end
