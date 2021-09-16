@@ -959,7 +959,10 @@ The graphs that we use in benchmarks are random 3 regular graphs, a typical type
 \begin{figure} 
     \centering
     \includegraphics[width=\textwidth, trim={0cm 0cm 0cm 0cm}, clip]{figures/fig1.pdf}
-    \caption{Benchmark results for computing different properties of independent sets on a random three regular graph with different tensor element types. \red{for each graph size, is there only one graph?}\blue{yes} (a) treewidth versus the number of vertices for the benchmarked graphs. 
+    \caption{Benchmark results for computing different properties of independent sets of a random three regular graph with different tensor element types.
+    The time in these plots only includes tensor network contraction process, without taking the just in time compiling time into account.
+    \red{for each graph size, is there only one graph?}\blue{yes}
+    (a) treewidth versus the number of vertices for the benchmarked graphs. 
     Legends are the data types that we used in the computation, one can find the corresponding computational task in \Tbl{tbl:generictypes}.
     (b) The computing time for calculating the independence number and for counting of the number of independent sets, the number of MISs, and the number of independent sets having size $\alpha(G)$ and $\alpha(G)-1$.
     (c) The computing time for calculating the independence polynomials with different approaches.
@@ -1051,31 +1054,42 @@ Thank Chris Elord for helping us writing the fastest matrix multiplication libar
 \appendix
 
 \section{Technical guide}\label{sec:technical}
+Before showing the codes,
+we want to introduce some Julia packages that playing important roles in our code base.
+
 \begin{description}
-	\item[OMEinsum] a package for the \texttt{einsum} function,
-	\item[OMEinsumContractionOrders] a package for finding the optimal contraction order for the \texttt{einsum} function \\ \href{https://github.com/Happy-Diode/OMEinsumContractionOrders.jl}{https://github.com/Happy-Diode/OMEinsumContractionOrders.jl},
-	\item[TropicalGEMM] a package for efficient tropical matrix multiplication (compatible with OMEinsum),
-	\item[TropicalNumbers] a package providing tropical number types and tropical algebra, one o the dependency of TropicalGEMM,
-	\item[LightGraphs] a package providing graph utilities, like random regular graph generator,
-	\item[Polynomials] a package providing polynomial algebra and polynomial fitting,
-	\item[Mods and Primes] packages providing finite field algebra and prime number generators.
+	\item[\href{https://github.com/under-Peter/OMEinsum.jl}{OMEinsum} and \href{https://github.com/Happy-Diode/OMEinsumContractionOrders.jl}{OMEinsumContractionOrders}] are packages providing the support for Einstein's (or tensor network) notation and contraction order optimizations.
+    \texttt{OMEinsumContractionOrders} implements state of art algorithms for finding the optimal contraction order for the an tensor network, including the KaHypar+Greedy~\cite{Gray2021, Pan2021} and local transformation based approaches~\cite{Kalachev2021},
+	\item[\href{https://github.com/TensorBFS/TropicalNumbers.jl}{TropicalNumbers} and \href{https://github.com/TensorBFS/TropicalGEMM.jl}{TropicalGEMM}] are packages providing tropical number and efficient tropical matrix multiplication,
+	\item[\href{https://github.com/JuliaGraphs/LightGraphs.jl}{LightGraphs}] is a package providing graph utilities, like random regular graph generator,
+	\item[\href{https://github.com/JuliaMath/Polynomials.jl}{Polynomials}] is a package providing polynomial algebra and polynomial fitting,
+	\item[\href{https://github.com/scheinerman/Mods.jl}{Mods} and \href{https://github.com/JuliaMath/Primes.jl}{Primes}] are packages providing finite field algebra and prime number generations.
 \end{description}
 
 One can install these packages by opening a Julia REPL, type \colorbox{lightgray}{\texttt{]}} to enter the \texttt{pkg>} mode and type, e.g.
 \begin{lstlisting}
-pkg> add OMEinsum LightGraphs Mods Primes FFTW Polynomials TropicalNumbers
+pkg> add OMEinsum LightGraphs Mods Primes Polynomials TropicalNumbers OMEinsumContractionOrders
 \end{lstlisting}
 
-It may surprise you that the Julia implementation of algorithms introduced in the paper is so short that except the bounding and sparsity related parts,
+It may surprise you that the Julia implementation of algorithms introduced in the paper is so short that except the bounding algorithm,
 all are contained in this appendix. After installing required packages, one can open a Julia REPL and copy the following code into it.
 
 \lstinputlisting[breaklines]{../democode/demo.jl}
 
-In the above examples, the configuration enumeration is very slow, one should use the optimal MIS size for bounding as described in the main text.
-We will not show any example about implementing the backward rule here because it has approximately 100 lines of code.
-Please checkout our GitHub repository \href{https://github.com/Happy-Diode/NoteOnTropicalMIS}{https://github.com/Happy-Diode/NoteOnTropicalMIS}.
+Please checkout our GitHub repository for the full featured version:
 
-\section{Why not introducing \texorpdfstring{$\delta$} tensors}\label{app:tensorbad}
+\href{https://github.com/Happy-Diode/GraphTensorNetworks.jl}{https://github.com/Happy-Diode/GraphTensorNetworks.jl}
+
+\section{Why not using the standard tensor network notations}\label{app:tensorbad}
+As we have mentioned in the main text,
+a standard tensor network notation inevitably introduces $\delta$ tensors to encode some graph problems.
+A $\delta$ tensor of rank $d$ is defined as
+\begin{equation}
+    \delta_{i_1, i_2,\ldots,i_d} = \begin{cases}
+        1, & i_1=i_2=\ldots =i_d,\\
+        0, & \text{otherwise}.
+    \end{cases}
+\end{equation}
 
 Given a graph
 
@@ -1096,7 +1110,7 @@ Given a graph
         }
 \end{tikzpicture}}
 
-Its traditional tensor network representation with $\delta$ tensors is
+Its standard tensor network representation includes a $\delta$ tensors on each vertex, so its graphical representation is as bellow.
 
 \centerline{\begin{tikzpicture}
     \def\r{0.08}
@@ -1122,7 +1136,7 @@ Its traditional tensor network representation with $\delta$ tensors is
                     post length=0mm,pre length=0mm}}
     \draw [decorate] (2.7, 0.5) -- (2.7, 5.5);
 \end{tikzpicture}}
-where a small circle on an edge is a diagonal tensor. Its rank is $8$ in the bulk. If we contract this tensor network in a naive column-wise order, the maximum intermediate tensor is approximately $3L$, giving a space complexity $\approx 2^{3L}$.
+Here, we use a small circle on a vertex to represent a diagonal $\delta$ tensor. Its rank is $8$ in the bulk. If we contract this tensor network in a naive column-wise order, the maximum intermediate tensor has a rank $\sim3L$, requiring a storage of size $\approx 2^{3L}$.
 If we treat it as the following generalized tensor network
 
 \centerline{\begin{tikzpicture}
@@ -1183,18 +1197,19 @@ If we treat it as the following generalized tensor network
                     post length=0mm,pre length=0mm}}
     \draw [decorate] (2.7, 0.5) -- (2.7, 5.5);
 \end{tikzpicture}}
-where we use different colors to distinguish different hyperedges.
-Now, the vertex tensor is always rank $1$.
-With the same naive contraction order, we can see the maximum intermediate tensor is approximately of size $2^L$ by counting the colors.
+Here, we use different colors to distinguish different hyperedges.
+The vertex tensor is always rank $1$ in this representation.
+Again, if we contract this tensor network in the columnwise contraction order, we can see the maximum intermediate tensor has rank $\sim L$ by counting the colors.
 
 \section{Generalizing to other graph problems}\label{app:otherproblems}
-There are some other graph problems that can be encoded in a tensor network.
+There are some other graph problems that can be encoded to a tensor network.
 To understand its representation power, it is a good starting point to connect it with dynamic programming because
 a tensor network can be viewed as a special type of dynamic programming where its update rule can be characterized by a linear operation.
-Courcelle’s theorem~\cite{Courcelle1990,Barr2020} states that a problem quantified by monadic second order logic (MSO) on a graph with bounded treewidth $k$ can be solved in linear time with respect to the graph size.
-Dynamic programming is a traditional approach to attack a MSO problem, it can solve the maximum independent set problem in $O(2^k)n$, which is similar to the tensor network approach.
-We mentioned in the main text that tensor network has nice analytic property make it easier for generic programming.
-The cost is, the tensor network is less expressive than dynamic programming,
+Dynamic programming can solve monadic second order logic (MSO) definable problem on a graph with small tree width efficiently~\cite{Courcelle1990,Barr2020}.
+It can solve the maximum independent set problem in $O(2^k)n$, which is similar to the tensor network approach.
+The graph problem can be expressed in the tensor network language is clearly much less than that can be expressed by dynamic programming.
+For example, it is hard to determine whether a collection of vertices forms a path in a graph using the tensor network language, while this problem is MSO definable.
+As a gain, a tensor network has a nicer analytic property, which makes contraction order optimization, generic programming and utilizing BLAS libaries very convenient.
 %\iffalse
 %The cost is, it is less expressive than MSO because the tensor network described by \Eq{eq:tensor} can be expressed in MSO as
 %\begin{align}
@@ -1219,29 +1234,29 @@ The cost is, the tensor network is less expressive than dynamic programming,
 %for example, it is hard to construct a tensor network to decide whether a graph is connected or not.
 %At the cost of losing expressiveness, we can encode the properties of the graph into the tensor elements.
 %\fi
-However, that are still some other problems that can be expressed in the framework of generic tensor network.
+In the following, we introduce some other problems that can be expressed by a tensor network.
 \subsection{Matching problem}
 A matching polynomial of a graph $G$ is defined as
 \begin{equation}
     M(G, x) = \sum\limits_{k=1}^{|V|/2} c_k x^k,
 \end{equation}
 where $k$ is the number of matches, and coefficients $c_k$ are the corresponding counting.
-
 We define a tensor of rank $d(v) = |N(v)|$ on vertex $v$ such that,
 \begin{equation}
-    W_{v\rightarrow n_1, v\rightarrow n_2, \ldots, v\rightarrow n_{d(v)}} = \begin{cases}
-        1, & \sum_{i=1}^{d(v)} v\rightarrow n_i \leq 1,\\
+    W_{\langle v, n_1\rangle, \langle v, n_2 \rangle, \ldots, \langle v, n_{d(v)}\rangle} = \begin{cases}
+        1, & \sum_{i=1}^{d(v)} \langle v, n_i \rangle \leq 1,\\
         0, & \text{otherwise},
     \end{cases}
 \end{equation}
 and a tensor of rank $1$ on the bond
 \begin{equation}
-    B_{v\rightarrow w} = \begin{cases}
-    1, & v \rightarrow w = 0 \\
-    x, & v \rightarrow w = 1.
+    B_{\langle v, w\rangle} = \begin{cases}
+    1, & \langle v, w \rangle = 0 \\
+    x, & \langle v, w \rangle = 1.
 \end{cases}
 \end{equation}
-Here, we use bond index $v \rightarrow w$ to label tensors.
+Here, we use bond index $\langle v, w \rangle \in \{0, 1\}$ ($\langle v, w \rangle$ and $\langle w,v\rangle$ are equivalent) to label tensors,
+where $1$ means two vertices of an edge are matched, $0$ means otherwise.
 
 \subsection{k-Coloring}
 Let us use 3-coloring on the vertex as an example. We can define a vertex tensor as
@@ -1261,36 +1276,39 @@ and an edge tensor as
     \end{matrix}\right).
 \end{equation}
 The number of possible coloring can be obtained by contracting this tensor network by setting vertex tensor elements $r_v, g_v$ and $b_v$ to $1$.
-By designing generic types as tensor elements, one should be able to get all possible colorings.
-It is straight forward to define the k-coloring problem on edges hence we will not discuss the detailed construction here.
+By designing generic types as tensor elements, one can get all possible colorings.
+Similarly, one can define the k-coloring problem on edges too.
 
 \subsection{Max cut problem}
 Max cut problem is also known as the boolean spinglass problem.
 Its tensor network representation does not contain vertex tensors.
 The edge tensor can be defined as
 \begin{equation}
-    B(x_{ij}) = \left(\begin{matrix}
-        1 & x_{ij}\\
-        x_{ij} & 1
+    B(x_{\langle i, j\rangle}) = \left(\begin{matrix}
+        1 & x_{\langle i, j\rangle}\\
+        x_{\langle i, j\rangle} & 1
     \end{matrix}\right).
 \end{equation}
-We can also define a polynomial about edges variables by setting $x_{ij} = x$,
-its $k$th coefficient is two times the number of configurations of cut size $k$.
+We can also define a polynomial about edges variables by setting $x_{\langle i, j\rangle} = x$,
+where its $k$th coefficient is two times the number of configurations of cut size $k$.
 
 \subsection{Set packing}
-Set packing the the hypergraph version of the maximum independent set problem, where each set corresponds to a vertex, each element corresponds to a hyperedge.
+Set packing is the hypergraph version of the maximum independent set problem, where each set corresponds to a vertex, each element corresponds to a hyperedge.
 To solve the set packing problem, we just remove the rank 2 restriction of an edge tensor
 \begin{equation}
     B_{v,w,\ldots, z} = \begin{cases}
         1, & v+w+\ldots+z\leq 1,\\
-        0, & otherwise
+        0, & \text{otherwise}.
     \end{cases}
 \end{equation}
 
 \section{Discrete Fourier transform for computing the independence polynomial}\label{app:fft}
 
-In section~\ref{sec:indpoly}, we show that the independence polynomial can be obtained by solving the linear equation \Eq{eq:lineareq}. Since the coefficients of the independence polynomial can range many orders of magnitude, the round-off errors in fitting can be significant if we use random floating point numbers for $x_{i}$.
-In the main text, we propose to use a finite field $\text{GF}(p)$ to circumvent overflow and round-off errors. Here, we give another method based on discrete Fourier transform.
+In section~\ref{sec:indpoly}, we show that the independence polynomial can be obtained by solving the linear equation \Eq{eq:lineareq}.
+Since the coefficients of the independence polynomial can range many orders of magnitude, the round-off errors in fitting can be significant if we use random floating point numbers for $x_{i}$.
+In the main text, we propose to use a finite field $\text{GF}(p)$ to circumvent integer overflow and round-off errors.
+One drawback of using finite field algebra is its matrix multiplication is less computational efficient compared with floating point matrix multiplication.
+Here, we give an alternative method based on discrete Fourier transform with controllable round off errors.
 Instead of choosing $x_{i}$ as random numbers, we can choose them such that they form a geometric sequence in the complex domain $x_j = r\omega^j$, where $r \in \mathbb{R}$ and $\omega = e^{-2\pi i/( \alpha(G)+1)}$. The linear equation thus becomes
 \begin{equation}
 \left(\begin{matrix}
@@ -1308,7 +1326,7 @@ y_0 \\ y_1 \\ \vdots \\ y_{\alpha(G)}
 \end{equation}
 
 Let us rearrange the coefficients $r^j$ to $a_j$, the matrix on the left side becomes the discrete Fourier transform matrix. Thus, we can obtain the coefficients by inverse Fourier transform $\vec a_r = {\rm FFT^{-1}}(\omega) \cdot \vec y$, where $(\vec a_r)_j = a_j r ^j$.
-By choosing different $r$, one can obtain better precision in low independent set size region  ($r<1$) or high independent set size region ($r>1$).
+By choosing different $r$, one can obtain better precision in low independent set size region by choosing $r<1$ or high independent set size region by choosing $r>1$.
 
 \section{Integer sequences formed by the number of independent sets}
 
