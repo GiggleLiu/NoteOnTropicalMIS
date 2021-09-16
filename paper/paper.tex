@@ -959,7 +959,10 @@ The graphs that we use in benchmarks are random 3 regular graphs, a typical type
 \begin{figure} 
     \centering
     \includegraphics[width=\textwidth, trim={0cm 0cm 0cm 0cm}, clip]{figures/fig1.pdf}
-    \caption{Benchmark results for computing different properties of independent sets on a random three regular graph with different tensor element types. \red{for each graph size, is there only one graph?}\blue{yes} (a) treewidth versus the number of vertices for the benchmarked graphs. 
+    \caption{Benchmark results for computing different properties of independent sets of a random three regular graph with different tensor element types.
+    The time in these plots only includes tensor network contraction process, without taking the just in time compiling time into account.
+    \red{for each graph size, is there only one graph?}\blue{yes}
+    (a) treewidth versus the number of vertices for the benchmarked graphs. 
     Legends are the data types that we used in the computation, one can find the corresponding computational task in \Tbl{tbl:generictypes}.
     (b) The computing time for calculating the independence number and for counting of the number of independent sets, the number of MISs, and the number of independent sets having size $\alpha(G)$ and $\alpha(G)-1$.
     (c) The computing time for calculating the independence polynomials with different approaches.
@@ -1051,6 +1054,9 @@ Thank Chris Elord for helping us writing the fastest matrix multiplication libar
 \appendix
 
 \section{Technical guide}\label{sec:technical}
+Before showing the codes,
+we want to introduce some Julia packages that playing important roles in our code base.
+
 \begin{description}
 	\item[\href{https://github.com/under-Peter/OMEinsum.jl}{OMEinsum} and \href{https://github.com/Happy-Diode/OMEinsumContractionOrders.jl}{OMEinsumContractionOrders}] are packages providing the support for Einstein's (or tensor network) notation and contraction order optimizations.
     \texttt{OMEinsumContractionOrders} implements state of art algorithms for finding the optimal contraction order for the an tensor network, including the KaHypar+Greedy~\cite{Gray2021, Pan2021} and local transformation based approaches~\cite{Kalachev2021},
@@ -1292,14 +1298,17 @@ To solve the set packing problem, we just remove the rank 2 restriction of an ed
 \begin{equation}
     B_{v,w,\ldots, z} = \begin{cases}
         1, & v+w+\ldots+z\leq 1,\\
-        0, & otherwise
+        0, & \text{otherwise}.
     \end{cases}
 \end{equation}
 
 \section{Discrete Fourier transform for computing the independence polynomial}\label{app:fft}
 
-In section~\ref{sec:indpoly}, we show that the independence polynomial can be obtained by solving the linear equation \Eq{eq:lineareq}. Since the coefficients of the independence polynomial can range many orders of magnitude, the round-off errors in fitting can be significant if we use random floating point numbers for $x_{i}$.
-In the main text, we propose to use a finite field $\text{GF}(p)$ to circumvent overflow and round-off errors. Here, we give another method based on discrete Fourier transform.
+In section~\ref{sec:indpoly}, we show that the independence polynomial can be obtained by solving the linear equation \Eq{eq:lineareq}.
+Since the coefficients of the independence polynomial can range many orders of magnitude, the round-off errors in fitting can be significant if we use random floating point numbers for $x_{i}$.
+In the main text, we propose to use a finite field $\text{GF}(p)$ to circumvent integer overflow and round-off errors.
+One drawback of using finite field algebra is its matrix multiplication is less computational efficient compared with floating point matrix multiplication.
+Here, we give an alternative method based on discrete Fourier transform with controllable round off errors.
 Instead of choosing $x_{i}$ as random numbers, we can choose them such that they form a geometric sequence in the complex domain $x_j = r\omega^j$, where $r \in \mathbb{R}$ and $\omega = e^{-2\pi i/( \alpha(G)+1)}$. The linear equation thus becomes
 \begin{equation}
 \left(\begin{matrix}
@@ -1317,7 +1326,7 @@ y_0 \\ y_1 \\ \vdots \\ y_{\alpha(G)}
 \end{equation}
 
 Let us rearrange the coefficients $r^j$ to $a_j$, the matrix on the left side becomes the discrete Fourier transform matrix. Thus, we can obtain the coefficients by inverse Fourier transform $\vec a_r = {\rm FFT^{-1}}(\omega) \cdot \vec y$, where $(\vec a_r)_j = a_j r ^j$.
-By choosing different $r$, one can obtain better precision in low independent set size region  ($r<1$) or high independent set size region ($r>1$).
+By choosing different $r$, one can obtain better precision in low independent set size region by choosing $r<1$ or high independent set size region by choosing $r>1$.
 
 \section{Integer sequences formed by the number of independent sets}
 
