@@ -12,7 +12,7 @@ function case_r3(n, k=3; sc_target, seed=2)
     @assert length(connected_components(graph)) == 1  # connected graph
     # optimize the contraction order using KaHyPar + Greedy
     #optcode = Independence(graph; optmethod=:kahypar, sc_target=sc_target, max_group_size=40, imbalances=0:0.001:1)
-    optcode = Independence(graph; optmethod=:tree, sc_target=sc_target, sc_weight=2.0, ntrials=20, βs=0.01 .* 1.03 .^ (0:300), niters=50, rw_weight=1.0)
+    optcode = Independence(graph; optmethod=:tree, sc_target=sc_target, sc_weight=2.0, ntrials=20, βs=0.01:0.05:15.0, niters=50, rw_weight=0.2)
     return optcode
 end
 
