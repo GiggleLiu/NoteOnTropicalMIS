@@ -1029,6 +1029,15 @@ The number of independent sets for square grid graphs of size $L \times L$ form 
 
 \subsubsection{Partition functions and finite-temperature phase transitions}
 
+\subsubsection{Computing the Hamming distance statistics}
+
+\begin{figure} 
+    \centering
+    \includegraphics[width=\textwidth, trim={0cm 0cm 0cm 0cm}, clip]{figures/fig3.pdf}
+    \caption{The statistics of Hamming distances between two MIS configurations for a specific three regular graph instance of size $200$.}
+    \label{fig:hamming}
+\end{figure}
+
 
 
 \section{Discussion and conclusion}
@@ -1037,7 +1046,7 @@ We derived the backward rule for tropical tensor network to bound the search of 
 Although many of these properties are global, we can encode them to different tensor element types as commutative semirings.
 The power of our tensor network approach is not only limited to the independent set problem, in \App{app:otherproblems}, we show how to map the matching problem, $k$-coloring problem, max cut problem and set packing problem to tensor networks.
 We show some of the Julia language implementations in Appendix~\ref{sec:technical} and you will find it surprisingly short.
-The full code base can be found in ~\cite{GraphTensorNetworks}.
+A complete implementation can be found in our Github repository~\cite{GraphTensorNetworks}.
 %What we need to do is just defining two operations $\oplus$ and $\odot$ and two special elements $\mymathbb{0}$ and $\mymathbb{1}$.
 %The style that we program is called generic programming,
 

@@ -11,8 +11,8 @@ import os
 
 class PLT(object):
     def fig1(self, tp="pdf"):  # independence polynomials
-        nw = [(10, 3), (20, 4), (30, 6), (40, 7), (50, 8), (60, 10), (70, 11), (80, 11), (90, 15), (100, 15),
-            (110, 15), (120, 18), (130, 17), (140, 16), (150, 21), (160, 20), (170, 22), (180, 24), (190, 26), (200, 25)]
+        nw = [(10, 3), (20, 4), (30, 4), (40, 5), (50, 8), (60, 8), (70, 8), (80, 10), (90, 13), (100, 13),
+            (110, 15), (120, 15), (130, 13), (140, 17), (150, 18), (160, 20), (170, 19), (180, 25), (190, 24), (200, 25)]
         ns = [x[0] for x in nw]
         FS = 8
         with DataPlt(filename="fig1.%s"%tp, figsize=(10,6)) as dp:
@@ -70,7 +70,7 @@ class PLT(object):
 
 
     def fig2(self, tp="pdf"):  # independence polynomials
-        nw = [(10, 6), (20, 8), (30, 10), (40, 11), (50, 16), (60, 17), (70, 17), (80, 21), (90, 27), (100, 26)]
+        nw = [(10, 6), (20, 8), (30, 9), (40, 11), (50, 16), (60, 17), (70, 16), (80, 20), (90, 26), (100, 26)]
         ns = [x[0] for x in nw]
         FS = 10
         with DataPlt(filename="fig2.%s"%tp, figsize=(8,3)) as dp:
@@ -97,6 +97,17 @@ class PLT(object):
             plt.legend(loc="upper left", fontsize=FS)
             plt.ylim(1e-3,3e3)
 
+            plt.tight_layout()
+
+    def fig3(self, tp="pdf", seed=3):  # independence polynomials
+        with DataPlt(filename="fig3.%s"%tp, figsize=(6,3)) as dp:
+            datafile = "../../democode/data/r3_n200_hamming_%d.txt"%seed
+            y = np.loadtxt(datafile)
+            n = 18
+            plt.bar(range(n), y[:n], lw=1.5, color="C4", ls="-")
+            plt.xticks(range(0,n+1,2))
+            plt.xlabel("Hamming distance")
+            plt.ylabel("Count")
             plt.tight_layout()
 
 fire.Fire(PLT())
