@@ -25,8 +25,9 @@ function analyse_hamming(filename)
     return hamming
 end
 
-seed = 3
-filename = joinpath(@__DIR__, "data", "r3_n200_optconfigs_$seed.txt")
-compute_configs(filename, seed=seed)
-filename2 = joinpath(@__DIR__, "data", "r3_n200_hamming_$seed.txt")
-writedlm(filename2, analyse_hamming(filename))
+for seed = 4:10
+    filename = joinpath(@__DIR__, "data", "r3_n200_optconfigs_$seed.txt")
+    compute_configs(filename, seed=seed)
+    filename2 = joinpath(@__DIR__, "data", "r3_n200_hamming_$seed.txt")
+    writedlm(filename2, analyse_hamming(filename))
+end
