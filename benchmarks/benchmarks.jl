@@ -81,7 +81,8 @@ cases = [case_r3(n, 3; seed=2, sc_target=s) for (n, s) in [
 
 if DEVICE >= 0
     for TASK in ["counting_sum", "size_max", "counting_max", "counting_max2",
-        "counting_all_(fft)", "counting_all_(finitefield)",
+        "counting_all_(fft)", 
+	"counting_all_(finitefield)",
         "config_max", "config_max_(bounded)"
         ]
         runcase(cases[1:end-truncatedict[TASK]]; task=TASK, usecuda=DEVICE>=0)
