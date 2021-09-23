@@ -2,12 +2,12 @@ using GraphTensorNetworks, Random
 
 using DelimitedFiles
 
-function mis_maximal_counting(n, seed; writefile, sc_target=24, usecuda=false, imbalances=0.0:0.002:1.0)
+function mis_maximal_counting(n, seed; writefile, sc_target=24, usecuda=false)
     folder = joinpath(homedir(), ".julia/dev/TropicalMIS", "project", "data")
     fname = joinpath(folder, "mis_degeneracy_L$n.dat")
     mask = Matrix{Bool}(reshape(readdlm(fname)[seed+1,4:end], n, n))
     g = diagonal_coupled_graph(mask)
-    gp = Independence(g; sc_target=sc_target, imbalances=imbalances, max_group_size=50, optmethod=:kahypar)
+    gp = MaximalIndependence(g; sc_target=sc_target, optmethod=:tree, niters=5)
     println("Graph $seed")
     res = graph_polynomial(gp, Val(:finitefield), usecuda=usecuda)[]
     folderout = joinpath(folder, "maximal_polynomial_L$(n)")
@@ -43,4 +43,6 @@ if DEVICE >= 0
     CUDA.device!(DEVICE)
 end
 
-@time mis_maximal_counting(11, 488; writefile=true, sc_target=20, usecuda=DEVICE>=0, imbalances=0.03:0.001:1.0)
+for i=0:999
+    @time mis_maximal_counting(12, i; writefile=true, sc_target=0, usecuda=DEVICE>=0)
+end

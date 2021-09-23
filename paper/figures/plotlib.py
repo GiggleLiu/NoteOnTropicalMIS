@@ -11,6 +11,8 @@ import pdb
 def cornertex(s, ax, offset=(0,0)):
     plt.text(0.92+offset[0],0.15+offset[1],s,transform=ax.transAxes,color='k',va='top',ha='left',fontsize=16, zorder=100)
 
+def cornertex2(s, ax, offset=(0,0)):
+    plt.text(0.02+offset[0],0.92+offset[1],s,transform=ax.transAxes,color='k',va='top',ha='left',fontsize=16, zorder=100)
 
 class DataPlt():
     '''
