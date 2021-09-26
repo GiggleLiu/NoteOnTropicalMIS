@@ -22,6 +22,7 @@ class PLT(object):
             plt.plot(ns, [x[2] for x in nw], label="time complexity")
             plt.xlabel("number of vertices, $|V|$")
             plt.ylabel("log2 value")
+            plt.legend(loc="upper left", fontsize=FS, ncol=1)
 
             ax=plt.subplot(222)   # size
             cornertex("(b)", ax, offset=(0,0))
@@ -71,15 +72,17 @@ class PLT(object):
 
 
     def fig2(self, tp="pdf"):  # independence polynomials
-        nw = [(10, 6), (20, 8), (30, 9), (40, 11), (50, 16), (60, 17), (70, 16), (80, 20), (90, 26), (100, 26)]
+        nw = [(10, 6, 9.49), (20, 8, 12.40), (30, 9, 13.35), (40, 11, 15.14), (50, 16, 21.26), (60, 17, 22.58), (70, 16, 21.50), (80, 20, 27.48), (90, 26, 35.04), (100, 26, 35.06)]
         ns = [x[0] for x in nw]
         FS = 10
         with DataPlt(filename="fig2.%s"%tp, figsize=(8,3)) as dp:
             ax = plt.subplot(121)   # treewidth
             cornertex("(a)", ax, offset=(-0.02,0))
-            plt.plot(ns, [x[1] for x in nw])
+            plt.plot(ns, [x[1] for x in nw], label="space complexity (tree width)")
+            plt.plot(ns, [x[2] for x in nw], label="time complexity")
             plt.xlabel("number of vertices, $|V|$")
-            plt.ylabel("tree width")
+            plt.ylabel("log2 value")
+            plt.legend(loc="upper left", fontsize=FS, ncol=1)
 
             ax=plt.subplot(122)   # size
             cornertex("(b)", ax, offset=(-0.02,0))
