@@ -12,7 +12,7 @@ function case_r3(n, k=3; sc_target, seed=2)
     @assert length(connected_components(graph)) == 1  # connected graph
     # optimize the contraction order using KaHyPar + Greedy
     #optcode = Independence(graph; optmethod=:kahypar, sc_target=sc_target, max_group_size=40, imbalances=0:0.001:1)
-    optcode = Independence(graph; optmethod=:tree, sc_target=sc_target, sc_weight=2.0, ntrials=20, βs=0.01 .* 1.03 .^ (0:300), niters=50)
+    optcode = Independence(graph; optmethod=:tree, sc_target=sc_target, sc_weight=2.0, ntrials=20, βs=0.01:0.05:15.0, niters=50, rw_weight=0.2)
     return optcode
 end
 
@@ -75,20 +75,34 @@ const truncatedict = Dict([string(task)=>ntruncate for (task, ntruncate) in [
         ]])
 
 cases = [case_r3(n, 3; seed=2, sc_target=s) for (n, s) in [
-        (10, 3), (20, 4), (30, 4), (40, 5), (50, 8), (60, 8), (70, 8), (80, 10), (90, 13), (100, 13),
-        (110, 15), (120, 15), (130, 13), (140, 17), (150, 18), (160, 20), (170, 19), (180, 25), (190, 24), (200, 25),
+        (10, 3), (20, 4), (40, 5), (50, 8), (60, 8), (70, 8), (80, 10), (90, 13), (100, 13),
+        (110, 15), (120, 15), (130, 13), (140, 17), (150, 18), (160, 20), (170, 19), (180, 24), (190, 24), (200, 25),
        ]]
 
-if DEVICE >= 0
+function run_cpu(truncatedict)
+    run = false
+    for TASK in keys(truncatedict)
+        println(TASK)
+        run && runcase(cases[1:end-truncatedict[TASK]]; task=TASK, usecuda=false)
+        if TASK == "counting_max2"
+	    run = true
+	end
+    end
+end
+
+function run_gpu(truncatedict)
     for TASK in ["counting_sum", "size_max", "counting_max", "counting_max2",
         "counting_all_(fft)", 
 	"counting_all_(finitefield)",
         "config_max", "config_max_(bounded)"
         ]
-        runcase(cases[1:end-truncatedict[TASK]]; task=TASK, usecuda=DEVICE>=0)
+        runcase(cases[1:end-truncatedict[TASK]]; task=TASK, usecuda=true)
     end
+end
+
+
+if DEVICE >= 0
+    run_gpu(truncatedict)
 else
-    for TASK in ["counting_all_(finitefield)"]
-        runcase(cases[1:end-truncatedict[TASK]]; task=TASK, usecuda=DEVICE>=0)
-    end
+    run_cpu(truncatedict)
 end

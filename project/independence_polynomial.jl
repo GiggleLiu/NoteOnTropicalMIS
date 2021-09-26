@@ -43,6 +43,6 @@ if DEVICE >= 0
     CUDA.device!(DEVICE)
 end
 
-for i=0:999
+for i=700:999
     @time mis_maximal_counting(12, i; writefile=true, sc_target=0, usecuda=DEVICE>=0)
 end
