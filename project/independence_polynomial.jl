@@ -7,8 +7,8 @@ function mis_maximal_counting(n, seed; writefile, sc_target=24, usecuda=false)
     fname = joinpath(folder, "mis_degeneracy_L$n.dat")
     mask = Matrix{Bool}(reshape(readdlm(fname)[seed+1,4:end], n, n))
     g = diagonal_coupled_graph(mask)
-    gp = MaximalIndependence(g; sc_target=sc_target, optmethod=:tree, niters=5)
-    println("Graph $seed")
+    println("Graph $seed, usecuda = $usecuda")
+    gp = MaximalIndependence(g; sc_target=sc_target, optmethod=:tree, niters=10, ntrials=3, rw_weight=0.2)
     res = graph_polynomial(gp, Val(:finitefield), usecuda=usecuda)[]
     folderout = joinpath(folder, "maximal_polynomial_L$(n)")
     if !isdir(folderout)
@@ -43,6 +43,6 @@ if DEVICE >= 0
     CUDA.device!(DEVICE)
 end
 
-for i=0:999
-    @time mis_maximal_counting(12, i; writefile=true, sc_target=0, usecuda=DEVICE>=0)
+for i=0:500
+    @time mis_maximal_counting(14, i; writefile=true, sc_target=0, usecuda=DEVICE>=0)
 end
