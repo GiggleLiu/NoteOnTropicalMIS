@@ -7,6 +7,8 @@ version = "0.1.0"
 GraphTensorNetworks = "0978c8c2-34f6-49c7-9826-ea2cc20dabd2"
 LightGraphs = "093fc24a-ae57-5d10-9952-331d41423f4d"
 MethodAnalysis = "85b6ec6f-f7df-4429-9514-a64bcd9ee824"
+Mods = "7475f97c-0381-53b1-977b-4c60186c8d62"
+Primes = "27ebfcd6-29c5-5fa9-bf4b-fb8fc14df3ae"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 
 [compat]

@@ -4,7 +4,7 @@ using LightGraphs
 using Random
 
 # generate a random regular graph of size 100, degree 3
-graph = (Random.seed!(2); LightGraphs.random_regular_graph(100, 3))
+graph = (Random.seed!(2); LightGraphs.random_regular_graph(50, 3))
 
 # generate einsum code, i.e. the labels of tensors
 code = EinCode(([minmax(e.src,e.dst) for e in LightGraphs.edges(graph)]..., # labels for edge tensors
@@ -100,24 +100,39 @@ println("the independence polynomial (finite field) is $(independence_polynomial
 
 ########## FINDING OPTIMAL CONFIGURATIONS ###########
 
-# define the config enumerator algebra
-struct ConfigEnumerator{N,C}
-    data::Vector{StaticBitVector{N,C}}
+# define the set algebra
+struct ConfigEnumerator{N}
+    data::Vector{BitVector}
 end
-function Base.:+(x::ConfigEnumerator{N,C}, y::ConfigEnumerator{N,C}) where {N,C}
-    res = ConfigEnumerator{N,C}(vcat(x.data, y.data))
+function Base.:+(x::ConfigEnumerator{N}, y::ConfigEnumerator{N}) where {N}
+    res = ConfigEnumerator{N}(vcat(x.data, y.data))
     return res
 end
-function Base.:*(x::ConfigEnumerator{L,C}, y::ConfigEnumerator{L,C}) where {L,C}
+function Base.:*(x::ConfigEnumerator{L}, y::ConfigEnumerator{L}) where {L}
     M, N = length(x.data), length(y.data)
-    z = Vector{StaticBitVector{L,C}}(undef, M*N)
+    z = Vector{BitVector}(undef, M*N)
     for j=1:N, i=1:M
         z[(j-1)*M+i] = x.data[i] .| y.data[j]
     end
-    return ConfigEnumerator{L,C}(z)
+    return ConfigEnumerator{L}(z)
 end
-Base.zero(::Type{ConfigEnumerator{N,C}}) where {N,C} = ConfigEnumerator{N,C}(StaticBitVector{N,C}[])
-Base.one(::Type{ConfigEnumerator{N,C}}) where {N,C} = ConfigEnumerator{N,C}([TropicalNumbers.staticfalses(StaticBitVector{N,C})])
+Base.zero(::Type{ConfigEnumerator{N}}) where {N} = ConfigEnumerator{N}(BitVector[])
+Base.one(::Type{ConfigEnumerator{N}}) where {N} = ConfigEnumerator{N}([falses(N)])
+
+# the algebra sampling one of the configurations
+struct ConfigSampler{N}
+    data::BitVector
+end
+
+function Base.:+(x::ConfigSampler{N}, y::ConfigSampler{N}) where {N}  # biased sampling: return `x`, maybe using random sampler is better.
+    return x  # randomly pick one
+end
+function Base.:*(x::ConfigSampler{L}, y::ConfigSampler{L}) where {L}
+    ConfigSampler{L}(x.data .| y.data)
+end
+
+Base.zero(::Type{ConfigSampler{N}}) where {N} = ConfigSampler{N}(trues(N))
+Base.one(::Type{ConfigSampler{N}}) where {N} = ConfigSampler{N}(falses(N))
 
 # enumerate all configurations if `all` is true, compute one otherwise.
 # a configuration is stored in the data type of `StaticBitVector`, it uses integers to represent bit strings.
@@ -127,24 +142,24 @@ function mis_config(code; all=false)
     # map a vertex label to an integer
     vertex_index = Dict([s=>i for (i, s) in enumerate(symbols(code))])
     N = length(vertex_index)  # number of vertices
-    C = TropicalNumbers._nints(N)  # number of integers to store N bits
-    xs = map(getixs(flatten(code))) do ix
-        T = all ? CountingTropical{Float64, ConfigEnumerator{N,C}} : ConfigTropical{Float64, N, C}
+    xs = map(getixs(OMEinsum.flatten(code))) do ix
+        T = all ? CountingTropical{Float64, ConfigEnumerator{N}} : CountingTropical{Float64, ConfigSampler{N}}
         if length(ix) == 2
             return [one(T) one(T); one(T) zero(T)]
         else
-            s = TropicalNumbers.onehot(StaticBitVector{N,C}, vertex_index[ix[1]])
+            s = falses(N)
+            s[vertex_index[ix[1]]] = true  # one hot vector
             if all
-                [one(T), T(1.0, ConfigEnumerator([s]))]
+                [one(T), T(1.0, ConfigEnumerator{N}([s]))]
             else
-                [one(T), T(1.0, s)]
+                [one(T), T(1.0, ConfigSampler{N}(s))]
             end
         end
     end
 	return code(xs...)
 end
 
-println("one of the optimal configurations is $(mis_config(optimized_code; all=false)[].config)")
+println("one of the optimal configurations is $(mis_config(optimized_code; all=false)[].c.data)")
 
-# enumerating configurations directly can be very slow (~15min), please check the bounding version in our Github repo.
+# enumerating configurations directly can be very slow, please check the bounding version in our Github repo.
 println("all optimal configurations are $(mis_config(optimized_code; all=true)[].c)")
