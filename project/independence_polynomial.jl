@@ -2,15 +2,24 @@ using GraphTensorNetworks, Random
 
 using DelimitedFiles
 
-function mis_maximal_counting(n, seed; writefile, sc_target=24, usecuda=false)
+function mis_counting(n, seed; writefile, sc_target, usecuda, maximal)
     folder = joinpath(homedir(), ".julia/dev/TropicalMIS", "project", "data")
     fname = joinpath(folder, "mis_degeneracy_L$n.dat")
     mask = Matrix{Bool}(reshape(readdlm(fname)[seed+1,4:end], n, n))
     g = diagonal_coupled_graph(mask)
+    if maximal
+        gp = MaximalIndependence(g; sc_target=sc_target, optmethod=:tree, niters=5)
+    else
+        #gp = Independence(g; optmethod=:kahypar, sc_target=sc_target)
+        gp = Independence(g; optmethod=:tree, sc_target=sc_target, sc_weight=1.0, ntrials=10, βs=0.01:0.05:15.0, niters=30, rw_weight=0.2)
+    end
     println("Graph $seed, usecuda = $usecuda")
-    gp = MaximalIndependence(g; sc_target=sc_target, optmethod=:tree, niters=10, ntrials=3, rw_weight=0.2)
     res = graph_polynomial(gp, Val(:finitefield), usecuda=usecuda)[]
-    folderout = joinpath(folder, "maximal_polynomial_L$(n)")
+    if maximal
+        folderout = joinpath(folder, "maximal_polynomial_L$(n)")
+    else
+        folderout = joinpath(folder, "independence_polynomial_L$(n)")
+    end
     if !isdir(folderout)
         mkdir(folderout)
     end
@@ -19,30 +28,12 @@ function mis_maximal_counting(n, seed; writefile, sc_target=24, usecuda=false)
 end
 
 # patch
-using GPUArrays, CUDA, LinearAlgebra
-@static if !(VERSION > v"1.6")
-function LinearAlgebra.permutedims!(dest::AbstractGPUArray, src::AbstractGPUArray,
-                                    perm::NTuple)
-    Base.checkdims_perm(dest, src, perm)
-    function permutedims_kernel(ctx, dest, src, perm)
-        I = @cartesianidx src
-        @inbounds begin
-            J = CartesianIndex(map(i->I[i], perm))
-            dest[J] = src[I]
-        end
-        return
-    end
-    gpu_call(permutedims_kernel, dest, src, perm)
-    return dest
-end
-end
-
 const DEVICE = length(ARGS) >= 1 ? parse(Int, ARGS[1]) : -1
 
 if DEVICE >= 0
     CUDA.device!(DEVICE)
 end
 
-for i=0:500
-    @time mis_maximal_counting(14, i; writefile=true, sc_target=0, usecuda=DEVICE>=0)
+for i=0:49
+    @time mis_counting(24, i; writefile=true, sc_target=0, usecuda=DEVICE>=0, maximal=false)
 end
