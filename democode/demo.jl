@@ -102,6 +102,7 @@ println("the independence polynomial (finite field) is $(independence_polynomial
 
 # define the set algebra
 struct ConfigEnumerator{N}
+    # NOTE: BitVector is dynamic, can be very slow, check our repo for the static version
     data::Vector{BitVector}
 end
 function Base.:+(x::ConfigEnumerator{N}, y::ConfigEnumerator{N}) where {N}
