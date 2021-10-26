@@ -11,10 +11,10 @@ function mis_counting(n, seed; writefile, sc_target, usecuda, maximal)
         gp = MaximalIndependence(g; sc_target=sc_target, optmethod=:tree, niters=5)
     else
         #gp = Independence(g; optmethod=:kahypar, sc_target=sc_target)
-        gp = Independence(g; optmethod=:tree, sc_target=sc_target, sc_weight=1.0, ntrials=10, βs=0.01:0.05:15.0, niters=30, rw_weight=0.2)
+        gp = Independence(g; optmethod=:tree, sc_target=sc_target, sc_weight=1.0, ntrials=1, βs=0.01:0.05:15.0, niters=30, rw_weight=0.2)
     end
     println("Graph $seed, usecuda = $usecuda")
-    res = graph_polynomial(gp, Val(:finitefield), usecuda=usecuda)[]
+    @profile res = graph_polynomial(gp, Val(:finitefield), usecuda=usecuda)[]
     if maximal
         folderout = joinpath(folder, "maximal_polynomial_L$(n)")
     else
@@ -34,6 +34,6 @@ if DEVICE >= 0
     CUDA.device!(DEVICE)
 end
 
-for i=0:49
+for i=0:0
     @time mis_counting(24, i; writefile=true, sc_target=0, usecuda=DEVICE>=0, maximal=false)
 end
