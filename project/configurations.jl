@@ -19,9 +19,10 @@ function mis_configurations(n, seed; order, writefile, sc_target=12)
         @warn "degeneracy too high, got: $c"
     end
     #s2, config1, config0 = (res = best2_solutions(code; all=true)[]; (res.maxorder, res.coeffs...))
-    s2, configs = (res = solve(code, "configs max$order")[]; (res.maxorder, res.coeffs))
+    res_c = solve(code, "counting max$order")[]
+    s2, configs = (res = solve(code, "configs max$order (bounded)")[]; (res.maxorder, res.coeffs))
     @assert s2 == s2
-    @assert length(configs[order]) == c
+    @assert all(res_c.coeffs .== length.(configs))
     for i=1:order
         ofname = joinpath(folder, "$seed-$(i-1).dat")
         writefile && write(ofname, toMatrix(configs[order-i+1]))
