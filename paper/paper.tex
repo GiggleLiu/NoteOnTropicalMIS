@@ -247,7 +247,7 @@ An independent set is a set of vertices in a graph where no two vertices are adj
 More formally, given an undirected graph $G = (V,E)$, an independent set $I \subseteq V$ is a set that for any $u,v \in I$, there is no edge connecting $u$ and $v$ in $G$.
 The problem of finding an independent set of the largest possible size, the maximum independent set (MIS), is a paradigmatic NP-complete problem~\cite{Hastad1996}.
 The size of an MIS of a graph $G$ is called the independence number, denoted as $\alpha(G) \equiv \max_{I}|I|$. 
-Finding $\alpha(G)$ is a hard computational problem; moreover, it is NP-hard to even approximate $\alpha(G)$ within a factor $|V|^{1-\epsilon}$ for an arbitrarily small positive $\epsilon$.
+Finding $\alpha(G)$ is a hard computational problem; moreover, it is NP-hard to even approximate $\alpha(G)$ within a factor $|V|^{1-\epsilon}$ for any positive $\epsilon$.
 Naive exhaustive search for the MIS requires time $O\left(2^{|V|} \right)$. More efficient exact algorithms include the branching algorithms~\cite{Tarjan1977,Robson1986} and dynamic programming.
 Sophisticated branching algorithms can reduce the base of the exponential time scaling to, e.g., $1.1996^{|V|} {|V|}^{O(1)}$~\cite{Xiao2017}.
 Dynamic programming approaches~\cite{Courcelle1990, Fomin2013} works better for graphs with a small treewidth $\text{tw}(G)$;
