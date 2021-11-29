@@ -1,4 +1,6 @@
 using GraphTensorNetworks, Random
+using CUDA
+CUDA.allowscalar(false)
 
 using DelimitedFiles
 
@@ -8,10 +10,9 @@ function mis_counting(n, seed; writefile, sc_target, usecuda, maximal)
     mask = Matrix{Bool}(reshape(readdlm(fname)[seed+1,4:end], n, n))
     g = diagonal_coupled_graph(mask)
     if maximal
-        gp = MaximalIndependence(g; sc_target=sc_target, optmethod=:tree, niters=5)
+        gp = MaximalIndependence(g; optimizer=TreeSA(sc_target=sc_target, niters=5))
     else
-        #gp = Independence(g; optmethod=:kahypar, sc_target=sc_target)
-        gp = Independence(g; optmethod=:tree, sc_target=sc_target, sc_weight=1.0, ntrials=10, βs=0.01:0.05:15.0, niters=30, rw_weight=0.2)
+        gp = Independence(g; optimizer=TreeSA(sc_target=sc_target, sc_weight=1.0, ntrials=10, βs=0.01:0.05:15.0, niters=50, rw_weight=0.2), simplifier=MergeGreedy())
     end
     println("Graph $seed, usecuda = $usecuda")
     res = graph_polynomial(gp, Val(:finitefield), usecuda=usecuda)[]
@@ -34,6 +35,9 @@ if DEVICE >= 0
     CUDA.device!(DEVICE)
 end
 
-for i=0:49
-    @time mis_counting(24, i; writefile=true, sc_target=0, usecuda=DEVICE>=0, maximal=false)
+for L = [32, 34, 36, 38, 40]
+    println("computing L = $L")
+    for i=0:49
+        @time mis_counting(L, i; writefile=true, sc_target=26, usecuda=DEVICE>=0, maximal=false)
+    end
 end
