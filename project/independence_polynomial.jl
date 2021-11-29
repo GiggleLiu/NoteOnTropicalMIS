@@ -15,7 +15,7 @@ function mis_counting(n, seed; writefile, sc_target, usecuda, maximal)
         gp = Independence(g; optimizer=TreeSA(sc_target=sc_target, sc_weight=1.0, ntrials=10, βs=0.01:0.05:15.0, niters=50, rw_weight=0.2), simplifier=MergeGreedy())
     end
     println("Graph $seed, usecuda = $usecuda")
-    res = graph_polynomial(gp, Val(:finitefield), usecuda=usecuda)[]
+    @profile res = graph_polynomial(gp, Val(:finitefield), usecuda=usecuda)[]
     if maximal
         folderout = joinpath(folder, "maximal_polynomial_L$(n)")
     else
