@@ -221,12 +221,12 @@ Listing \thelstlisting: #1\hfill%\hfill%
 
 \begin{abstract}
 We introduce a method of using generic programming tensor network to compute various properties of independent sets.
-This method is versertile. By engineering tensor element algebra, the type of graph problems that can be computed using this method includes: independence number, the number of independent sets, independence polynomial, maximal independence polynomial, and both counting and enumeration of all maximum independence sets, the large-size independent sets, and all maximal independent sets.
+This method is versertile such that by engineering tensor element algebra, the type of graph problems that can be computed using this method includes: independence number, the number of independent sets, independence polynomial, maximal independence polynomial, and both counting and enumeration of all maximum independence sets, the large-size independent sets, and all maximal independent sets.
 %Although the computational complexity inevitably scales exponentially with treewidth of the graph,
 %our method using tensor network contraction with generic programming is highly versatile and is able to compute properties that are otherwise not known to be possible for up to several hundred vertices.
 At the same time, our algorithms are very simple to implement and one can directly utilize recent advances in tensor network contraction techniques like near optimal contraction order finding and slicing.
-We can easily contract a tensor network with thousands of tensors with an algorithmic complexity $2^{{\rm tw}(G)}$, with ${\rm tw} (G)$ the tree width of the problem graph.
-To demonstrate the versatility of this tool, we apply it to a few examples including the calculations of the hard-square entropy constant, Euler characteristics of the independence complex, partition functions, and finite-temperature phase transitions on square-lattice graphs.
+One can easily find a good contraction order for the tensor network representation of a graph $G$ with thousands of vertices. This contraction order gives tensor network contraction complexity $2^{{\rm tw}(G)}$, with ${\rm tw} (G)$ the tree width of the problem graph.
+To demonstrate the versatility of this tool, we apply it to a few examples including the calculations of the hard-square entropy constant, Euler characteristics of the independence complex, partition functions, and finite-temperature phase transitions on square-lattice graphs\blue{remove some examples}.
 \end{abstract}
 
 % REQUIRED
@@ -240,21 +240,21 @@ independent set, tensor network, maximum independent set, independence polynomia
   05C31, 14N07
 \end{AMS}
 
-\section{Introduction}
 \blue{independence polynomial at -1~\cite{Bousquet2008,Levit2009},
 two motivations of computing independence polynomial: 1. Lee-Yang zero~\cite{Lee1952,Yang1952}, 2. Lov{\'a}sz local lemma~\cite{Scott2005}.
 }
+\section{Introduction}
 In graph theory and combinatorial optimization, there are many interesting hard computational problems concerning properties of independent sets.
 %An independent set of a graph is a subset of its vertices that no two vertices in this set are adjacent to each other.
-For an undirected graph $G = (V,E)$, an independent set $I \subseteq V$ is a set of vertices that for any $u,v \in I$, $(u, v) \not\in E$. %there is no edge connecting $u$ and $v$ in $G$.
-The primary insterest of many computational complexity theorists is finding the maximum size of such vertex sets be $\alpha(G) \equiv \max_{I}|I|$ and one of the sets having this size.
+For an undirected graph $G = (V,E)$, an independent set $I \subseteq V$ is a set of vertices that for any vertex pair $u,v \in I$, $(u, v) \not\in E$. %there is no edge connecting $u$ and $v$ in $G$.
+The primary insterest of many computational complexity theorists is finding the maximum size of such vertex sets $\alpha(G) \equiv \max_{I}|I|$ and one of the sets of this size.
 Finding $\alpha(G)$ is a hard computational problem; moreover, it is NP-hard to even approximate $\alpha(G)$ within a factor $|V|^{1-\epsilon}$ for an arbitrarily small positive $\epsilon$ ~\cite{Hastad1996}.
 Naive exhaustive search for an MIS requires computing time $O\left(2^{|V|} \right)$.
 People developed more efficient exact algorithms for finding MISs, including the branching algorithms~\cite{Tarjan1977,Robson1986} and dynamic programming.
 The branching algorithms can reduce the base of the exponential time scaling to, e.g., $1.1996^{|V|} {|V|}^{O(1)}$~\cite{Xiao2017}, 
 while dynamic programming approaches~\cite{Courcelle1990, Fomin2013} works better for graphs with a small treewidth $\text{tw}(G)$;
 these methods can produce algorithms of complexity $O(2^{\text{tw}(G)} \text{tw}(G) |V|)$.
-Although it is a hard problem, people keep chanllenging themself to find a better algorithm for solving the MIS problem;
+Although finding MIS is hard, people keep chanllenging themselves to find better algorithms for solving the MIS problem;
 not only for it has a wide range of applications in scheduling, logistics, social network analysis, bioinformatics, wireless networks and telecommunication,
 map labelling, computer vision, etc.~\cite{Butenko2003, Wu2015}, but also for it is a well know NP-complete problem that can be mapped from
  to many other important combinatorial optimization problems in polynomial time such as circuit satisfiability~\cite{}, the maximum clique problem and the maximum vertex cover~\cite{Moore2011} problems.
@@ -262,81 +262,48 @@ map labelling, computer vision, etc.~\cite{Butenko2003, Wu2015}, but also for it
 %more concretely, an maximal independent set of a graph $G$ corresponds to a maximum clique in the complement graph of $G$,
 %and the complement vertex set of an MIS corresponds to a minimum vertex cover of the graph $G$.
 %In this paper, the term ``maximal'' has a different meaning from ``maximum''  which we discussed above; a maximal independent set is an independent set that is not a subset of any other independent set, but its size may not be the maximum.
-In this paper, we do not limit our discussion the finding one of the maximum indepedent sets and its size.
+In this paper, we do not limit our discussion to finding one of the maximum indepedent sets and its size.
 There are many other interesting problems pertaining to independent sets, such as the number of independent sets,
 independence polynomial, maximal independence polynomial, and enumeration of MIS or maximal independent sets.
 Some of these problems are of great interest in physics applications such as the hard-core lattice gas model~\cite{Dyre2016, Fernandes2007}
 in statistical mechanics and the Rydberg hamiltonian with neutral atoms~\cite{Pichler2018} \red{cite experiment when it's ready};
 they can, for example, be used to understand phase transitions, to analyse the overlap gap properties~\cite{Gamarnik2013, Gamarnik2019} and to identify harder graphs in an ensemble of graphs \red{cite experiment}.
-
-In this work, we introduce a tensor-network based framework to compute the various properties pertaining to independent sets.
+The problem of computing the independence polynomial belongs to the complexity class \#P-hard. One approach to exactly compute the independence polynomial requires a computational time of $O(1.442^{|V|})$~\cite{Ferrin2014}
+\blue{I am not sure about this complexity, this is based on the naive analysis of theorem 2.2 in ~\cite{Ferrin2014}}. There are some interesting works on efficiently approximating the independence polynomial~\cite{Harvey2018}, but in this work, we focus on computing the independence polynomial exactly.
+We introduce a tensor-network based framework to compute the various properties pertaining to independent sets.
 We map the independent set problem into generic tensor network contraction with specially designed tensor element algebra.
-Its algorithmic complexity is similar to that of dynamic programming, i.e. scales exponentially as the tree width of the graph ${\rm tw}(G)$.
+Its algorithmic complexity is similar to that of dynamic programming, i.e. scales exponentially as ${\rm tw}(G)$.
 %But the tensor network approach is highly versatile so different problems can be generically solved with minimal implementation efforts without loss of efficiency.
-We benchmark our algorithms by computing various independent set properties on CPUs and GPUs.
+We benchmark our algorithms by computing various independent set properties on central processing units (CPUs) and graphics processing units (GPUs) and show its good performance on sparse graphs.
 Its high performance benefits from recent advances in random tensor-network contraction for the purposes of quantum circuit simulations~\cite{Gray2021, Pan2021, Kalachev2021}.
 People developed algorithms to optimize the contraction order for tensor networks with thousands of vertices,
-while the optimized contraction order gives us a near optimal space complexity $2^{\sim{\rm tw}(G)}$ to contract the tensor network.
+and the optimized contraction order gives us a near optimal space complexity $2^{\sim{\rm tw}(G)}$ to contract the tensor network.
 For cases when the tensors being too large to fit into a GPU, slicing technique can be used to further reduce the space consumption.
-The implementation of our algorithm is publicly available online: ~\cite{repolink}.
 Lastly, we provide a few examples and show that this toolbox can be used to calculate the hard-square entropy constant,
 Euler characteristics of the independence complex, partition functions, and finite-temperature phase transitions on square-lattice graphs. 
+The implementation of our algorithm is publicly available online: ~\cite{repolink}.
 
 \section{Tensor networks}
-A tensor network~\cite{Cirac2020, Orus2014} can be viewed as a generalization of matrix multiplication to multi-dimensional tensor contraction.
-Let $A, B$ be two matrices; the matrix multiplication is defined as $C_{ik} = \sum_{j}A_{ij}B_{jk}$.
-Using the Einstein notation, we can write $C_{ik} = A_{ij}B_{jk}$, where $j$ is implicitly summed over.
-In the standard notation, each index can appear at most twice. A tensor network consists of multiple tensors performing the sum-product operation,
-i.e., contraction, and it can be represented as a multigraph with open edges by viewing a tensor as a vertex,
-a label pairing two tensors as an edge, and the remaining unpaired labels as open edges.
+Tensor network~\cite{Cirac2020, Orus2014} is also known as einsum, factor graph or sum-product network~\cite{Bishop2006} in different contexts,
+it can be viewed as a generalization of matrix multiplication to multiple tensors contraction.
+People often use Einstein's notation to represent a tensor network, e.g. the matrix multiplication between two matrices $A$ and $B$ can be represented in Einstein's notation as $C_{ik} = A_{ij}B_{jk}$,
+where we use a label in subscripts to represent a degree of freedom.
+We enumerate these degree of freedoms and accumulate the product of tensor elements to the output tensor.
+In the standard notation of Einstein's summation or tensor network in physics, each index appears precisely twice.
+Hence people can represent a tensor network as a simple graph,
+where a tensor is a vertex and two tensors sharing the same label are connected.
+In the main text, we do not have this restriction. An index can appear arbitrary times.
+The graphical representation of our generlized tensor network is hypergraph, in which an edge (label) can be shared by an arbitrary number of vertices (tensors).
+These two notations are equivalent in representation power because one can easily translate a generalized tensor network to the standard notation by adding $\delta$ tensors - a high dimensional equivalence of identity matrix.
+However, introducing $\delta$ tensors can potentially increase the contraction complexity a lot. We illustrate this point in \App{app:tensorbad}.
+\blue{introduce contraction orders}
 
 \begin{example}
-   A standard tensor network $C_{il} = A_{ijkm} B_{kml} V_{j}$ has the following multigraph representation.
-   
-\centerline{\begin{tikzpicture}[
-    dot/.style = {circle, fill, minimum size=#1,
-                inner sep=0pt, outer sep=0pt},
-    dot/.default = 6pt  % size of the circle diameter 
-                    ]
-    \def\dx{0};
-    \def\r{0.25cm}
-    \def\ax{0}
-    \def\ay{0}
-    \def\bx{1}
-    \def\by{1}
-    \def\cx{1}
-    \def\cy{-1}
-    \node[color=white, fill=black, dot=2*\r] at (\ax+\dx,\ax) (a) {A};
-    \node[color=white, fill=black, dot=2*\r] at (\bx+\dx,\by) (b) {B};
-    \node[color=white, fill=black, dot=2*\r] at (\cx+\dx,\cy) (c) {V};
-    %\draw [black,thick] (\ax+\dx,\ay) .. controls (0.5*\ax+0.5*\bx+\dx+0.2,0.5*\ay+0.5*\by-0.2) .. (\bx+\dx,\by);
-    %\draw [black,thick] (\ax+\dx,\ay) .. controls (0.5*\ax+0.5*\bx+\dx-0.2,0.5*\ay+0.5*\by+0.2) .. (\bx+\dx,\by);
-    \draw [black,thick] (a) .. controls (0.4, 0.6) .. (b);
-    \draw [black,thick] (a) .. controls (0.6, 0.4) .. (b);
-    \draw [black,thick] (a) -- (c);
-    \draw [black,thick] (a) -- (\ax+\dx-0.8,\ay);
-    \draw [black,thick] (b) -- (\bx+\dx+0.8,\by);
-    \node[color=black] at (0.5*\ax+0.5*\bx-0.3+\dx,0.5*\ay+0.5\by+0.3) {k};
-    \node[color=black] at (0.5*\ax+0.5*\bx+0.3+\dx,0.5*\ay+0.5\by-0.3) {m};
-    \node[color=black] at (0.5*\ax+0.5*\cx+\dx+0.2,0.5*\ay+0.5\cy+0.2) {j};
-    \node[color=black] at (\ax+\dx-0.5,\ay-0.2) {i};
-    \node[color=black] at (\bx+\dx+0.5,\by-0.2) {l};
-\end{tikzpicture}}
-\end{example}
+$C_{ijk} = A_{jkm} B_{mil} V_{jm}$ is a tensor network that can be evaluated as $C_{ijk} = \sum_{ml}A_{jkm} B_{mil} V_{jm}$.
+Its hypergraph representation is shown below, where we use different colors to represent different hyperedges.
+%It's equivalent standard notation is $C_{ijk} = A_{ukm} B_{pil} V_{vq} \delta_{mpq} \delta_{juv}\delta_l$. 
 
-In the main text, we use a generalized tensor network notation that an index can appear arbitrary times.
-It is sometimes called einsum,
-sum-product network or factor graph~\cite{Bishop2006} in different contexts.
-The graphical representation of a generlized tensor network is a hypergraph, where an edge (label) can be shared by an arbitrary number of vertices (tensors).
-These two notations are equivalent in the representation power because one can easily translate a generalized tensor network to the standard notation by adding identity tensors denoted as $\delta$ tensors.
-However, by adding the $\delta$ tensors, one may unnecessarily increase the contraction complexity of a graph, which we illustrate in \App{app:tensorbad}.
-
-\begin{example}
-$C_{ijk} = A_{jkm} B_{mil} V_{jm}$ is a tensor network representing $C_{ijk} = \sum_{ml}A_{jkm} B_{mil} V_{jm}$,
-where $i,j,k$ in the output tensor are open edges (note that $l$ is not an open edge and thus summed over).
-Its hypergraph representation is shown below, where we use different colors to annotate different hyperedges.
-It's equivalent standard notation is $C_{ijk} = A_{ukm} B_{pil} V_{vq} \delta_{mpq} \delta_{juv}\delta_l$. 
-
+\vspace{1em}
 \centerline{\begin{tikzpicture}[
     dot/.style = {circle, fill, minimum size=#1,
                 inner sep=0pt, outer sep=0pt},
@@ -386,7 +353,7 @@ One of the key concepts that push the technology forward is called generic progr
    Generic programming is an approach to programming that focuses on designing algorithms and data structures so that they work in the most general setting without loss of efficiency. ~\cite{Stepanov2014}
 \end{definition}
 
-This definition of generic programming contains two major aspects: a single program for the general setting and efficiency.
+This definition of generic programming contains two major aspects: a single program works in the most general setting and efficiency.
 To understand the first aspect, suppose we want to write a function that raises an element to a power, $f(x, n) := x^n$.
 One can easily write a function for standard number types that computes the power of $x$ in $\log(n)$ steps using the multiply and square trick.
 Generic programming does not require $x$ to be a standard number type,
@@ -401,7 +368,7 @@ In Julia, these inlined arrays can even be compiled to GPU devices for faster co
 
 This motivates us to think about what is the most general element type that is allowed in a tensor network contraction program.
 We find that as long as the algebra of tensor elements forms a commutative semiring, the tensor network contraction result will be valid and be independent of the contraction order.
-A commutative semiring is a semiring with its multiplication operation being commutative, while a semiring is a ring without additive inverse.
+A commutative semiring is a semiring with its multiplication operation being commutative, and a semiring is a ring without additive inverse.
 To define a commutative semiring with the addition operation $\oplus$ and the multiplication operation $\odot$ on a set $R$, the following relations must hold for any arbitrary three elements $a, b, c \in R$.
 \begin{align*}
 (a \oplus b) \oplus c = a \oplus (b \oplus c) & \hspace{5em}\text{$\triangleright$ commutative monoid $\oplus$ with identity $\mymathbb{0}$}\\
@@ -417,7 +384,7 @@ a \odot (b\oplus c) = a\odot b \oplus a\odot c  &  \hspace{5em}\text{$\triangler
 &\\
 a \odot \mymathbb{0} = \mymathbb{0} \odot a = \mymathbb{0}
 \end{align*}
-The requirement of being commutative is for the tensor contraction result to be independent of the contraction order, which could be relaxed in certain cases. In the following sections, we show how to compute the independence polynomial,
+The requirement of being commutative is for the tensor contraction result to be independent of the contraction order. In the following sections, we show how to compute the independence polynomial,
 the maximal independence polynomial, independence number, the number of independent sets, and enumeration of the MIS and maximal independent sets of a general graph $G$ by designing tensor element types as commutative semirings while keeping the tensor network generic~\cite{Stepanov2014}.
 Table~\ref{tbl:generictypes} summarizes the problems that can be solved by various tensor element types. 
 
@@ -451,21 +418,18 @@ The independence polynomial is an important graph polynomial that contains the c
 \begin{equation}
 I(G, x) = \sum_{k=0}^{\alpha(G)} a_k x^k,
 \end{equation}
-where $a_k$ is the number of independent sets of size $k$ in $G$, and $\alpha(G)$ is the independence number. The total number of independent sets is thus equal to $I(G, 1)$.
-The problem of computing the independence polynomial belongs to the complexity class \#P-hard. One approach to exactly compute the independence polynomial requires a computational time of $O(1.442^{|V|})$~\cite{Ferrin2014}
-\blue{I am not sure about this complexity, this is based on the naive analysis of theorem 2.2 in ~\cite{Ferrin2014}}. There are some interesting works on efficiently approximating the independence polynomial~\cite{Harvey2018}, but in this work, we focus on exact methods to compute the independence polynomial.
-
-The independence polynomial is closely related to the matching polynomial, the clique polynomial~\cite{Hoede1994}, and the vertex cover polynomial~\cite{Akbari2013}.
-In fact, the independence polynomial can be viewed as a generalization of the matching polynomial, since the matching polynomial of a graph $G$ is the same as the independence polynomial of the line graph of $G$~\cite{Levit2005}.
-Thus, our algorithm to compute the independence polynomial can also be used to compute the above graph polynomials. Some properties of the independence polynomial, such as the uni-modality, log-concavity, and roots of the polynomial, are well studied in the literature for special classes of graphs~\cite{Levit2005}.
-We hope our algorithms to calculate the independence polynomial can also help further research in these directions.
-
-To compute the independence polynomial of a graph $G$, we encode it to a tensor network. On the vertex $i$ of the graph $G$, we place a rank-one vertex tensor, $W(x_i)$, of size $2$ parametrized by $x_{i}$ and a rank-two edge tensor, $B$, of size $2 \times 2$ on an edge
+where $a_k$ is the number of independent sets of size $k$ in $G$. The total number of independent sets is thus equal to $I(G, 1)$.
+To compute the independence polynomial of a graph $G = (V, E)$, we reinterpret this problem as a tensor network contraction problem.
+We map a vertex $i\in V$ to a label $s_i \in \{0, 1\}$ of dimension $2$ in a tensor network, where we use $0$ ($1$) to denote a vertex absent (exists) in the set.
+For each label $s_i$, we defined a prametrized rank-one vertex tensor $W(x_i)$ indexed by it as
 \begin{equation}
     W(x_i) = \left(\begin{matrix}
         1 \\
         x_i
-    \end{matrix}\right),
+    \end{matrix}\right).
+\end{equation}
+On each edge $(u, v)$, we define a matrix $B$ indexed by $(s_u, s_v)$ as
+\begin{equation}
     \qquad \quad 
        B = \left(\begin{matrix}
         1  & 1\\
@@ -473,16 +437,19 @@ To compute the independence polynomial of a graph $G$, we encode it to a tensor 
     \end{matrix}\right), \label{eq:tensor}
 \end{equation}
 The corresponding tensor network contraction gives
-\begin{equation}
+\begin{equation}\label{eq:idp}
     P(G, \{x_1, x_{2}, \ldots,x_{|V|}\}) = \sum\limits_{s_1, s_2, \ldots, s_{|V|} = 0}^{1} \prod\limits_{i=1}^{|V|} W(x_i)_{s_i} \prod\limits_{(i,j) \in E(G)} B_{s_i s_j},
 \end{equation}
 where the summation runs over all vertex configurations $\{s_1, s_{2}, \ldots,s_{|V|}\}$ and accumulates the product of tensor elements to the output $P$ (see Example \ref{eg:tensorcontraction} for a concrete example).
-The tensor index $s_i$ is a boolean variable; $s_{i} = 1$ corresponds that the vertex $i$ is in the independent set, and $s_{i} = 0$ means otherwise. Let us assume the tensor elements are real numbers for now.
 The edge tensor element $B_{s_{i}=1, s_{j}=1} = 0$ encodes the independent set constraint, meaning vertex $i$ and $j$ cannot be both in the independent set if they are connected by an edge $(i,j)$.
 In the special case of $x_i = x$, the contraction result directly corresponds to the independence polynomial.
 The connection can be understood as follows: the product over vertex tensor elements produces a factor $x^k$, where $k=\sum_i s_i$ counts the set size,
-and the product over edge tensor elements gives a factor $1$ for a configuration being in an independent set and $0$ otherwise. In the implementation of the algorithm, we benefit from recent advances in tensor network contraction,
-where researchers working on quantum circuit simulation evaluate the tensor network by pairwise contracting tensors in a heuristic order~\cite{Gray2021, Pan2021}.
+and the product over edge tensor elements gives a factor $1$ for a configuration being in an independent set and $0$ otherwise.
+
+%In the implementation of the algorithm, we benefit from recent advances in tensor network contraction,
+%where researchers working on quantum circuit simulation evaluate the tensor network by pairwise contracting tensors in a heuristic order~\cite{Gray2021, Pan2021}.
+To evalute \Eq{eq:idp}, summing up the products directly is apparently computational inefficient.
+The standard approach to evaluate a tensor network is to contract two tensors a time with a certain order utilizing the associativity and commutativity of tensor elements.
 A good contraction order can reduce the time complexity significantly, at the cost of having a space overhead of $O(2^{\text{tw}(G)})$~\cite{Markov2008}.
 The pairwise tensor contraction also makes it possible to utilize basic linear algebra subprograms (BLAS) functions to speed up the computation for certain tensor element types.
 
@@ -543,7 +510,7 @@ We attach a vertex tensor on each hyperedge and an edge tensor between two hyper
         \draw [orange,thick] (e) -- (de);
     \end{tikzpicture}}
     
-    The contraction of this tensor network can be done in a pairwise order:
+    The contraction of this tensor network can be done in a pairwise order utilizing the associativity, additive commutativity and multiplicative commutativity of tensor elements:
     \begin{align*}
         &\sum_{s_a,s_b,s_c,s_d,s_e} W(x_a)_{s_a} W(x_b)_{s_b} W(x_c)_{s_c} W(x_d)_{s_d} W(x_e)_{s_e} B_{s_a s_b} B_{s_b s_d} B_{s_c s_d} B_{s_a s_c} B_{s_b s_c} B_{s_d s_e}\\
         =&\sum_{s_b,s_c}\left(\sum_{s_d}\left(\left(\left(\left(\sum_{s_e}B_{s_d s_e}W(x_e)_{s_e}\right) W(x_d)_{s_d}\right) \left(B_{s_bs_d} W(x_b)_{s_b}\right)\right) \left(B_{s_cs_d} W(x_c)_{s_c}\right)\right)\right.\\
@@ -555,7 +522,7 @@ We attach a vertex tensor on each hyperedge and an edge tensor between two hyper
 
 Before contracting the tensor network and evaluating the independence polynomial numerically, let us first elevate the tensor elements $0$s and $1$s in tensors $W(x)$ and $B$ from integers and floating point numbers to the additive identity,
 $\mymathbb{0}$, and multiplicative identity, $\mymathbb{1}$, of a commutative semiring as discussed in Sec.~\ref{sec:generic}.
-The most natural approach is to treat the tensor elements as polynomials and evaluate the polynomial directly.
+Then we can treat the tensor elements as polynomials and evaluate the polynomial directly.
 Let us create a polynomial type, and represent a polynomial $a_0 + a_1 x + \ldots + a_k x^k$ as a coefficient vector $(a_0, a_1, \ldots, a_k) \in \mathbb{R}^k$, so, e.g., $x$ is represented as $(0, 1)$.
 We define the algebra between the polynomials $a$ of order $k_a$ and $b$ of order $k_b$ as
 \begin{equation}
@@ -567,7 +534,7 @@ We define the algebra between the polynomials $a$ of order $k_a$ and $b$ of orde
     \mymathbb{1} &= (1).\label{eq:polynomial}
     \end{split}
 \end{equation}
-One way to efficiently evaluate the multiplication operation is to use the convolution theorem~\cite{Schonhage1971}.
+Here, the multiplication operation can be evaluated efficiently using the convolution theorem~\cite{Schonhage1971}.
 We can see these operations are standard addition and multiplication operations of polynomials, and the polynomial type forms a commutative ring. The tensors $W$ and $B$ can thus be written as 
 \begin{equation}
     W^{\rm poly} = \left(\begin{matrix}
@@ -580,9 +547,9 @@ We can see these operations are standard addition and multiplication operations 
         \mymathbb{1} & \mymathbb{0}
     \end{matrix}\right).
 \end{equation}
-By contracting the tensor network with the polynomial type, the final result is the exact representation of the independence polynomial.
+By contracting the tensor network with the polynomial type, we have contraction result the exact representation of the independence polynomial.
 However, using polynomial numbers suffers from a space overhead proportional to $\alpha(G)$ because each polynomial requires a vector of such size to store the coefficients. 
-Here, we propose to find the independence polynomial by fitting $\alpha(G)+1$ random values of $x_{i}$ and $y_{i} = I(G,x_{i})$. One can then compute the independence polynomial coefficients $a_{i}$ by solving the linear equation: 
+Here, we propose to find the independence polynomial by fitting $\alpha(G)+1$ random pairs of $x_{i}$ and $y_{i} = I(G,x_{i})$. One can then compute the independence polynomial coefficients $a_{i}$ by solving the linear equation: 
 \begin{equation}
 \left(\begin{matrix}
 1 & x_0 & x_0^2 & \ldots & x_0^{\alpha(G)} \\
@@ -599,7 +566,7 @@ y_0 \\ y_1 \\ \vdots \\ y_{\alpha(G)}
 \end{equation}
 With this approach, we do not incur the linear overhead in space. However, because the independence polynomial coefficients can have a huge order-of-magnitude range, if we use floating point numbers in the computation, the round-off errors can be significant for the counting of large independent set sizes.
 In addition, the number could easily overflow if we use fixed-width integer types.
-The big integer type is also not a good option because big integers with varying width can be very slow and is incompatible with graphics processing unit (GPU) devices. These problems can be solved by introducing a finite-field algebra $\text{GF}(p)$:
+The big integer type is also not a good option because big integers with varying width can be very slow and is incompatible with GPU devices. These problems can be solved by introducing a finite-field algebra $\text{GF}(p)$:
 \begin{equation}
 \begin{split}
     x ~\oplus~ y &= x+y\pmod p,\\
@@ -616,12 +583,12 @@ With a finite-field algebra, we have the following observations:
 \end{enumerate}
 With these observations, we develop Algorithm~\ref{alg:finitefield} to compute the independence polynomial exactly without introducing space overheads.
 This is an iterative algorithm that iterates over a sequence of large prime numbers until convergence.
-In each iteration, we contract the tensor networks to evaluate the polynomial for each variable $x = \chi_{i}$ on ${\rm GF}(p)$ and denote the outputs as $Y$.
-Then we solve a linear equation $Y = X A_p$ using the gaussian elimination to find the coefficient modulo $p$, $A_p \equiv A \pmod p$.
-Finally we apply the Chinese remainder theorem to get $A \pmod {P\times p}$, where $P$ is a product of all prime numbers chosen in previous iterations.
-If this number does not change compared with the previous iteration, it indicates the result has converged.
+In each iteration, we choose a large prime number $p$, and contract the tensor networks to evaluate the polynomial for each variable $\chi = (x_{0}, x_{1}, \ldots, x_{\alpha(G)})$ on ${\rm GF}(p)$ and denote the outputs as $(y_0, y_1, \ldots, y_{\alpha(G)}) \pmod p$.
+Then we solve \Eq{eq:lineareq} using the gaussian elimination on ${\rm GF}(p)$ to find the coefficient modulo $p$, $A_p \equiv (a_0, a_1, \ldots, a_{\alpha(G)})\pmod p$.
+As the last step of each iteration, we apply the Chinese remainder theorem to update $A \pmod P $ to $ A \pmod {P\times p}$, where $P$ is a product of all prime numbers chosen in previous iterations.
+If this number does not change compared with the previous iteration, it indicates the convergence of result and the program terminates.
 All computations are done with integers of fixed width $W$ except the last step of applying the Chinese remainder theorem, where we use arbitrary precision integers to represent the counting.
-In \App{app:fft}, we provide another method to solve the linear equation using discrete Fourier transform.
+In \App{app:fft}, we provide another method to solve the linear equation using discrete Fourier transformation.
 
 \LinesNumberedHidden
 \begin{algorithm}[!ht]
@@ -631,15 +598,13 @@ In \App{app:fft}, we provide another method to solve the linear equation using d
     Let $P = 1$, $W$ be the integer width, vector $\chi = (0,1,2, \ldots, \alpha(G))$, matrix $X_{ij} = (\chi_i)^j$, where $i,j = 0, 1, \ldots, \alpha(G)$\;
 
     \While{true}{
-        compute the largest prime $p$ that $\gcd(p, P) = 1$ and $p \leq 2^W$\;
+        compute the largest prime $p$ that $\gcd(p, P) = 1$ and $p < 2^W$\;
 
-        \For{$i=1\ldots\alpha(G)$}{
-            t = ${\rm tensor\_network}(\chi_i\pmod p)$ \tcp*[l]{defined on $\text{GF}(p)$}
-
-            $Y_i \pmod p  = {\rm contract}(t)$\;
+        \For{$i=0\ldots\alpha(G)$}{
+            $y_i \pmod p$ = ${\rm contract\_tensor\_network}(\chi_i\pmod p)$ \tcp*[l]{on $\text{GF}(p)$}
         }
 
-        $A_p = (a_0, a_1, \ldots, a_{\alpha(G)}) \pmod p = {\rm gaussian\_elimination}(X, Y \pmod p) $\;
+        $A_p = (a_0, a_1, \ldots, a_{\alpha(G)}) \pmod p = {\rm gaussian\_elimination}(X, (y_0, y_1, \ldots, y_{\alpha{G}}) \pmod p) $\;
 
         $A_{P\times p} = {\rm chinese\_remainder}(A_P, A_p)$\;
 
@@ -647,11 +612,13 @@ In \App{app:fft}, we provide another method to solve the linear equation using d
             \Return $A_P$ \tcp*[l]{converged}
         }
         $P = P \times p$\;
-    }\caption{Compute the independence polynomial exactly without integer overflow}\label{alg:finitefield} 
+    }\caption{Computing the independence polynomial exactly without integer overflow}\label{alg:finitefield} 
 \end{algorithm}
 
+\blue{I am here!}
+
 \subsection{Maximal independence polynomial}
-Sometimes, one may be interested in knowing maximal solutions to understand why his or her \blue{Is this a convention to use both "he" and "her"?} program is trapped in a local minimum.
+Sometimes, one may be interested in knowing maximal solutions to understand why his or her program is trapped in a local minimum.
 Then instead of counting all independent sets, the maximal independence polynomial counts the number of maximal independent sets of various sizes~\cite{Hu2017} would be more helpful.
  Concretely, it is defined as
 \begin{equation}
@@ -1057,6 +1024,10 @@ We have introduced a new approach based on tensor network contraction to compute
 We derived the backward rule for tropical tensor network to bound the search of solution space.
 Although many of these properties are global, we can encode them to different tensor element types as commutative semirings.
 The power of our tensor network approach is not only limited to the independent set problem, in \App{app:otherproblems}, we show how to map the matching problem, $k$-coloring problem, max cut problem and set packing problem to tensor networks.
+The independence polynomial is closely related to the matching polynomial, the clique polynomial~\cite{Hoede1994}, and the vertex cover polynomial~\cite{Akbari2013}.
+In fact, the independence polynomial can be viewed as a generalization of the matching polynomial, since the matching polynomial of a graph $G$ is the same as the independence polynomial of the line graph of $G$~\cite{Levit2005}.
+Thus, our algorithm to compute the independence polynomial can also be used to compute the above graph polynomials. Some properties of the independence polynomial, such as the uni-modality, log-concavity, and roots of the polynomial, are well studied in the literature for special classes of graphs~\cite{Levit2005}.
+We hope our algorithms to calculate the independence polynomial can also help further research in these directions.
 We show some of the Julia language implementations in Appendix~\ref{sec:technical} and you will find it surprisingly short.
 A complete implementation can be found in our Github repository~\cite{GraphTensorNetworks}.
 %What we need to do is just defining two operations $\oplus$ and $\odot$ and two special elements $\mymathbb{0}$ and $\mymathbb{1}$.
