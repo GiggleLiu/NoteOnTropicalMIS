@@ -254,7 +254,7 @@ People developed more efficient exact algorithms for finding MISs, including the
 The branching algorithms can reduce the base of the exponential time scaling to, e.g., $1.1996^{|V|} {|V|}^{O(1)}$~\cite{Xiao2017}, 
 while dynamic programming approaches~\cite{Courcelle1990, Fomin2013} works better for graphs with a small treewidth $\text{tw}(G)$;
 these methods can produce algorithms of complexity $O(2^{\text{tw}(G)} \text{tw}(G) |V|)$.
-Although finding MIS is hard, people keep chanllenging themselves to find better algorithms for solving the MIS problem;
+People are eager to find better algorithms for solving the MIS problem;
 not only for it has a wide range of applications in scheduling, logistics, social network analysis, bioinformatics, wireless networks and telecommunication,
 map labelling, computer vision, etc.~\cite{Butenko2003, Wu2015}, but also for it is a well know NP-complete problem that can be mapped from
  to many other important combinatorial optimization problems in polynomial time such as circuit satisfiability~\cite{}, the maximum clique problem and the maximum vertex cover~\cite{Moore2011} problems.
@@ -296,7 +296,7 @@ In the main text, we do not have this restriction. An index can appear arbitrary
 The graphical representation of our generlized tensor network is hypergraph, in which an edge (label) can be shared by an arbitrary number of vertices (tensors).
 These two notations are equivalent in representation power because one can easily translate a generalized tensor network to the standard notation by adding $\delta$ tensors - a high dimensional equivalence of identity matrix.
 However, introducing $\delta$ tensors can potentially increase the contraction complexity a lot. We illustrate this point in \App{app:tensorbad}.
-\blue{introduce contraction orders}
+\blue{Is it better to introduce the contraction orders here or in example~\ref{eg:tensorcontraction}?}
 
 \begin{example}
 $C_{ijk} = A_{jkm} B_{mil} V_{jm}$ is a tensor network that can be evaluated as $C_{ijk} = \sum_{ml}A_{jkm} B_{mil} V_{jm}$.
@@ -394,15 +394,15 @@ Table~\ref{tbl:generictypes} summarizes the problems that can be solved by vario
         \begin{tabularx}{\textwidth}{sb}\toprule
             \hline
             \textbf{element type}     & \textbf{purpose} \\
-            {$\mathbbm{R}$}     & {real number for counting all independent sets} \\
+            {$\mathbbm{R}$}     & {real number for counting independent sets} \\
             {$\mathbbm{C}$}     & {complex number for fitting the independence polynomial with fast Fourier transform} \\
-            {$\text{GF}(p)$} (\Eq{eq:finitefield}) & {number on finite field algebra for fitting the independence polynomial exactly using number theory} \\
+            {$\text{GF}(p)$} (\Eq{eq:finitefield}) & {finite field algebra for fitting the independence polynomial exactly using number theory} \\
             {T} (\Eq{eq:tropical})    & {tropical number for finding the independence number} \\
             {P1} (\Eq{eq:countingtropical})     & {polynomial truncated to largest order, i.e. the tropical number with counting field for finding the independence number and the number of MISs} \\
-            {P2} (\Eq{eq:max2poly})     & {counting MISs and independent sets of size $\alpha(G)-1$} \\
-            {PN} (\Eq{eq:polynomial})     & {computing the independence polynomial exactly} \\
-            {P1+S1}     & {replacing the counting field in P1 to configuration sampler defined in $\Eq{eq:singleconfig}$ for finding the independence number and one MIS} \\
-            {P1+SN} (\Eq{eq:countingtropicalset})    & {replacing the counting field in P1 to configuration sampler defined in $\Eq{eq:set}$ for finding the independence number and enumeration of all MISs} \\
+            {P2} (\Eq{eq:max2poly})     & {polynomial truncated to largest two orders for counting MISs and independent sets of size $\alpha(G)-1$} \\
+            {PN} (\Eq{eq:polynomial})     & {polynomial number for computing the independence polynomial directly} \\
+            {P1+S1}     & {P1 with configuration sampler (\Eq{eq:singleconfig}) as its counting field for finding the independence number and one MIS} \\
+            {P1+SN} (\Eq{eq:countingtropicalset})    & {P1 with configuration enumerator (\Eq{eq:set}) as its counting field for finding the independence number and enumeration of all MISs} \\
             \bottomrule
         \end{tabularx}
     \caption{Tensor element types and their purposes in calculating various independent set properties.}\label{tbl:generictypes}
