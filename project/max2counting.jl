@@ -12,14 +12,14 @@ function mis_counting(n, seed; writefile, sc_target, usecuda, maximal)
     if maximal
         gp = MaximalIndependence(g; optimizer=TreeSA(sc_target=sc_target, niters=5))
     else
-        gp = Independence(g; optimizer=TreeSA(sc_target=sc_target, sc_weight=1.0, ntrials=10, βs=0.01:0.05:15.0, niters=50, rw_weight=0.2), simplifier=MergeGreedy())
+        gp = Independence(g; optimizer=TreeSA(sc_target=sc_target, sc_weight=1.0, ntrials=1, βs=0.01:0.05:15.0, niters=10, rw_weight=0.2), simplifier=MergeGreedy())
     end
     println("Graph $seed, usecuda = $usecuda")
-    @profile res = graph_polynomial(gp, Val(:finitefield), usecuda=usecuda)[]
+    res = GraphTensorNetworks.contractx(gp, Max2Poly(0f0, 1f0, 1f0); usecuda=usecuda)[]
     if maximal
-        folderout = joinpath(folder, "maximal_polynomial_L$(n)")
+        folderout = joinpath(folder, "maximal_max2_L$(n)")
     else
-        folderout = joinpath(folder, "independence_polynomial_L$(n)")
+        folderout = joinpath(folder, "max2_L$(n)")
     end
     if !isdir(folderout)
         mkdir(folderout)
@@ -35,7 +35,7 @@ if DEVICE >= 0
     CUDA.device!(DEVICE)
 end
 
-for L = [32, 34, 36, 38, 40]
+for L = [20]
     println("computing L = $L")
     for i=0:49
         @time mis_counting(L, i; writefile=true, sc_target=26, usecuda=DEVICE>=0, maximal=false)

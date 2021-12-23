@@ -11,22 +11,21 @@ function mis_configurations(n, seed; order, writefile, sc_target=12)
     fname = joinpath(dirname(folder), "mis_degeneracy_L$n.dat")
     mask = Matrix{Bool}(reshape(readdlm(fname)[seed+1,4:end], n, n))
     g = diagonal_coupled_graph(mask)
-    code = Independence(g; optimizer=GreedyMethod(), simplifier=MergeGreedy())
-    #code = Independence(g; optimizer=TreeSA(sc_target=sc_target), simplifier=MergeGreedy())
-    s, c = max_size_count(code)
-    println("Graph $seed, n = $n, MIS size = $s, degeneracy = $c")
-    if c > 1000000
-        @warn "degeneracy too high, got: $c"
+    gp = Independence(g; optimizer=GreedyMethod(), simplifier=MergeGreedy())
+    res_c = solve(gp, "counting max$order")[]
+    println("Graph $seed, n = $n, max2 count = $res_c")
+    if sum(res_c.coeffs) > 10000000
+        @warn "degeneracy too high!"
+        return res_c, nothing
     end
-    #s2, config1, config0 = (res = best2_solutions(code; all=true)[]; (res.maxorder, res.coeffs...))
-    s2, configs = (res = solve(code, "configs max$order")[]; (res.maxorder, res.coeffs))
-    @assert s2 == s2
-    @assert length(configs[order]) == c
+    gp = Independence(g; optimizer=TreeSA(sc_target=sc_target), simplifier=MergeGreedy())
+    s2, configs = (res = solve(gp, "configs max$order (bounded)")[]; (res.maxorder, res.coeffs))
+    @assert all(res_c.coeffs .== length.(configs))
     for i=1:order
         ofname = joinpath(folder, "$seed-$(i-1).dat")
         writefile && write(ofname, toMatrix(configs[order-i+1]))
     end
-    return s, configs
+    return res_c, configs
 end
 
 function toMatrix(x::ConfigEnumerator{N,K,C}) where {N,K,C}
@@ -62,7 +61,10 @@ for (n, seeds) in [
     #(6, [667, 557, 78, 312, 807, 776, 485, 980, 71, 50, 521, 773, 549, 523, 374, 515, 669, 344, 21, 107, 201,
     #    851, 736, 508, 286, 526, 385, 116, 20, 999, 357, 149, 872, 233, 528, 603, 912, 820])
     #(10, [828, 61, 156, 773, 105, 222, 417, 269, 309, 350, 786, 590, 109, 83, 243, 699, 425, 174, 925])
-    (11, [571, 808, 438, 748, 802, 454, 13, 401, 596, 126, 412, 977, 645, 263, 208, 622, 971, 725, 328, 895])
+    #(11, [571, 808, 438, 748, 802, 454, 13, 401, 596, 126, 412, 977, 645, 263, 208, 622, 971, 725, 328, 895])
+    #(10, 81:99)
+    #(11, 0:99)
+    (12, 51:99)
     ]
     for seed in seeds
         @time mis_configurations(n, seed; order=2, writefile=true, sc_target=14)
