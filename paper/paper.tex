@@ -617,7 +617,7 @@ In \App{app:fft}, we provide another method to solve the linear equation using d
     }\caption{Computing the independence polynomial exactly without integer overflow}\label{alg:finitefield} 
 \end{algorithm}
 
-\section{Maximum independent sets and its counting problem}
+\section{Maximum independent sets and its counting}
 \subsection{Tropical algebra for finding the independence number and counting MISs}
 In the previous section, we focused on computing the independence polynomial for a graph $G$ of given independence number $\alpha(G)$, but we did not show how to compute this number.
 The method we use to compute this quantity is based on the following observations. Let $x=\infty$, the independence polynomial becomes
@@ -930,25 +930,27 @@ Some figure has single peak structure while some other has multiple peaks. Multi
 
 
 \section{Discussion and conclusion}
-We have introduced a new approach based on tensor network contraction to compute various properties of independent sets,
-including the independence number, number of independent set of a given size, and enumeration of independent sets of a give size.
-We derived the backward rule for tropical tensor network to bound the search of solution space.
-Although many of these properties are global, we can encode them to different tensor element types as commutative semirings.
-The power of our tensor network approach is not only limited to the independent set problem, in \App{app:otherproblems}, we show how to map the matching problem, $k$-coloring problem, max cut problem and set packing problem to tensor networks.
-The independence polynomial is closely related to the matching polynomial, the clique polynomial~\cite{Hoede1994}, and the vertex cover polynomial~\cite{Akbari2013}.
-In fact, the independence polynomial can be viewed as a generalization of the matching polynomial, since the matching polynomial of a graph $G$ is the same as the independence polynomial of the line graph of $G$~\cite{Levit2005}.
-Thus, our algorithm to compute the independence polynomial can also be used to compute the above graph polynomials. Some properties of the independence polynomial, such as the uni-modality, log-concavity, and roots of the polynomial, are well studied in the literature for special classes of graphs~\cite{Levit2005}.
-We hope our algorithms to calculate the independence polynomial can also help further research in these directions.
+In this paper, we introduce an abstract algebra formalism to compute properties of independent sets.
+The properties include the independence number, number of independent set of a given size, and enumeration of independent sets of a give size.
+For each property, we design a algebra being a commutative semiring, and map the property computation to the contraction of a tensor network with such element type.
+%We derived the backward rule for tropical tensor network to bound the search of solution space.
+%Although many of these properties are global, we can encode them to different tensor element types as commutative semirings.
+We call this method generic programming tensor network, and its power is not limited to the independent set problem.
+In \App{app:otherproblems}, we show how to map the maximal independent set problem, matching problem, $k$-coloring problem, max cut problem and set packing problem to tensor networks.
+Moreover, since the independence polynomial is closely related to the matching polynomial~\cite{Levit2005}, the clique polynomial~\cite{Hoede1994}, and the vertex cover polynomial~\cite{Akbari2013},
+our algorithm to compute the independence polynomial can also be used to compute these graph polynomials.
+%Some properties of the independence polynomial, such as the uni-modality, log-concavity, and roots of the polynomial, are well studied in the literature for special classes of graphs~\cite{Levit2005}.
+%We hope our algorithms to calculate the independence polynomial can also help further research in these directions.
 We show some of the Julia language implementations in Appendix~\ref{sec:technical} and you will find it surprisingly short.
 A complete implementation can be found in our Github repository~\cite{GraphTensorNetworks}.
 %What we need to do is just defining two operations $\oplus$ and $\odot$ and two special elements $\mymathbb{0}$ and $\mymathbb{1}$.
 %The style that we program is called generic programming,
 
 \section*{Acknowledgments}
-We would like to thank Pan Zhang for sharing his code for optimizing contraction orders of a tensor network.
+We would like to thank Pan Zhang for sharing his python code for optimizing contraction orders of a tensor network.
 We would like to acknowledge Sepehr Ebadi, Maddie Cain and Leo Zhou for popping up inspiring questions about independent sets,
-their questions are one of the driving forces of this project.
-Thank Chris Elord for helping us writing the fastest matrix multiplication libary for tropical numbers, TropicalGEMM.jl, he is a remarkable guy!
+their questions are driving forces of this project.
+Thank Chris Elord for helping us writing the fastest matrix multiplication libary for tropical numbers, TropicalGEMM.jl, he is a man of speed!
 \blue{funding information}
 
 \bibliographystyle{siamplain}
