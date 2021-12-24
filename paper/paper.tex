@@ -851,27 +851,25 @@ where $\circ$ is the element-wise product, boolean false is treated as the tropi
 This rule defined on matrix multiplication can be easily generalized to tensor contraction by replacing the matrix multiplication between $C^{\circ-1} \circ \overline C$ and $B^{\mathsf{T}}$ by a tensor contraction.
 With the above method, one can significantly reduce the space needed to store the intermediate configurations by setting the tensor elements masked false to zero during contraction.
 
-\blue{I am here!}
-
 \section{Benchmarks and case studies}
 \subsection{Performance benchmarks}
 We run a single thread benchmark on CPU Intel(R) Xeon(R) CPU E5-2686 v4 @ 2.30GHz,
 and its CUDA version on a GPU Tesla V100.
 The results are summarized in Figure~\ref{fig:benchmark}.
-The graphs that we use in benchmarks are random 3 regular graphs, a typical type of sparse graphs that has a small tree width $\text{tw}(G) \leq |V|/6$~\cite{Fomin2006}.
-
+The graphs that we use in benchmarks are random three regular graphs,
+ a typical type of sparse graphs that has a small tree width asymptotically smaller than $|V|/6$~\cite{Fomin2006}.
 
 \begin{figure} 
     \centering
     \includegraphics[width=\textwidth, trim={0cm 0cm 0cm 0cm}, clip]{figures/fig1.pdf}
     \caption{Benchmark results for computing different properties of independent sets of a random three regular graph with different tensor element types.
-    The time in these plots only includes tensor network contraction process, without taking the just in time compiling time into account.
+    The time in these plots only includes tensor network contraction, without taking the contraction order finding and just in time compiling time into account.
     \red{for each graph size, is there only one graph?}\blue{yes}
-    (a) treewidth versus the number of vertices for the benchmarked graphs. 
-    Legends are the data types that we used in the computation, one can find the corresponding computational task in \Tbl{tbl:generictypes}.
+    (a) tree width versus the number of vertices for the benchmarked graphs. 
+    Legends are the data types that we used in the computation, one can find the corresponding computed property in \Tbl{tbl:generictypes}.
     (b) The computing time for calculating the independence number and for counting of the number of independent sets, the number of MISs, and the number of independent sets having size $\alpha(G)$ and $\alpha(G)-1$.
     (c) The computing time for calculating the independence polynomials with different approaches.
-    (d) The computing time for enumeration problems, including the enumeration of all independent set configurations, a single MIS configuration, all MIS configurations, all independent set configurations having size $\alpha(G)$ and $\alpha(G)-1$,  with or without bounding the enumeration space.
+    (d) The computing time for configuration enumeration, including the enumeration of all independent set configurations, a single MIS configuration, all MIS configurations, all independent set configurations having size $\alpha(G)$ and $\alpha(G)-1$,  with or without bounding the enumeration space.
     \red{suggestions for the figure: 1. the legend seems to overlap the lines, especially the large subfigure. Not sure what's a better way to include the legend there. 2. I see you guys don't typically use markers. We typically use markers to distinguish the different lines, as well as using the color. Especially, for some journals, there is a physical non-color copy, so some requires the figures to be understandable without colors.}
     \blue{If we use markers, the data poitns are too dense. I prefer not adding markers, not much people read papers with kindle or on paper.}
     \blue{I used a smaller fontsize, there are still some overlaps. Does it look better (or worse) now?}
@@ -879,40 +877,22 @@ The graphs that we use in benchmarks are random 3 regular graphs, a typical type
     \label{fig:benchmark}
 \end{figure}
 
-The computations shown in \Fig{fig:benchmark} include independent set counting, finding maximum independent set size (panel b),
-computing independence polynomial (panel c) and enumerating and sampling independent sets (panel d).
-\blue{I cleaned up this paragraph, because one can check the table \Tbl{tbl:generictypes} now.}
-\red{Jinguo, should we include maximal independence polynomial and enumeration of all maximal independent sets as well? I think that will make the benchmark more complete.}
-\blue{added a new paragraph.}
-Among the benchmarks, computing \texttt{T (CPU)},
-\texttt{$\mathbbm{R}$ (CPU)}, \texttt{$\mathbbm{R}$ (GPU)}, \texttt{$\mathbbm{C}$ (CPU)}, \texttt{$\mathbbm{C}$ (GPU)} and \texttt{T+bounding (CPU)} can utilize fast BLAS functions, and hence 
-they are faster comparing to non-BLAS methods in the same category.
+Figure (a) shows the time and space complexity obtained with tensor network optimization algorithm in Ref.~\cite{Kalachev2021}, where the space complexity is the same as the tree width of the problem graph.
+One can see all the computing times in figure (b), (c) and (d) have a strong correlation with the treewidth.
+%The computations shown in \Fig{fig:benchmark} include independent set counting, finding maximum independent set size (panel b),
+%computing independence polynomial (panel c) and find one independent set and enumerating independent sets (panel d).
+Among these benchmarks, computational tasks with data types \texttt{T (CPU)},
+\texttt{$\mathbbm{R}$ (CPU)}, \texttt{$\mathbbm{R}$ (GPU)}, \texttt{$\mathbbm{C}$ (CPU)}, \texttt{$\mathbbm{C}$ (GPU)} and \texttt{T+bounding (CPU)} can utilize fast BLAS functions, hence 
+are much faster comparing to non-BLAS methods in the same category.
+GPU computes much faster than CPU in all cases when the problem scale is large enough so that the actual computing time is comparable or larger than the launching time of CUDA kernels.
 Most algebras can be computed on GPU, except those requiring dynamic sized structures, i.e. \texttt{PN} and \texttt{SN}.
-Fourier transformation based method is the fastest in computing the independence polynomial,
-while the finite field (GF$(p)$) approach is the only method that does not incur round-off errors and that can be run on a GPU.
-In the benchmark of enumerating the MISs (panel d), one can see the technique to bound the enumeration space improves the performance for more than one order.
-Bounding can also reduce the memory usage significantly, without which the largest enumerable size is about $150$ vertices on a 32G memory device.
-All these computing times have a strong correlation with the treewidth, 
-and the computing times of configuration enumeration also depend on the size of the target configuration space.
+In figure (c), one can see the Fourier transformation based method is the fastest in computing the independence polynomial,
+however, it maybe suffer from the round off errors. The finite field (GF$(p)$) approach is the only method that does not incur round-off errors and can run on a GPU.
+In figure (d), one can see the technique to bound the enumeration space improves the performance for more than one order in enumerating the MISs.
+Bounding can also reduce the memory usage significantly, without which the largest computable graph size is only $\sim150$ on a 32G memory device.
+%and the computing times of configuration enumeration also depend on the size of the target configuration space.
 
-\begin{figure} 
-    \centering
-    \includegraphics[width=\textwidth, trim={0cm 0cm 0cm 0cm}, clip]{figures/fig2.pdf}
-    \caption{Benchmark results for computing different properties of maximal independent sets on a random three regular graph with different tensor element types.
-    (a) treewidth versus the number of vertices for the benchmarked graphs. 
-    (b) The computing time for calculating the number of independent sets and enumerate all MISs.
-    }
-    \label{fig:benchmark-maximal}
-\end{figure}
-
-The standard algorithm to enumerate all maximal independent sets is the Bron-Kerbosch algorithm~\cite{Bron1973}, which, of course, includes the enumeration of all MISs and can be used to enumerate all independent sets as well.
-We also benchmarked our method with the Bron-Kerbosch method to enumerate and count maximal independent sets in \Fig{fig:benchmark-maximal}.
-Since the network for computing maximal independent set properties is different from the one for computing the independence polynomial,
-the tree width of this tensor network is significantly larger, hence only small graphs can be benchmarked.
-The time for the tensor netwrok approach and the Bron-Kerbosch approach to enumerate all maximal independent sets are comparable,
-while the tensor network does counting much more efficiently.
-The implementation of Bron-Kerbosch algorithm is from the package LightGraphs~\cite{LightGraphs},
-due to the memory limit, this algorithm stops working at size $70$ and above.
+\blue{I am here!}
 
 \subsection{Example case studies} In this section, we give a few examples where the different properties of independence sets are used.
 In all the examples, the types of graphs we used are shown in Figure~\ref{fig:lattices}, where vertices are all placed on square lattices with lattice dimensions $L \times L$.
@@ -984,14 +964,14 @@ we want to introduce some Julia packages that playing important roles in our cod
 	\item[\href{https://github.com/under-Peter/OMEinsum.jl}{OMEinsum} and \href{https://github.com/Happy-Diode/OMEinsumContractionOrders.jl}{OMEinsumContractionOrders}] are packages providing the support for Einstein's (or tensor network) notation and contraction order optimizations.
     \texttt{OMEinsumContractionOrders} implements state of art algorithms for finding the optimal contraction order for the an tensor network, including the KaHypar+Greedy~\cite{Gray2021, Pan2021} and local transformation based approaches~\cite{Kalachev2021},
 	\item[\href{https://github.com/TensorBFS/TropicalNumbers.jl}{TropicalNumbers} and \href{https://github.com/TensorBFS/TropicalGEMM.jl}{TropicalGEMM}] are packages providing tropical number and efficient tropical matrix multiplication,
-	\item[\href{https://github.com/JuliaGraphs/LightGraphs.jl}{LightGraphs}] is a package providing graph utilities, like random regular graph generator,
+	\item[\href{https://github.com/JuliaGraphs/Graphs.jl}{Graphs}] is a package providing graph utilities, like random regular graph generator,
 	\item[\href{https://github.com/JuliaMath/Polynomials.jl}{Polynomials}] is a package providing polynomial algebra and polynomial fitting,
 	\item[\href{https://github.com/scheinerman/Mods.jl}{Mods} and \href{https://github.com/JuliaMath/Primes.jl}{Primes}] are packages providing finite field algebra and prime number generations.
 \end{description}
 
 One can install these packages by opening a Julia REPL, type \colorbox{lightgray}{\texttt{]}} to enter the \texttt{pkg>} mode and type, e.g.
 \begin{lstlisting}
-pkg> add OMEinsum LightGraphs Mods Primes Polynomials TropicalNumbers OMEinsumContractionOrders
+pkg> add OMEinsum Graphs Mods Primes Polynomials TropicalNumbers OMEinsumContractionOrders
 \end{lstlisting}
 
 It may surprise you that the Julia implementation of algorithms introduced in the paper is so short that except the bounding algorithm,
@@ -1002,6 +982,10 @@ all are contained in this appendix. After installing required packages, one can 
 Please checkout our GitHub repository for the full featured version:
 
 \href{https://github.com/Happy-Diode/GraphTensorNetworks.jl}{https://github.com/Happy-Diode/GraphTensorNetworks.jl}
+
+Here is a short introduction to the functionalities in this libary.
+
+\lstinputlisting[breaklines]{../democode/tutorial.jl}
 
 \section{Why not using the standard tensor network notations}\label{app:tensorbad}
 As we have mentioned in the main text,
@@ -1231,6 +1215,25 @@ With the tensors defined as $T(x_v)$, we can perform a similar computation of co
 One can see that the average degree of a tensor is increased.
 The computational complexity of this new tensor network contraction is often greater than the one for computing the independence polynomial.
 However, in most sparse graphs, this tensor network contraction approach is still significantly faster than enumerating all the maximal cliques on its complement graph using the Bron-Kerbosch algorithm~\cite{Bron1973}, which is the standard algorithm that we are aware of to compute the maximal independence polynomial.
+
+\begin{figure} 
+    \centering
+    \includegraphics[width=\textwidth, trim={0cm 0cm 0cm 0cm}, clip]{figures/fig2.pdf}
+    \caption{Benchmark results for computing different properties of maximal independent sets on a random three regular graph with different tensor element types.
+    (a) treewidth versus the number of vertices for the benchmarked graphs. 
+    (b) The computing time for calculating the number of independent sets and enumerate all MISs.
+    }
+    \label{fig:benchmark-maximal}
+\end{figure}
+
+We show the benchmark of computing the maximal independent set properties in \Fig{fig:benchmark-maximal},
+including a comparison to the Bron-Kerbosch algorithm from the package Graphs~\cite{Graphs}.
+Since the network for computing maximal independent set properties is different from the one for computing the independence polynomial,
+the tree width of this tensor network is significantly larger, hence only small graphs can be benchmarked.
+The time for the tensor netwrok approach and the Bron-Kerbosch approach to enumerate all maximal independent sets are comparable,
+while the tensor network does counting much more efficiently.
+Due to the memory limit, this Bron-Kerbosch algorithm stops working at size $70$ and above.
+
 
 \subsection{Matching problem}
 A matching polynomial of a graph $G$ is defined as
