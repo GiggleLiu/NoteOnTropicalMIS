@@ -220,12 +220,14 @@ Listing \thelstlisting: #1\hfill%\hfill%
 \maketitle
 
 \begin{abstract}
-We introduce a method of using generic programming tensor network to compute various properties of independent sets.
-This method is versertile such that by engineering tensor element algebra, the type of graph problems that can be computed using this method includes: independence number, the number of independent sets, independence polynomial, maximal independence polynomial, and both counting and enumeration of all maximum independence sets, the large-size independent sets, and all maximal independent sets.
+We introduce a method of using generic programming tensor network to compute various properties of independent sets,
+which includes: maximum size of such sets, the number of sets of a given size, enumeration of sets of a given size.
+It can be generalized to compute properties of other problems like cut size, coloring, maximal cliques et al.
 %Although the computational complexity inevitably scales exponentially with treewidth of the graph,
 %our method using tensor network contraction with generic programming is highly versatile and is able to compute properties that are otherwise not known to be possible for up to several hundred vertices.
 At the same time, our algorithms are very simple to implement and one can directly utilize recent advances in tensor network contraction techniques like near optimal contraction order finding and slicing.
-One can easily find a good contraction order for the tensor network representation of a graph $G$ with thousands of vertices. This contraction order gives tensor network contraction complexity $2^{{\rm tw}(G)}$, with ${\rm tw} (G)$ the tree width of the problem graph.
+%One can easily find a good contraction order for the tensor network representation of a graph $G$ with thousands of vertices. 
+The algorithmic complexity of this approach is $2^{{\rm tw}(G)}$, where ${\rm tw} (G)$ the tree width of the problem graph.
 To demonstrate the versatility of this tool, we apply it to a few examples including the calculations of the hard-square entropy constant, Euler characteristics of the independence complex, partition functions, and finite-temperature phase transitions on square-lattice graphs\blue{remove some examples}.
 \end{abstract}
 
@@ -263,8 +265,8 @@ map labelling, computer vision, etc.~\cite{Butenko2003, Wu2015}, but also for it
 %and the complement vertex set of an MIS corresponds to a minimum vertex cover of the graph $G$.
 %In this paper, the term ``maximal'' has a different meaning from ``maximum''  which we discussed above; a maximal independent set is an independent set that is not a subset of any other independent set, but its size may not be the maximum.
 In this paper, we do not limit our discussion to finding one of the maximum indepedent sets and its size.
-There are many other interesting problems pertaining to independent sets, such as the number of independent sets,
-independence polynomial, maximal independence polynomial, and enumeration of MIS or maximal independent sets.
+There are many other interesting problems pertaining to independent sets, such as the number of independent sets at a given size
+and enumerating independent sets at a give size or what we call computing \textit{properties}.
 Some of these problems are of great interest in physics applications such as the hard-core lattice gas model~\cite{Dyre2016, Fernandes2007}
 in statistical mechanics and the Rydberg hamiltonian with neutral atoms~\cite{Pichler2018} \red{cite experiment when it's ready};
 they can, for example, be used to understand phase transitions, to analyse the overlap gap properties~\cite{Gamarnik2013, Gamarnik2019} and to identify harder graphs in an ensemble of graphs \red{cite experiment}.
@@ -384,9 +386,9 @@ a \odot (b\oplus c) = a\odot b \oplus a\odot c  &  \hspace{5em}\text{$\triangler
 &\\
 a \odot \mymathbb{0} = \mymathbb{0} \odot a = \mymathbb{0}
 \end{align*}
-The requirement of being commutative is for the tensor contraction result to be independent of the contraction order. In the following sections, we show how to compute the independence polynomial,
-the maximal independence polynomial, independence number, the number of independent sets, and enumeration of the MIS and maximal independent sets of a general graph $G$ by designing tensor element types as commutative semirings while keeping the tensor network generic~\cite{Stepanov2014}.
-Table~\ref{tbl:generictypes} summarizes the problems that can be solved by various tensor element types. 
+The requirement of being commutative is for the tensor contraction result to be independent of the contraction order.
+In the following sections, we show how to compute the properties of independent sets by designing tensor element types as commutative semirings while keeping the tensor network generic~\cite{Stepanov2014}.
+Table~\ref{tbl:generictypes} summarizes the properties that can be solved by various tensor element types. 
 
 \begin{table}[t!]\centering
 \begin{minipage}{\columnwidth}
@@ -412,7 +414,7 @@ Table~\ref{tbl:generictypes} summarizes the problems that can be solved by vario
 maximal IS is different network structure. We can use the above algebra in any network structure.}
 \end{table}
 
-\section{Independence polynomial and maximal independence polynomial}
+\section{Independence polynomial}
 \subsection{Independence polynomial}\label{sec:indpoly}
 The independence polynomial is an important graph polynomial that contains the counting information of independent sets. It is defined as
 \begin{equation}
@@ -615,82 +617,6 @@ In \App{app:fft}, we provide another method to solve the linear equation using d
     }\caption{Computing the independence polynomial exactly without integer overflow}\label{alg:finitefield} 
 \end{algorithm}
 
-\blue{I am here!}
-
-\subsection{Maximal independence polynomial}
-Sometimes, one may be interested in knowing maximal solutions to understand why his or her program is trapped in a local minimum.
-Then instead of counting all independent sets, the maximal independence polynomial counts the number of maximal independent sets of various sizes~\cite{Hu2017} would be more helpful.
- Concretely, it is defined as
-\begin{equation}
-I_{\rm max}(G, x) = \sum_{k=0}^{\alpha(G)} b_k x^k,
-\end{equation}
-where $b_k$ is the number of maximal independent sets of size $k$ in $G$.
-Obviously, $b_{k} \leq a_{k}$ and $b_{\alpha(G)} = a_{\alpha(G)}$. $I_{\rm max}(G, 1)$ counts the total number of maximal independent sets~\cite{Gaspers2012, Manne2013}, where the fastest algorithm currently has a runtime of $O(1.3642^{|V|})$~\cite{Gaspers2012}.
-If we want to find an MIS, $b_{k}$ counts the number of local optimum at size $k < \alpha(G)$, and can, in some cases, provide hints on the difficulty of finding the MIS using local algorithms~\red{cite experiment}.
-The uni-modality, log-concavity, and real-rootness properties of the maximal independence polynomial for special classes of graphs have also been studied~\cite{Hu2017}. 
-
-Let us denote the neighborhood of a vertex $v$ as $N(v)$ and denote $N[v] = N(v)\cup \{v\}$.
-A maximal independent set $I_m$ is an independent set where there exists no vertex $v$ such that $I_m \cap N[v]  = \emptyset$.
-We can modify the tensor network for computing the independence polynomial to include this restriction. Instead of defining the restriction on vertices and edges, it is more natural to define it on $N[v]$:
-\begin{equation}\label{eq:maximal}
-    T(x_v)_{s_1,s_2,\ldots,s_{|N(v)|},s_v} = \begin{cases}
-        s_vx_v & s_1=s_2=\ldots=s_{|N(v)|}=0,\\
-        1-s_v& \text{otherwise}.\\
-    \end{cases}
-\end{equation}
-Intuitively, it means if all the neighborhood vertices are not in $I_{m}$, i.e., $ s_1=s_2=\ldots=s_{|N(v)|}=0$, then $v$ should be in $I_{m}$, counted as $x_{v}$,
-and if any of the neighborhood vertices is in $I_{m}$, i.e., $\exists i \in \{1,2,\ldots, |N(v)|\}$ s.t. $s_{i} = 1$, then $v$ cannot be in $I_{m}$.
-As an example, for a vertex of degree 2, the resulting rank-3 tensor is
-\begin{equation}
-    T(x_v)=\left(\begin{matrix}
-    \left(\begin{matrix}
-        0 &1 \\
-        1 &1
-    \end{matrix}\right)\\
-    \left(\begin{matrix}
-        x_v &0 \\
-        0 &0
-    \end{matrix}\right)
-    \end{matrix}\right).
-\end{equation}
- 
-With the tensors defined as $T(x_v)$, we can perform a similar computation of contracting the tensor network with the same tensor element types as described in the previous section~\ref{sec:indpoly}, the result of which then produces the maximal independence polynomial. Let us consider the example in~\Sec{eg:tensorcontraction}: its corresponding tensor network structure for computing the maximal independent polynomial becomes
-
-    \centerline{\begin{tikzpicture}[
-    dot/.style = {circle, fill, minimum size=#1,
-                inner sep=0pt, outer sep=0pt},
-    dot/.default = 6pt  % size of the circle diameter 
-                    ]  
-        \def\dx{0};
-        \def\r{0.5cm}
-        \def\G{1.0}
-        \foreach \x/\y/\v in {0/0/a, 1/0/b, 2/0/c, 3/0/d, 4/0/e}
-            \node[color=black] at (\x*\G+\dx,\y) (\v) {$s_\v$};
-        \foreach \x/\v/\t in {0/A/$T_a$, 1/B/$T_b$, 2/C/$T_c$, 3/D/$T_d$, 4/E/$T_e$}
-            \node[color=white,fill=black,dot=\r] at (\x*\G+\dx,1.5) (\v) {\t};
-        \draw [cyan,thick] (a) -- (A);
-        \draw [cyan,thick] (a) -- (B);
-        \draw [cyan,thick] (a) -- (C);
-        \draw [blue,thick] (b) -- (B);
-        \draw [blue,thick] (b) -- (A);
-        \draw [blue,thick] (b) -- (C);
-        \draw [blue,thick] (b) -- (D);
-        \draw [red,thick] (c) -- (C);
-        \draw [red,thick] (c) -- (A);
-        \draw [red,thick] (c) -- (B);
-        \draw [red,thick] (c) -- (D);
-        \draw [green,thick] (d) -- (D);
-        \draw [green,thick] (d) -- (B);
-        \draw [green,thick] (d) -- (C);
-        \draw [green,thick] (d) -- (E);
-        \draw [orange,thick] (e) -- (E);
-        \draw [orange,thick] (e) -- (D);
-    \end{tikzpicture}}
- 
-One can see that the average degree of a tensor is increased.
-The computational complexity of this new tensor network contraction is often greater than the one for computing the independence polynomial.
-However, in most sparse graphs, this tensor network contraction approach is still significantly faster than enumerating all the maximal cliques on its complement graph using the Bron-Kerbosch algorithm~\cite{Bron1973}, which is the standard algorithm that we are aware of to compute the maximal independence polynomial.
-
 \section{Maximum independent sets and its counting problem}
 \subsection{Tropical algebra for finding the independence number and counting MISs}
 In the previous section, we focused on computing the independence polynomial for a graph $G$ of given independence number $\alpha(G)$, but we did not show how to compute this number.
@@ -766,15 +692,14 @@ In the program, we thus need a data structure that contains three fields, the la
 This approach can clearly be extended to calculate more independence polynomial coefficients and is more efficient than calculating the entire independence polynomial.
 As will be shown below, this algebra can also be extended to enumerate those large-size independent sets.
 
-\section{Enumeration of configurations and enumeration bounds}
-\subsection{Enumeration of independent sets}
+\section{Enumeration of independent sets}
+\subsection{Set algebra for configuration enumeration}
 The enumeration problems of independent sets are also interesting and has been studied extensively in the literature~\cite{Bron1973, Eppstein2010, Johnson1988}, including,
 for example, the enumeration of all independent sets, the enumeration of all maximal independent sets, or the enumeration of all MISs.
-The standard algorithm to enumerate all maximal independent sets is the Bron-Kerbosch algorithm~\cite{Bron1973}, which, of course, includes the enumeration of all MISs and can be used to enumerate all independent sets as well.
-Here, we adapt the tensor element types for different enumeration problems.
-For example, our tensor-network based algorithm to enumerate all MISs is expectedly much faster and more space-efficient than the Bron-Kerbosch algorithm, which lists all maximal independent sets. 
-
-To enumerate all independent sets, we input a set of configurations into the tensor elements. More concretely, we design a new element type having the following algebra
+Here, the term ``maximal'' has a different meaning from ``maximum''  which we discussed above;
+a maximal independent set is an independent set that is not a subset of any other independent set, but its size may not be the maximum.
+We can also compute the maximal independence polynomial and enumerate maximal independent sets with a different tensor network mapping, and this is described in \Sec{sec:maximal}.
+To enumerate all independent sets, we designed an algebra defined on sets of bitstrings.
 \begin{equation}
 \eqname{SN}
 \begin{split}
@@ -892,12 +817,12 @@ where the \texttt{select} function picks one of $\sigma$ and $\tau$ by some crit
 
 \subsection{Bounding the MIS enumeration space}
 When we use the algebra in \Eq{eq:countingtropicalset} to enumerate all MIS configurations, we find that the program stores significantly more intermediate configurations than necessary and thus incur significant overheads in space.
-To speed up the computation and reduce space overhead, we use $\alpha(G)$ to bound the searching space.
+To speed up the computation and reduce space overhead, we bound the searching space using the MIS size $\alpha(G)$.
 First, we compute the value of $\alpha(G)$ with tropical algebra and cache all intermediate tensors.
 Then, we compute a boolean mask for each cached tensor, where we use a boolean true to represent a tensor element having a contribution to the MIS (i.e.\ with a non-zero gradient) and boolean false otherwise.
 Finally, we perform masked matrix multiplication using the new element type with the above algebra, \Eq{eq:countingtropicalset}, for obtaining all configurations.
-Note that these masks in fact correspond to tensor elements with non-zero gradients with respect to the MIS size; we compute these masks by back propagation of the gradients.
-To derive the back-propagation rule for tensor contraction,
+Note that these masks in fact correspond to tensor elements with non-zero gradients with respect to the MIS size; we compute these masks by back propagating the gradients.
+To derive the back-propagation rule for tropical tensor contraction,
 we first reduce the problem to finding the back-propagation rule of a tropical matrix multiplication $C = A B$.
 Since $ C_{ik} = \bigoplus_{j} \ A_{ij} \odot B_{jk} = \max_{j} \ A_{ij} \odot B_{jk}$ with tropical algebra, we have the following inequality
 \begin{equation}
@@ -905,6 +830,8 @@ Since $ C_{ik} = \bigoplus_{j} \ A_{ij} \odot B_{jk} = \max_{j} \ A_{ij} \odot B
 \end{equation}
 Here $\leq$ on tropical numbers are the same as the real-number algebra.
 The equality holds for some $j'$, which means $A_{ij'}$ and $B_{j'k}$ have contributions to $C_{ik}$.
+Intuitively, one can use this relation to indentify elements with nonzero gradients in $A$ and $B$ directly,
+however, doing this might make us lost the advantage of using BLAS libraries~\cite{TropicalGEMM}.
 Since $A_{ij} \odot B_{jk} = A_{ij} + B_{jk}$, one can move $B_{jk}$ to the right hand side of the inequality: 
 \begin{equation}
     A_{ij} \leq C_{ik} \odot B_{jk}^{\circ -1}
@@ -922,7 +849,9 @@ Let the gradient mask for $C$ be $\overline C$; the back-propagation rule for gr
 \end{equation}
 where $\circ$ is the element-wise product, boolean false is treated as the tropical number $\mymathbb{0}$, and boolean true is treated as the tropical number $\mymathbb{1}$.
 This rule defined on matrix multiplication can be easily generalized to tensor contraction by replacing the matrix multiplication between $C^{\circ-1} \circ \overline C$ and $B^{\mathsf{T}}$ by a tensor contraction.
-With the above method, one can significantly reduce the space needed to store the intermediate configurations.
+With the above method, one can significantly reduce the space needed to store the intermediate configurations by setting the tensor elements masked false to zero during contraction.
+
+\blue{I am here!}
 
 \section{Benchmarks and case studies}
 \subsection{Performance benchmarks}
@@ -976,6 +905,7 @@ and the computing times of configuration enumeration also depend on the size of 
     \label{fig:benchmark-maximal}
 \end{figure}
 
+The standard algorithm to enumerate all maximal independent sets is the Bron-Kerbosch algorithm~\cite{Bron1973}, which, of course, includes the enumeration of all MISs and can be used to enumerate all independent sets as well.
 We also benchmarked our method with the Bron-Kerbosch method to enumerate and count maximal independent sets in \Fig{fig:benchmark-maximal}.
 Since the network for computing maximal independent set properties is different from the one for computing the independence polynomial,
 the tree width of this tensor network is significantly larger, hence only small graphs can be benchmarked.
@@ -1020,7 +950,8 @@ Some figure has single peak structure while some other has multiple peaks. Multi
 
 
 \section{Discussion and conclusion}
-We have introduced a new approach based on tensor network contraction to compute the independence number, independence polynomial, maximal independence polynomial, and enumeration of MIS configurations.
+We have introduced a new approach based on tensor network contraction to compute various properties of independent sets,
+including the independence number, number of independent set of a given size, and enumeration of independent sets of a give size.
 We derived the backward rule for tropical tensor network to bound the search of solution space.
 Although many of these properties are global, we can encode them to different tensor element types as commutative semirings.
 The power of our tensor network approach is not only limited to the independent set problem, in \App{app:otherproblems}, we show how to map the matching problem, $k$-coloring problem, max cut problem and set packing problem to tensor networks.
@@ -1227,6 +1158,80 @@ As a gain, a tensor network has a nicer analytic property, which makes contracti
 %At the cost of losing expressiveness, we can encode the properties of the graph into the tensor elements.
 %\fi
 In the following, we introduce some other problems that can be expressed by a tensor network.
+\subsection{Maximal independent sets and maximal cliques}\label{sec:maximal}
+Sometimes, one may be interested in knowing maximal solutions to understand why his or her program is trapped in a local minimum.
+Then instead of counting all independent sets, the maximal independence polynomial counts the number of maximal independent sets of various sizes~\cite{Hu2017} would be more helpful.
+ Concretely, it is defined as
+\begin{equation}
+I_{\rm max}(G, x) = \sum_{k=0}^{\alpha(G)} b_k x^k,
+\end{equation}
+where $b_k$ is the number of maximal independent sets of size $k$ in $G$.
+Obviously, $b_{k} \leq a_{k}$ and $b_{\alpha(G)} = a_{\alpha(G)}$. $I_{\rm max}(G, 1)$ counts the total number of maximal independent sets~\cite{Gaspers2012, Manne2013}, where the fastest algorithm currently has a runtime of $O(1.3642^{|V|})$~\cite{Gaspers2012}.
+If we want to find an MIS, $b_{k}$ counts the number of local optimum at size $k < \alpha(G)$, and can, in some cases, provide hints on the difficulty of finding the MIS using local algorithms~\red{cite experiment}.
+The uni-modality, log-concavity, and real-rootness properties of the maximal independence polynomial for special classes of graphs have also been studied~\cite{Hu2017}. 
+
+Let us denote the neighborhood of a vertex $v$ as $N(v)$ and denote $N[v] = N(v)\cup \{v\}$.
+A maximal independent set $I_m$ is an independent set where there exists no vertex $v$ such that $I_m \cap N[v]  = \emptyset$.
+We can modify the tensor network for computing the independence polynomial to include this restriction. Instead of defining the restriction on vertices and edges, it is more natural to define it on $N[v]$:
+\begin{equation}\label{eq:maximal}
+    T(x_v)_{s_1,s_2,\ldots,s_{|N(v)|},s_v} = \begin{cases}
+        s_vx_v & s_1=s_2=\ldots=s_{|N(v)|}=0,\\
+        1-s_v& \text{otherwise}.\\
+    \end{cases}
+\end{equation}
+Intuitively, it means if all the neighborhood vertices are not in $I_{m}$, i.e., $ s_1=s_2=\ldots=s_{|N(v)|}=0$, then $v$ should be in $I_{m}$, counted as $x_{v}$,
+and if any of the neighborhood vertices is in $I_{m}$, i.e., $\exists i \in \{1,2,\ldots, |N(v)|\}$ s.t. $s_{i} = 1$, then $v$ cannot be in $I_{m}$.
+As an example, for a vertex of degree 2, the resulting rank-3 tensor is
+\begin{equation}
+    T(x_v)=\left(\begin{matrix}
+    \left(\begin{matrix}
+        0 &1 \\
+        1 &1
+    \end{matrix}\right)\\
+    \left(\begin{matrix}
+        x_v &0 \\
+        0 &0
+    \end{matrix}\right)
+    \end{matrix}\right).
+\end{equation}
+ 
+With the tensors defined as $T(x_v)$, we can perform a similar computation of contracting the tensor network with the same tensor element types as described in the previous section~\ref{sec:indpoly}, the result of which then produces the maximal independence polynomial. Let us consider the example in~\Sec{eg:tensorcontraction}: its corresponding tensor network structure for computing the maximal independent polynomial becomes
+
+    \centerline{\begin{tikzpicture}[
+    dot/.style = {circle, fill, minimum size=#1,
+                inner sep=0pt, outer sep=0pt},
+    dot/.default = 6pt  % size of the circle diameter 
+                    ]  
+        \def\dx{0};
+        \def\r{0.5cm}
+        \def\G{1.0}
+        \foreach \x/\y/\v in {0/0/a, 1/0/b, 2/0/c, 3/0/d, 4/0/e}
+            \node[color=black] at (\x*\G+\dx,\y) (\v) {$s_\v$};
+        \foreach \x/\v/\t in {0/A/$T_a$, 1/B/$T_b$, 2/C/$T_c$, 3/D/$T_d$, 4/E/$T_e$}
+            \node[color=white,fill=black,dot=\r] at (\x*\G+\dx,1.5) (\v) {\t};
+        \draw [cyan,thick] (a) -- (A);
+        \draw [cyan,thick] (a) -- (B);
+        \draw [cyan,thick] (a) -- (C);
+        \draw [blue,thick] (b) -- (B);
+        \draw [blue,thick] (b) -- (A);
+        \draw [blue,thick] (b) -- (C);
+        \draw [blue,thick] (b) -- (D);
+        \draw [red,thick] (c) -- (C);
+        \draw [red,thick] (c) -- (A);
+        \draw [red,thick] (c) -- (B);
+        \draw [red,thick] (c) -- (D);
+        \draw [green,thick] (d) -- (D);
+        \draw [green,thick] (d) -- (B);
+        \draw [green,thick] (d) -- (C);
+        \draw [green,thick] (d) -- (E);
+        \draw [orange,thick] (e) -- (E);
+        \draw [orange,thick] (e) -- (D);
+    \end{tikzpicture}}
+ 
+One can see that the average degree of a tensor is increased.
+The computational complexity of this new tensor network contraction is often greater than the one for computing the independence polynomial.
+However, in most sparse graphs, this tensor network contraction approach is still significantly faster than enumerating all the maximal cliques on its complement graph using the Bron-Kerbosch algorithm~\cite{Bron1973}, which is the standard algorithm that we are aware of to compute the maximal independence polynomial.
+
 \subsection{Matching problem}
 A matching polynomial of a graph $G$ is defined as
 \begin{equation}
