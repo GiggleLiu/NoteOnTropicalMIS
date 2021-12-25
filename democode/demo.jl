@@ -1,29 +1,26 @@
 using OMEinsum, OMEinsumContractionOrders
-using OMEinsum: NestedEinsum, flatten, getixs
-using LightGraphs
+using Graphs
 using Random
 
 # generate a random regular graph of size 100, degree 3
-graph = (Random.seed!(2); LightGraphs.random_regular_graph(50, 3))
+graph = (Random.seed!(2); Graphs.random_regular_graph(50, 3))
 
 # generate einsum code, i.e. the labels of tensors
-code = EinCode(([minmax(e.src,e.dst) for e in LightGraphs.edges(graph)]..., # labels for edge tensors
-                [(i,) for i in LightGraphs.vertices(graph)]...), ())        # labels for vertex tensors
+code = EinCode(([minmax(e.src,e.dst) for e in Graphs.edges(graph)]..., # labels for edge tensors
+                [(i,) for i in Graphs.vertices(graph)]...), ())        # labels for vertex tensors
 
 # an einsum contraction without contraction order specified is called `EinCode`,
 # an einsum contraction has contraction order (specified as a tree structure) is called `NestedEinsum`.
 # assign each label a dimension-2, it will be used in contraction order optimization
-# `symbols` function extracts tensor labels into a vector.
-symbols(::EinCode{ixs}) where ixs = unique(Iterators.flatten(filter(x->length(x)==1,ixs)))
-symbols(ne::OMEinsum.NestedEinsum) = symbols(flatten(ne))
-size_dict = Dict([s=>2 for s in symbols(code)])
-# optimize the contraction order using KaHyPar + Greedy, target space complexity is 2^17
-optimized_code = optimize_kahypar(code, size_dict; sc_target=17, max_group_size=40)
+# `uniquelabels` function extracts tensor labels into a vector.
+size_dict = Dict([s=>2 for s in uniquelabels(code)])
+# optimize the contraction order using the `TreeSA` method, target space complexity is 2^17
+optimized_code = optimize_code(code, size_dict, TreeSA())
 println("time/space complexity is $(OMEinsum.timespace_complexity(optimized_code, size_dict))")
 
 # a function for computing independence polynomial
 function independence_polynomial(x::T, code) where {T}
-	xs = map(getixs(flatten(code))) do ix
+	xs = map(getixsv(code)) do ix
         # if the tensor rank is 1, create a vertex tensor.
         # otherwise the tensor rank must be 2, create a bond tensor.
         length(ix)==1 ? [one(T), x] : [one(T) one(T); one(T) zero(T)]
@@ -141,9 +138,9 @@ Base.one(::Type{ConfigSampler{N}}) where {N} = ConfigSampler{N}(falses(N))
 # `CountingTropical{T,<:ConfigEnumerator}` is a simple stores configurations instead of simple counting.
 function mis_config(code; all=false)
     # map a vertex label to an integer
-    vertex_index = Dict([s=>i for (i, s) in enumerate(symbols(code))])
+    vertex_index = Dict([s=>i for (i, s) in enumerate(uniquelabels(code))])
     N = length(vertex_index)  # number of vertices
-    xs = map(getixs(OMEinsum.flatten(code))) do ix
+    xs = map(getixsv(code)) do ix
         T = all ? CountingTropical{Float64, ConfigEnumerator{N}} : CountingTropical{Float64, ConfigSampler{N}}
         if length(ix) == 2
             return [one(T) one(T); one(T) zero(T)]
