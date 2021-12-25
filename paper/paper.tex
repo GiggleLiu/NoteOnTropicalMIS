@@ -417,7 +417,7 @@ maximal IS is different network structure. We can use the above algebra in any n
 \section{Independence polynomial}
 \subsection{Independence polynomial}\label{sec:indpoly}
 The independence polynomial is an important graph polynomial that contains the counting information of independent sets. It is defined as
-\begin{equation}
+\begin{equation}\label{eq:idpdef}
 I(G, x) = \sum_{k=0}^{\alpha(G)} a_k x^k,
 \end{equation}
 where $a_k$ is the number of independent sets of size $k$ in $G$. The total number of independent sets is thus equal to $I(G, 1)$.
@@ -436,7 +436,7 @@ On each edge $(u, v)$, we define a matrix $B$ indexed by $(s_u, s_v)$ as
        B = \left(\begin{matrix}
         1  & 1\\
         1 & 0
-    \end{matrix}\right), \label{eq:tensor}
+    \end{matrix}\right), \label{eq:edgetensor}
 \end{equation}
 The corresponding tensor network contraction gives
 \begin{equation}\label{eq:idp}
@@ -892,8 +892,6 @@ In figure (d), one can see the technique to bound the enumeration space improves
 Bounding can also reduce the memory usage significantly, without which the largest computable graph size is only $\sim150$ on a 32G memory device.
 %and the computing times of configuration enumeration also depend on the size of the target configuration space.
 
-\blue{I am here!}
-
 \subsection{Example case studies} In this section, we give a few examples where the different properties of independence sets are used.
 In all the examples, the types of graphs we used are shown in Figure~\ref{fig:lattices}, where vertices are all placed on square lattices with lattice dimensions $L \times L$.
 The graphs include: the square grid graphs, denoted as SG; the square grid graphs with a filling factor $p$, denoted as SG$(p)$, where $\lfloor pL^{2} \rfloor$ square grids are occupied with vertices;
@@ -953,14 +951,16 @@ their questions are driving forces of this project.
 Thank Chris Elord for helping us writing the fastest matrix multiplication libary for tropical numbers, TropicalGEMM.jl, he is a man of speed!
 \blue{funding information}
 
+\blue{I am here!}
+
 \bibliographystyle{siamplain}
 \bibliography{refs}
 
 \appendix
 
 \section{Technical guide}\label{sec:technical}
-Before showing the codes,
-we want to introduce some Julia packages that playing important roles in our code base.
+This project depends on multiple open source packages in Julia ecosystem.
+We list the Julia packages playing important roles in our code base as follows.
 
 \begin{description}
 	\item[\href{https://github.com/under-Peter/OMEinsum.jl}{OMEinsum} and \href{https://github.com/Happy-Diode/OMEinsumContractionOrders.jl}{OMEinsumContractionOrders}] are packages providing the support for Einstein's (or tensor network) notation and contraction order optimizations.
@@ -981,18 +981,16 @@ all are contained in this appendix. After installing required packages, one can 
 
 \lstinputlisting[breaklines]{../democode/demo.jl}
 
-Please checkout our GitHub repository for the full featured version:
-
-\href{https://github.com/Happy-Diode/GraphTensorNetworks.jl}{https://github.com/Happy-Diode/GraphTensorNetworks.jl}
-
-Here is a short introduction to the functionalities in this libary.
+For performance reason, we still recommend checking our GitHub repository for the full featured version:
+\href{https://github.com/Happy-Diode/GraphTensorNetworks.jl}{https://github.com/Happy-Diode/GraphTensorNetworks.jl}.
+It can be installed in a similar style to other packages. Here is a short introduction to the functionalities in this package.
 
 \lstinputlisting[breaklines]{../democode/tutorial.jl}
 
-\section{Why not using the standard tensor network notations}\label{app:tensorbad}
+\section{The reason to not using the standard tensor network notations}\label{app:tensorbad}
 As we have mentioned in the main text,
-a standard tensor network notation inevitably introduces $\delta$ tensors to encode some graph problems.
-A $\delta$ tensor of rank $d$ is defined as
+a standard tensor network notation is equivalent to the generalized tensor network by introducing $\delta$ tensors,
+where a $\delta$ tensor of rank $d$ is defined as
 \begin{equation}
     \delta_{i_1, i_2,\ldots,i_d} = \begin{cases}
         1, & i_1=i_2=\ldots =i_d,\\
@@ -1000,7 +998,7 @@ A $\delta$ tensor of rank $d$ is defined as
     \end{cases}
 \end{equation}
 
-Given a graph
+Let us consider the following King's graph.
 
 \centerline{\begin{tikzpicture}
     \def\r{0.2}
@@ -1019,14 +1017,14 @@ Given a graph
         }
 \end{tikzpicture}}
 
-Its standard tensor network representation includes a $\delta$ tensors on each vertex, so its graphical representation is as bellow.
+By mapping the independent set problem to a standard tensor network, we have the following graphical representation.
 
 \centerline{\begin{tikzpicture}
     \def\r{0.08}
     \def\a{0.1}
     \foreach \x in {1,...,5}
         \foreach \y in {1,...,5}
-            \filldraw[fill=black] (\x,\y) circle [radius=0.7*\r];
+            \filldraw[fill=black] (\x,\y) circle [radius=\r];
     \foreach \x in {1,...,5}
         \foreach \y in {1,...,4}{
             \filldraw[fill=black] (\x,\y+0.5) circle [radius=\r];
@@ -1045,8 +1043,10 @@ Its standard tensor network representation includes a $\delta$ tensors on each v
                     post length=0mm,pre length=0mm}}
     \draw [decorate] (2.7, 0.5) -- (2.7, 5.5);
 \end{tikzpicture}}
-Here, we use a small circle on a vertex to represent a diagonal $\delta$ tensor. Its rank is $8$ in the bulk. If we contract this tensor network in a naive column-wise order, the maximum intermediate tensor has a rank $\sim3L$, requiring a storage of size $\approx 2^{3L}$.
-If we treat it as the following generalized tensor network
+
+In this diagram, the circle on each vertex in the original graph is a $\delta$ tensor of rank $8$.
+If we contract this tensor network in a naive column-wise order, the maximum intermediate tensor has rank $\sim3L$, requiring a storage of size $\approx 2^{3L}$.
+If we relax the restriction that each label appears exactly twice. We have the following hypergraph representation of a generalized tensor network.
 
 \centerline{\begin{tikzpicture}
     \def\r{0.08}
@@ -1088,7 +1088,7 @@ If we treat it as the following generalized tensor network
         }
     \foreach \x in {1,...,5}
         \foreach \y in {1,...,5}{
-            \filldraw[fill=black] (\x,\y) circle [radius=0.7*\r];
+            %\filldraw[fill=black] (\x,\y) circle [radius=0.7*\r];
         }
     \foreach \x in {1,...,5}
         \foreach \y in {1,...,5}{
@@ -1107,20 +1107,20 @@ If we treat it as the following generalized tensor network
     \draw [decorate] (2.7, 0.5) -- (2.7, 5.5);
 \end{tikzpicture}}
 Here, we use different colors to distinguish different hyperedges.
-The vertex tensor is always rank $1$ in this representation.
-Again, if we contract this tensor network in the columnwise contraction order, we can see the maximum intermediate tensor has rank $\sim L$ by counting the colors.
+A vertex tensor always has rank $1$ and is not shown here since it does not change the contraction complexity.
+Again, if we contract this tensor network in the column-wise order, the maximum intermediate tensor rank is $\sim L$, which can be see by counting the number of colors.
 
 \section{Generalizing to other graph problems}\label{app:otherproblems}
-There are some other graph problems that can be encoded to a tensor network.
-To understand its representation power, it is a good starting point to connect it with dynamic programming because
-a tensor network can be viewed as a special type of dynamic programming where its update rule can be characterized by a linear operation.
-Dynamic programming can solve monadic second order logic (MSO) definable problem on a graph with small tree width efficiently~\cite{Courcelle1990,Barr2020}.
-It can solve the maximum independent set problem in $O(2^k)n$, which is similar to the tensor network approach.
-The graph problem can be expressed in the tensor network language is clearly much less than that can be expressed by dynamic programming.
-For example, it is hard to determine whether a collection of vertices forms a path in a graph using the tensor network language, while this problem is MSO definable.
-As a gain, a tensor network has a nicer analytic property, which makes contraction order optimization, generic programming and utilizing BLAS libaries very convenient.
+%There are some other graph problems that can be encoded to a tensor network.
+%To understand its representation power, it is a good starting point to connect it with dynamic programming because
+%a tensor network can be viewed as a special type of dynamic programming where its update rule can be characterized by a linear operation.
+%Dynamic programming can solve monadic second order logic (MSO) definable problem on a graph with small tree width efficiently~\cite{Courcelle1990,Barr2020}.
+%It can solve the maximum independent set problem in $O(2^k)n$, which is similar to the tensor network approach.
+%The graph problem can be expressed in the tensor network language is clearly much less than that can be expressed by dynamic programming.
+%For example, it is hard to determine whether a collection of vertices forms a path in a graph using the tensor network language, while this problem is MSO definable.
+%As a gain, a tensor network has a nicer analytic property, which makes contraction order optimization, generic programming and utilizing BLAS libaries very convenient.
 %\iffalse
-%The cost is, it is less expressive than MSO because the tensor network described by \Eq{eq:tensor} can be expressed in MSO as
+%The cost is, it is less expressive than MSO because the tensor network described by \Eq{eq:edgetensor} can be expressed in MSO as
 %\begin{align}
 %    \begin{split}
 %    \exists_X\forall_{u}&(\\
@@ -1143,21 +1143,22 @@ As a gain, a tensor network has a nicer analytic property, which makes contracti
 %for example, it is hard to construct a tensor network to decide whether a graph is connected or not.
 %At the cost of losing expressiveness, we can encode the properties of the graph into the tensor elements.
 %\fi
-In the following, we introduce some other problems that can be expressed by a tensor network.
+%In the following, we introduce some other problems that can be expressed by a tensor network.
 \subsection{Maximal independent sets and maximal cliques}\label{sec:maximal}
-Sometimes, one may be interested in knowing maximal solutions to understand why his or her program is trapped in a local minimum.
+Finding maximal independent sets of a graph is equivalent to finding the maximal cliques of its complement graph, so in the following we only discuss how to find maximal independent sets.
+Sometimes, one may be interested in knowing maximal independent sets to understand why his or her program for solving MIS is trapped in a local minimum.
 Then instead of counting all independent sets, the maximal independence polynomial counts the number of maximal independent sets of various sizes~\cite{Hu2017} would be more helpful.
  Concretely, it is defined as
 \begin{equation}
 I_{\rm max}(G, x) = \sum_{k=0}^{\alpha(G)} b_k x^k,
 \end{equation}
-where $b_k$ is the number of maximal independent sets of size $k$ in $G$.
-Obviously, $b_{k} \leq a_{k}$ and $b_{\alpha(G)} = a_{\alpha(G)}$. $I_{\rm max}(G, 1)$ counts the total number of maximal independent sets~\cite{Gaspers2012, Manne2013}, where the fastest algorithm currently has a runtime of $O(1.3642^{|V|})$~\cite{Gaspers2012}.
+where $b_k$ is the number of maximal independent sets of size $k$ in graph $G=(V, E)$.
+Comparing with the independence polynomial in \Eq{eq:idpdef}, we have $b_{k} \leq a_{k}$ and $b_{\alpha(G)} = a_{\alpha(G)}$. $I_{\rm max}(G, 1)$ counts the total number of maximal independent sets~\cite{Gaspers2012, Manne2013}, where the fastest algorithm currently has a runtime of $O(1.3642^{|V|})$~\cite{Gaspers2012}.
 If we want to find an MIS, $b_{k}$ counts the number of local optimum at size $k < \alpha(G)$, and can, in some cases, provide hints on the difficulty of finding the MIS using local algorithms~\red{cite experiment}.
 The uni-modality, log-concavity, and real-rootness properties of the maximal independence polynomial for special classes of graphs have also been studied~\cite{Hu2017}. 
 
 Let us denote the neighborhood of a vertex $v$ as $N(v)$ and denote $N[v] = N(v)\cup \{v\}$.
-A maximal independent set $I_m$ is an independent set where there exists no vertex $v$ such that $I_m \cap N[v]  = \emptyset$.
+A maximal independent set $I_m$ is an independent set where there exists no vertex $v \in V$ such that $I_m \cap N[v]  = \emptyset$.
 We can modify the tensor network for computing the independence polynomial to include this restriction. Instead of defining the restriction on vertices and edges, it is more natural to define it on $N[v]$:
 \begin{equation}\label{eq:maximal}
     T(x_v)_{s_1,s_2,\ldots,s_{|N(v)|},s_v} = \begin{cases}
@@ -1165,8 +1166,8 @@ We can modify the tensor network for computing the independence polynomial to in
         1-s_v& \text{otherwise}.\\
     \end{cases}
 \end{equation}
-Intuitively, it means if all the neighborhood vertices are not in $I_{m}$, i.e., $ s_1=s_2=\ldots=s_{|N(v)|}=0$, then $v$ should be in $I_{m}$, counted as $x_{v}$,
-and if any of the neighborhood vertices is in $I_{m}$, i.e., $\exists i \in \{1,2,\ldots, |N(v)|\}$ s.t. $s_{i} = 1$, then $v$ cannot be in $I_{m}$.
+Intuitively, it means if all the neighborhood vertices are not in $I_{m}$, i.e., $ s_1=s_2=\ldots=s_{|N(v)|}=0$, then $v$ should be in $I_{m}$ and contribute a factor $x_{v}$,
+otherwise, if any of the neighborhood vertices is in $I_{m}$, then $v$ cannot be in $I_{m}$.
 As an example, for a vertex of degree 2, the resulting rank-3 tensor is
 \begin{equation}
     T(x_v)=\left(\begin{matrix}
@@ -1181,7 +1182,9 @@ As an example, for a vertex of degree 2, the resulting rank-3 tensor is
     \end{matrix}\right).
 \end{equation}
  
-With the tensors defined as $T(x_v)$, we can perform a similar computation of contracting the tensor network with the same tensor element types as described in the previous section~\ref{sec:indpoly}, the result of which then produces the maximal independence polynomial. Let us consider the example in~\Sec{eg:tensorcontraction}: its corresponding tensor network structure for computing the maximal independent polynomial becomes
+By contracting this tensor network with generic element type,
+we can compute the maximum independent set properties such as maximal independence polynomial, enumerating maximal independent sets.
+Let us consider the example in~\Sec{eg:tensorcontraction}: its corresponding tensor network structure for computing the maximal independent polynomial becomes
 
     \centerline{\begin{tikzpicture}[
     dot/.style = {circle, fill, minimum size=#1,
@@ -1216,7 +1219,14 @@ With the tensors defined as $T(x_v)$, we can perform a similar computation of co
  
 One can see that the average degree of a tensor is increased.
 The computational complexity of this new tensor network contraction is often greater than the one for computing the independence polynomial.
-However, in most sparse graphs, this tensor network contraction approach is still significantly faster than enumerating all the maximal cliques on its complement graph using the Bron-Kerbosch algorithm~\cite{Bron1973}, which is the standard algorithm that we are aware of to compute the maximal independence polynomial.
+However, for most sparse graphs, this tensor network contraction approach is still much faster than enumerating all the maximal cliques on its complement graph using the Bron-Kerbosch algorithm~\cite{Bron1973}, which is the standard algorithm that we are aware of to compute the maximal independence polynomial.
+We show the benchmark of computing the maximal independent set properties in \Fig{fig:benchmark-maximal},
+including a comparison to the Bron-Kerbosch algorithm from Julia package Graphs~\cite{Graphs}.
+%Since the network for computing maximal independent set properties is different from the one for computing the independence polynomial,
+the tree width of this tensor network is significantly larger, hence only small graphs can be benchmarked.
+The time for the tensor netwrok approach and the Bron-Kerbosch approach to enumerate all maximal independent sets are comparable,
+while the tensor network does counting much more efficiently.
+Due to the memory limit, this Bron-Kerbosch algorithm stops working at size $70$ and above.
 
 \begin{figure} 
     \centering
@@ -1228,14 +1238,6 @@ However, in most sparse graphs, this tensor network contraction approach is stil
     \label{fig:benchmark-maximal}
 \end{figure}
 
-We show the benchmark of computing the maximal independent set properties in \Fig{fig:benchmark-maximal},
-including a comparison to the Bron-Kerbosch algorithm from the package Graphs~\cite{Graphs}.
-Since the network for computing maximal independent set properties is different from the one for computing the independence polynomial,
-the tree width of this tensor network is significantly larger, hence only small graphs can be benchmarked.
-The time for the tensor netwrok approach and the Bron-Kerbosch approach to enumerate all maximal independent sets are comparable,
-while the tensor network does counting much more efficiently.
-Due to the memory limit, this Bron-Kerbosch algorithm stops working at size $70$ and above.
-
 
 \subsection{Matching problem}
 A matching polynomial of a graph $G$ is defined as
@@ -1243,7 +1245,9 @@ A matching polynomial of a graph $G$ is defined as
     M(G, x) = \sum\limits_{k=1}^{|V|/2} c_k x^k,
 \end{equation}
 where $k$ is the number of matches, and coefficients $c_k$ are the corresponding counting.
-We define a tensor of rank $d(v) = |N(v)|$ on vertex $v$ such that,
+We map an edge $(u, v) \in E$ to a label $\langle u, v\rangle \in \{0, 1\}$ in a tensor network,
+where $1$ means two vertices of an edge are matched, $0$ means otherwise.
+Then we define a tensor of rank $d(v) = |N(v)|$ on vertex $v$ such that,
 \begin{equation}
     W_{\langle v, n_1\rangle, \langle v, n_2 \rangle, \ldots, \langle v, n_{d(v)}\rangle} = \begin{cases}
         1, & \sum_{i=1}^{d(v)} \langle v, n_i \rangle \leq 1,\\
@@ -1254,22 +1258,23 @@ and a tensor of rank $1$ on the bond
 \begin{equation}
     B_{\langle v, w\rangle} = \begin{cases}
     1, & \langle v, w \rangle = 0 \\
-    x, & \langle v, w \rangle = 1.
+    x, & \langle v, w \rangle = 1,
 \end{cases}
 \end{equation}
-Here, we use bond index $\langle v, w \rangle \in \{0, 1\}$ ($\langle v, w \rangle$ and $\langle w,v\rangle$ are equivalent) to label tensors,
-where $1$ means two vertices of an edge are matched, $0$ means otherwise.
+where label $\langle v, w \rangle$ is equivalent to $\langle w,v\rangle$.
+Here, a vertex tensor specifies the restriction that a vertex can not be in two matched edges, while an edge tensor contributes the variable in the polynomial.
 
 \subsection{k-Coloring}
-Let us use 3-coloring on the vertex as an example. We can define a vertex tensor as
+Let us use 3-coloring problem defined on vertices as an example.
+For a vertex $v$, we define the degree of freedoms $c_v\in\{1,2,3\}$ and a vertex tensor labeled by it as
 \begin{equation}
-    W = \left(\begin{matrix}
+    W(v) = \left(\begin{matrix}
         r_v\\
         g_v\\
         b_v
-    \end{matrix}\right),
+    \end{matrix}\right).
 \end{equation}
-and an edge tensor as
+For an edge $(u, v)$, we define an edge tensor as a matrix labeled by $(c_u, c_v)$ to specify the constraint
 \begin{equation}
     B = \left(\begin{matrix}
         0 & 1 & 1\\
@@ -1278,25 +1283,25 @@ and an edge tensor as
     \end{matrix}\right).
 \end{equation}
 The number of possible coloring can be obtained by contracting this tensor network by setting vertex tensor elements $r_v, g_v$ and $b_v$ to $1$.
-By designing generic types as tensor elements, one can get all possible colorings.
-Similarly, one can define the k-coloring problem on edges too.
+By designing generic types as tensor elements, one can get other properties.
+Similarly, one can define the k-coloring problem on edges too by switching the roles of edges and vertices.
 
 \subsection{Max cut problem}
 Max cut problem is also known as the boolean spinglass problem.
-Its tensor network representation does not contain vertex tensors.
-The edge tensor can be defined as
+For a vertex $v\in V$, we define a boolean degree of freedom $s_v\in\{0, 1\}$.
+Then the max cut problem can be encoded to tensor networks by mapping an edge $(i,j)\in E$ to an edge matrix labeled by $(s_i, s_j)$
 \begin{equation}
     B(x_{\langle i, j\rangle}) = \left(\begin{matrix}
         1 & x_{\langle i, j\rangle}\\
         x_{\langle i, j\rangle} & 1
     \end{matrix}\right).
 \end{equation}
-We can also define a polynomial about edges variables by setting $x_{\langle i, j\rangle} = x$,
+Similar to other problems, we can define a polynomial about edges variables by setting $x_{\langle i, j\rangle} = x$,
 where its $k$th coefficient is two times the number of configurations of cut size $k$.
 
 \subsection{Set packing}
-Set packing is the hypergraph version of the maximum independent set problem, where each set corresponds to a vertex, each element corresponds to a hyperedge.
-To solve the set packing problem, we just remove the rank 2 restriction of an edge tensor
+Set packing is the hypergraph generalization of the maximum independent set problem, where a set corresponds to a vertex and an element corresponds to a hyperedge.
+To solve the set packing problem, we just remove the rank 2 restriction of the edge tensor in \Eq{eq:edgetensor}
 \begin{equation}
     B_{v,w,\ldots, z} = \begin{cases}
         1, & v+w+\ldots+z\leq 1,\\
@@ -1304,7 +1309,7 @@ To solve the set packing problem, we just remove the rank 2 restriction of an ed
     \end{cases}
 \end{equation}
 
-\section{Discrete Fourier transform for computing the independence polynomial}\label{app:fft}
+\section{The discrete Fourier transform approach to computing the independence polynomial}\label{app:fft}
 
 In section~\ref{sec:indpoly}, we show that the independence polynomial can be obtained by solving the linear equation \Eq{eq:lineareq}.
 Since the coefficients of the independence polynomial can range many orders of magnitude, the round-off errors in fitting can be significant if we use random floating point numbers for $x_{i}$.
