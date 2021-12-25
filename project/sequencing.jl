@@ -10,9 +10,8 @@ function sequencing(n; writefile, sc_target, usecuda, nslices=1)
         ntrials=5, βs=0.01:0.05:22.0, niters=20, rw_weight=0.2), simplifier=MergeGreedy())
     println("Graph size $n, usecuda = $usecuda")
     @show timespace_complexity(gp)
-    return
     res = GraphTensorNetworks.big_integer_solve(Int32, 100) do T
-        GraphTensorNetworks.contractx(gp, one(T); usecuda=usecuda)
+        @time Array(GraphTensorNetworks.contractx(gp, one(T); usecuda=usecuda))
     end
     #res = GraphTensorNetworks.contractx(gp, 1.0; usecuda=usecuda)[]
     @show res
@@ -21,13 +20,12 @@ function sequencing(n; writefile, sc_target, usecuda, nslices=1)
 end
 
 # patch
-const DEVICE = length(ARGS) >= 1 ? parse(Int, ARGS[1]) : -1
+const L = parse(Int, ARGS[1])
+const DEVICE = parse(Int, ARGS[2])
 
 if DEVICE >= 0
     CUDA.device!(DEVICE)
 end
 
-for L = [11]
-    println("computing L = $L")
-    @time sequencing(L; writefile=false, sc_target=10, usecuda=DEVICE>=0)
-end
+println("computing L = $L")
+@time sequencing(L; writefile=true, sc_target=28, usecuda=DEVICE>=0, nslices=L-27)
