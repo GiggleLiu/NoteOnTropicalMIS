@@ -13,7 +13,6 @@ function sequencing(n; writefile, sc_target, usecuda, nslices=1)
     res = GraphTensorNetworks.big_integer_solve(Int32, 100) do T
         @time Array(GraphTensorNetworks.contractx(gp, one(T); usecuda=usecuda))
     end
-    #res = GraphTensorNetworks.contractx(gp, 1.0; usecuda=usecuda)[]
     @show res
     ofname = joinpath(@__DIR__, "data", "$n.dat")
     writefile && writedlm(ofname, res)
@@ -26,7 +25,8 @@ if DEVICE >= 0
     CUDA.device!(DEVICE)
 end
 
-for L=31:40
+Random.seed!(2)
+for L=38:38
     println("computing L = $L")
-    @time sequencing(L; writefile=true, sc_target=27, usecuda=DEVICE>=0, nslices=L-27)
+    @time sequencing(L; writefile=true, sc_target=28, usecuda=DEVICE>=0, nslices=L-28)
 end
