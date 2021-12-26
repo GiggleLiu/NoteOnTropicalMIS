@@ -1,4 +1,4 @@
-using Distributed, CUDA, GraphTensorNetworks, Random, DelimitedFiles, OMEinsumContractionOrders, OMEinsum
+using Distributed, CUDA, GraphTensorNetworks, Random, DelimitedFiles, GraphTensorNetworks.OMEinsumContractionOrders, GraphTensorNetworks.OMEinsum
 USECUDA = parse(Bool, ARGS[1])
 @show USECUDA
 if USECUDA
@@ -9,7 +9,7 @@ else
 end
 
 @everywhere begin
-using GraphTensorNetworks, Random, OMEinsumContractionOrders, OMEinsum
+using GraphTensorNetworks, Random, GraphTensorNetworks.OMEinsumContractionOrders, GraphTensorNetworks.OMEinsum
 using CUDA
 CUDA.allowscalar(false)
 const DEVICES = collect(devices())

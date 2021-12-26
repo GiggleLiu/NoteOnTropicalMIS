@@ -1,10 +1,10 @@
 #!/bin/sh
 
-#SBATCH -p gpu
-#SBATCH --gres=gpu:4
+#SBATCH -p gpu_test
+#SBATCH --gres=gpu:2
 #SBATCH -c 5
 #SBATCH --mem 16000
-#SBATCH -t 0-1:00 # time (D-HH:MM)
+#SBATCH -t 0-2:00 # time (D-HH:MM)
 #SBATCH --mail-user=jinguoliu@g.harvard.edu
 module load cuda/11.4.2-fasrc01
 julia -e "println(1)"
