@@ -21,31 +21,37 @@ class PLT(object):
             plt.plot(ns, [x[1] for x in nw], label="space complexity (tree width)")
             plt.plot(ns, [x[2] for x in nw], label="time complexity")
             plt.xlabel("number of vertices, $|V|$")
-            plt.ylabel("log2 value")
+            plt.ylabel("complexity")
+            tws = np.arange(0, 35, 5)
+            plt.yticks(tws, ["$2^{%d}$"%tw for tw in tws])
             plt.legend(loc="upper left", fontsize=FS, ncol=1)
 
             ax=plt.subplot(222)   # size
             cornertex("(b)", ax, offset=(0,0))
-            for k,(prefix, l) in enumerate([("counting_sum", r"$\mathbb{R}$"), ("size_max", "T"), ("counting_max", "P1"), ("counting_max2", "P2")]):
+            for k,(prefix, l) in enumerate([("counting_sum", r"counting ISs ($\mathbb{R}$"), ("size_max", "MIS size (T"), ("counting_max", "counting MISs (P1"), ("counting_max2", r"counting MISs and (MIS-1)s (P2")]):
                 for device in ["CPU", "GPU"]:
                     datafile = "../../benchmarks/data/"+prefix+"-r3-"+device+".dat"
                     if os.path.exists(datafile):
                         y = np.loadtxt(datafile) / 1e9
-                        plt.plot(ns[:len(y)], y, label="%s (%s)"%(l, device), lw=1.5, color="C%d"%k, ls="--" if device=="GPU" else "-")
+                        plt.plot(ns[:len(y)], y, label="%s, %s)"%(l, device), lw=1.5, color="C%d"%k, ls="--" if device=="GPU" else "-")
             plt.yscale("log")
             plt.xlabel("number of vertices, $|V|$")
             plt.ylabel("time/s")
-            plt.legend(loc="upper left", fontsize=FS, ncol=2)
+            plt.legend(loc="upper left", fontsize=FS, ncol=1)
             plt.ylim(1e-3,3e3)
 
             ax = plt.subplot(223)   # IDP
             cornertex("(c)", ax, offset=(0,0))
-            for k,(prefix, l) in enumerate([("counting_all_(fft)", r"$\mathbb{C}$"), ("counting_all_(finitefield)", r"GF$(p)$"), ("counting_all", "PN")]):
+            for k,(prefix, l) in enumerate([
+                ("counting_all", "direct (PN"),
+                ("counting_all_(finitefield)", r"finite field fitting (GF$(p)$"),
+                ("counting_all_(fft)", r"fourier transform ($\mathbb{C}$"),
+                ]):
                 for device in ["CPU", "GPU"]:
                     datafile = "../../benchmarks/data/"+prefix+"-r3-"+device+".dat"
                     if os.path.exists(datafile):
                         y = np.loadtxt(datafile) / 1e9
-                        plt.plot(ns[:len(y)], y, label="%s (%s)"%(l, device), lw=1.5, color="C%d"%k, ls="--" if device=="GPU" else "-")
+                        plt.plot(ns[:len(y)], y, label="%s, %s)"%(l, device), lw=1.5, color="C%d"%k, ls="--" if device=="GPU" else "-")
             plt.yscale("log")
             plt.xlabel("number of vertices, $|V|$")
             plt.ylabel("time/s")
@@ -54,13 +60,13 @@ class PLT(object):
 
             ax = plt.subplot(224)  # configurations
             cornertex("(d)", ax, offset=(0,0))
-            for k,(prefix, l) in enumerate([("config_max", "P1+S1"), ("config_max_(bounded)", "T+bounding"), ("configs_max_(bounded)", "P1+SN+bounding"), ("configs_max", "P1+SN"), ("configs_max2", "P2+SN"), ("configs_all", "PN+SN")]):
+            for k,(prefix, l) in enumerate([("config_max", "one MIS (P1+S1"), ("config_max_(bounded)", "one MIS (T+bounding"), ("configs_max_(bounded)", "MISs (P1+SN+bounding"), ("configs_max", "MISs (P1+SN"), ("configs_max2", "MISs and (MIS-1)s (P2+SN"), ("configs_all", "ISs (PN+SN")]):
                 datafile = "../../benchmarks/data/"+prefix+"-r3-"+device+".dat"
                 for device in ["CPU", "GPU"]:
                     datafile = "../../benchmarks/data/"+prefix+"-r3-"+device+".dat"
                     if os.path.exists(datafile):
                         y = np.loadtxt(datafile) / 1e9
-                        plt.plot(ns[:len(y)], y, label="%s (%s)"%(l, device), lw=1.5, color="C%d"%k, ls="--" if device=="GPU" else "-")
+                        plt.plot(ns[:len(y)], y, label="%s, %s)"%(l, device), lw=1.5, color="C%d"%k, ls="--" if device=="GPU" else "-")
             plt.yscale("log")
             plt.xlabel("number of vertices, $|V|$")
             plt.ylabel("time/s")
@@ -74,27 +80,29 @@ class PLT(object):
     def fig2(self, tp="pdf"):  # independence polynomials
         nw = [(10, 6, 9.49), (20, 8, 12.40), (30, 9, 13.35), (40, 11, 15.14), (50, 16, 21.26), (60, 17, 22.58), (70, 16, 21.50), (80, 20, 27.48), (90, 26, 35.04), (100, 26, 35.06)]
         ns = [x[0] for x in nw]
-        FS = 10
+        FS = 8
         with DataPlt(filename="fig2.%s"%tp, figsize=(8,3)) as dp:
             ax = plt.subplot(121)   # treewidth
             cornertex("(a)", ax, offset=(-0.02,0))
             plt.plot(ns, [x[1] for x in nw], label="space complexity (tree width)")
             plt.plot(ns, [x[2] for x in nw], label="time complexity")
             plt.xlabel("number of vertices, $|V|$")
-            plt.ylabel("log2 value")
+            plt.ylabel("complexity")
+            tws = np.arange(0, 36, 5)
+            plt.yticks(tws, ["$2^{%d}$"%tw for tw in tws])
             plt.legend(loc="upper left", fontsize=FS, ncol=1)
 
             ax=plt.subplot(122)   # size
             cornertex("(b)", ax, offset=(-0.02,0))
-            for k,(prefix, l) in enumerate([("counting_sum", r"$\mathbb{R}$"), ("counting_all_(finitefield)", "GF$(p)$"), ("configs_all", "PN+SN")]):
+            for k,(prefix, l) in enumerate([("counting_sum", r"counting of maximal ISs ($\mathbb{R}$"), ("counting_all_(finitefield)", "maximal independence polynomial (GF$(p)$"), ("configs_all", "maximal ISs (PN+SN")]):
                 for device in ["CPU", "GPU"]:
                     datafile = "../../benchmarks/data/maximal-"+prefix+"-r3-"+device+".dat"
                     if os.path.exists(datafile):
                         y = np.loadtxt(datafile) / 1e9
-                        plt.plot(ns[:len(y)], y, label="%s (%s)"%(l, device), lw=1.5, color="C%d"%k, ls="--" if device=="GPU" else "-")
+                        plt.plot(ns[:len(y)], y, label="%s, %s)"%(l, device), lw=1.5, color="C%d"%k, ls="--" if device=="GPU" else "-")
             datafile = "../../benchmarks/data/maximal-configs_all-r3bk-CPU.dat"
             y = np.loadtxt(datafile) / 1e9
-            plt.plot(ns[:len(y)], y, label="Bron Kerbosch (CPU)", lw=1.5, color="C4", ls="-")
+            plt.plot(ns[:len(y)], y, label="maximal ISs (Bron Kerbosch, CPU)", lw=1.5, color="C4", ls="-")
             plt.yscale("log")
             plt.xlabel("number of vertices, $|V|$")
             plt.ylabel("time/s")

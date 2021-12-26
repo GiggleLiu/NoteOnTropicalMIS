@@ -222,12 +222,12 @@ Listing \thelstlisting: #1\hfill%\hfill%
 \begin{abstract}
 We introduce a method of using generic programming tensor network to compute various properties of independent sets,
 which includes: maximum size of such sets, the number of sets of a given size, enumeration of sets of a given size.
-It can be generalized to compute properties of other problems like cut size, coloring, maximal cliques et al.
 %Although the computational complexity inevitably scales exponentially with treewidth of the graph,
 %our method using tensor network contraction with generic programming is highly versatile and is able to compute properties that are otherwise not known to be possible for up to several hundred vertices.
 At the same time, our algorithms are very simple to implement and one can directly utilize recent advances in tensor network contraction techniques like near optimal contraction order finding and slicing.
 %One can easily find a good contraction order for the tensor network representation of a graph $G$ with thousands of vertices. 
 The algorithmic complexity of this approach is $2^{{\rm tw}(G)}$, where ${\rm tw} (G)$ the tree width of the problem graph.
+Our generic programming tensor network method can be used to compute properties of other problems like cut size, coloring, maximal cliques et al.
 To demonstrate the versatility of this tool, we apply it to a few examples including the calculations of the hard-square entropy constant, Euler characteristics of the independence complex, partition functions, and finite-temperature phase transitions on square-lattice graphs\blue{remove some examples}.
 \end{abstract}
 
@@ -283,6 +283,10 @@ and the optimized contraction order gives us a near optimal space complexity $2^
 For cases when the tensors being too large to fit into a GPU, slicing technique can be used to further reduce the space consumption.
 Lastly, we provide a few examples and show that this toolbox can be used to calculate the hard-square entropy constant,
 Euler characteristics of the independence complex, partition functions, and finite-temperature phase transitions on square-lattice graphs. 
+Our method can also be used for finding ``maximal'' independent set properties.
+Here, the term ``maximal'' has a different meaning from ``maximum''  which we discussed above;
+a maximal independent set is an independent set that is not a subset of any other independent set, but its size may not be the maximum.
+We show how to compute properties related to maximal independent sets as well as other combinatorial optimization problems in \App{app:otherproblems}.
 The implementation of our algorithm is publicly available online: ~\cite{repolink}.
 
 \section{Tensor networks}
@@ -395,23 +399,20 @@ Table~\ref{tbl:generictypes} summarizes the properties that can be solved by var
 \ra{1.3}
         \begin{tabularx}{\textwidth}{sb}\toprule
             \hline
-            \textbf{element type}     & \textbf{purpose} \\
-            {$\mathbbm{R}$}     & {real number for counting independent sets} \\
-            {$\mathbbm{C}$}     & {complex number for fitting the independence polynomial with fast Fourier transform} \\
-            {$\text{GF}(p)$} (\Eq{eq:finitefield}) & {finite field algebra for fitting the independence polynomial exactly using number theory} \\
-            {T} (\Eq{eq:tropical})    & {tropical number for finding the independence number} \\
-            {P1} (\Eq{eq:countingtropical})     & {polynomial truncated to largest order, i.e. the tropical number with counting field for finding the independence number and the number of MISs} \\
-            {P2} (\Eq{eq:max2poly})     & {polynomial truncated to largest two orders for counting MISs and independent sets of size $\alpha(G)-1$} \\
-            {PN} (\Eq{eq:polynomial})     & {polynomial number for computing the independence polynomial directly} \\
-            {P1+S1}     & {P1 with configuration sampler (\Eq{eq:singleconfig}) as its counting field for finding the independence number and one MIS} \\
-            {P1+SN} (\Eq{eq:countingtropicalset})    & {P1 with configuration enumerator (\Eq{eq:set}) as its counting field for finding the independence number and enumeration of all MISs} \\
+            \textbf{element type}     & \textbf{property} \\
+            {$\mathbbm{R}$}     & {independent sets} \\
+            {$\mathbbm{C}$}     & {independence polynomial (approximate)} \\
+            {$\text{GF}(p)$} (\Eq{eq:finitefield}) & {independence polynomial} \\
+            {T} (\Eq{eq:tropical})    & {MIS size} \\
+            {P1} (\Eq{eq:countingtropical})     & {MIS size and the number of MISs} \\
+            {P2} (\Eq{eq:max2poly})     & {MISs and independent sets of size $\alpha(G)-1$} \\
+            {PN} (\Eq{eq:polynomial})     & {independence polynomial (direct approach)} \\
+            {P1+S1}     & {MIS size and one MIS} \\
+            {P1+SN} (\Eq{eq:countingtropicalset})    & {MIS size and all MISs} \\
             \bottomrule
         \end{tabularx}
-    \caption{Tensor element types and their purposes in calculating various independent set properties.}\label{tbl:generictypes}
+    \caption{Tensor element types and the property we want to calculate when we introduce them.}\label{tbl:generictypes}
 \end{minipage}
-\red{we should include maximal independence polynomial and counting, enumeration in this table as well.}
-\blue{I do not think so. Network structure and element types are two degree of freedoms,
-maximal IS is different network structure. We can use the above algebra in any network structure.}
 \end{table}
 
 \section{Independence polynomial}
@@ -618,8 +619,8 @@ In \App{app:fft}, we provide another method to solve the linear equation using d
 \end{algorithm}
 
 \section{Maximum independent sets and its counting}
-\subsection{Tropical algebra for finding the independence number and counting MISs}
-In the previous section, we focused on computing the independence polynomial for a graph $G$ of given independence number $\alpha(G)$, but we did not show how to compute this number.
+\subsection{Tropical algebra for finding the MIS size and counting MISs}
+In the previous section, we focused on computing the independence polynomial for a graph $G$ of given MIS size $\alpha(G)$, but we did not show how to compute this number.
 The method we use to compute this quantity is based on the following observations. Let $x=\infty$, the independence polynomial becomes
 \begin{equation}
 I(G, \infty) = a_{\alpha(G)} \infty^{\alpha(G)},
@@ -696,9 +697,6 @@ As will be shown below, this algebra can also be extended to enumerate those lar
 \subsection{Set algebra for configuration enumeration}
 The enumeration problems of independent sets are also interesting and has been studied extensively in the literature~\cite{Bron1973, Eppstein2010, Johnson1988}, including,
 for example, the enumeration of all independent sets, the enumeration of all maximal independent sets, or the enumeration of all MISs.
-Here, the term ``maximal'' has a different meaning from ``maximum''  which we discussed above;
-a maximal independent set is an independent set that is not a subset of any other independent set, but its size may not be the maximum.
-We can also compute the maximal independence polynomial and enumerate maximal independent sets with a different tensor network mapping, and this is described in \Sec{sec:maximal}.
 To enumerate all independent sets, we designed an algebra defined on sets of bitstrings.
 \begin{equation}
 \eqname{SN}
@@ -816,11 +814,20 @@ where the \texttt{select} function picks one of $\sigma$ and $\tau$ by some crit
 % as well as other problems in \App{app:otherproblems} for configuration enumeration and sampling.
 
 \subsection{Bounding the MIS enumeration space}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.9\textwidth, trim={0cm 0cm 0cm 0cm}, clip]{figures/masktree.pdf}
+    \caption{Bounded enumeration of maximum independent sets. In the graph, a circle is a tensor, an arrow specifies execution direction of a function and $\circ$ is the Hadamard multiplication. (a) is the forward pass with algebra \Eq{eq:tropical} for computing $\alpha(G)$.
+     (b) is the backward pass for computing boolean gradients as masks.
+     (c) is the masked forward pass with algebra \Eq{eq:countingtropicalset} for enumerating configurations.}
+     \label{fig:bounding}
+\end{figure}
+
 When we use the algebra in \Eq{eq:countingtropicalset} to enumerate all MIS configurations, we find that the program stores significantly more intermediate configurations than necessary and thus incur significant overheads in space.
 To speed up the computation and reduce space overhead, we bound the searching space using the MIS size $\alpha(G)$.
-First, we compute the value of $\alpha(G)$ with tropical algebra and cache all intermediate tensors.
-Then, we compute a boolean mask for each cached tensor, where we use a boolean true to represent a tensor element having a contribution to the MIS (i.e.\ with a non-zero gradient) and boolean false otherwise.
-Finally, we perform masked matrix multiplication using the new element type with the above algebra, \Eq{eq:countingtropicalset}, for obtaining all configurations.
+As shown in \Fig{fig:bounding}, (a) we first compute the value of $\alpha(G)$ with tropical algebra and cache all intermediate tensors.
+(b) Then, we compute a boolean mask for each cached tensor, where we use a boolean true to represent a tensor element having a contribution to the MIS (i.e.\ with a non-zero gradient) and boolean false otherwise.
+(c) Finally, we perform masked tensor network contraction using the element type with the algebra in \Eq{eq:countingtropicalset} to obtaining all configurations.
 Note that these masks in fact correspond to tensor elements with non-zero gradients with respect to the MIS size; we compute these masks by back propagating the gradients.
 To derive the back-propagation rule for tropical tensor contraction,
 we first reduce the problem to finding the back-propagation rule of a tropical matrix multiplication $C = A B$.
@@ -844,7 +851,7 @@ The inequality still holds if we take the minimum over $k$:
 On the right hand side, we transform the operation into a tropical matrix multiplication so that we can utilize the fast tropical BLAS routines~\cite{TropicalGEMM}.
 Again, the equality holds if and only if the element $A_{ij}$ has a contribution to $C$ (i.e.\ having a non-zero gradient).
 Let the gradient mask for $C$ be $\overline C$; the back-propagation rule for gradient masks reads
-\begin{equation}
+\begin{equation}\label{eq:adrule}
 \overline{A}_{ij} = \delta \left(A_{ij}, \left( \left( C^{\circ-1} \circ \overline C \right) B^{\mathsf{T}} \right)_{ij}^{\circ -1} \right),
 \end{equation}
 where $\circ$ is the element-wise product, boolean false is treated as the tropical number $\mymathbb{0}$, and boolean true is treated as the tropical number $\mymathbb{1}$.
@@ -864,10 +871,9 @@ The graphs that we use in benchmarks are random three regular graphs,
     \includegraphics[width=\textwidth, trim={0cm 0cm 0cm 0cm}, clip]{figures/fig1.pdf}
     \caption{Benchmark results for computing different properties of independent sets of a random three regular graph with different tensor element types.
     The time in these plots only includes tensor network contraction, without taking the contraction order finding and just in time compiling time into account.
-    \red{for each graph size, is there only one graph?}\blue{yes}
     (a) tree width versus the number of vertices for the benchmarked graphs. 
     Legends are the data types that we used in the computation, one can find the corresponding computed property in \Tbl{tbl:generictypes}.
-    (b) The computing time for calculating the independence number and for counting of the number of independent sets, the number of MISs, and the number of independent sets having size $\alpha(G)$ and $\alpha(G)-1$.
+    (b) The computing time for calculating the MIS size and for counting of the number of independent sets (ISs), the number of MISs, and the number of independent sets having size $\alpha(G)$ and $\alpha(G)-1$ (denoted as ``MISs and (MIS-1)s'').
     (c) The computing time for calculating the independence polynomials with different approaches.
     (d) The computing time for configuration enumeration, including the enumeration of all independent set configurations, a single MIS configuration, all MIS configurations, all independent set configurations having size $\alpha(G)$ and $\alpha(G)-1$,  with or without bounding the enumeration space.
     \red{suggestions for the figure: 1. the legend seems to overlap the lines, especially the large subfigure. Not sure what's a better way to include the legend there. 2. I see you guys don't typically use markers. We typically use markers to distinguish the different lines, as well as using the color. Especially, for some journals, there is a physical non-color copy, so some requires the figures to be understandable without colors.}
@@ -929,7 +935,7 @@ Some figure has single peak structure while some other has multiple peaks. Multi
 
 \section{Discussion and conclusion}
 In this paper, we introduce an abstract algebra formalism to compute properties of independent sets.
-The properties include the independence number, number of independent set of a given size, and enumeration of independent sets of a give size.
+The properties include the MIS size, number of independent set of a given size, and enumeration of independent sets of a give size.
 For each property, we design a algebra being a commutative semiring, and map the property computation to the contraction of a tensor network with such element type.
 %We derived the backward rule for tropical tensor network to bound the search of solution space.
 %Although many of these properties are global, we can encode them to different tensor element types as commutative semirings.
@@ -1338,39 +1344,12 @@ By choosing different $r$, one can obtain better precision in low independent se
 \section{Integer sequences formed by the number of independent sets}
 
 \begin{table}[h]
-\caption{The number of independent sets for square grid graphs of size $L\times L$. This forms the integer sequence \href{https://oeis.org/A006506}{OEIS A006506}.}
+\caption{The number of independent sets for square grid graphs of size $L\times L$. This forms the integer sequence \href{https://oeis.org/A006506}{OEIS A006506}.
+Here we only show two updated entries for $L=38,39$ that has not been computed before.}
 \begin{center}
 \scalebox{0.9}{
 \begin{tabular}{|c| >{\centering\arraybackslash} p{0.95\linewidth}|}
  \hline $L$  & square grid graphs \\
- \hline $ 1$ & 2  \\
- \hline $ 2$ & 7  \\
- \hline $ 3$ & 63  \\
- \hline $ 4$ & 1 234  \\
- \hline $ 5$ & 55 447  \\
- \hline $ 6$ & 5 598 861  \\
- \hline $ 7$ & 1 280 128 950  \\
- \hline $ 8$ & 660 647 962 955  \\
- \hline $ 9$ & 770 548 397 261 707  \\
- \hline $ 10$ & 2 030 049 051 145 980 050  \\
- \hline $ 11$ & 12 083 401 651 433 651 945 979  \\
- \hline $ 12$ & 162 481 813 349 792 588 536 582 997  \\
- \hline $ 13$ & 4 935 961 285 224 791 538 367 780 371 090  \\
- \hline $ 14$ & 338 752 110 195 939 290 445 247 645 371 206 783  \\
- \hline $ 15$ & 52 521 741 712 869 136 440 040 654 451 875 316 861 275  \\
- \hline $ 16$ &  18 396 766 424 410 124 752 958 806 046 933 947 217 821 482 942 \\
- \hline $ 17$ &  14 557 601 701 834 111 295 974 187 104 248 827 765 798 599 152 358 303 \\
- \hline $ 18$ &  26 024 585 612 650 837 861 658 126 921 792 857 026 992 497 268 285 945 167 621 \\
- \hline $ 19$ &  105 105 055 066 577 962 012 604 229 608 317 915 229 737 651 637 019 975 757 755 051 314 \\
- \hline $ 20$ &  958 979 036 662 929 619 406 859 624 886 958 746 851 620 546 557 485 230 898 539 651 354 907 499 \\
- \hline $ 21$ &  19 766 982 580 727 525 559 447 459 703 066 410 506 378 295 841 376 040 664 015 562 851 325 369 819 076 327 \\
- \hline $ 22$ &  920 486 427 724 231 647 653 646 535 134 255 190 048 558 085 587 696 509 535 085 179 014 710 020 739 303 637 413 062 \\
- \hline $ 23$ & 96 836 737 362 332 577 228 126 233 146 266 027 907 220 602 904 916 569 863 928 397 932 638 147 313 462 817 836 132 159 477 643 \\
- \hline $ 24$ & 23 014 876 830 102 973 080 295 375 510 481 185 265 791 418 130 718 634 637 816 237 986 620 978 856 344 595 418 898 906 840 911 239 867 869 \\
- \hline $ 25$ & 12 357 280 628 458 621 610 261 003 683 798 282 889 567 362 022 871 449 310 490 079 744 330 288 088 293 888 381 458 751 196 205 785 114 467 063 479 978 \\
- \hline $ 26$ & 14 989 353 830 657 887 045 253 535 577 369 170 604 561 059 504 403 111 230 207 533 142 521 161 755 543 754 839 412 836 401 335 298 693 619 461 437 872 472 165 615 \\
- \hline $ 27$ &  41 076 048 814 756 904 170 038 431 958 637 474 710 328 322 517 168 428 037 124 975 797 939 221 729 929 250 098 889 601 666 346 169 376 778 430 801 983 574 787 538 529 309 191 \\
- \hline $ 28$ &  254 296 368 874 677 123 746 928 211 898 730 495 474 495 246 876 690 760 159 507 126 754 738 599 026 016 292 991 448 162 576 157 292 681 301 528 315 863 006 160 203 433 527 765 235 617 478 \\
  \hline $ 29$ & 3 556 619 491 488 838 337 298 644 336 171 591 528 960 687 731 348 622 394 588 805 214 244 031 766 315 339 709 627 465 589 460 212 852 431 000 227 410 783 701 037 177 097 019 793 172 369 009 198 594 591 \\
  \hline $ 30$ &  112 377 766 778 527 126 203 646 648 402 050 958 984 330 252 199 994 469 198 044 986 979 798 657 215 652 532 005 142 877 926 040 203 499 014 641 860 333 039 219 325 350 361 465 468 647 055 420 204 598 509 312 491 705 \\
   \hline
