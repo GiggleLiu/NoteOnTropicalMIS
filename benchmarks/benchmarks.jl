@@ -23,15 +23,6 @@ function case_r3(n, k=3; seed=2, maxsc)
     return optcode
 end
 
-# setup global arguments
-const TASK = length(ARGS) >= 1 ? ARGS[1] : "size_max"
-const DEVICE = length(ARGS) >= 2 ? parse(Int, ARGS[2]) : -1
-
-if DEVICE >= 0
-    CUDA.device!(DEVICE)
-    Base.ndims(::Base.Broadcast.Broadcasted{CUDA.CuArrayStyle{0}}) = 0
-end
-
 function run_benchmarks(cases; output_file)
     suite = BenchmarkGroup()
     for (case, f) in cases
@@ -84,13 +75,18 @@ end
     end
 end
 
-@cast function gpu()
-    cases = generate_instances(250, 27)
-    for TASK in ["counting_sum", "size_max", "counting_max", "counting_max2",
-        "counting_all_(fft)", 
-	"counting_all_(finitefield)",
-        "config_max", "config_max_(bounded)"
-        ]
+@cast function gpu(group::Int)
+    if group == 1
+        cases = generate_instances(250, 27)
+        tasks = ["counting_sum", "size_max", "counting_max", "counting_max2"]
+    elseif group == 2
+        cases = generate_instances(220, 27)
+        tasks = ["counting_all_(fft)", "counting_all_(finitefield)", "config_max_(bounded)"]
+    else
+        cases = generate_instances(250, 26)
+        tasks = ["config_max"]
+    end
+    for TASK in tasks
         runcase(cases; task=TASK, usecuda=true)
     end
 end

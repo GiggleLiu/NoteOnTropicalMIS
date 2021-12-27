@@ -4,6 +4,7 @@ using BenchmarkTools, Random
 using LinearAlgebra
 using CUDA
 using OMEinsumContractionOrders
+using Comonicon
 
 BLAS.set_num_threads(1)
 
