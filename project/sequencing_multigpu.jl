@@ -51,14 +51,13 @@ function (se::SlicedEinsum{LT,ET})(@nospecialize(xs::AbstractArray...); size_inf
     results = multiprocess_run(inputs) do (k, slicemap)
         @info "computing slice $k/$(length(it))"
         device!(DEVICES[Distributed.myid()-1])
-        flush(stdout)
         xsi = ntuple(i->CuArray(OMEinsumContractionOrders.take_slice(xs[i], it.ixsv[i], slicemap)), length(xs))
         Array(einsum(eins_sliced, xsi, it.size_dict_sliced))
     end
-    @show results
     for (resi, (k, slicemap)) in zip(results, inputs)
         OMEinsumContractionOrders.fill_slice!(res, it.iyv, resi, slicemap)
     end
+    @show res
     return res
 end
 end
@@ -70,6 +69,7 @@ function sequencing(n; writefile, sc_target, usecuda, nslices=1)
     println("Graph size $n, usecuda = $usecuda")
     @show timespace_complexity(gp)
     res = GraphTensorNetworks.big_integer_solve(Int32, 100) do T
+        @info "T = $T"
         @time Array(GraphTensorNetworks.contractx(gp, one(T); usecuda=usecuda))
     end
     @show res
@@ -78,7 +78,7 @@ function sequencing(n; writefile, sc_target, usecuda, nslices=1)
 end
 
 Random.seed!(2)
-for L=31
+for L=38
     println("computing L = $L")
-    @time sequencing(L; writefile=true, sc_target=29, usecuda=USECUDA, nslices=L-29)
+    @time sequencing(L; writefile=true, sc_target=28, usecuda=USECUDA, nslices=L-28)
 end
