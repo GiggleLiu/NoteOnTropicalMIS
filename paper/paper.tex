@@ -287,7 +287,6 @@ Our method can also be used for finding ``maximal'' independent set properties.
 Here, the term ``maximal'' has a different meaning from ``maximum''  which we discussed above;
 a maximal independent set is an independent set that is not a subset of any other independent set, but its size may not be the maximum.
 We show how to compute properties related to maximal independent sets as well as other combinatorial optimization problems in \App{app:otherproblems}.
-The implementation of our algorithm is publicly available online: ~\cite{repolink}.
 
 \section{Tensor networks}
 Tensor network~\cite{Cirac2020, Orus2014} is also known as einsum, factor graph or sum-product network~\cite{Bishop2006} in different contexts,
@@ -876,7 +875,7 @@ The graphs that we use in benchmarks are random three regular graphs,
     \includegraphics[width=\textwidth, trim={0cm 0cm 0cm 0cm}, clip]{figures/fig1.pdf}
     \caption{Benchmark results for computing different properties of independent sets of a random three regular graph with different tensor element types.
     The time in these plots only includes tensor network contraction, without taking the contraction order finding and just in time compiling time into account.
-    Legends are properties, data types and devices that we used in the computation, one can find the corresponding computed property in \Tbl{tbl:generictypes}.
+    Legends are properties, algebra and devices that we used in the computation, one can find the corresponding computed property in \Tbl{tbl:generictypes}.
     (a) tree width versus the number of vertices for the benchmarked graphs. 
     (b) The computing time for calculating the MIS size and for counting of the number of independent sets (ISs), the number of MISs, and the number of independent sets having size $\alpha(G)$ and $\alpha(G)-1$ (denoted as ``MISs and (MIS-1)s'').
     (c) The computing time for calculating the independence polynomials with different approaches.
@@ -923,12 +922,12 @@ The number of independent sets for square grid graphs of size $L \times L$ form 
 \subsubsection{Computing the overlap gap property}
 
 With the ability to enumerate configurations, we can analyse the landscape of the target problem, like the overlap gap property~\cite{Gamarnik2013, Gamarnik2019}.
-We compute all MIS configurations for two random 3 regular graph instances of size 200, and show the Hamming distance statistics in \Fig{fig:hamming}.
-Some figure has single peak structure while some other has multiple peaks. Multiple peak structure indicates disconnected clusters in the configuration space.
+We compute all MIS and MIS-1 configurations for two random 3 regular graph instances of size 100, and show the Hamming distance statistics in \Fig{fig:hamming}.
+The multiple peak structure indicates disconnected clusters in the configuration space.
 \begin{figure} 
     \centering
     \includegraphics[width=\textwidth, trim={0cm 0cm 0cm 0cm}, clip]{figures/fig3.pdf}
-    \caption{The statistics of Hamming distances between two MIS configurations for two specific three regular graph instance of size $200$.}
+    \caption{The statistics of Hamming distances between two MIS or MIS-1 configurations for two random three regular graph instances of size $100$.}
     \label{fig:hamming}
 \end{figure}
 

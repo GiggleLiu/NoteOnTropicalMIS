@@ -137,4 +137,31 @@ class PLT(object):
 
             plt.tight_layout(h_pad=30.0)
 
+    def fig4(self, tp="pdf"):  # independence polynomials
+        with DataPlt(filename="fig3.%s"%tp, figsize=(7,3)) as dp:
+            ax = plt.subplot(121)   # treewidth
+            cornertex2("(a)", ax, offset=(0,0))
+            nv = 100
+            seed = 3
+            datafile = "../../democode/data/r3_n%d_hamming_%d.txt"%(nv,seed)
+            y = np.loadtxt(datafile)
+            n = np.max(np.where(y > 0)[0])
+            plt.bar(range(n), y[:n], lw=1.5, color="C4", ls="-")
+            plt.xlabel("Hamming distance")
+            plt.ylabel("Count")
+            plt.xlim(0, nv)
+            ax.ticklabel_format(style="scientific", scilimits=(-3, 3))
+
+            ax = plt.subplot(122)   # treewidth
+            cornertex2("(b)", ax, offset=(0,0))
+            seed = 5
+            datafile = "../../democode/data/r3_n%d_hamming_%d.txt"%(nv,seed)
+            y = np.loadtxt(datafile)
+            n = np.max(np.where(y > 0)[0])
+            plt.bar(range(n), y[:n], lw=1.5, color="C4", ls="-")
+            plt.xlabel("Hamming distance")
+            plt.xlim(0, nv)
+
+            plt.tight_layout(h_pad=30.0)
+
 fire.Fire(PLT())
