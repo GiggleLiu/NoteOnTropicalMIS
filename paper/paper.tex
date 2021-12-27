@@ -228,7 +228,7 @@ At the same time, our algorithms are very simple to implement and one can direct
 %One can easily find a good contraction order for the tensor network representation of a graph $G$ with thousands of vertices. 
 The algorithmic complexity of this approach is $2^{{\rm tw}(G)}$, where ${\rm tw} (G)$ the tree width of the problem graph.
 Our generic programming tensor network method can be used to compute properties of other problems like cut size, coloring, maximal cliques et al.
-To demonstrate the versatility of this tool, we apply it to a few examples including the calculations of the hard-square entropy constant, Euler characteristics of the independence complex, partition functions, and finite-temperature phase transitions on square-lattice graphs\blue{remove some examples}.
+To demonstrate the versatility of this tool, we apply it to a few examples including the calculations of the hard-square entropy constant and overlap gap property of three regular graphs.
 \end{abstract}
 
 % REQUIRED
@@ -242,15 +242,13 @@ independent set, tensor network, maximum independent set, independence polynomia
   05C31, 14N07
 \end{AMS}
 
-\blue{independence polynomial at -1~\cite{Bousquet2008,Levit2009},
-two motivations of computing independence polynomial: 1. Lee-Yang zero~\cite{Lee1952,Yang1952}, 2. Lov{\'a}sz local lemma~\cite{Scott2005}.
-}
 \section{Introduction}
 In graph theory and combinatorial optimization, there are many interesting hard computational problems concerning properties of independent sets.
 %An independent set of a graph is a subset of its vertices that no two vertices in this set are adjacent to each other.
 For an undirected graph $G = (V,E)$, an independent set $I \subseteq V$ is a set of vertices that for any vertex pair $u,v \in I$, $(u, v) \not\in E$. %there is no edge connecting $u$ and $v$ in $G$.
 The primary insterest of many computational complexity theorists is finding the maximum size of such vertex sets $\alpha(G) \equiv \max_{I}|I|$ and one of the sets of this size.
-Finding $\alpha(G)$ is a hard computational problem; moreover, it is NP-hard to even approximate $\alpha(G)$ within a factor $|V|^{1-\epsilon}$ for an arbitrarily small positive $\epsilon$ ~\cite{Hastad1996}.
+Finding $\alpha(G)$ is a hard computational problem; moreover, it is NP-hard to even approximate $\alpha(G)$ within $|V|^{1-\epsilon}$ ~\cite{Hastad1996},
+meaning there is unlikely a polynomial time algorithm to find an independent set with size $\alpha(G)/|V|^{1-\epsilon}$ for an arbitrarily small positive $\epsilon$.
 Naive exhaustive search for an MIS requires computing time $O\left(2^{|V|} \right)$.
 People developed more efficient exact algorithms for finding MISs, including the branching algorithms~\cite{Tarjan1977,Robson1986} and dynamic programming.
 The branching algorithms can reduce the base of the exponential time scaling to, e.g., $1.1996^{|V|} {|V|}^{O(1)}$~\cite{Xiao2017}, 
@@ -259,19 +257,22 @@ these methods can produce algorithms of complexity $O(2^{\text{tw}(G)} \text{tw}
 People are eager to find better algorithms for solving the MIS problem;
 not only for it has a wide range of applications in scheduling, logistics, social network analysis, bioinformatics, wireless networks and telecommunication,
 map labelling, computer vision, etc.~\cite{Butenko2003, Wu2015}, but also for it is a well know NP-complete problem that can be mapped from
- to many other important combinatorial optimization problems in polynomial time such as circuit satisfiability~\cite{}, the maximum clique problem and the maximum vertex cover~\cite{Moore2011} problems.
+ many other important combinatorial optimization problems in polynomial time such as 3-satisfiability problem, the maximum clique problem and the maximum vertex cover problem~\cite{Moore2011}.
 
 %more concretely, an maximal independent set of a graph $G$ corresponds to a maximum clique in the complement graph of $G$,
 %and the complement vertex set of an MIS corresponds to a minimum vertex cover of the graph $G$.
 %In this paper, the term ``maximal'' has a different meaning from ``maximum''  which we discussed above; a maximal independent set is an independent set that is not a subset of any other independent set, but its size may not be the maximum.
 In this paper, we do not limit our discussion to finding one of the maximum indepedent sets and its size.
-There are many other interesting problems pertaining to independent sets, such as the number of independent sets at a given size
+There are many other interesting problems pertaining to independent sets, such as the number of independent sets of a given size
 and enumerating independent sets at a give size or what we call computing \textit{properties}.
 Some of these problems are of great interest in physics applications such as the hard-core lattice gas model~\cite{Dyre2016, Fernandes2007}
 in statistical mechanics and the Rydberg hamiltonian with neutral atoms~\cite{Pichler2018} \red{cite experiment when it's ready};
-they can, for example, be used to understand phase transitions, to analyse the overlap gap properties~\cite{Gamarnik2013, Gamarnik2019} and to identify harder graphs in an ensemble of graphs \red{cite experiment}.
-The problem of computing the independence polynomial belongs to the complexity class \#P-hard. One approach to exactly compute the independence polynomial requires a computational time of $O(1.442^{|V|})$~\cite{Ferrin2014}
-\blue{I am not sure about this complexity, this is based on the naive analysis of theorem 2.2 in ~\cite{Ferrin2014}}. There are some interesting works on efficiently approximating the independence polynomial~\cite{Harvey2018}, but in this work, we focus on computing the independence polynomial exactly.
+they can, for example, be used to understand phase transitions, to analyse the overlap gap property~\cite{Gamarnik2013, Gamarnik2019} and to identify harder graphs in an ensemble of graphs \red{cite experiment}.
+Finding the number of independent sets of a given size is equivalent to computing the coefficients of independence polynomial,
+which is a useful graph characteristics that can related to Euler characteristics of the independence complex~\cite{Bousquet2008,Levit2009}, partition functions~\cite{Lee1952,Yang1952} et al.
+Computing independence polynomials belongs to the complexity class \#P-hard 
+and only exponential algorithms~\cite{Ferrin2014} are known to compute it exactly.
+There are also some interesting works on efficiently approximating the independence polynomial~\cite{Harvey2018}, but in this work, we mainly focus on computing the independence polynomial exactly.
 We introduce a tensor-network based framework to compute the various properties pertaining to independent sets.
 We map the independent set problem into generic tensor network contraction with specially designed tensor element algebra.
 Its algorithmic complexity is similar to that of dynamic programming, i.e. scales exponentially as ${\rm tw}(G)$.
@@ -281,8 +282,7 @@ Its high performance benefits from recent advances in random tensor-network cont
 People developed algorithms to optimize the contraction order for tensor networks with thousands of vertices,
 and the optimized contraction order gives us a near optimal space complexity $2^{\sim{\rm tw}(G)}$ to contract the tensor network.
 For cases when the tensors being too large to fit into a GPU, slicing technique can be used to further reduce the space consumption.
-Lastly, we provide a few examples and show that this toolbox can be used to calculate the hard-square entropy constant,
-Euler characteristics of the independence complex, partition functions, and finite-temperature phase transitions on square-lattice graphs. 
+Lastly, we provide a few examples and show that this toolbox can be used to calculate the hard-square entropy constant and overlap gap property. 
 Our method can also be used for finding ``maximal'' independent set properties.
 Here, the term ``maximal'' has a different meaning from ``maximum''  which we discussed above;
 a maximal independent set is an independent set that is not a subset of any other independent set, but its size may not be the maximum.
@@ -355,8 +355,8 @@ the elements in the tensor networks are limited to standard number types such as
 Owning to the development of modern compiling technology, we no longer need to limit our imagination to standard number types.
 One of the key concepts that push the technology forward is called generic programming:
 
-\begin{definition}[Generic programming]
-   Generic programming is an approach to programming that focuses on designing algorithms and data structures so that they work in the most general setting without loss of efficiency. ~\cite{Stepanov2014}
+\begin{definition}[Generic programming ~\cite{Stepanov2014}]
+   Generic programming is an approach to programming that focuses on designing algorithms and data structures so that they work in the most general setting without loss of efficiency.
 \end{definition}
 
 This definition of generic programming contains two major aspects: a single program works in the most general setting and efficiency.
@@ -431,13 +431,14 @@ For each label $s_i$, we defined a prametrized rank-one vertex tensor $W(x_i)$ i
         x_i
     \end{matrix}\right).
 \end{equation}
-On each edge $(u, v)$, we define a matrix $B$ indexed by $(s_u, s_v)$ as
+We use subscripts to index tensor elements, e.g. $W(x_i)_0=1$ is the first element associated with $s_i=0$ and $W(x_i)_1=x_i$ is the second element associated with to $s_i=1$.
+Similarly, on each edge $(u, v)$, we define a matrix $B$ indexed by $s_u$ and $s_v$ as
 \begin{equation}
     \qquad \quad 
        B = \left(\begin{matrix}
         1  & 1\\
         1 & 0
-    \end{matrix}\right), \label{eq:edgetensor}
+    \end{matrix}\right). \label{eq:edgetensor}
 \end{equation}
 The corresponding tensor network contraction gives
 \begin{equation}\label{eq:idp}
@@ -653,6 +654,8 @@ From this, we can define a new algebra as
 \end{split}%& \text{\rlap{(P1)}}
 \label{eq:countingtropical}
 \end{equation}
+To implement this algebra programmatically, we create a data type with two fields $(x, a_x)$ to store the MIS size and its counting,
+and define the above operations and constants correspondingly.
 When we are only interested in knowing the MIS size, we can drop the counting field.
 The algebra of the exponents becomes the max-plus tropical algebra~\cite{Maclagan2015, Moore2011}.:
 \begin{equation}\eqname{T}
@@ -709,7 +712,7 @@ To enumerate all independent sets, we designed an algebra defined on sets of bit
 \end{equation}
 where $s$ and $t$ are each a set of $|V|$-bit strings and $\lor^\circ$ is the bitwise OR operation over two bit strings.
 \begin{example}\label{eg:setalgebra}
-    For elements being bit vectors of length $5$, we have the following set algebra
+    For elements being bit strings of length $5$, we have the following set algebra
 \begin{equation*}
 \begin{split}
     &\{00001\} \oplus \{01110, 01000\} = \{01110, 01000\} \oplus \{00001\} = \{00001,01110, 01000\}\\
@@ -723,7 +726,7 @@ where $s$ and $t$ are each a set of $|V|$-bit strings and $\lor^\circ$ is the bi
 \end{example}
 
 To enumerate all independent sets, 
-we initialize variable $x_{i}$ in the vertex tensor to $x_i = \{\boldsymbol{e}_{i}\}$, where $\boldsymbol{e}_i$ is the standard basis vector of size $|V|$ and having 1 at index $i$.
+we initialize variable $x_{i}$ in the vertex tensor to $x_i = \{\boldsymbol{e}_{i}\}$, where $\boldsymbol{e}_i$ is a basis bit string of size $|V|$ that has only one non-zero value at location $i$.
 The vertex and edge tensors are thus
 \begin{equation}
     W^{\rm enum}(\{\boldsymbol{e}_{i}\}) = \left(\begin{matrix}
@@ -739,7 +742,9 @@ The vertex and edge tensors are thus
 
 This set algebra can serve as the coefficients in \Eq{eq:countingtropical} to enumerate all MISs, \Eq{eq:polynomial} to enumerate independent sets of different sizes,
 or \Eq{eq:max2poly} to enumerate all independent sets of size $\alpha(G)$ and $\alpha(G)-1$.
-For example, to enumerate only the MISs, with the tropical algebra, we define $s(k) = (s_{k}, k)$, where the coefficients follows the algebra in \Eq{eq:set} and the orders follows the max-plus tropical algebra.
+As long as the coefficients in a truncated polynomial forms a commutative semiring, the polynomial itself is a commutative semiring.
+For example, to enumerate only the MISs, with the tropical algebra, we define $s_{k}\infty^k$,
+where the coefficient follows the algebra in \Eq{eq:set} and the orders follows the max-plus tropical algebra.
 The combined operations become: 
 %\begin{equation}
 %\begin{split}
@@ -871,8 +876,8 @@ The graphs that we use in benchmarks are random three regular graphs,
     \includegraphics[width=\textwidth, trim={0cm 0cm 0cm 0cm}, clip]{figures/fig1.pdf}
     \caption{Benchmark results for computing different properties of independent sets of a random three regular graph with different tensor element types.
     The time in these plots only includes tensor network contraction, without taking the contraction order finding and just in time compiling time into account.
+    Legends are properties, data types and devices that we used in the computation, one can find the corresponding computed property in \Tbl{tbl:generictypes}.
     (a) tree width versus the number of vertices for the benchmarked graphs. 
-    Legends are the data types that we used in the computation, one can find the corresponding computed property in \Tbl{tbl:generictypes}.
     (b) The computing time for calculating the MIS size and for counting of the number of independent sets (ISs), the number of MISs, and the number of independent sets having size $\alpha(G)$ and $\alpha(G)-1$ (denoted as ``MISs and (MIS-1)s'').
     (c) The computing time for calculating the independence polynomials with different approaches.
     (d) The computing time for configuration enumeration, including the enumeration of all independent set configurations, a single MIS configuration, all MIS configurations, all independent set configurations having size $\alpha(G)$ and $\alpha(G)-1$,  with or without bounding the enumeration space.
@@ -915,11 +920,7 @@ the King's graphs, denoted as K; the King's graphs with a filling factor $p$, de
 \subsubsection{Number of independent sets and hard-square entropy constant}
 The number of independent sets for square grid graphs of size $L \times L$ form a well-known integer sequence (\href{https://oeis.org/A006506}{OEIS A006506}), which is thought as a two-dimensional generalization of the Fibonacci numbers.
 
-\subsubsection{Euler characteristics of independence complex}
-
-\subsubsection{Partition functions and finite-temperature phase transitions}
-
-\subsubsection{Computing the Hamming distance statistics}
+\subsubsection{Computing the overlap gap property}
 
 With the ability to enumerate configurations, we can analyse the landscape of the target problem, like the overlap gap property~\cite{Gamarnik2013, Gamarnik2019}.
 We compute all MIS configurations for two random 3 regular graph instances of size 200, and show the Hamming distance statistics in \Fig{fig:hamming}.
@@ -1151,10 +1152,12 @@ Again, if we contract this tensor network in the column-wise order, the maximum 
 %\fi
 %In the following, we introduce some other problems that can be expressed by a tensor network.
 \subsection{Maximal independent sets and maximal cliques}\label{sec:maximal}
-Finding maximal independent sets of a graph is equivalent to finding the maximal cliques of its complement graph, so in the following we only discuss how to find maximal independent sets.
-Sometimes, one may be interested in knowing maximal independent sets to understand why his or her program for solving MIS is trapped in a local minimum.
-Then instead of counting all independent sets, the maximal independence polynomial counts the number of maximal independent sets of various sizes~\cite{Hu2017} would be more helpful.
- Concretely, it is defined as
+Finding maximal independent sets of a graph is equivalent to finding the maximal cliques of its complement graph, so in the following we mainly discuss how to find maximal independent sets.
+Let us denote the neighborhood of a vertex $v$ as $N(v)$ and denote $N[v] = N(v)\cup \{v\}$.
+A maximal independent set $I_m$ is an independent set where there exists no vertex $v \in V$ such that $I_m \cap N[v]  = \emptyset$.
+Similar to the independence polynomial, the maximal independence polynomial counts the number of maximal independent sets of various sizes~\cite{Hu2017},
+which can help us understand why the program for solving MIS is trapped in a local minimum.
+Concretely, it is defined as
 \begin{equation}
 I_{\rm max}(G, x) = \sum_{k=0}^{\alpha(G)} b_k x^k,
 \end{equation}
@@ -1163,8 +1166,6 @@ Comparing with the independence polynomial in \Eq{eq:idpdef}, we have $b_{k} \le
 If we want to find an MIS, $b_{k}$ counts the number of local optimum at size $k < \alpha(G)$, and can, in some cases, provide hints on the difficulty of finding the MIS using local algorithms~\red{cite experiment}.
 The uni-modality, log-concavity, and real-rootness properties of the maximal independence polynomial for special classes of graphs have also been studied~\cite{Hu2017}. 
 
-Let us denote the neighborhood of a vertex $v$ as $N(v)$ and denote $N[v] = N(v)\cup \{v\}$.
-A maximal independent set $I_m$ is an independent set where there exists no vertex $v \in V$ such that $I_m \cap N[v]  = \emptyset$.
 We can modify the tensor network for computing the independence polynomial to include this restriction. Instead of defining the restriction on vertices and edges, it is more natural to define it on $N[v]$:
 \begin{equation}\label{eq:maximal}
     T(x_v)_{s_1,s_2,\ldots,s_{|N(v)|},s_v} = \begin{cases}
@@ -1295,13 +1296,14 @@ Similarly, one can define the k-coloring problem on edges too by switching the r
 \subsection{Max cut problem}
 Max cut problem is also known as the boolean spinglass problem.
 For a vertex $v\in V$, we define a boolean degree of freedom $s_v\in\{0, 1\}$.
-Then the max cut problem can be encoded to tensor networks by mapping an edge $(i,j)\in E$ to an edge matrix labeled by $(s_i, s_j)$
+Then the max cut problem can be encoded to tensor networks by mapping an edge $(i,j)\in E$ to an edge matrix labeled by $s_is_j$
 \begin{equation}
     B(x_{\langle i, j\rangle}) = \left(\begin{matrix}
         1 & x_{\langle i, j\rangle}\\
         x_{\langle i, j\rangle} & 1
-    \end{matrix}\right).
+    \end{matrix}\right),
 \end{equation}
+where variable $x_{\langle i, j\rangle}$ represents a cut on edge $(i, j)$ or a domain wall of an Ising spinglass.
 Similar to other problems, we can define a polynomial about edges variables by setting $x_{\langle i, j\rangle} = x$,
 where its $k$th coefficient is two times the number of configurations of cut size $k$.
 
@@ -1399,6 +1401,6 @@ Here we only show two updated entries for $L=38,39$ that has not been computed b
 \label{tbl:kingsgrid}
 \end{table}
 
-We also computed independence polynomial rigorously for these lattices in our Github repo\blue{add link to the repo}.
+We also computed independence polynomial rigorously for these lattices in our \href{https://github.com/GiggleLiu/NoteOnTropicalMIS/tree/master/data}{Github repo}.
 
 \end{document}
