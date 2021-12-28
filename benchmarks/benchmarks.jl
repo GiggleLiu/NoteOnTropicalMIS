@@ -60,10 +60,10 @@ end
 @cast function cpu(group::Int)
     if group==0
         cases = generate_instances(200, 27)
-        tasks=("config_max", "config_max_(bounded)", "configs_max_(bounded)")
+        tasks=("config_max", "config_max_(bounded)", "configs_max_(bounded)", "counting_max", "counting_max2")
     elseif group==1
-        cases = generate_instances(200, 27)
-        tasks = ("counting_sum", "size_max", "counting_max", "counting_max2")
+        cases = generate_instances(250, 27)
+        tasks = ("counting_sum", "size_max")
     elseif group==2
         cases = generate_instances(200, 27)
         tasks = ("counting_all_(fft)",)
