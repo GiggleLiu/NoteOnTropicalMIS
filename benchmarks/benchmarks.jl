@@ -58,12 +58,15 @@ function generate_instances(nmax::Int, maxsc::Int)
 end
 
 @cast function cpu(group::Int)
-    if group==1
+    if group==0
         cases = generate_instances(200, 27)
-        tasks = ("counting_sum", "size_max", "counting_max", "counting_max2", "config_max", "config_max_(bounded)", "configs_max_(bounded)")
+        tasks=("config_max", "config_max_(bounded)", "configs_max_(bounded)")
+    elseif group==1
+        cases = generate_instances(200, 27)
+        tasks = ("counting_sum", "size_max", "counting_max", "counting_max2")
     elseif group==2
         cases = generate_instances(200, 27)
-        tasks = ("counting_all_(fft)", "counting_all_(finitefield)")
+        tasks = ("counting_all_(fft)",)
     elseif group==3
         cases = generate_instances(170, 27)
         tasks = ("counting_all",)
@@ -76,6 +79,9 @@ end
     elseif group == 6
         cases = generate_instances(110, 27)
         tasks = ("configs_max2",)
+    elseif group==7
+        cases = generate_instances(180, 27)
+        tasks = ("counting_all_(finitefield)",)
     end
     for TASK in tasks
         println(TASK)
