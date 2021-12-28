@@ -11,15 +11,14 @@ import os
 
 class PLT(object):
     def fig1(self, tp="pdf"):  # independence polynomials
-        nw = [(10, 3, 7.66), (20, 4, 9.01), (30, 4,9.63), (40, 5,10.36), (50, 8,12.32), (60, 8,12.63), (70, 8,12.55), (80, 10,14.68), (90, 13,16.76), (100, 13,17.67),
-            (110, 15, 18.94), (120, 15, 20.47), (130, 13, 18.23), (140, 17, 21.57), (150, 18, 22.41), (160, 20, 26.23), (170, 19, 24.15), (180, 24, 32.04), (190, 24, 30.27), (200, 25, 32.10)]
-        ns = [x[0] for x in nw]
+        ns =[10*i for i in range(1, 26)]
+        treewidth = np.loadtxt("../../benchmarks/data/treewidth.dat")
         FS = 8
-        with DataPlt(filename="fig1.%s"%tp, figsize=(10,6)) as dp:
+        with DataPlt(filename="fig1.%s"%tp, figsize=(10,7)) as dp:
             ax = plt.subplot(221)   # treewidth
             cornertex("(a)", ax, offset=(0,0))
-            plt.plot(ns, [x[1] for x in nw], label="space complexity (tree width)")
-            plt.plot(ns, [x[2] for x in nw], label="time complexity")
+            plt.plot(ns, treewidth[:,1], label="space complexity (tree width)")
+            plt.plot(ns, treewidth[:,0], label="time complexity")
             plt.xlabel("number of vertices, $|V|$")
             plt.ylabel("complexity")
             tws = np.arange(0, 35, 5)

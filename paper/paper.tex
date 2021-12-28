@@ -252,7 +252,7 @@ meaning there is unlikely a polynomial time algorithm to find an independent set
 Naive exhaustive search for an MIS requires computing time $O\left(2^{|V|} \right)$.
 People developed more efficient exact algorithms for finding MISs, including the branching algorithms~\cite{Tarjan1977,Robson1986} and dynamic programming.
 The branching algorithms can reduce the base of the exponential time scaling to, e.g., $1.1996^{|V|} {|V|}^{O(1)}$~\cite{Xiao2017}, 
-while dynamic programming approaches~\cite{Courcelle1990, Fomin2013} works better for graphs with a small treewidth $\text{tw}(G)$;
+while dynamic programming approaches~\cite{Courcelle1990, Fomin2013} works better for graphs with a small treewidth $\text{tw}(G)$, and
 these methods can produce algorithms of complexity $O(2^{\text{tw}(G)} \text{tw}(G) |V|)$.
 People are eager to find better algorithms for solving the MIS problem;
 not only for it has a wide range of applications in scheduling, logistics, social network analysis, bioinformatics, wireless networks and telecommunication,
@@ -881,8 +881,6 @@ The graphs that we use in benchmarks are random three regular graphs,
     (c) The computing time for calculating the independence polynomials with different approaches.
     (d) The computing time for configuration enumeration, including the enumeration of all independent set configurations, a single MIS configuration, all MIS configurations, all independent set configurations having size $\alpha(G)$ and $\alpha(G)-1$,  with or without bounding the enumeration space.
     \red{suggestions for the figure: 1. the legend seems to overlap the lines, especially the large subfigure. Not sure what's a better way to include the legend there. 2. I see you guys don't typically use markers. We typically use markers to distinguish the different lines, as well as using the color. Especially, for some journals, there is a physical non-color copy, so some requires the figures to be understandable without colors.}
-    \blue{If we use markers, the data poitns are too dense. I prefer not adding markers, not much people read papers with kindle or on paper.}
-    \blue{I used a smaller fontsize, there are still some overlaps. Does it look better (or worse) now?}
     }
     \label{fig:benchmark}
 \end{figure}
@@ -955,9 +953,8 @@ We would like to thank Pan Zhang for sharing his python code for optimizing cont
 We would like to acknowledge Sepehr Ebadi, Maddie Cain and Leo Zhou for popping up inspiring questions about independent sets,
 their questions are driving forces of this project.
 Thank Chris Elord for helping us writing the fastest matrix multiplication libary for tropical numbers, TropicalGEMM.jl, he is a man of speed!
+Thank other open source software developers: Roger Luo, Time Besard and Katharine Hyatt for solving issues voluntarily.
 \blue{funding information}
-
-\blue{I am here!}
 
 \bibliographystyle{siamplain}
 \bibliography{refs}
