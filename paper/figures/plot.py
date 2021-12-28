@@ -25,6 +25,7 @@ class PLT(object):
             tws = np.arange(0, 45, 5)
             plt.yticks(tws, ["$2^{%d}$"%tw for tw in tws])
             plt.xticks(range(0, 300, 50))
+            plt.xlim(0, 260)
             plt.legend(loc="upper left", fontsize=FS, ncol=1)
 
             ax=plt.subplot(222)   # size
@@ -40,6 +41,7 @@ class PLT(object):
             plt.ylabel("time/s")
             plt.legend(loc="upper left", fontsize=FS, ncol=1)
             plt.xticks(range(0, 300, 50))
+            plt.xlim(0, 260)
             plt.ylim(1e-3,3e3)
 
             ax = plt.subplot(223)   # IDP
@@ -58,6 +60,7 @@ class PLT(object):
             plt.xlabel("number of vertices, $|V|$")
             plt.ylabel("time/s")
             plt.xticks(range(0, 300, 50))
+            plt.xlim(0, 260)
             plt.legend(loc="upper left", fontsize=FS)
             plt.ylim(1e-3,3e3)
 
@@ -74,6 +77,7 @@ class PLT(object):
             plt.xlabel("number of vertices, $|V|$")
             plt.ylabel("time/s")
             plt.xticks(range(0, 300, 50))
+            plt.xlim(0, 260)
             plt.legend(loc="upper left", fontsize=FS)
             plt.ylim(1e-3,3e3)
             #plt.plot(twinx(), ns, getindex.(nw, 2), label="tree width",ytickfontsize=12, xticks=:none,yguidefontsize=14,legend=:bottomright, color=:black, ls=:dash, lw=2, ylabel="tree width")
