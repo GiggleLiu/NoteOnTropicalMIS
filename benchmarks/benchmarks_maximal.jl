@@ -47,16 +47,25 @@ const truncatedict = Dict([string(task)=>ntruncate for (task, ntruncate) in [
         ("counting_sum", 0), ("counting_all_(finitefield)", 0), ("configs_all", 3), ("bron", 4),
        ]])
 
-@main function runcase(task, usecuda, ntruncate=truncatedict[task], maxsc=27, seed=2)
-    if task != "bron"
+@main function runcase(task::String, usecuda::Bool, maxsc::Int=27, seed::Int=8)
+    if task ∈ ("tcsc", "treewidth")
+        cases = [case_r3(n, 3; seed=seed, maxsc=task=="tcsc" ? maxsc : 100) for n=10:10:100]
+        tcscs = zeros(length(cases), 2)
+        for i=1:length(cases)
+            tcscs[i,:] .= timespace_complexity(cases[i])
+        end
+        writedlm(joinpath(@__DIR__, "data", "maximal-$task.dat"), tcscs)
+    elseif task == "bron"
+        ntruncate=truncatedict[task]
+        graphs = [(Random.seed!(seed); Graphs.random_regular_graph(i*10, 3)) for i=1:10-ntruncate]
+        run_benchmarks([("n$(10*i)", ()->maximal_cliques(complement(g))) for (i, g) in enumerate(graphs)],
+                    output_file=joinpath(@__DIR__, "data", "maximal-$(task)-r3-$(usecuda ? "GPU" : "CPU").dat"))
         cases = [case_r3(n, 3; seed=seed, maxsc=maxsc) for (n, s) in [
             (10, 6), (20, 8), (30, 9), (40, 11), (50, 16), (60, 17), (70, 16), (80, 20), (90, 26), (100, 26),
         ][1:end-ntruncate]]
-        run_benchmarks([("n$(10*i)", ()->(usecuda ? (CUDA.@sync solve(case, replace(task, "_"=>" "); usecuda=true)) : solve((@show length(GraphTensorNetworks.labels(case.code)); case), replace(task, "_"=>" "); usecuda=false))) for (i, case) in enumerate(cases)],
-                    output_file=joinpath(@__DIR__, "data", "maximal-$(task)-r3-$(usecuda ? "GPU" : "CPU").dat"))
     else
-        graphs = [(Random.seed!(seed); Graphs.random_regular_graph(i*10, 3)) for i=1:10-ntruncate]
-        run_benchmarks([("n$(10*i)", ()->maximal_cliques(complement(g))) for (i, g) in enumerate(graphs)],
+        ntruncate=truncatedict[task]
+        run_benchmarks([("n$(10*i)", ()->(usecuda ? (CUDA.@sync solve(case, replace(task, "_"=>" "); usecuda=true)) : solve((@show length(GraphTensorNetworks.labels(case.code)); case), replace(task, "_"=>" "); usecuda=false))) for (i, case) in enumerate(cases)],
                     output_file=joinpath(@__DIR__, "data", "maximal-$(task)-r3-$(usecuda ? "GPU" : "CPU").dat"))
     end
 end

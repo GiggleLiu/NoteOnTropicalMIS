@@ -57,21 +57,29 @@ function generate_instances(nmax::Int, maxsc::Int)
     return cases
 end
 
-@cast function cpu()
-    truncatedict = Dict([string(task)=>ntruncate for (task, ntruncate) in [
-            ("counting_sum", 0), ("size_max", 0), ("counting_max", 0), ("counting_max2", 0),
-            ("counting_all", 3), ("counting_all_(fft)", 0), ("counting_all_(finitefield)", 0),
-            ("config_max", 0), ("configs_max",5), ("configs_all", 16), ("configs_max2", 9), ("config_max_(bounded)", 0), ("configs_max_(bounded)", 0)
-            ]])
-
-    cases = generate_instances(200, 27)
-    run = false
-    for TASK in keys(truncatedict)
+@cast function cpu(group::Int)
+    if group==1
+        cases = generate_instances(200, 27)
+        tasks = ("counting_sum", "size_max", "counting_max", "counting_max2", "config_max", "config_max_(bounded)", "configs_max_(bounded)")
+    elseif group==2
+        cases = generate_instances(200, 27)
+        tasks = ("counting_all_(fft)", "counting_all_(finitefield)")
+    elseif group==3
+        cases = generate_instances(170, 27)
+        tasks = ("counting_all",)
+    elseif group == 4
+        cases = generate_instances(150, 27)
+        tasks = ("configs_max",)
+    elseif group == 5
+        cases = generate_instances(40, 27)
+        tasks = ("configs_all",)
+    elseif group == 6
+        cases = generate_instances(110, 27)
+        tasks = ("configs_max2",)
+    end
+    for TASK in tasks
         println(TASK)
-        run && runcase(cases[1:end-truncatedict[TASK]]; task=TASK, usecuda=false)
-        if TASK == "counting_max2"
-	    run = true
-	end
+        runcase(cases; task=TASK, usecuda=false)
     end
 end
 
