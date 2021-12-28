@@ -17,12 +17,14 @@ class PLT(object):
         with DataPlt(filename="fig1.%s"%tp, figsize=(10,7)) as dp:
             ax = plt.subplot(221)   # treewidth
             cornertex("(a)", ax, offset=(0,0))
-            plt.plot(ns, treewidth[:,1], label="space complexity (tree width)")
+            plt.plot(ns, treewidth[:,1], label="space complexity (tree width)", color="C1")
+            plt.axhline(y=27, color="C1", ls="--", label="slicing threshold")
             plt.plot(ns, treewidth[:,0], label="time complexity")
             plt.xlabel("number of vertices, $|V|$")
             plt.ylabel("complexity")
-            tws = np.arange(0, 35, 5)
+            tws = np.arange(0, 45, 5)
             plt.yticks(tws, ["$2^{%d}$"%tw for tw in tws])
+            plt.xticks(range(0, 300, 50))
             plt.legend(loc="upper left", fontsize=FS, ncol=1)
 
             ax=plt.subplot(222)   # size
@@ -37,6 +39,7 @@ class PLT(object):
             plt.xlabel("number of vertices, $|V|$")
             plt.ylabel("time/s")
             plt.legend(loc="upper left", fontsize=FS, ncol=1)
+            plt.xticks(range(0, 300, 50))
             plt.ylim(1e-3,3e3)
 
             ax = plt.subplot(223)   # IDP
@@ -54,6 +57,7 @@ class PLT(object):
             plt.yscale("log")
             plt.xlabel("number of vertices, $|V|$")
             plt.ylabel("time/s")
+            plt.xticks(range(0, 300, 50))
             plt.legend(loc="upper left", fontsize=FS)
             plt.ylim(1e-3,3e3)
 
@@ -69,6 +73,7 @@ class PLT(object):
             plt.yscale("log")
             plt.xlabel("number of vertices, $|V|$")
             plt.ylabel("time/s")
+            plt.xticks(range(0, 300, 50))
             plt.legend(loc="upper left", fontsize=FS)
             plt.ylim(1e-3,3e3)
             #plt.plot(twinx(), ns, getindex.(nw, 2), label="tree width",ytickfontsize=12, xticks=:none,yguidefontsize=14,legend=:bottomright, color=:black, ls=:dash, lw=2, ylabel="tree width")

@@ -868,7 +868,7 @@ We run a single thread benchmark on CPU Intel(R) Xeon(R) CPU E5-2686 v4 @ 2.30GH
 and its CUDA version on a GPU Tesla V100.
 The results are summarized in Figure~\ref{fig:benchmark}.
 The graphs that we use in benchmarks are random three regular graphs,
- a typical type of sparse graphs that has a small tree width asymptotically smaller than $|V|/6$~\cite{Fomin2006}.
+ a typical type of sparse graphs that has a small tree width that asymptotically smaller than $|V|/6$~\cite{Fomin2006}.
 
 \begin{figure} 
     \centering
@@ -876,7 +876,7 @@ The graphs that we use in benchmarks are random three regular graphs,
     \caption{Benchmark results for computing different properties of independent sets of a random three regular graph with different tensor element types.
     The time in these plots only includes tensor network contraction, without taking the contraction order finding and just in time compiling time into account.
     Legends are properties, algebra and devices that we used in the computation, one can find the corresponding computed property in \Tbl{tbl:generictypes}.
-    (a) tree width versus the number of vertices for the benchmarked graphs. 
+    (a) time and space complexity versus the number of vertices for the benchmarked graphs.
     (b) The computing time for calculating the MIS size and for counting of the number of independent sets (ISs), the number of MISs, and the number of independent sets having size $\alpha(G)$ and $\alpha(G)-1$ (denoted as ``MISs and (MIS-1)s'').
     (c) The computing time for calculating the independence polynomials with different approaches.
     (d) The computing time for configuration enumeration, including the enumeration of all independent set configurations, a single MIS configuration, all MIS configurations, all independent set configurations having size $\alpha(G)$ and $\alpha(G)-1$,  with or without bounding the enumeration space.
@@ -885,7 +885,9 @@ The graphs that we use in benchmarks are random three regular graphs,
     \label{fig:benchmark}
 \end{figure}
 
-Figure (a) shows the time and space complexity obtained with tensor network optimization algorithm in Ref.~\cite{Kalachev2021}, where the space complexity is the same as the tree width of the problem graph.
+Figure (a) shows the time and space complexity (without slicing) of tensor network contraction for variaty of graph sizes, where the space complexity is the same as the tree width of the problem graph.
+It is obtained with tensor network contraction order optimization algorithm in Ref.~\cite{Kalachev2021}.
+In practice, slicing technique is used to fit the computation into a 32GB memory, the target tree width of slicing is $27$.
 One can see all the computing times in figure (b), (c) and (d) have a strong correlation with the treewidth.
 %The computations shown in \Fig{fig:benchmark} include independent set counting, finding maximum independent set size (panel b),
 %computing independence polynomial (panel c) and find one independent set and enumerating independent sets (panel d).
@@ -897,8 +899,7 @@ Most algebras can be computed on GPU, except those requiring dynamic sized struc
 In figure (c), one can see the Fourier transformation based method is the fastest in computing the independence polynomial,
 however, it maybe suffer from the round off errors. The finite field (GF$(p)$) approach is the only method that does not incur round-off errors and can run on a GPU.
 In figure (d), one can see the technique to bound the enumeration space improves the performance for more than one order in enumerating the MISs.
-Bounding can also reduce the memory usage significantly, without which the largest computable graph size is only $\sim150$ on a 32G memory device.
-%and the computing times of configuration enumeration also depend on the size of the target configuration space.
+Bounding can also reduce the memory usage significantly, without which the largest computable graph size is only $\sim150$ on a 32GB memory device.
 
 \subsection{Example case studies} In this section, we give a few examples where the different properties of independence sets are used.
 In all the examples, the types of graphs we used are shown in Figure~\ref{fig:lattices}, where vertices are all placed on square lattices with lattice dimensions $L \times L$.
