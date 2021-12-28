@@ -12,8 +12,9 @@ end
 using GraphTensorNetworks, Random, GraphTensorNetworks.OMEinsumContractionOrders, GraphTensorNetworks.OMEinsum
 using CUDA
 CUDA.allowscalar(false)
-const DEVICES = collect(devices())
 using DelimitedFiles
+const process_device_map = Dict(zip(procs, gpus))
+@show process_device_map
 
 function do_work(f, jobs, results) # define work function everywhere
     while true
@@ -37,8 +38,7 @@ function multiprocess_run(func, inputs::AbstractVector{T}) where T
     return Any[take!(results) for i=1:n]
 end
 
-function (se::SlicedEinsum{LT,ET})(@nospecialize(xs::AbstractArray...); size_info = nothing) where {LT, ET}
-    xs = Array.(xs)  # convert to CPU first, then back to GPU
+function multigpu_contract(se::SlicedEinsum{LT,ET}, xs::Tuple; size_info = nothing, process_device_map::Dict) where {LT, ET}
     length(se.slicing) == 0 && return se.eins(xs...; size_info=size_info)
     size_dict = size_info===nothing ? Dict{OMEinsum.labeltype(se),Int}() : copy(size_info)
     OMEinsum.get_size_dict!(se, xs, size_dict)
@@ -50,7 +50,7 @@ function (se::SlicedEinsum{LT,ET})(@nospecialize(xs::AbstractArray...); size_inf
     @info "start multiple process contraction!"
     results = multiprocess_run(inputs) do (k, slicemap)
         @info "computing slice $k/$(length(it))"
-        device!(DEVICES[Distributed.myid()-1])
+        device!(process_device_map[Distributed.myid()])
         xsi = ntuple(i->CuArray(OMEinsumContractionOrders.take_slice(xs[i], it.ixsv[i], slicemap)), length(xs))
         Array(einsum(eins_sliced, xsi, it.size_dict_sliced))
     end
@@ -62,20 +62,20 @@ function (se::SlicedEinsum{LT,ET})(@nospecialize(xs::AbstractArray...); size_inf
 end
 end
 
-function sequencing(n; writefile, sc_target, usecuda, nslices=1)
+function sequencing(n; writefile, sc_target, usecuda, nslices=1, process_device_map)
     g = square_lattice_graph(trues(n, n))
     gp = Independence(g; optimizer=TreeSA(sc_target=sc_target, sc_weight=1.0, nslices=nslices;
-        ntrials=20, βs=0.01:0.05:25.0, niters=50, rw_weight=1.0), simplifier=MergeGreedy())
+        ntrials=4, βs=0.01:0.05:25.0, niters=50, rw_weight=1.0), simplifier=MergeGreedy())
     println("Graph size $n, usecuda = $usecuda")
     @show timespace_complexity(gp)
-    return
     res = GraphTensorNetworks.big_integer_solve(Int32, 100) do T
         @info "T = $T"
         filename = joinpath(@__DIR__, "data", "$n-$(GraphTensorNetworks.modulus(one(T))).dat")
         if isfile(filename)
-            fill(readdlm(filename)[])
+            fill(T(readdlm(filename)[]))
         else
-            @time res = Array(GraphTensorNetworks.contractx(gp, one(T); usecuda=usecuda))
+            xs = GraphTensorNetworks.generate_tensors(one(T), gp)
+            @time res = multigpu_contract(gp.code, xs; process_device_map=process_device_map)
             writedlm(filename, res[].val)
             res
         end
@@ -85,9 +85,9 @@ function sequencing(n; writefile, sc_target, usecuda, nslices=1)
     writefile && writedlm(ofname, res)
 end
 
-# current best = 9
-Random.seed!(parse(Int, ARGS[2]))
-for L=39
+# current best = 204: 49.27
+Random.seed!(204) #parse(Int, ARGS[2]))
+for L=38
     println("computing L = $L")
-    @time sequencing(L; writefile=true, sc_target=28, usecuda=USECUDA, nslices=L-28)
+    @time sequencing(L; writefile=true, sc_target=28, usecuda=USECUDA, nslices=L-28, process_device_map=process_device_map)
 end
