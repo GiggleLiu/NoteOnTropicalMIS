@@ -1,20 +1,17 @@
 using Distributed, CUDA, GraphTensorNetworks, Random, DelimitedFiles, GraphTensorNetworks.OMEinsumContractionOrders, GraphTensorNetworks.OMEinsum
 USECUDA = parse(Bool, ARGS[1])
 @show USECUDA
-if USECUDA
-    println("find $(length(devices())) GPU devices")
-    addprocs(length(devices()))
-else
-    addprocs(4)
-end
+const gpus = collect(devices())
+println("find $(length(gpus)) GPU devices")
+const procs = addprocs(length(gpus))
+const process_device_map = Dict(zip(procs, gpus))
+@show process_device_map
 
 @everywhere begin
 using GraphTensorNetworks, Random, GraphTensorNetworks.OMEinsumContractionOrders, GraphTensorNetworks.OMEinsum
 using CUDA
 CUDA.allowscalar(false)
 using DelimitedFiles
-const process_device_map = Dict(zip(procs, gpus))
-@show process_device_map
 
 function do_work(f, jobs, results) # define work function everywhere
     while true
@@ -23,6 +20,7 @@ function do_work(f, jobs, results) # define work function everywhere
         res = f(job)
         put!(results, res)
     end
+end
 end
 
 function multiprocess_run(func, inputs::AbstractVector{T}) where T
@@ -60,7 +58,6 @@ function multigpu_contract(se::SlicedEinsum{LT,ET}, xs::Tuple; size_info = nothi
     @show res
     return res
 end
-end
 
 function sequencing(n; writefile, sc_target, usecuda, nslices=1, process_device_map)
     g = square_lattice_graph(trues(n, n))
@@ -74,8 +71,8 @@ function sequencing(n; writefile, sc_target, usecuda, nslices=1, process_device_
         if isfile(filename)
             fill(T(readdlm(filename)[]))
         else
-            xs = GraphTensorNetworks.generate_tensors(one(T), gp)
-            @time res = multigpu_contract(gp.code, xs; process_device_map=process_device_map)
+            xs = GraphTensorNetworks.generate_tensors(x->one(T), gp)
+            @time res = multigpu_contract(gp.code, (xs...,); process_device_map=process_device_map)
             writedlm(filename, res[].val)
             res
         end
@@ -85,9 +82,10 @@ function sequencing(n; writefile, sc_target, usecuda, nslices=1, process_device_
     writefile && writedlm(ofname, res)
 end
 
-# current best = 204: 49.27
-Random.seed!(204) #parse(Int, ARGS[2]))
-for L=38
+# current best for 38 = 204: 49.27
+# current best for 39 = 7: 49.27
+Random.seed!(7) #parse(Int, ARGS[2]))
+for L=39
     println("computing L = $L")
     @time sequencing(L; writefile=true, sc_target=28, usecuda=USECUDA, nslices=L-28, process_device_map=process_device_map)
 end
