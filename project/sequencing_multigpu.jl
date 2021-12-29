@@ -84,7 +84,7 @@ end
 
 # current best for 38 = 204: 49.27
 # current best for 39 = 7: 49.27
-Random.seed!(7) #parse(Int, ARGS[2]))
+Random.seed!(33) #parse(Int, ARGS[2]))
 for L=39
     println("computing L = $L")
     @time sequencing(L; writefile=true, sc_target=28, usecuda=USECUDA, nslices=L-28, process_device_map=process_device_map)
