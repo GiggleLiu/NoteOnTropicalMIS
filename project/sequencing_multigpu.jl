@@ -1,18 +1,16 @@
 using Distributed, CUDA, GraphTensorNetworks, Random, DelimitedFiles, GraphTensorNetworks.OMEinsumContractionOrders, GraphTensorNetworks.OMEinsum
 USECUDA = parse(Bool, ARGS[1])
 @show USECUDA
-if USECUDA
-    println("find $(length(devices())) GPU devices")
-    addprocs(length(devices()))
-else
-    addprocs(4)
-end
+const gpus = collect(devices())
+println("find $(length(gpus)) GPU devices")
+const procs = addprocs(length(gpus))
+const process_device_map = Dict(zip(procs, gpus))
+@show process_device_map
 
 @everywhere begin
 using GraphTensorNetworks, Random, GraphTensorNetworks.OMEinsumContractionOrders, GraphTensorNetworks.OMEinsum
 using CUDA
 CUDA.allowscalar(false)
-const DEVICES = collect(devices())
 using DelimitedFiles
 
 function do_work(f, jobs, results) # define work function everywhere
@@ -22,6 +20,7 @@ function do_work(f, jobs, results) # define work function everywhere
         res = f(job)
         put!(results, res)
     end
+end
 end
 
 function multiprocess_run(func, inputs::AbstractVector{T}) where T
@@ -37,8 +36,7 @@ function multiprocess_run(func, inputs::AbstractVector{T}) where T
     return Any[take!(results) for i=1:n]
 end
 
-function (se::SlicedEinsum{LT,ET})(@nospecialize(xs::AbstractArray...); size_info = nothing) where {LT, ET}
-    xs = Array.(xs)  # convert to CPU first, then back to GPU
+function multigpu_contract(se::SlicedEinsum{LT,ET}, xs::Tuple; size_info = nothing, process_device_map::Dict) where {LT, ET}
     length(se.slicing) == 0 && return se.eins(xs...; size_info=size_info)
     size_dict = size_info===nothing ? Dict{OMEinsum.labeltype(se),Int}() : copy(size_info)
     OMEinsum.get_size_dict!(se, xs, size_dict)
@@ -50,7 +48,7 @@ function (se::SlicedEinsum{LT,ET})(@nospecialize(xs::AbstractArray...); size_inf
     @info "start multiple process contraction!"
     results = multiprocess_run(inputs) do (k, slicemap)
         @info "computing slice $k/$(length(it))"
-        device!(DEVICES[Distributed.myid()-1])
+        device!(process_device_map[Distributed.myid()])
         xsi = ntuple(i->CuArray(OMEinsumContractionOrders.take_slice(xs[i], it.ixsv[i], slicemap)), length(xs))
         Array(einsum(eins_sliced, xsi, it.size_dict_sliced))
     end
@@ -60,25 +58,34 @@ function (se::SlicedEinsum{LT,ET})(@nospecialize(xs::AbstractArray...); size_inf
     @show res
     return res
 end
-end
 
-function sequencing(n; writefile, sc_target, usecuda, nslices=1)
+function sequencing(n; writefile, sc_target, usecuda, nslices=1, process_device_map)
     g = square_lattice_graph(trues(n, n))
     gp = Independence(g; optimizer=TreeSA(sc_target=sc_target, sc_weight=1.0, nslices=nslices;
-        ntrials=10, βs=0.01:0.05:22.0, niters=20, rw_weight=2.0), simplifier=MergeGreedy())
+        ntrials=4, βs=0.01:0.05:25.0, niters=50, rw_weight=1.0), simplifier=MergeGreedy())
     println("Graph size $n, usecuda = $usecuda")
     @show timespace_complexity(gp)
     res = GraphTensorNetworks.big_integer_solve(Int32, 100) do T
         @info "T = $T"
-        @time Array(GraphTensorNetworks.contractx(gp, one(T); usecuda=usecuda))
+        filename = joinpath(@__DIR__, "data", "$n-$(GraphTensorNetworks.modulus(one(T))).dat")
+        if isfile(filename)
+            fill(T(readdlm(filename)[]))
+        else
+            xs = GraphTensorNetworks.generate_tensors(x->one(T), gp)
+            @time res = multigpu_contract(gp.code, (xs...,); process_device_map=process_device_map)
+            writedlm(filename, res[].val)
+            res
+        end
     end
     @show res
     ofname = joinpath(@__DIR__, "data", "$n.dat")
     writefile && writedlm(ofname, res)
 end
 
-Random.seed!(2)
-for L=38
+# current best for 38 = 204: 49.27
+# current best for 39 = 7: 49.27
+for L=32
+    Random.seed!(L == 38 ? 204 : 33)
     println("computing L = $L")
-    @time sequencing(L; writefile=true, sc_target=28, usecuda=USECUDA, nslices=L-28)
+    @time sequencing(L; writefile=true, sc_target=28, usecuda=USECUDA, nslices=L-28, process_device_map=process_device_map)
 end
