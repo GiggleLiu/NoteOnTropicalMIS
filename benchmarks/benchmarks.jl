@@ -1,5 +1,5 @@
 using GraphTensorNetworks, DelimitedFiles, TropicalGEMM
-using LightGraphs
+using Graphs
 using BenchmarkTools, Random
 using LinearAlgebra
 using CUDA
@@ -7,27 +7,20 @@ using Comonicon
 
 BLAS.set_num_threads(1)
 
-function case_r3(n, k=3; seed=2)
+function case_r3(n, k=3; seed=2, maxsc)
     # generate a random regular graph of size 100, degree 3
-    graph = (Random.seed!(seed); LightGraphs.random_regular_graph(n, k))
+    graph = (Random.seed!(seed); Graphs.random_regular_graph(n, k))
     @assert length(connected_components(graph)) == 1  # connected graph
     # optimize the contraction order using KaHyPar + Greedy
     optcode = Independence(graph; optimizer=TreeSA(sc_target=0, sc_weight=1.0, ntrials=10, βs=0.01:0.05:25.0, niters=20, rw_weight=2.0), simplifier=MergeGreedy())
     tw = timespace_complexity(optcode)[2]
     @info "n = $n, tw = $tw"
-    if tw > 28
-        optcode = Independence(graph; optimizer=TreeSA(sc_target=28, sc_weight=1.0, ntrials=10, βs=0.01:0.05:25.0, niters=20, rw_weight=2.0, nslices=tw-28), simplifier=MergeGreedy())
+    if tw > maxsc
+        optcode = Independence(graph; optimizer=TreeSA(sc_target=maxsc, sc_weight=1.0, ntrials=10, βs=0.01:0.05:25.0, niters=20, rw_weight=2.0, nslices=Int(tw-maxsc)), simplifier=MergeGreedy())
+        tw = timespace_complexity(optcode)[2]
+        @info "sliced: n = $n, tw = $tw"
     end
-    return optcode, tw
-end
-
-# setup global arguments
-const TASK = length(ARGS) >= 1 ? ARGS[1] : "size_max"
-const DEVICE = length(ARGS) >= 2 ? parse(Int, ARGS[2]) : -1
-
-if DEVICE >= 0
-    CUDA.device!(DEVICE)
-    Base.ndims(::Base.Broadcast.Broadcasted{CUDA.CuArrayStyle{0}}) = 0
+    return optcode
 end
 
 function run_benchmarks(cases; output_file)
@@ -55,8 +48,8 @@ function runcase(cases; task = :maxsize, usecuda = false)
                    output_file=joinpath(@__DIR__, "data", "$(task)-r3-$(usecuda ? "GPU" : "CPU").dat"))
 end
 
-function generate_instances(nmax::Int)
-    cases = [case_r3(n, 3; seed=2) for n=10:10:nmax]
+function generate_instances(nmax::Int, maxsc::Int)
+    cases = [case_r3(n, 3; seed=2, maxsc=maxsc) for n=10:10:nmax]
             # [case_r3(n, 3; seed=2, treewidth=s) for (n, s) in [
            # (10, 3), (20, 4), (40, 5), (50, 8), (60, 8), (70, 8), (80, 10), (90, 13), (100, 13),
            # (110, 15), (120, 15), (130, 13), (140, 17), (150, 18), (160, 20), (170, 19), (180, 24), (190, 24), (200, 25),
@@ -64,33 +57,70 @@ function generate_instances(nmax::Int)
     return cases
 end
 
-@cast function run_cpu()
-    truncatedict = Dict([string(task)=>ntruncate for (task, ntruncate) in [
-            ("counting_sum", 0), ("size_max", 0), ("counting_max", 0), ("counting_max2", 0),
-            ("counting_all", 3), ("counting_all_(fft)", 0), ("counting_all_(finitefield)", 0),
-            ("config_max", 0), ("configs_max",5), ("configs_all", 16), ("configs_max2", 9), ("config_max_(bounded)", 0), ("configs_max_(bounded)", 0)
-            ]])
-
-    cases = generate_instances(200)
-    run = false
-    for TASK in keys(truncatedict)
+@cast function cpu(group::Int)
+    if group==0
+        cases = generate_instances(200, 27)
+        tasks=("config_max", "config_max_(bounded)", "configs_max_(bounded)", "counting_max", "counting_max2")
+    elseif group==1
+        cases = generate_instances(250, 27)
+        tasks = ("counting_sum", "size_max")
+    elseif group==2
+        cases = generate_instances(200, 27)
+        tasks = ("counting_all_(fft)",)
+    elseif group==3
+        cases = generate_instances(170, 27)
+        tasks = ("counting_all",)
+    elseif group == 4
+        cases = generate_instances(150, 27)
+        tasks = ("configs_max",)
+    elseif group == 5
+        cases = generate_instances(40, 27)
+        tasks = ("configs_all",)
+    elseif group == 6
+        cases = generate_instances(110, 27)
+        tasks = ("configs_max2",)
+    elseif group==7
+        cases = generate_instances(180, 27)
+        tasks = ("counting_all_(finitefield)",)
+    end
+    for TASK in tasks
         println(TASK)
-        run && runcase(cases[1:end-truncatedict[TASK]]; task=TASK, usecuda=false)
-        if TASK == "counting_max2"
-	    run = true
-	end
+        runcase(cases; task=TASK, usecuda=false)
     end
 end
 
-@cast function run_gpu()
-    cases = generate_instances(250)
-    for TASK in ["counting_sum", "size_max", "counting_max", "counting_max2",
-        "counting_all_(fft)", 
-	"counting_all_(finitefield)",
-        "config_max", "config_max_(bounded)"
-        ]
+@cast function gpu(group::Int)
+    if group == 1
+        cases = generate_instances(250, 27)
+        tasks = ["counting_sum", "size_max", "counting_max", "counting_max2"]
+    elseif group == 2
+        cases = generate_instances(220, 27)
+        tasks = ["counting_all_(fft)", "counting_all_(finitefield)", "config_max_(bounded)"]
+    else
+        cases = generate_instances(250, 26)
+        tasks = ["config_max"]
+    end
+    for TASK in tasks
         runcase(cases; task=TASK, usecuda=true)
     end
+end
+
+@cast function tw()
+    cases = generate_instances(250, 100)
+    tcscs = zeros(length(cases), 2)
+    for i=1:length(cases)
+        tcscs[i,:] .= timespace_complexity(cases[i])
+    end
+    writedlm(joinpath(@__DIR__, "data", "treewidth.dat"), tcscs)
+end
+
+@cast function tcsc()
+    cases = generate_instances(250, 27)
+    tcscs = zeros(length(cases), 2)
+    for i=1:length(cases)
+        tcscs[i,:] .= timespace_complexity(cases[i])
+    end
+    writedlm(joinpath(@__DIR__, "data", "tcsc.dat"), tcscs)
 end
 
 @main
