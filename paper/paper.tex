@@ -221,14 +221,14 @@ Listing \thelstlisting: #1\hfill%\hfill%
 
 \begin{abstract}
 We introduce a method of using generic programming tensor network to compute various properties of independent sets,
-which includes: maximum size of such sets, the number of sets of a given size, enumeration of sets of a given size.
+which include the size of the maximum independent sets, the number of independent sets and maximal independent sets of a given size, and enumeration of independent sets and maximal independent sets of a given size.
 %Although the computational complexity inevitably scales exponentially with treewidth of the graph,
 %our method using tensor network contraction with generic programming is highly versatile and is able to compute properties that are otherwise not known to be possible for up to several hundred vertices.
-At the same time, our algorithms are very simple to implement and one can directly utilize recent advances in tensor network contraction techniques like near optimal contraction order finding and slicing.
+By making use of generic programming, our algorithms are very simple to implement and one can in addition directly utilize recent advances in tensor network contraction techniques such as near-optimal contraction order finding and slicing to achieve high performance.
 %One can easily find a good contraction order for the tensor network representation of a graph $G$ with thousands of vertices. 
-The algorithmic complexity of this approach is $2^{{\rm tw}(G)}$, where ${\rm tw} (G)$ the tree width of the problem graph.
-Our generic programming tensor network method can be used to compute properties of other problems like cut size, coloring, maximal cliques et al.
-To demonstrate the versatility of this tool, we apply it to a few examples including the calculations of the hard-square entropy constant and overlap gap property of three regular graphs.
+The algorithmic complexity of this approach is $2^{{\rm tw}(G)}$, where ${\rm tw} (G)$ is the tree width of the problem graph.
+Our framework can be easily extended to compute properties of other problems such as the cut size, coloring, and maximal cliques, among others.
+To demonstrate the versatility of this tool, we apply it to a few examples including the calculations of the entropy constant for some hardcore lattice gases on 2D square lattices and the overlap gap property on three regular graphs.
 \end{abstract}
 
 % REQUIRED
