@@ -1342,9 +1342,16 @@ By choosing different $r$, one can obtain better precision in low independent se
 
 \section{Integer sequences formed by the number of independent sets}
 
+We computed the number of independent sets on square lattices and King's graphs
+with our generic tensor network contraction on GPUs.
+The tensor element type is finite field algebra so that we can reach arbitrary precision.
+We also computed independence polynomial rigorously for these lattices in our \href{https://github.com/GiggleLiu/NoteOnTropicalMIS/tree/master/data}{Github repo}.
+
+
 \begin{table}[h]
 \caption{The number of independent sets for square grid graphs of size $L\times L$. This forms the integer sequence \href{https://oeis.org/A006506}{OEIS A006506}.
-Here we only show two updated entries for $L=38,39$ that has not been computed before.}
+Here we only show two updated entries for $L=38,39$, which to our knowledge, has not been computed before.~\cite{Butera2014}
+}
 \begin{center}
 \scalebox{0.9}{
 \begin{tabular}{|c| >{\centering\arraybackslash} p{0.95\linewidth}|}
@@ -1398,7 +1405,5 @@ Here we only show two updated entries for $L=38,39$ that has not been computed b
 \end{center}
 \label{tbl:kingsgrid}
 \end{table}
-
-We also computed independence polynomial rigorously for these lattices in our \href{https://github.com/GiggleLiu/NoteOnTropicalMIS/tree/master/data}{Github repo}.
 
 \end{document}
