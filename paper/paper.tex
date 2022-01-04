@@ -227,7 +227,7 @@ which includes: maximum size of such sets, the number of sets of a given size, e
 At the same time, our algorithms are very simple to implement and one can directly utilize recent advances in tensor network contraction techniques like near optimal contraction order finding and slicing.
 %One can easily find a good contraction order for the tensor network representation of a graph $G$ with thousands of vertices. 
 The algorithmic complexity of this approach is $2^{{\rm tw}(G)}$, where ${\rm tw} (G)$ the tree width of the problem graph.
-Our generic programming tensor network method can be used to compute properties of other problems like cut size, coloring, maximal cliques et al.
+Our generic programming tensor network method can be used to compute properties of other problems like cut size, colouring, maximal cliques et al.
 To demonstrate the versatility of this tool, we apply it to a few examples including the calculations of the hard-square entropy constant and overlap gap property of three regular graphs.
 \end{abstract}
 
@@ -246,13 +246,13 @@ independent set, tensor network, maximum independent set, independence polynomia
 In graph theory and combinatorial optimization, there are many interesting hard computational problems concerning properties of independent sets.
 %An independent set of a graph is a subset of its vertices that no two vertices in this set are adjacent to each other.
 For an undirected graph $G = (V,E)$, an independent set $I \subseteq V$ is a set of vertices that for any vertex pair $u,v \in I$, $(u, v) \not\in E$. %there is no edge connecting $u$ and $v$ in $G$.
-The primary insterest of many computational complexity theorists is finding the maximum size of such vertex sets $\alpha(G) \equiv \max_{I}|I|$ and one of the sets of this size.
+The primary interest of many computational complexity theorists is finding the maximum size of such vertex sets $\alpha(G) \equiv \max_{I}|I|$ and one of the sets of this size.
 Finding $\alpha(G)$ is a hard computational problem; moreover, it is NP-hard to even approximate $\alpha(G)$ within $|V|^{1-\epsilon}$ ~\cite{Hastad1996},
 meaning there is unlikely a polynomial time algorithm to find an independent set with size $\alpha(G)/|V|^{1-\epsilon}$ for an arbitrarily small positive $\epsilon$.
 Naive exhaustive search for an MIS requires computing time $O\left(2^{|V|} \right)$.
 People developed more efficient exact algorithms for finding MISs, including the branching algorithms~\cite{Tarjan1977,Robson1986} and dynamic programming.
 The branching algorithms can reduce the base of the exponential time scaling to, e.g., $1.1996^{|V|} {|V|}^{O(1)}$~\cite{Xiao2017}, 
-while dynamic programming approaches~\cite{Courcelle1990, Fomin2013} works better for graphs with a small treewidth $\text{tw}(G)$, and
+while dynamic programming approaches~\cite{Courcelle1990, Fomin2013} works better for graphs with a small tree width $\text{tw}(G)$, and
 these methods can produce algorithms of complexity $O(2^{\text{tw}(G)} \text{tw}(G) |V|)$.
 People are eager to find better algorithms for solving the MIS problem;
 not only for it has a wide range of applications in scheduling, logistics, social network analysis, bioinformatics, wireless networks and telecommunication,
@@ -262,7 +262,7 @@ map labelling, computer vision, etc.~\cite{Butenko2003, Wu2015}, but also for it
 %more concretely, an maximal independent set of a graph $G$ corresponds to a maximum clique in the complement graph of $G$,
 %and the complement vertex set of an MIS corresponds to a minimum vertex cover of the graph $G$.
 %In this paper, the term ``maximal'' has a different meaning from ``maximum''  which we discussed above; a maximal independent set is an independent set that is not a subset of any other independent set, but its size may not be the maximum.
-In this paper, we do not limit our discussion to finding one of the maximum indepedent sets and its size.
+In this paper, we do not limit our discussion to finding one of the maximum independent sets and its size.
 There are many other interesting problems pertaining to independent sets, such as the number of independent sets of a given size
 and enumerating independent sets at a give size or what we call computing \textit{properties}.
 Some of these problems are of great interest in physics applications such as the hard-core lattice gas model~\cite{Dyre2016, Fernandes2007}
@@ -298,7 +298,7 @@ In the standard notation of Einstein's summation or tensor network in physics, e
 Hence people can represent a tensor network as a simple graph,
 where a tensor is a vertex and two tensors sharing the same label are connected.
 In the main text, we do not have this restriction. An index can appear arbitrary times.
-The graphical representation of our generlized tensor network is hypergraph, in which an edge (label) can be shared by an arbitrary number of vertices (tensors).
+The graphical representation of our generalized tensor network is hypergraph, in which an edge (label) can be shared by an arbitrary number of vertices (tensors).
 These two notations are equivalent in representation power because one can easily translate a generalized tensor network to the standard notation by adding $\delta$ tensors - a high dimensional equivalence of identity matrix.
 However, introducing $\delta$ tensors can potentially increase the contraction complexity a lot. We illustrate this point in \App{app:tensorbad}.
 \blue{Is it better to introduce the contraction orders here or in example~\ref{eg:tensorcontraction}?}
@@ -423,7 +423,7 @@ I(G, x) = \sum_{k=0}^{\alpha(G)} a_k x^k,
 where $a_k$ is the number of independent sets of size $k$ in $G$. The total number of independent sets is thus equal to $I(G, 1)$.
 To compute the independence polynomial of a graph $G = (V, E)$, we reinterpret this problem as a tensor network contraction problem.
 We map a vertex $i\in V$ to a label $s_i \in \{0, 1\}$ of dimension $2$ in a tensor network, where we use $0$ ($1$) to denote a vertex absent (exists) in the set.
-For each label $s_i$, we defined a prametrized rank-one vertex tensor $W(x_i)$ indexed by it as
+For each label $s_i$, we defined a parametrized rank-one vertex tensor $W(x_i)$ indexed by it as
 \begin{equation}
     W(x_i) = \left(\begin{matrix}
         1 \\
@@ -451,7 +451,7 @@ and the product over edge tensor elements gives a factor $1$ for a configuration
 
 %In the implementation of the algorithm, we benefit from recent advances in tensor network contraction,
 %where researchers working on quantum circuit simulation evaluate the tensor network by pairwise contracting tensors in a heuristic order~\cite{Gray2021, Pan2021}.
-To evalute \Eq{eq:idp}, summing up the products directly is apparently computational inefficient.
+To evaluate \Eq{eq:idp}, summing up the products directly is apparently computational inefficient.
 The standard approach to evaluate a tensor network is to contract two tensors a time with a certain order utilizing the associativity and commutativity of tensor elements.
 A good contraction order can reduce the time complexity significantly, at the cost of having a space overhead of $O(2^{\text{tw}(G)})$~\cite{Markov2008}.
 The pairwise tensor contraction also makes it possible to utilize basic linear algebra subprograms (BLAS) functions to speed up the computation for certain tensor element types.
@@ -618,6 +618,19 @@ In \App{app:fft}, we provide another method to solve the linear equation using d
     }\caption{Computing the independence polynomial exactly without integer overflow}\label{alg:finitefield} 
 \end{algorithm}
 
+% \begin{algorithm}[!ht]
+%     \small
+%     \SetAlgoNoLine
+%     %\LinesNumbered
+%     Let vector $\chi = (\chi_0,\chi_1,\chi_2, \ldots, \chi_{\alpha(G)})$ be a random sequence, matrix $X_{ij} = (\chi_i)^j$, where $i,j = 0, 1, \ldots, \alpha(G)$\;
+
+%     \For{$i=0\ldots\alpha(G)$}{
+%         $y_i$ = ${\rm contract\_tensor\_network}(\chi_i)$
+%     }
+
+%     \Return ${\rm gaussian\_elimination}(X, (y_0, y_1, \ldots, y_{\alpha{G}})) $\;
+% \end{algorithm}
+
 \section{Maximum independent sets and its counting}
 \subsection{Tropical algebra for finding the MIS size and counting MISs}
 In the previous section, we focused on computing the independence polynomial for a graph $G$ of given MIS size $\alpha(G)$, but we did not show how to compute this number.
@@ -772,7 +785,7 @@ The combined operations become:
 \end{equation}
 Clearly, the vertex tensor and edge tensor become
 \begin{equation}
-    W^{\rm MISenum}(\{\boldsymbol{e}_{i}\}) = \left(\begin{matrix}
+    W^{\rm MISenum}(\{\boldsymbol{e}_{i}\infty^1\}) = \left(\begin{matrix}
         \mymathbb{1} \\
         \{\boldsymbol{e}_{i}\}\infty^1
     \end{matrix}\right),   
@@ -841,7 +854,7 @@ Since $ C_{ik} = \bigoplus_{j} \ A_{ij} \odot B_{jk} = \max_{j} \ A_{ij} \odot B
 \end{equation}
 Here $\leq$ on tropical numbers are the same as the real-number algebra.
 The equality holds for some $j'$, which means $A_{ij'}$ and $B_{j'k}$ have contributions to $C_{ik}$.
-Intuitively, one can use this relation to indentify elements with nonzero gradients in $A$ and $B$ directly,
+Intuitively, one can use this relation to identify elements with nonzero gradients in $A$ and $B$ directly,
 however, doing this might make us lost the advantage of using BLAS libraries~\cite{TropicalGEMM}.
 Since $A_{ij} \odot B_{jk} = A_{ij} + B_{jk}$, one can move $B_{jk}$ to the right hand side of the inequality: 
 \begin{equation}
@@ -880,15 +893,15 @@ The graphs that we use in benchmarks are random three regular graphs,
     (b) The computing time for calculating the MIS size and for counting of the number of independent sets (ISs), the number of MISs, and the number of independent sets having size $\alpha(G)$ and $\alpha(G)-1$ (denoted as ``MISs and (MIS-1)s'').
     (c) The computing time for calculating the independence polynomials with different approaches.
     (d) The computing time for configuration enumeration, including the enumeration of all independent set configurations, a single MIS configuration, all MIS configurations, all independent set configurations having size $\alpha(G)$ and $\alpha(G)-1$,  with or without bounding the enumeration space.
-    \red{suggestions for the figure: 1. the legend seems to overlap the lines, especially the large subfigure. Not sure what's a better way to include the legend there. 2. I see you guys don't typically use markers. We typically use markers to distinguish the different lines, as well as using the color. Especially, for some journals, there is a physical non-color copy, so some requires the figures to be understandable without colors.}
+    \red{suggestions for the figure: 1. the legend seems to overlap the lines, especially the large sub-figure. Not sure what's a better way to include the legend there. 2. I see you guys don't typically use markers. We typically use markers to distinguish the different lines, as well as using the color. Especially, for some journals, there is a physical non-color copy, so some requires the figures to be understandable without colors.}
     }
     \label{fig:benchmark}
 \end{figure}
 
-Figure (a) shows the time and space complexity (without slicing) of tensor network contraction for variaty of graph sizes, where the space complexity is the same as the tree width of the problem graph.
+Figure (a) shows the time and space complexity (without slicing) of tensor network contraction for variety of graph sizes, where the space complexity is the same as the tree width of the problem graph.
 It is obtained with tensor network contraction order optimization algorithm in Ref.~\cite{Kalachev2021}.
 In practice, slicing technique is used to fit the computation into a 32GB memory, the target tree width of slicing is $27$.
-One can see all the computing times in figure (b), (c) and (d) have a strong correlation with the treewidth.
+One can see all the computing times in figure (b), (c) and (d) have a strong correlation with the tree width.
 %The computations shown in \Fig{fig:benchmark} include independent set counting, finding maximum independent set size (panel b),
 %computing independence polynomial (panel c) and find one independent set and enumerating independent sets (panel d).
 Among these benchmarks, computational tasks with data types \texttt{T (CPU)},
@@ -939,7 +952,7 @@ For each property, we design a algebra being a commutative semiring, and map the
 %We derived the backward rule for tropical tensor network to bound the search of solution space.
 %Although many of these properties are global, we can encode them to different tensor element types as commutative semirings.
 We call this method generic programming tensor network, and its power is not limited to the independent set problem.
-In \App{app:otherproblems}, we show how to map the maximal independent set problem, matching problem, $k$-coloring problem, max cut problem and set packing problem to tensor networks.
+In \App{app:otherproblems}, we show how to map the maximal independent set problem, matching problem, $k$-colouring problem, max cut problem and set packing problem to tensor networks.
 Moreover, since the independence polynomial is closely related to the matching polynomial~\cite{Levit2005}, the clique polynomial~\cite{Hoede1994}, and the vertex cover polynomial~\cite{Akbari2013},
 our algorithm to compute the independence polynomial can also be used to compute these graph polynomials.
 %Some properties of the independence polynomial, such as the uni-modality, log-concavity, and roots of the polynomial, are well studied in the literature for special classes of graphs~\cite{Levit2005}.
@@ -1170,8 +1183,8 @@ We can modify the tensor network for computing the independence polynomial to in
         1-s_v& \text{otherwise}.\\
     \end{cases}
 \end{equation}
-Intuitively, it means if all the neighborhood vertices are not in $I_{m}$, i.e., $ s_1=s_2=\ldots=s_{|N(v)|}=0$, then $v$ should be in $I_{m}$ and contribute a factor $x_{v}$,
-otherwise, if any of the neighborhood vertices is in $I_{m}$, then $v$ cannot be in $I_{m}$.
+Intuitively, it means if all the neighbourhood vertices are not in $I_{m}$, i.e., $ s_1=s_2=\ldots=s_{|N(v)|}=0$, then $v$ should be in $I_{m}$ and contribute a factor $x_{v}$,
+otherwise, if any of the neighbourhood vertices is in $I_{m}$, then $v$ cannot be in $I_{m}$.
 As an example, for a vertex of degree 2, the resulting rank-3 tensor is
 \begin{equation}
     T(x_v)=\left(\begin{matrix}
@@ -1228,7 +1241,7 @@ We show the benchmark of computing the maximal independent set properties in \Fi
 including a comparison to the Bron-Kerbosch algorithm from Julia package Graphs~\cite{Graphs}.
 %Since the network for computing maximal independent set properties is different from the one for computing the independence polynomial,
 the tree width of this tensor network is significantly larger, hence only small graphs can be benchmarked.
-The time for the tensor netwrok approach and the Bron-Kerbosch approach to enumerate all maximal independent sets are comparable,
+The time for the tensor network approach and the Bron-Kerbosch approach to enumerate all maximal independent sets are comparable,
 while the tensor network does counting much more efficiently.
 Due to the memory limit, this Bron-Kerbosch algorithm stops working at size $70$ and above.
 
@@ -1268,9 +1281,9 @@ and a tensor of rank $1$ on the bond
 where label $\langle v, w \rangle$ is equivalent to $\langle w,v\rangle$.
 Here, a vertex tensor specifies the restriction that a vertex can not be in two matched edges, while an edge tensor contributes the variable in the polynomial.
 
-\subsection{k-Coloring}
-Let us use 3-coloring problem defined on vertices as an example.
-For a vertex $v$, we define the degree of freedoms $c_v\in\{1,2,3\}$ and a vertex tensor labeled by it as
+\subsection{k-Colouring}
+Let us use 3-colouring problem defined on vertices as an example.
+For a vertex $v$, we define the degree of freedoms $c_v\in\{1,2,3\}$ and a vertex tensor labelled by it as
 \begin{equation}
     W(v) = \left(\begin{matrix}
         r_v\\
@@ -1278,7 +1291,7 @@ For a vertex $v$, we define the degree of freedoms $c_v\in\{1,2,3\}$ and a verte
         b_v
     \end{matrix}\right).
 \end{equation}
-For an edge $(u, v)$, we define an edge tensor as a matrix labeled by $(c_u, c_v)$ to specify the constraint
+For an edge $(u, v)$, we define an edge tensor as a matrix labelled by $(c_u, c_v)$ to specify the constraint
 \begin{equation}
     B = \left(\begin{matrix}
         0 & 1 & 1\\
@@ -1286,21 +1299,21 @@ For an edge $(u, v)$, we define an edge tensor as a matrix labeled by $(c_u, c_v
         1 & 1 & 0
     \end{matrix}\right).
 \end{equation}
-The number of possible coloring can be obtained by contracting this tensor network by setting vertex tensor elements $r_v, g_v$ and $b_v$ to $1$.
+The number of possible colouring can be obtained by contracting this tensor network by setting vertex tensor elements $r_v, g_v$ and $b_v$ to $1$.
 By designing generic types as tensor elements, one can get other properties.
-Similarly, one can define the k-coloring problem on edges too by switching the roles of edges and vertices.
+Similarly, one can define the k-colouring problem on edges too by switching the roles of edges and vertices.
 
 \subsection{Max cut problem}
-Max cut problem is also known as the boolean spinglass problem.
+Max cut problem is also known as the boolean spin glass problem.
 For a vertex $v\in V$, we define a boolean degree of freedom $s_v\in\{0, 1\}$.
-Then the max cut problem can be encoded to tensor networks by mapping an edge $(i,j)\in E$ to an edge matrix labeled by $s_is_j$
+Then the max cut problem can be encoded to tensor networks by mapping an edge $(i,j)\in E$ to an edge matrix labelled by $s_is_j$
 \begin{equation}
     B(x_{\langle i, j\rangle}) = \left(\begin{matrix}
         1 & x_{\langle i, j\rangle}\\
         x_{\langle i, j\rangle} & 1
     \end{matrix}\right),
 \end{equation}
-where variable $x_{\langle i, j\rangle}$ represents a cut on edge $(i, j)$ or a domain wall of an Ising spinglass.
+where variable $x_{\langle i, j\rangle}$ represents a cut on edge $(i, j)$ or a domain wall of an Ising spin glass.
 Similar to other problems, we can define a polynomial about edges variables by setting $x_{\langle i, j\rangle} = x$,
 where its $k$th coefficient is two times the number of configurations of cut size $k$.
 
