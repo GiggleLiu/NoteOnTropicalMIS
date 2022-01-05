@@ -267,12 +267,11 @@ In this paper, we introduce a generic programming tensor-network framework to co
 %In this paper, we do not limit our study to just finding an MIS and its size. 
 % We introduce a tensor-network based framework to compute the various \textit{properties} pertaining to independent sets.
 Beyond just finding an MIS and its size as described above, these properties also include, for example, the number and enumeration of independent sets or maximal independent sets of a given size.
-We map these independent set problems into generic tensor network contraction with specially designed tensor element algebra.
 % There are many other interesting problems pertaining to independent sets, such as the number of independent sets of a given size
 % and enumerating independent sets at a give size or what we call computing \textit{properties}.
 Some of these problems are of great interest in physics applications such as the hard-core lattice gas model~\cite{Dyre2016, Fernandes2007}
 in statistical mechanics and the Rydberg hamiltonian with neutral atoms~\cite{Pichler2018, Ebadi2022} \red{replace with experiment paper when ready};
-they can, for example, be used to understand phase transitions, to identify harder graphs in an ensemble of graphs~\cite{Ebadi2022} and to analyze the overlap gap property~\cite{Gamarnik2013, Gamarnik2019}.
+they can, for example, be used to understand phase transitions, to identify harder graphs in an ensemble of graphs~\cite{Ebadi2022} and to analyze the overlap gap property~\cite{Gamarnik2013, Gamarnik2019}. We map the computation of these independent set properties into generic tensor network contraction with specially designed tensor element algebra. This is different from standard tensor network methods, where tensor elements are restricted to standard number types such as floating point numbers and integers.
 
 Finding the number of independent sets of a given size is equivalent to computing the coefficients of the independence polynomial,
 which is a useful graph characteristic related to, for example, the partition functions~\cite{Lee1952,Yang1952} and Euler characteristics of the independence complex~\cite{Bousquet2008, Levit2009}.
