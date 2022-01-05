@@ -187,9 +187,9 @@ class PLT(object):
             ax = plt.subplot(121)   # treewidth
             cornertex("(a)", ax, offset=(-0.02,0))
             plot_and_plot("square", "Square lattice", False)
-            #plot_and_plot("square-0.8", "Square lattice (0.8 filling)", True)
+            plot_and_plot("square-0.8", "Square lattice (0.8 filling)", True)
             plt.xlim(0, 42)
-            plt.ylim(1.5, 1.7)
+            plt.ylim(1.4, 1.7)
             plt.legend(fontsize=12)
             plt.xlabel("lattice size L")
             plt.ylabel(r"$F(L,L)^{1/{L^2}}$")
