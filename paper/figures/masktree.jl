@@ -2,6 +2,7 @@ using UnitDiskMapping.TikzGraph
 
 function fig1()  # mask tree
     filename = joinpath(@__DIR__, "masktree.tex")
+    LW = "1pt"
     graph = canvas(props=Dict("scale"=>"1.5")) do c
         node!(x, y) = Node(x, y; minimum_size="0.3cm") >> c
         dx1 = 0.8
@@ -14,7 +15,7 @@ function fig1()  # mask tree
             push!(nodes, node!(x+dx, -y-dy))
         end
         for (i, j) in [(1, 2), (1,3), (2,4), (2,5), (3,6), (3,7), (4,8), (4,9)]
-            Line(nodes[i], nodes[j], arrow="<-", line_width="0.5pt") >> c
+            Line(nodes[i], nodes[j], arrow="latex-", line_width=LW) >> c
         end
         annotate(nodes[1], "\$\\alpha(G)\$", offsety=0.3) >> c
         annotate(nodes[4], "\$A\$", offsetx=-0.3) >> c
@@ -23,13 +24,13 @@ function fig1()  # mask tree
         annotate(nodes[2], "\$*\$", offsety=-0.3) >> c
         PlainText(dx, -2.2, "\\large (a)") >> c
 
-        dx += 4
+        dx += 3.6
         nodes = []
         for (x,y) in locs
             push!(nodes, node!(x+dx, -y-dy))
         end
         for (i, j) in [(1, 2), (1,3), (2,4), (2,5), (3,6), (3,7), (4,8), (4,9)]
-            Line(nodes[i], nodes[j], arrow="->", line_width="0.5pt", draw="red") >> c
+            Line(nodes[i], nodes[j], arrow="-latex", line_width=LW, draw="red") >> c
         end
         annotate(nodes[1], "\$\\overline{\\alpha(G)}\$", offsety=0.3) >> c
         annotate(nodes[4], "\$\\overline{A}\$", offsetx=-0.3) >> c
@@ -38,13 +39,13 @@ function fig1()  # mask tree
         annotate(nodes[2], "\\small Eq. 6.9", offsety=-0.4) >> c
         PlainText(dx, -2.2, "\\large (b)") >> c
 
-        dx += 4
+        dx += 3.6
         nodes = []
         for (x,y) in locs
             push!(nodes, node!(x+dx, -y-dy))
         end
         for (i, j) in [(1, 2), (1,3), (2,4), (2,5), (3,6), (3,7), (4,8), (4,9)]
-            Line(nodes[i], nodes[j], arrow="<-", line_width="0.5pt", draw="black") >> c
+            Line(nodes[i], nodes[j], arrow="latex-", line_width=LW, draw="black") >> c
         end
         annotate(nodes[1], "\$s_{\\alpha(G)}\\infty^{\\alpha(G)}\$", offsety=0.3) >> c
         annotate(nodes[4], "\$A'\\circ\\overline{A}\$", offsetx=-0.45) >> c
