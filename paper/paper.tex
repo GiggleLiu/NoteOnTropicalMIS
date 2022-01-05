@@ -306,7 +306,6 @@ In this work, we do not impose such a restriction, so an index can appear an arb
 The graphical representation of these generalized tensor networks is hypergraphs, in which an edge (label) can be shared by an arbitrary number of vertices (tensors).
 These two notations are equivalent in representation power because one can easily translate a generalized tensor network to the standard notation by adding $\delta$ tensors, which is a high dimensional equivalence of the identity matrix.
 However, introducing $\delta$ tensors may significantly increase the complexity of the tensor contraction. We illustrate this subtle point in \App{app:tensorbad}.
-\blue{Is it better to introduce the contraction orders here or in example~\ref{eg:tensorcontraction}?}
 
 \begin{example}
 $C_{ijk} = A_{jkm} B_{mil} V_{jm}$ is a tensor network that can be evaluated as $C_{ijk} = \sum_{ml}A_{jkm} B_{mil} V_{jm}$.
@@ -404,12 +403,12 @@ Table~\ref{tbl:generictypes} summarizes those properties that can be computed by
         \begin{tabularx}{\textwidth}{sb}\toprule
             \hline
             \textbf{element type}     & \textbf{property/properties to compute} \\
-            {$\mathbbm{R}$}     & {independent sets} \\
+            {$\mathbbm{R}$}     & {the number of independent sets} \\
             {$\mathbbm{C}$}     & {independence polynomial (approximate)} \\
             {$\text{GF}(p)$} (\Eq{eq:finitefield}) & {independence polynomial} \\
             {T} (\Eq{eq:tropical})    & {MIS size} \\
             {P1} (\Eq{eq:countingtropical})     & {MIS size and the number of MISs} \\
-            {P2} (\Eq{eq:max2poly})     & {MISs and independent sets of size $\alpha(G)-1$} \\
+            {P2} (\Eq{eq:max2poly})     & {the number of MISs and independent sets of size $\alpha(G)-1$} \\
             {PN} (\Eq{eq:polynomial})     & {independence polynomial (direct approach)} \\
             {P1+S1}     & {MIS size and one MIS} \\
             {P1+SN} (\Eq{eq:countingtropicalset})    & {MIS size and all MISs} \\
@@ -841,7 +840,7 @@ where the \texttt{select} function picks one of $\sigma$ and $\tau$ by some crit
     \includegraphics[width=0.9\textwidth, trim={0cm 0cm 0cm 0cm}, clip]{figures/masktree.pdf}
     \caption{Bounded enumeration of maximum independent sets. In the graph, a circle is a tensor, an arrow specifies execution direction of a function and $\circ$ is the Hadamard multiplication. (a) is the forward pass with algebra \Eq{eq:tropical} for computing $\alpha(G)$.
      (b) is the backward pass for computing boolean gradients as masks.
-     (c) is the masked forward pass with algebra \Eq{eq:countingtropicalset} for enumerating configurations.}
+     (c) is the masked forward pass with algebra \Eq{eq:countingtropicalset} for enumerating configurations.\red{line thicker}}
      \label{fig:bounding}
 \end{figure}
 
@@ -876,6 +875,7 @@ Let the gradient mask for $C$ be $\overline C$; the back-propagation rule for gr
 \begin{equation}\label{eq:adrule}
 \overline{A}_{ij} = \delta \left(A_{ij}, \left( \left( C^{\circ-1} \circ \overline C \right) B^{\mathsf{T}} \right)_{ij}^{\circ -1} \right),
 \end{equation}
+\green{explain delta}
 where $\circ$ is the element-wise product, boolean false is treated as the tropical number $\mymathbb{0}$, and boolean true is treated as the tropical number $\mymathbb{1}$.
 This rule defined on matrix multiplication can be easily generalized to tensor contraction by replacing the matrix multiplication between $C^{\circ-1} \circ \overline C$ and $B^{\mathsf{T}}$ by a tensor contraction.
 With the above method, one can significantly reduce the space needed to store the intermediate configurations by setting the tensor elements masked false to zero during contraction.
@@ -923,12 +923,14 @@ Bounding can also reduce the memory usage significantly, without which the large
 
 \subsubsection{Number of independent sets and hard-square entropy constant}
 In this examples, the types of graphs we used are shown in Figure~\ref{fig:lattices}, where vertices are all placed on square lattices with lattice dimensions $L \times L$.
-The graphs include: the square grid graphs, denoted as SG; the square grid graphs with a filling factor $p$, denoted as SG$(p)$, where $\lfloor pL^{2} \rfloor$ square grids are occupied with vertices;
+The graphs include: the square grid graphs, denoted as SG; the square grid graphs with a filling factor $p$, denoted as SG$(p)$, where $\lfloor pL^{2} \rceil$ square grids are occupied with vertices;
 the King's graphs, denoted as K; the King's graphs with a filling factor $p$, denoted as K$(p)$. 
 The number of independent sets for square grid graphs of size $L \times L$ form a well-known integer sequence (\href{https://oeis.org/A006506}{OEIS A006506}), which is thought as a two-dimensional generalization of the Fibonacci numbers.
 We computed the integer sequences for $L=38$ and $L=39$, which is not known before to our knowledge.
 In the computation, we have used the finite field algebra trick for contracting arbitrarily high precision integer tensor networks.
-We also computed hard square entropies for these lattices and shown the results in \Fig{fig:hardsquare}.
+We also computed the quantity $F(L,L)^{1/n}$ as a function of lattice size $L$ for these lattices,
+where $F(L,L)$ is the number of independent sets of a given lattice size and $n$ is the number of vertices.
+The results are shown in \Fig{fig:hardsquare}.
 
 \begin{figure}[t] 
     \centering
@@ -942,7 +944,10 @@ We also computed hard square entropies for these lattices and shown the results 
 \begin{figure}[t] 
     \centering
     \includegraphics[width=\textwidth, trim={0cm 0cm 0cm 0cm}, clip]{figures/fig5.pdf}
-    \caption{Hard square entropy for lattices defined in \Fig{fig:lattices}, the error bar is scaled by a factor of $100$.}
+    \caption{Mean entropy for lattices defined in \Fig{fig:lattices}.
+    We sampled $1000$ instances for $p=0.8$ lattices, and the error bar is too small to be visible.
+    The horizontal black dashed lines are for $\lim_{L\rightarrow \infty} F(L,L)^{1/\lfloor pL^2 \rceil}$.
+    }
     \label{fig:hardsquare}
 \end{figure}
 
@@ -1393,45 +1398,5 @@ Here we only show two updated entries for $L=38,39$, which to our knowledge, has
 \label{tbl:squaregrid}
 \end{table}
 % online digit seperator: https://www.browserling.com/tools/thousands-separator
-
-
-\begin{table}[h]
-\caption{The number of independent sets for King's graphs of size $L\times L$.}
-\begin{center}
-\begin{tabular}{|c| >{\centering\arraybackslash} p{0.85\linewidth}|}
- \hline $L$  & King's graphs \\
- \hline $ 1$ & 2  \\
- \hline $ 2$ & 5  \\
- \hline $ 3$ & 35  \\
- \hline $ 4$ & 314 \\
- \hline $ 5$ & 6 427 \\
- \hline $ 6$ & 202 841 \\
- \hline $ 7$ & 12 727 570  \\
- \hline $ 8$ & 1 355 115 601 \\
- \hline $ 9$ & 269 718 819 131 \\
- \hline $ 10$ & 94 707 789 944 544 \\
- \hline $ 11$ & 60 711 713 670 028 729  \\
- \hline $ 12$ & 69 645 620 389 200 894 313  \\
- \hline $ 13$ &  144 633 664 064 386 054 815 370 \\
- \hline $ 14$ & 540 156 683 236 043 677 756 331 721  \\
- \hline $ 15$ & 3 641 548 665 525 780 178 990 584 908 643  \\
- \hline $ 16$ & 44 222 017 282 082 621 251 230 960 522 832 336 \\
- \hline $ 17$ & 968 503 939 616 343 947 563 582 929 715 005 880 647 \\
- \hline $ 18$ & 38 227 887 218 717 761 202 510 261 178 854 062 185 464 315 \\
- \hline $ 19$ & 2 720 444 488 584 821 384 410 936 779 813 343 554 469 758 172 682 \\
- \hline $ 20$ & 348 970 226 122 589 397 373 342 369 495 005 120 745 703 462 667 115 175 \\
- \hline $ 21$ & 80 700 603 403 721 730 646 640 814 391 653 008 712 705 595 500 769 624 448 529 \\
- \hline $ 22$ & 33 641 616 174 796 469 294 898 513 022 199 100 689 671 634 779 118 656 571 910 751 320 \\
- \hline $ 23$ & 25 281 578 706 433 684 460 290 055 263 926 749 952 595 755 044 481 112 956 327 672 312 862 611  \\
- \hline $ 24$ & 34 249 181 078 331 384 968 700 380 345 306 575 903 108 280 266 841 066 358 396 857 518 201 026 192 547 \\
- \hline $ 25$ & 83 641 072 313 734 275 009 578 098 702 552 656 178 287 685 025 530 905 558 603 555 359 601 823 180 929 638 318  \\
- \hline $ 26$ & 368 222 048 967 797 645 785 624 418 568 072 838 671 415 214 857 177 141 161 824 615 541 365 640 076 045 923 328 316 979  \\
- \hline $ 27$ & 2 922 282 601 123 898 422 508 409 690 495 824 015 239 663 506 989 438 099 254 205 806 998 557 618 858 143 959 252 475 337 777 029  \\
- \hline $ 28$ & 41 807 680 908 633 213 277 041 952 346 680 116 482 996 387 928 973 684 599 097 559 098 879 721 953 006 036 791 335 134 446 016 561 667 772 \\
-  \hline
-\end{tabular}
-\end{center}
-\label{tbl:kingsgrid}
-\end{table}
 
 \end{document}

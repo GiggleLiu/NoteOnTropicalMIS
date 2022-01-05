@@ -30,7 +30,7 @@ class PLT(object):
 
             ax=plt.subplot(222)   # size
             cornertex("(b)", ax, offset=(0,0))
-            for k,(prefix, l) in enumerate([("counting_sum", r"counting ISs ($\mathbb{R}$"), ("size_max", "MIS size (T"), ("counting_max", "counting MISs (P1"), ("counting_max2", r"counting MISs and (MIS-1)s (P2")]):
+            for k,(prefix, l) in enumerate([("counting_sum", r"counting ISs ($\mathbb{R}$"), ("size_max", "MIS size (T"), ("counting_max", "counting MISs (P1"), ("counting_max2", r"counting ISs of size $\alpha(G)$ and $\alpha(G)-1$ (P2")]):
                 for device in ["CPU", "GPU"]:
                     datafile = "../../benchmarks/data/"+prefix+"-r3-"+device+".dat"
                     if os.path.exists(datafile):
@@ -42,7 +42,7 @@ class PLT(object):
             plt.legend(loc="upper left", fontsize=FS, ncol=1)
             plt.xticks(range(0, 300, 50))
             plt.xlim(0, 260)
-            plt.ylim(1e-3,3e3)
+            plt.ylim(1e-3,1e4)
 
             ax = plt.subplot(223)   # IDP
             cornertex("(c)", ax, offset=(0,0))
@@ -62,7 +62,7 @@ class PLT(object):
             plt.xticks(range(0, 300, 50))
             plt.xlim(0, 260)
             plt.legend(loc="upper left", fontsize=FS)
-            plt.ylim(1e-3,3e3)
+            plt.ylim(1e-3,1e4)
 
             ax = plt.subplot(224)  # configurations
             cornertex("(d)", ax, offset=(0,0))
@@ -79,7 +79,7 @@ class PLT(object):
             plt.xticks(range(0, 300, 50))
             plt.xlim(0, 260)
             plt.legend(loc="upper left", fontsize=FS)
-            plt.ylim(1e-3,3e3)
+            plt.ylim(1e-3,1e4)
             #plt.plot(twinx(), ns, getindex.(nw, 2), label="tree width",ytickfontsize=12, xticks=:none,yguidefontsize=14,legend=:bottomright, color=:black, ls=:dash, lw=2, ylabel="tree width")
 
             plt.tight_layout()
@@ -115,7 +115,7 @@ class PLT(object):
             plt.xlabel("number of vertices, $|V|$")
             plt.ylabel("time/s")
             plt.legend(loc="upper left", fontsize=FS)
-            plt.ylim(1e-3,3e3)
+            plt.ylim(1e-3,1e4)
 
             plt.tight_layout()
 
@@ -177,7 +177,7 @@ class PLT(object):
             filename = "../../project/data/%s/entropyconstant_summary.dat"%which
             data = np.loadtxt(filename)
             mean = data[:,0]
-            error = np.sqrt(data[:,1]/1000)*100
+            error = np.sqrt(data[:,1]/1000)
             ns = np.arange(2,len(mean)+2)
             if errorbase:
                 plt.errorbar(ns, mean, label=label, yerr=error)
@@ -190,6 +190,7 @@ class PLT(object):
             plot_and_plot("square-0.8", "Square lattice (0.8 filling)", True)
             plt.xlim(0, 42)
             plt.ylim(1.4, 1.7)
+            plt.axhline(y=1.50304, color="k", ls="--")
             plt.legend(fontsize=12)
             plt.xlabel("lattice size L")
             plt.ylabel(r"$F(L,L)^{1/{L^2}}$")
@@ -199,6 +200,7 @@ class PLT(object):
             plot_and_plot("diag-0.8", "King's graph (0.8 filling)", True)
             plt.ylim(1.3, 1.6)
             plt.xlim(0, 34)
+            plt.axhline(y=1.342643951124, color="k", ls="--")
             plt.xlabel("lattice size L")
             plt.ylabel(r"$F(L,L)^{1/{L^2}}$")
             plt.legend(fontsize=12)
@@ -210,7 +212,7 @@ class PLT(object):
         else:
             nmax = 32
         if which == "diag-0.8" or which == "square-0.8":
-            filling = 1.0
+            filling = 0.8
         else:
             filling = 1.0
         meanvar = np.zeros((nmax-1, 2))
