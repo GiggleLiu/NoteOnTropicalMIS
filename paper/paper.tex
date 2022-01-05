@@ -418,23 +418,23 @@ Table~\ref{tbl:generictypes} summarizes those properties that can be computed by
 \end{minipage}
 \end{table}
 
-\section{Independence polynomial}
-\subsection{Independence polynomial}\label{sec:indpoly}
+\section{Independence polynomial} \label{sec:indpoly}
+% \subsection{Independence polynomial}
 The independence polynomial is an important graph polynomial that contains the counting information of independent sets. It is defined as
 \begin{equation}\label{eq:idpdef}
 I(G, x) = \sum_{k=0}^{\alpha(G)} a_k x^k,
 \end{equation}
 where $a_k$ is the number of independent sets of size $k$ in $G$. The total number of independent sets is thus equal to $I(G, 1)$.
 To compute the independence polynomial of a graph $G = (V, E)$, we reinterpret this problem as a tensor network contraction problem.
-We map a vertex $i\in V$ to a label $s_i \in \{0, 1\}$ of dimension $2$ in a tensor network, where we use $0$ ($1$) to denote a vertex absent (exists) in the set.
-For each label $s_i$, we defined a parametrized rank-one vertex tensor $W(x_i)$ indexed by it as
+We map a vertex $i\in V$ to a label $s_i \in \{0, 1\}$ of dimension $2$ in a tensor network, where we use $0$ ($1$) to denote a vertex is absent (present) in the set.
+For each label $s_i$, we defined a parametrized rank-one vertex tensor $W(x_i)$ as
 \begin{equation}
     W(x_i) = \left(\begin{matrix}
         1 \\
         x_i
     \end{matrix}\right).
 \end{equation}
-We use subscripts to index tensor elements, e.g. $W(x_i)_0=1$ is the first element associated with $s_i=0$ and $W(x_i)_1=x_i$ is the second element associated with to $s_i=1$.
+We use subscripts to index tensor elements, e.g.\ $W(x_i)_0=1$ is the first element associated with $s_i=0$ and $W(x_i)_1=x_i$ is the second element associated with $s_i=1$.
 Similarly, on each edge $(u, v)$, we define a matrix $B$ indexed by $s_u$ and $s_v$ as
 \begin{equation}
     \qquad \quad 
@@ -451,12 +451,12 @@ where the summation runs over all vertex configurations $\{s_1, s_{2}, \ldots,s_
 The edge tensor element $B_{s_{i}=1, s_{j}=1} = 0$ encodes the independent set constraint, meaning vertex $i$ and $j$ cannot be both in the independent set if they are connected by an edge $(i,j)$.
 In the special case of $x_i = x$, the contraction result directly corresponds to the independence polynomial.
 The connection can be understood as follows: the product over vertex tensor elements produces a factor $x^k$, where $k=\sum_i s_i$ counts the set size,
-and the product over edge tensor elements gives a factor $1$ for a configuration being in an independent set and $0$ otherwise.
+and the product over edge tensor elements gives a factor $1$ for a configuration being in an independent set and $0$ otherwise. The summation counts the number of independent sets of size $k$. 
 
 %In the implementation of the algorithm, we benefit from recent advances in tensor network contraction,
 %where researchers working on quantum circuit simulation evaluate the tensor network by pairwise contracting tensors in a heuristic order~\cite{Gray2021, Pan2021}.
-To evaluate \Eq{eq:idp}, summing up the products directly is apparently computational inefficient.
-The standard approach to evaluate a tensor network is to contract two tensors a time with a certain order utilizing the associativity and commutativity of tensor elements.
+To evaluate \Eq{eq:idp}, directly summing up the products is computationally inefficient.
+The standard approach to evaluate a tensor network is to contract two tensors at a time with a certain order utilizing the associativity and commutativity of tensor elements.
 A good contraction order can reduce the time complexity significantly, at the cost of having a space overhead of $O(2^{\text{tw}(G)})$~\cite{Markov2008}.
 The pairwise tensor contraction also makes it possible to utilize basic linear algebra subprograms (BLAS) functions to speed up the computation for certain tensor element types.
 
@@ -517,20 +517,20 @@ We attach a vertex tensor on each hyperedge and an edge tensor between two hyper
         \draw [orange,thick] (e) -- (de);
     \end{tikzpicture}}
     
-    The contraction of this tensor network can be done in a pairwise order utilizing the associativity, additive commutativity and multiplicative commutativity of tensor elements:
+    The contraction of this tensor network can be done in a pairwise order utilizing the associativity, additive commutativity, and multiplicative commutativity of tensor elements:
     \begin{align*}
         &\sum_{s_a,s_b,s_c,s_d,s_e} W(x_a)_{s_a} W(x_b)_{s_b} W(x_c)_{s_c} W(x_d)_{s_d} W(x_e)_{s_e} B_{s_a s_b} B_{s_b s_d} B_{s_c s_d} B_{s_a s_c} B_{s_b s_c} B_{s_d s_e}\\
         =&\sum_{s_b,s_c}\left(\sum_{s_d}\left(\left(\left(\left(\sum_{s_e}B_{s_d s_e}W(x_e)_{s_e}\right) W(x_d)_{s_d}\right) \left(B_{s_bs_d} W(x_b)_{s_b}\right)\right) \left(B_{s_cs_d} W(x_c)_{s_c}\right)\right)\right.\\
         &\phantom{XXX}\left.\left(B_{s_bs_c}\left(\sum_{s_a}B_{s_as_b}\left(B_{s_as_c}W(x_a)_{s_a}\right)\right)\right)\right)\\
         =&1 + x_a + x_b + x_c + x_d + x_e + x_ax_d + x_ax_e + x_cx_e + x_bx_e\\
-        =&1+5x+4x^2 \qquad \quad (x_{i} = x)
+        =&1+5x+4x^2 \qquad \quad (x_{i} = x).
     \end{align*}
 \end{example}
 
 Before contracting the tensor network and evaluating the independence polynomial numerically, let us first elevate the tensor elements $0$s and $1$s in tensors $W(x)$ and $B$ from integers and floating point numbers to the additive identity,
 $\mymathbb{0}$, and multiplicative identity, $\mymathbb{1}$, of a commutative semiring as discussed in Sec.~\ref{sec:generic}.
-Then we can treat the tensor elements as polynomials and evaluate the polynomial directly.
-Let us create a polynomial type, and represent a polynomial $a_0 + a_1 x + \ldots + a_k x^k$ as a coefficient vector $(a_0, a_1, \ldots, a_k) \in \mathbb{R}^k$, so, e.g., $x$ is represented as $(0, 1)$.
+%Then we can treat the tensor elements as polynomials and evaluate the polynomial directly.
+Let us create a polynomial type and represent a polynomial $a_0 + a_1 x + \ldots + a_k x^k$ as a coefficient vector $a = (a_0, a_1, \ldots, a_k) \in \mathbb{R}^k$, so, e.g., $x$ is represented as $(0, 1)$.
 We define the algebra between the polynomials $a$ of order $k_a$ and $b$ of order $k_b$ as
 \begin{equation}
     \eqname{PN}
@@ -542,20 +542,20 @@ We define the algebra between the polynomials $a$ of order $k_a$ and $b$ of orde
     \end{split}
 \end{equation}
 Here, the multiplication operation can be evaluated efficiently using the convolution theorem~\cite{Schonhage1971}.
-We can see these operations are standard addition and multiplication operations of polynomials, and the polynomial type forms a commutative ring. The tensors $W$ and $B$ can thus be written as 
+These operations are standard addition and multiplication operations of polynomials, and the polynomial type forms a commutative ring. The tensors $W$ and $B$ can thus be written as 
 \begin{equation}
-    W^{\rm poly} = \left(\begin{matrix}
+    W^{\rm PN} = \left(\begin{matrix}
         \mymathbb{1} \\
         (0,1)
     \end{matrix}\right),   
     \qquad \qquad
-        B^{\rm poly} = \left(\begin{matrix}
+        B^{\rm PN} = \left(\begin{matrix}
         \mymathbb{1}  & \mymathbb{1} \\
         \mymathbb{1} & \mymathbb{0}
     \end{matrix}\right).
 \end{equation}
-By contracting the tensor network with the polynomial type, we have contraction result the exact representation of the independence polynomial.
-However, using polynomial numbers suffers from a space overhead proportional to $\alpha(G)$ because each polynomial requires a vector of such size to store the coefficients. 
+By contracting the tensor network with the polynomial type, we have the exact representation of the independence polynomial.
+However, using the polynomial type suffers a space overhead proportional to $\alpha(G)$ because each polynomial requires a vector of such size to store the coefficients. 
 Here, we propose to find the independence polynomial by fitting $\alpha(G)+1$ random pairs of $x_{i}$ and $y_{i} = I(G,x_{i})$. One can then compute the independence polynomial coefficients $a_{i}$ by solving the linear equation: 
 \begin{equation}
 \left(\begin{matrix}
@@ -571,10 +571,11 @@ a_0 \\ a_1 \\ \vdots \\ a_{\alpha(G)}
 y_0 \\ y_1 \\ \vdots \\ y_{\alpha(G)}
 \end{matrix}\right).\label{eq:lineareq}
 \end{equation}
-With this approach, we do not incur the linear overhead in space. However, because the independence polynomial coefficients can have a huge order-of-magnitude range, if we use floating point numbers in the computation, the round-off errors can be significant for the counting of large independent set sizes.
+With this approach, we do not incur the linear overhead in space. However, because the independence polynomial coefficients can have a huge order-of-magnitude range, if we use floating point numbers in the computation, the round-off errors can be significant for the counting of large-size independent sets.
 In addition, the number could easily overflow if we use fixed-width integer types.
 The big integer type is also not a good option because big integers with varying width can be very slow and is incompatible with GPU devices. These problems can be solved by introducing a finite-field algebra $\text{GF}(p)$:
 \begin{equation}
+\eqname{GF$(p)$}
 \begin{split}
     x ~\oplus~ y &= x+y\pmod p,\\
     x ~\odot~ y &= xy\pmod p,\\
@@ -589,11 +590,11 @@ With a finite-field algebra, we have the following observations:
     $x \pmod {p_1 \times p_2 \times \ldots \times p_n}$ can be computed using the Chinese remainder theorem. With this, one can infer big integers from small integers.
 \end{enumerate}
 With these observations, we develop Algorithm~\ref{alg:finitefield} to compute the independence polynomial exactly without introducing space overheads.
-This is an iterative algorithm that iterates over a sequence of large prime numbers until convergence.
+The algorithm iterates over a sequence of large prime numbers until convergence.
 In each iteration, we choose a large prime number $p$, and contract the tensor networks to evaluate the polynomial for each variable $\chi = (x_{0}, x_{1}, \ldots, x_{\alpha(G)})$ on ${\rm GF}(p)$ and denote the outputs as $(y_0, y_1, \ldots, y_{\alpha(G)}) \pmod p$.
-Then we solve \Eq{eq:lineareq} using the gaussian elimination on ${\rm GF}(p)$ to find the coefficient modulo $p$, $A_p \equiv (a_0, a_1, \ldots, a_{\alpha(G)})\pmod p$.
+Then we solve \Eq{eq:lineareq} using Gaussian elimination on ${\rm GF}(p)$ to find the coefficient modulo $p$, $A_p \equiv (a_0, a_1, \ldots, a_{\alpha(G)})\pmod p$.
 As the last step of each iteration, we apply the Chinese remainder theorem to update $A \pmod P $ to $ A \pmod {P\times p}$, where $P$ is a product of all prime numbers chosen in previous iterations.
-If this number does not change compared with the previous iteration, it indicates the convergence of result and the program terminates.
+If this number does not change compared with the previous iteration, it indicates the convergence of the result and the program terminates.
 All computations are done with integers of fixed width $W$ except the last step of applying the Chinese remainder theorem, where we use arbitrary precision integers to represent the counting.
 In \App{app:fft}, we provide another method to solve the linear equation using discrete Fourier transformation.
 
@@ -611,7 +612,7 @@ In \App{app:fft}, we provide another method to solve the linear equation using d
             $y_i \pmod p$ = ${\rm contract\_tensor\_network}(\chi_i\pmod p)$ \tcp*[l]{on $\text{GF}(p)$}
         }
 
-        $A_p = (a_0, a_1, \ldots, a_{\alpha(G)}) \pmod p = {\rm gaussian\_elimination}(X, (y_0, y_1, \ldots, y_{\alpha{G}}) \pmod p) $\;
+        $A_p = (a_0, a_1, \ldots, a_{\alpha(G)}) \pmod p = {\rm gaussian\_elimination}(X, (y_0, y_1, \ldots, y_{\alpha(G)}) \pmod p) $\;
 
         $A_{P\times p} = {\rm chinese\_remainder}(A_P, A_p)$\;
 
