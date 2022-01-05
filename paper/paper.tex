@@ -263,15 +263,15 @@ but also because it is a well-known NP-complete problem that can be mapped from 
 %and the complement vertex set of an MIS corresponds to a minimum vertex cover of the graph $G$.
 %In this paper, the term ``maximal'' has a different meaning from ``maximum''  which we discussed above; a maximal independent set is an independent set that is not a subset of any other independent set, but its size may not be the maximum.
 \blue{We need to distinct ourself in the problem we want to solve.}
-In this paper, we do not limit our study to just finding an MIS and its size. 
-We introduce a tensor-network based framework to compute the various \textit{properties} pertaining to independent sets.
-These properties include, for example, the number and enumeration of independent sets or maximal independent sets of a given size.
-We map these independent set problems into generic tensor network contraction with specially designed tensor element algebra.
+In this paper, we introduce a generic programming tensor-network framework to compute the various \textit{properties} pertaining to independent sets. 
+%In this paper, we do not limit our study to just finding an MIS and its size. 
+% We introduce a tensor-network based framework to compute the various \textit{properties} pertaining to independent sets.
+Beyond just finding an MIS and its size as described above, these properties also include, for example, the number and enumeration of independent sets or maximal independent sets of a given size.
 % There are many other interesting problems pertaining to independent sets, such as the number of independent sets of a given size
 % and enumerating independent sets at a give size or what we call computing \textit{properties}.
 Some of these problems are of great interest in physics applications such as the hard-core lattice gas model~\cite{Dyre2016, Fernandes2007}
 in statistical mechanics and the Rydberg hamiltonian with neutral atoms~\cite{Pichler2018, Ebadi2022} \red{replace with experiment paper when ready};
-they can, for example, be used to understand phase transitions, to identify harder graphs in an ensemble of graphs~\cite{Ebadi2022} and to analyze the overlap gap property~\cite{Gamarnik2013, Gamarnik2019}.
+they can, for example, be used to understand phase transitions, to identify harder graphs in an ensemble of graphs~\cite{Ebadi2022} and to analyze the overlap gap property~\cite{Gamarnik2013, Gamarnik2019}. We map the computation of these independent set properties into generic tensor network contraction with specially designed tensor element algebra. This is different from standard tensor network methods, where tensor elements are restricted to standard number types such as floating point numbers and integers.
 
 Finding the number of independent sets of a given size is equivalent to computing the coefficients of the independence polynomial,
 which is a useful graph characteristic related to, for example, the partition functions~\cite{Lee1952,Yang1952} and Euler characteristics of the independence complex~\cite{Bousquet2008, Levit2009}.
@@ -293,18 +293,19 @@ a maximal independent set is an independent set that is not a subset of any othe
 We show how to compute properties related to maximal independent sets and properties for other combinatorial optimization problems in \App{app:otherproblems}.
 
 \section{Tensor networks}
-Tensor network~\cite{Cirac2020, Orus2014} is also known as einsum, factor graph or sum-product network~\cite{Bishop2006} in different contexts,
-it can be viewed as a generalization of matrix multiplication to multiple tensors contraction.
-People often use Einstein's notation to represent a tensor network, e.g. the matrix multiplication between two matrices $A$ and $B$ can be represented in Einstein's notation as $C_{ik} = A_{ij}B_{jk}$,
-where we use a label in subscripts to represent a degree of freedom.
-We enumerate these degree of freedoms and accumulate the product of tensor elements to the output tensor.
-In the standard notation of Einstein's summation or tensor network in physics, each index appears precisely twice.
-Hence people can represent a tensor network as a simple graph,
+Tensor network~\cite{Cirac2020, Orus2014} is also known as einsum, factor graph or sum-product network~\cite{Bishop2006} in different contexts;
+it can be viewed as a generalization of matrix multiplication to multi-dimensional tensor contraction.
+Einstein's notation is often used to represent a tensor network, e.g.\ the matrix multiplication between two matrices $A$ and $B$ can be represented in Einstein's notation as $C_{ik} = A_{ij}B_{jk}$,
+where we use a label in the subscript to represent a degree of freedom.
+One can enumerate these degrees of freedom and accumulate the product of tensor elements to the output tensor.
+In the standard notation of Einstein's summation or tensor networks in physics, each index appears precisely twice.
+Hence a tensor network can be represented as a simple graph,
 where a tensor is a vertex and two tensors sharing the same label are connected.
-In the main text, we do not have this restriction. An index can appear arbitrary times.
-The graphical representation of our generalized tensor network is hypergraph, in which an edge (label) can be shared by an arbitrary number of vertices (tensors).
-These two notations are equivalent in representation power because one can easily translate a generalized tensor network to the standard notation by adding $\delta$ tensors - a high dimensional equivalence of identity matrix.
-However, introducing $\delta$ tensors can potentially increase the contraction complexity a lot. We illustrate this point in \App{app:tensorbad}.
+In this work, we do not impose such a restriction, so an index can appear an arbitrary number of times. 
+%In the main text, we do not have this restriction. An index can appear arbitrary times.
+The graphical representation of these generalized tensor networks is hypergraphs, in which an edge (label) can be shared by an arbitrary number of vertices (tensors).
+These two notations are equivalent in representation power because one can easily translate a generalized tensor network to the standard notation by adding $\delta$ tensors, which is a high dimensional equivalence of the identity matrix.
+However, introducing $\delta$ tensors may significantly increase the complexity of the tensor contraction. We illustrate this subtle point in \App{app:tensorbad}.
 \blue{Is it better to introduce the contraction orders here or in example~\ref{eg:tensorcontraction}?}
 
 \begin{example}
@@ -363,8 +364,8 @@ One of the key concepts that push the technology forward is called generic progr
 \end{definition}
 
 This definition of generic programming contains two major aspects: a single program works in the most general setting and efficiency.
-To understand the first aspect, suppose we want to write a function that raises an element to a power, $f(x, n) := x^n$.
-One can easily write a function for standard number types that computes the power of $x$ in $\log(n)$ steps using the multiply and square trick.
+To understand the first aspect on generality, suppose we want to write a function that raises an element to a power, $f(x, n) := x^n$.
+One can easily write a function for standard number types that computes the power of $x$ in $O \left( \log(n) \right)$ steps using the multiply and square trick.
 Generic programming does not require $x$ to be a standard number type,
 instead it treats $x$ as an element with an associative multiplication operation $\odot$ and a multiplicative identity $\mymathbb{1}$.
 In such a way, when the program takes a matrix as an input, it computes the matrix power without extra efforts.
@@ -375,9 +376,9 @@ When these languages ``see'' a new input type, the compiler can recompile the ge
 A myriad of optimizations can be done during the compilation, such as inlining immutable elements with fixed sizes in an array to decrease the cache miss rate when accessing data.
 In Julia, these inlined arrays can even be compiled to GPU devices for faster computation~\cite{Besard2018}.
 
-This motivates us to think about what is the most general element type that is allowed in a tensor network contraction program.
+This motivates us to think about what is the most general element type allowed in a tensor network contraction program.
 We find that as long as the algebra of tensor elements forms a commutative semiring, the tensor network contraction result will be valid and be independent of the contraction order.
-A commutative semiring is a semiring with its multiplication operation being commutative, and a semiring is a ring without additive inverse.
+A commutative semiring is a ring with its multiplication operation being commutative and without an additive inverse.
 To define a commutative semiring with the addition operation $\oplus$ and the multiplication operation $\odot$ on a set $R$, the following relations must hold for any arbitrary three elements $a, b, c \in R$.
 \begin{align*}
 (a \oplus b) \oplus c = a \oplus (b \oplus c) & \hspace{5em}\text{$\triangleright$ commutative monoid $\oplus$ with identity $\mymathbb{0}$}\\
@@ -394,15 +395,15 @@ a \odot (b\oplus c) = a\odot b \oplus a\odot c  &  \hspace{5em}\text{$\triangler
 a \odot \mymathbb{0} = \mymathbb{0} \odot a = \mymathbb{0}
 \end{align*}
 The requirement of being commutative is for the tensor contraction result to be independent of the contraction order.
-In the following sections, we show how to compute the properties of independent sets by designing tensor element types as commutative semirings while keeping the tensor network generic~\cite{Stepanov2014}.
-Table~\ref{tbl:generictypes} summarizes the properties that can be solved by various tensor element types. 
+In the following sections, we show how to compute a number of properties of independent sets by designing tensor element types as specific commutative semirings while keeping the tensor network generic~\cite{Stepanov2014}.
+Table~\ref{tbl:generictypes} summarizes those properties that can be computed by various tensor element types.
 
 \begin{table}[t!]\centering
 \begin{minipage}{\columnwidth}
 \ra{1.3}
         \begin{tabularx}{\textwidth}{sb}\toprule
             \hline
-            \textbf{element type}     & \textbf{property} \\
+            \textbf{element type}     & \textbf{property/properties to compute} \\
             {$\mathbbm{R}$}     & {independent sets} \\
             {$\mathbbm{C}$}     & {independence polynomial (approximate)} \\
             {$\text{GF}(p)$} (\Eq{eq:finitefield}) & {independence polynomial} \\
@@ -414,7 +415,7 @@ Table~\ref{tbl:generictypes} summarizes the properties that can be solved by var
             {P1+SN} (\Eq{eq:countingtropicalset})    & {MIS size and all MISs} \\
             \bottomrule
         \end{tabularx}
-    \caption{Tensor element types and the property we want to calculate when we introduce them.}\label{tbl:generictypes}
+    \caption{Tensor element types and the independent set properties that can be computed using them.}\label{tbl:generictypes}
 \end{minipage}
 \end{table}
 
