@@ -928,9 +928,11 @@ the King's graphs, denoted as K; the King's graphs with a filling factor $p$, de
 The number of independent sets for square grid graphs of size $L \times L$ form a well-known integer sequence (\href{https://oeis.org/A006506}{OEIS A006506}), which is thought as a two-dimensional generalization of the Fibonacci numbers.
 We computed the integer sequences for $L=38$ and $L=39$, which is not known before to our knowledge.
 In the computation, we have used the finite field algebra trick for contracting arbitrarily high precision integer tensor networks.
-We also computed the quantity $F(L,L)^{1/n}$ as a function of lattice size $L$ for these lattices,
-where $F(L,L)$ is the number of independent sets of a given lattice size and $n$ is the number of vertices.
+We also computed the quantity $F(L,L)^{1/\lfloor pL^2\rceil}$ as a function of grid size $L$ for these lattices,
+where $F(L,L)$ is the number of independent sets of a given grid size.
 The results are shown in \Fig{fig:hardsquare}.
+Our result for $p=1$ matches those in the literature, and the lattices with hole has much larger average value,
+which has a phsical meaning of the hard lattices with holes have much larger mean entropy than those without holes at the high temperature limit.
 
 \begin{figure}[t] 
     \centering

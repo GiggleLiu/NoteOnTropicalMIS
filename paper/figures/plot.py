@@ -193,7 +193,7 @@ class PLT(object):
             plt.axhline(y=1.50304, color="k", ls="--")
             plt.legend(fontsize=12)
             plt.xlabel("lattice size L")
-            plt.ylabel(r"$F(L,L)^{1/{L^2}}$")
+            plt.ylabel(r"$F(L,L)^{1/\lfloor pL^2\rceil}$")
             ax=plt.subplot(122)   # size
             cornertex("(b)", ax, offset=(-0.02,0))
             plot_and_plot("diag", "King's graph", False)
@@ -202,7 +202,7 @@ class PLT(object):
             plt.xlim(0, 34)
             plt.axhline(y=1.342643951124, color="k", ls="--")
             plt.xlabel("lattice size L")
-            plt.ylabel(r"$F(L,L)^{1/{L^2}}$")
+            plt.ylabel(r"$F(L,L)^{1/\lfloor pL^2\rceil}$")
             plt.legend(fontsize=12)
             plt.tight_layout()
 
