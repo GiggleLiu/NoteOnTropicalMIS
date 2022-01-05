@@ -294,18 +294,19 @@ a maximal independent set is an independent set that is not a subset of any othe
 We show how to compute properties related to maximal independent sets and properties for other combinatorial optimization problems in \App{app:otherproblems}.
 
 \section{Tensor networks}
-Tensor network~\cite{Cirac2020, Orus2014} is also known as einsum, factor graph or sum-product network~\cite{Bishop2006} in different contexts,
-it can be viewed as a generalization of matrix multiplication to multiple tensors contraction.
-People often use Einstein's notation to represent a tensor network, e.g. the matrix multiplication between two matrices $A$ and $B$ can be represented in Einstein's notation as $C_{ik} = A_{ij}B_{jk}$,
-where we use a label in subscripts to represent a degree of freedom.
-We enumerate these degree of freedoms and accumulate the product of tensor elements to the output tensor.
-In the standard notation of Einstein's summation or tensor network in physics, each index appears precisely twice.
-Hence people can represent a tensor network as a simple graph,
+Tensor network~\cite{Cirac2020, Orus2014} is also known as einsum, factor graph or sum-product network~\cite{Bishop2006} in different contexts;
+it can be viewed as a generalization of matrix multiplication to multi-dimensional tensor contraction.
+Einstein's notation is often used to represent a tensor network, e.g.\ the matrix multiplication between two matrices $A$ and $B$ can be represented in Einstein's notation as $C_{ik} = A_{ij}B_{jk}$,
+where we use a label in the subscript to represent a degree of freedom.
+One can enumerate these degrees of freedom and accumulate the product of tensor elements to the output tensor.
+In the standard notation of Einstein's summation or tensor networks in physics, each index appears precisely twice.
+Hence a tensor network can be represented as a simple graph,
 where a tensor is a vertex and two tensors sharing the same label are connected.
-In the main text, we do not have this restriction. An index can appear arbitrary times.
-The graphical representation of our generalized tensor network is hypergraph, in which an edge (label) can be shared by an arbitrary number of vertices (tensors).
-These two notations are equivalent in representation power because one can easily translate a generalized tensor network to the standard notation by adding $\delta$ tensors - a high dimensional equivalence of identity matrix.
-However, introducing $\delta$ tensors can potentially increase the contraction complexity a lot. We illustrate this point in \App{app:tensorbad}.
+In this work, we do not impose such a restriction, so an index can appear an arbitrary number of times. 
+%In the main text, we do not have this restriction. An index can appear arbitrary times.
+The graphical representation of these generalized tensor networks is hypergraphs, in which an edge (label) can be shared by an arbitrary number of vertices (tensors).
+These two notations are equivalent in representation power because one can easily translate a generalized tensor network to the standard notation by adding $\delta$ tensors, which is a high dimensional equivalence of the identity matrix.
+However, introducing $\delta$ tensors may significantly increase the complexity of the tensor contraction. We illustrate this subtle point in \App{app:tensorbad}.
 \blue{Is it better to introduce the contraction orders here or in example~\ref{eg:tensorcontraction}?}
 
 \begin{example}
