@@ -175,8 +175,9 @@ class PLT(object):
     def fig5(self, tp="pdf"):  # 
         def plot_and_plot(which, label, errorbase):
             filename = "../../project/data/%s/entropyconstant_summary.dat"%which
-            mean = np.loadtxt(filename)[:,0]
-            error = np.sqrt(np.loadtxt(filename)[:,1]/1000*1000)
+            data = np.loadtxt(filename)
+            mean = data[:,0]
+            error = np.sqrt(data[:,1]/1000)*100
             ns = np.arange(2,len(mean)+2)
             if errorbase:
                 plt.errorbar(ns, mean, label=label, yerr=error)
