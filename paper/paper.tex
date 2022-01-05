@@ -364,8 +364,8 @@ One of the key concepts that push the technology forward is called generic progr
 \end{definition}
 
 This definition of generic programming contains two major aspects: a single program works in the most general setting and efficiency.
-To understand the first aspect, suppose we want to write a function that raises an element to a power, $f(x, n) := x^n$.
-One can easily write a function for standard number types that computes the power of $x$ in $\log(n)$ steps using the multiply and square trick.
+To understand the first aspect on generality, suppose we want to write a function that raises an element to a power, $f(x, n) := x^n$.
+One can easily write a function for standard number types that computes the power of $x$ in $O \left( \log(n) \right)$ steps using the multiply and square trick.
 Generic programming does not require $x$ to be a standard number type,
 instead it treats $x$ as an element with an associative multiplication operation $\odot$ and a multiplicative identity $\mymathbb{1}$.
 In such a way, when the program takes a matrix as an input, it computes the matrix power without extra efforts.
@@ -376,9 +376,9 @@ When these languages ``see'' a new input type, the compiler can recompile the ge
 A myriad of optimizations can be done during the compilation, such as inlining immutable elements with fixed sizes in an array to decrease the cache miss rate when accessing data.
 In Julia, these inlined arrays can even be compiled to GPU devices for faster computation~\cite{Besard2018}.
 
-This motivates us to think about what is the most general element type that is allowed in a tensor network contraction program.
+This motivates us to think about what is the most general element type allowed in a tensor network contraction program.
 We find that as long as the algebra of tensor elements forms a commutative semiring, the tensor network contraction result will be valid and be independent of the contraction order.
-A commutative semiring is a semiring with its multiplication operation being commutative, and a semiring is a ring without additive inverse.
+A commutative semiring is a ring with its multiplication operation being commutative and without an additive inverse.
 To define a commutative semiring with the addition operation $\oplus$ and the multiplication operation $\odot$ on a set $R$, the following relations must hold for any arbitrary three elements $a, b, c \in R$.
 \begin{align*}
 (a \oplus b) \oplus c = a \oplus (b \oplus c) & \hspace{5em}\text{$\triangleright$ commutative monoid $\oplus$ with identity $\mymathbb{0}$}\\
@@ -395,15 +395,15 @@ a \odot (b\oplus c) = a\odot b \oplus a\odot c  &  \hspace{5em}\text{$\triangler
 a \odot \mymathbb{0} = \mymathbb{0} \odot a = \mymathbb{0}
 \end{align*}
 The requirement of being commutative is for the tensor contraction result to be independent of the contraction order.
-In the following sections, we show how to compute the properties of independent sets by designing tensor element types as commutative semirings while keeping the tensor network generic~\cite{Stepanov2014}.
-Table~\ref{tbl:generictypes} summarizes the properties that can be solved by various tensor element types. 
+In the following sections, we show how to compute a number of properties of independent sets by designing tensor element types as specific commutative semirings while keeping the tensor network generic~\cite{Stepanov2014}.
+Table~\ref{tbl:generictypes} summarizes those properties that can be computed by various tensor element types.
 
 \begin{table}[t!]\centering
 \begin{minipage}{\columnwidth}
 \ra{1.3}
         \begin{tabularx}{\textwidth}{sb}\toprule
             \hline
-            \textbf{element type}     & \textbf{property} \\
+            \textbf{element type}     & \textbf{property/properties to compute} \\
             {$\mathbbm{R}$}     & {independent sets} \\
             {$\mathbbm{C}$}     & {independence polynomial (approximate)} \\
             {$\text{GF}(p)$} (\Eq{eq:finitefield}) & {independence polynomial} \\
@@ -415,7 +415,7 @@ Table~\ref{tbl:generictypes} summarizes the properties that can be solved by var
             {P1+SN} (\Eq{eq:countingtropicalset})    & {MIS size and all MISs} \\
             \bottomrule
         \end{tabularx}
-    \caption{Tensor element types and the property we want to calculate when we introduce them.}\label{tbl:generictypes}
+    \caption{Tensor element types and the independent set properties that can be computed using them.}\label{tbl:generictypes}
 \end{minipage}
 \end{table}
 
