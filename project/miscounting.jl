@@ -20,6 +20,9 @@ function countmax(graph, n; writefile, sc_target, usecuda, nslices)
             fill(T(readdlm(filename)[]))
         else
             xs = GraphTensorNetworks.generate_tensors(x->CountingTropical(Int32(1), one(T)), gp)
+            if usecuda
+                xs = CUDA.CuArray.(xs)
+            end
             @time res = gp.code(xs...)
             writedlm(filename, res[].c.val)
             fill(res[].c)
@@ -32,9 +35,9 @@ end
 
 # current best for 38 = 204: 49.27
 # current best for 39 = 7: 49.27
-for L=2:30
+for L=30:-1:29
     Random.seed!(2)
     graph = "diag"
     println("computing graph $graph, L = $L")
-    @time countmax(graph, L; writefile=true, sc_target=28, usecuda=USECUDA, nslices=0)
+    @time countmax(graph, L; writefile=true, sc_target=28, usecuda=USECUDA, nslices=7)
 end
