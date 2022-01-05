@@ -28,7 +28,7 @@ if DEVICE >= 0
 end
 
 Random.seed!(2)
-for L=34:37
+for L=1:32
     println("computing L = $L")
     @time sequencing(L; writefile=true, sc_target=23, usecuda=DEVICE>=0, nslices=L-23)
 end
