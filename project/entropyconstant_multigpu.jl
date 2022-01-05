@@ -71,20 +71,15 @@ function countall(grid, n; sc_target, usecuda, nslices, process_device_map, mask
     elseif grid == "square"
         g = square_lattice_graph(mask)
     end
-    if n >= 28
-        gp = Independence(g; optimizer=TreeSA(sc_target=sc_target, sc_weight=1.0, nslices=nslices;
-            ntrials=3, βs=0.01:0.05:25.0, niters=6, rw_weight=2.0), simplifier=MergeGreedy())
-    else
-        gp = Independence(g)
-    end
+    #gp = Independence(g; optimizer=TreeSA(sc_target=sc_target, sc_weight=1.0, nslices=nslices;
+        #ntrials=3, βs=0.01:0.05:25.0, niters=6, rw_weight=2.0), simplifier=MergeGreedy())
+    gp = Independence(g; optimizer=TreeSA(sc_target=sc_target, sc_weight=1.0, nslices=nslices;
+        ntrials=1, βs=0.01:0.1:25.0, niters=1, rw_weight=2.0), simplifier=MergeGreedy())
     println("Graph size $n, usecuda = $usecuda")
     @show timespace_complexity(gp)
     xs = GraphTensorNetworks.generate_tensors(x->1.0, gp)
-    if n>= 25
-        @time res = multigpu_contract(gp.code, (xs...,); process_device_map=process_device_map)
-    else
-        @time res = gp.code(xs...)
-    end
+    #@time res = multigpu_contract(gp.code, (xs...,); process_device_map=process_device_map)
+    @time res = gp.code(xs...)
     return res[]
 end
 
@@ -119,7 +114,7 @@ end
 
 # current best for 38 = 204: 49.27
 # current best for 39 = 7: 49.27
-for L=2:32
+for L=33:35
     Random.seed!(2)
     graph = "square-0.8"
     println("computing L = $L")
