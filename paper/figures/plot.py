@@ -173,12 +173,34 @@ class PLT(object):
             plt.tight_layout(h_pad=30.0)
 
     def fig5(self, tp="pdf"):  # 
-        with DataPlt(filename="fig2.%s"%tp, figsize=(8,3)) as dp:
+        def plot_and_plot(which, label, errorbase):
+            filename = "../../project/data/%s/entropyconstant_summary.dat"%which
+            mean = np.loadtxt(filename)[:,0]
+            error = np.sqrt(np.loadtxt(filename)[:,1]/1000*1000)
+            ns = np.arange(2,len(mean)+2)
+            if errorbase:
+                plt.errorbar(ns, mean, label=label, yerr=error)
+            else:
+                plt.plot(ns, mean, label=label)
+        with DataPlt(filename="fig5.%s"%tp, figsize=(8,3)) as dp:
             ax = plt.subplot(121)   # treewidth
             cornertex("(a)", ax, offset=(-0.02,0))
-            filename = "../../project/data/square/entropyconstant-%d.dat"%(which, n)
+            plot_and_plot("square", "Square lattice", False)
+            #plot_and_plot("square-0.8", "Square lattice (0.8 filling)", True)
+            plt.xlim(0, 42)
+            plt.ylim(1.3, 1.7)
+            plt.legend()
+            plt.xlabel("lattice size L")
+            plt.ylabel(r"$F(L,L)^{1/{L^2}}$")
             ax=plt.subplot(122)   # size
             cornertex("(b)", ax, offset=(-0.02,0))
+            plot_and_plot("diag", "King's graph", False)
+            plot_and_plot("diag-0.8", "King's graph (0.8 filling)", True)
+            plt.ylim(1.3, 1.7)
+            plt.xlim(0, 34)
+            plt.xlabel("lattice size L")
+            plt.ylabel(r"$F(L,L)^{1/{L^2}}$")
+            plt.legend()
             plt.tight_layout()
 
     def preprocess_entropy(self, which, nmax):
