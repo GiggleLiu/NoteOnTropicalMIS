@@ -35,7 +35,7 @@ end
 
 # current best for 38 = 204: 49.27
 # current best for 39 = 7: 49.27
-for L=30:-1:28
+for L=28
     Random.seed!(2)
     graph = "diag"
     println("computing graph $graph, L = $L")
