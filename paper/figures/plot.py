@@ -175,8 +175,9 @@ class PLT(object):
     def fig5(self, tp="pdf"):  # 
         def plot_and_plot(which, label, errorbase):
             filename = "../../project/data/%s/entropyconstant_summary.dat"%which
-            mean = np.loadtxt(filename)[:,0]
-            error = np.sqrt(np.loadtxt(filename)[:,1]/1000*1000)
+            data = np.loadtxt(filename)
+            mean = data[:,0]
+            error = np.sqrt(data[:,1]/1000)*100
             ns = np.arange(2,len(mean)+2)
             if errorbase:
                 plt.errorbar(ns, mean, label=label, yerr=error)
@@ -186,28 +187,36 @@ class PLT(object):
             ax = plt.subplot(121)   # treewidth
             cornertex("(a)", ax, offset=(-0.02,0))
             plot_and_plot("square", "Square lattice", False)
-            #plot_and_plot("square-0.8", "Square lattice (0.8 filling)", True)
+            plot_and_plot("square-0.8", "Square lattice (0.8 filling)", True)
             plt.xlim(0, 42)
-            plt.ylim(1.3, 1.7)
-            plt.legend()
+            plt.ylim(1.4, 1.7)
+            plt.legend(fontsize=12)
             plt.xlabel("lattice size L")
             plt.ylabel(r"$F(L,L)^{1/{L^2}}$")
             ax=plt.subplot(122)   # size
             cornertex("(b)", ax, offset=(-0.02,0))
             plot_and_plot("diag", "King's graph", False)
             plot_and_plot("diag-0.8", "King's graph (0.8 filling)", True)
-            plt.ylim(1.3, 1.7)
+            plt.ylim(1.3, 1.6)
             plt.xlim(0, 34)
             plt.xlabel("lattice size L")
             plt.ylabel(r"$F(L,L)^{1/{L^2}}$")
-            plt.legend()
+            plt.legend(fontsize=12)
             plt.tight_layout()
 
-    def preprocess_entropy(self, which, nmax):
+    def preprocess_entropy(self, which):
+        if which == "square" or which == "square-0.8":
+            nmax = 40
+        else:
+            nmax = 32
+        if which == "diag-0.8" or which == "square-0.8":
+            filling = 1.0
+        else:
+            filling = 1.0
         meanvar = np.zeros((nmax-1, 2))
         for n in range(2, nmax+1):
             filename = "../../project/data/%s/entropyconstant-%d.dat"%(which, n)
-            data = np.loadtxt(filename) ** (1/n**2)
+            data = np.loadtxt(filename) ** (1/n**2/filling)
             meanvar[n-2,0] = np.mean(data)
             meanvar[n-2,1] = np.var(data)
         fout = "../../project/data/%s/entropyconstant_summary.dat"%(which,)

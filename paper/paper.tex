@@ -921,9 +921,15 @@ In figure (d), one can see the technique to bound the enumeration space improves
 Bounding can also reduce the memory usage significantly, without which the largest computable graph size is only $\sim150$ on a 32GB memory device.
 
 \subsection{Example case studies} In this section, we give a few examples where the different properties of independence sets are used.
-In all the examples, the types of graphs we used are shown in Figure~\ref{fig:lattices}, where vertices are all placed on square lattices with lattice dimensions $L \times L$.
+
+\subsubsection{Number of independent sets and hard-square entropy constant}
+In this examples, the types of graphs we used are shown in Figure~\ref{fig:lattices}, where vertices are all placed on square lattices with lattice dimensions $L \times L$.
 The graphs include: the square grid graphs, denoted as SG; the square grid graphs with a filling factor $p$, denoted as SG$(p)$, where $\lfloor pL^{2} \rfloor$ square grids are occupied with vertices;
 the King's graphs, denoted as K; the King's graphs with a filling factor $p$, denoted as K$(p)$. 
+The number of independent sets for square grid graphs of size $L \times L$ form a well-known integer sequence (\href{https://oeis.org/A006506}{OEIS A006506}), which is thought as a two-dimensional generalization of the Fibonacci numbers.
+We computed the integer sequences for $L=38$ and $L=39$, which is not known before to our knowledge.
+In the computation, we have used the finite field algebra trick for contracting arbitrarily high precision integer tensor networks.
+We also computed hard square entropies for these lattices and shown the results in \Fig{fig:hardsquare}.
 
 \begin{figure}[t] 
     \centering
@@ -937,12 +943,9 @@ the King's graphs, denoted as K; the King's graphs with a filling factor $p$, de
 \begin{figure}[t] 
     \centering
     \includegraphics[width=\textwidth, trim={0cm 0cm 0cm 0cm}, clip]{figures/fig5.pdf}
-    \caption{Square square entropy constants for lattices defined in \Fig{fig:lattices}, the error bar is scaled by a factor of $1000$.}
-    \label{fig:lattices}
+    \caption{Hard square entropy for lattices defined in \Fig{fig:lattices}, the error bar is scaled by a factor of $100$.}
+    \label{fig:hardsquare}
 \end{figure}
-
-\subsubsection{Number of independent sets and hard-square entropy constant}
-The number of independent sets for square grid graphs of size $L \times L$ form a well-known integer sequence (\href{https://oeis.org/A006506}{OEIS A006506}), which is thought as a two-dimensional generalization of the Fibonacci numbers.
 
 \subsubsection{Computing the overlap gap property}
 
