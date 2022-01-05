@@ -172,4 +172,23 @@ class PLT(object):
 
             plt.tight_layout(h_pad=30.0)
 
+    def fig5(self, tp="pdf"):  # 
+        with DataPlt(filename="fig2.%s"%tp, figsize=(8,3)) as dp:
+            ax = plt.subplot(121)   # treewidth
+            cornertex("(a)", ax, offset=(-0.02,0))
+            filename = "../../project/data/square/entropyconstant-%d.dat"%(which, n)
+            ax=plt.subplot(122)   # size
+            cornertex("(b)", ax, offset=(-0.02,0))
+            plt.tight_layout()
+
+    def preprocess_entropy(self, which, nmax):
+        meanvar = np.zeros((nmax-1, 2))
+        for n in range(2, nmax+1):
+            filename = "../../project/data/%s/entropyconstant-%d.dat"%(which, n)
+            data = np.loadtxt(filename) ** (1/n**2)
+            meanvar[n-2,0] = np.mean(data)
+            meanvar[n-2,1] = np.var(data)
+        fout = "../../project/data/%s/entropyconstant_summary.dat"%(which,)
+        np.savetxt(fout, meanvar)
+
 fire.Fire(PLT())
