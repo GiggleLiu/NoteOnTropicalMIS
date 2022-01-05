@@ -841,7 +841,7 @@ where the \texttt{select} function picks one of $\sigma$ and $\tau$ by some crit
     \includegraphics[width=0.9\textwidth, trim={0cm 0cm 0cm 0cm}, clip]{figures/masktree.pdf}
     \caption{Bounded enumeration of maximum independent sets. In the graph, a circle is a tensor, an arrow specifies execution direction of a function and $\circ$ is the Hadamard multiplication. (a) is the forward pass with algebra \Eq{eq:tropical} for computing $\alpha(G)$.
      (b) is the backward pass for computing boolean gradients as masks.
-     (c) is the masked forward pass with algebra \Eq{eq:countingtropicalset} for enumerating configurations.\red{line thicker}}
+     (c) is the masked forward pass with algebra \Eq{eq:countingtropicalset} for enumerating configurations.}
      \label{fig:bounding}
 \end{figure}
 
@@ -895,7 +895,7 @@ The graphs that we use in benchmarks are random three regular graphs,
     The time in these plots only includes tensor network contraction, without taking the contraction order finding and just in time compiling time into account.
     Legends are properties, algebra and devices that we used in the computation, one can find the corresponding computed property in \Tbl{tbl:generictypes}.
     (a) time and space complexity versus the number of vertices for the benchmarked graphs.
-    (b) The computing time for calculating the MIS size and for counting of the number of independent sets (ISs), the number of MISs, and the number of independent sets having size $\alpha(G)$ and $\alpha(G)-1$ (denoted as ``MISs and (MIS-1)s'').
+    (b) The computing time for calculating the MIS size and for counting of the number of independent sets (ISs), the number of MISs, and the number of independent sets having size $\alpha(G)$ and $\alpha(G)-1$.
     (c) The computing time for calculating the independence polynomials with different approaches.
     (d) The computing time for configuration enumeration, including the enumeration of all independent set configurations, a single MIS configuration, all MIS configurations, all independent set configurations having size $\alpha(G)$ and $\alpha(G)-1$,  with or without bounding the enumeration space.
     \red{suggestions for the figure: 1. the legend seems to overlap the lines, especially the large sub-figure. Not sure what's a better way to include the legend there. 2. I see you guys don't typically use markers. We typically use markers to distinguish the different lines, as well as using the color. Especially, for some journals, there is a physical non-color copy, so some requires the figures to be understandable without colors.}
@@ -956,12 +956,12 @@ which has a phsical meaning of the hard lattices with holes have much larger mea
 \subsubsection{Computing the overlap gap property}
 
 With the ability to enumerate configurations, we can analyse the landscape of the target problem, like the overlap gap property~\cite{Gamarnik2013, Gamarnik2019}.
-We compute all MIS and MIS-1 configurations for two random 3 regular graph instances of size 100, and show the Hamming distance statistics in \Fig{fig:hamming}.
+We enumeate all ISs of size $\geq\alpha(G)-1$ for two random 3 regular graph instances of size 100, and show the Hamming distance statistics in \Fig{fig:hamming}.
 The multiple peak structure indicates disconnected clusters in the configuration space.
 \begin{figure} 
     \centering
     \includegraphics[width=\textwidth, trim={0cm 0cm 0cm 0cm}, clip]{figures/fig3.pdf}
-    \caption{The statistics of Hamming distances between two MIS or MIS-1 configurations for two random three regular graph instances of size $100$.}
+    \caption{The distribution of Hamming distances between two independent sets of size $\geq\alpha(G)-1$ for two random three regular graph instances of size $100$.}
     \label{fig:hamming}
 \end{figure}
 

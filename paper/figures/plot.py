@@ -14,6 +14,7 @@ class PLT(object):
         ns =[10*i for i in range(1, 26)]
         treewidth = np.loadtxt("../../benchmarks/data/treewidth.dat")
         FS = 8
+        ALPHA = 0.5
         with DataPlt(filename="fig1.%s"%tp, figsize=(10,7)) as dp:
             ax = plt.subplot(221)   # treewidth
             cornertex("(a)", ax, offset=(0,0))
@@ -26,7 +27,7 @@ class PLT(object):
             plt.yticks(tws, ["$2^{%d}$"%tw for tw in tws])
             plt.xticks(range(0, 300, 50))
             plt.xlim(0, 260)
-            plt.legend(loc="upper left", fontsize=FS, ncol=1)
+            plt.legend(loc="upper left", fontsize=FS, ncol=1, framealpha=ALPHA)
 
             ax=plt.subplot(222)   # size
             cornertex("(b)", ax, offset=(0,0))
@@ -39,7 +40,7 @@ class PLT(object):
             plt.yscale("log")
             plt.xlabel("number of vertices, $|V|$")
             plt.ylabel("time/s")
-            plt.legend(loc="upper left", fontsize=FS, ncol=1)
+            plt.legend(loc="upper left", fontsize=FS, ncol=1, framealpha=ALPHA)
             plt.xticks(range(0, 300, 50))
             plt.xlim(0, 260)
             plt.ylim(1e-3,1e4)
@@ -61,12 +62,12 @@ class PLT(object):
             plt.ylabel("time/s")
             plt.xticks(range(0, 300, 50))
             plt.xlim(0, 260)
-            plt.legend(loc="upper left", fontsize=FS)
+            plt.legend(loc="upper left", fontsize=FS, framealpha=ALPHA)
             plt.ylim(1e-3,1e4)
 
             ax = plt.subplot(224)  # configurations
             cornertex("(d)", ax, offset=(0,0))
-            for k,(prefix, l) in enumerate([("config_max", "one MIS (P1+S1"), ("config_max_(bounded)", "one MIS (T+bounding"), ("configs_max_(bounded)", "MISs (P1+SN+bounding"), ("configs_max", "MISs (P1+SN"), ("configs_max2", "MISs and (MIS-1)s (P2+SN"), ("configs_all", "ISs (PN+SN")]):
+            for k,(prefix, l) in enumerate([("config_max", "one MIS (P1+S1"), ("config_max_(bounded)", "one MIS (T+bounding"), ("configs_max_(bounded)", "MISs (P1+SN+bounding"), ("configs_max", "MISs (P1+SN"), ("configs_max2", r"ISs of size $\alpha(G)$ and $\alpha(G)-1$ (P2+SN"), ("configs_all", "ISs (PN+SN")]):
                 datafile = "../../benchmarks/data/"+prefix+"-r3-"+device+".dat"
                 for device in ["CPU", "GPU"]:
                     datafile = "../../benchmarks/data/"+prefix+"-r3-"+device+".dat"
@@ -78,7 +79,7 @@ class PLT(object):
             plt.ylabel("time/s")
             plt.xticks(range(0, 300, 50))
             plt.xlim(0, 260)
-            plt.legend(loc="upper left", fontsize=FS)
+            plt.legend(loc="upper left", fontsize=FS, framealpha=ALPHA)
             plt.ylim(1e-3,1e4)
             #plt.plot(twinx(), ns, getindex.(nw, 2), label="tree width",ytickfontsize=12, xticks=:none,yguidefontsize=14,legend=:bottomright, color=:black, ls=:dash, lw=2, ylabel="tree width")
 
