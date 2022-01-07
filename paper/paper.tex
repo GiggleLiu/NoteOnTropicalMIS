@@ -247,38 +247,48 @@ independent set, tensor network, maximum independent set, independence polynomia
 In graph theory and combinatorial optimization, there are many interesting and hard computational problems concerning various properties of independent sets.
 %An independent set of a graph is a subset of its vertices that no two vertices in this set are adjacent to each other.
 For an undirected graph $G = (V,E)$, an independent set $I \subseteq V$ is a set of vertices that for any vertex pair $u,v \in I$, $(u, v) \not\in E$. %there is no edge connecting $u$ and $v$ in $G$. 
-One of the independent set properties that many computational complexity theorists are most interested in is to find a maximum independent set (MIS) and the size of the MIS, $\alpha(G) \equiv \max_{I}|I|$. 
-\blue{The primary interest of many computational complexity theorists is finding the maximum size of such vertex sets $\alpha(G) \equiv \max_{I}|I|$ and one of the sets of this size.}
-Finding $\alpha(G)$ exactly is a hard computational problem, and it is NP-hard even to approximate $\alpha(G)$ within $|V|^{1-\epsilon}$ ~\cite{Hastad1996},
-meaning there is unlikely a polynomial time algorithm to find an independent set with size $\alpha(G)/|V|^{1-\epsilon}$ for an arbitrarily small positive $\epsilon$.
-Naive exhaustive search for an MIS requires a computational time of $O\left(2^{|V|} \right)$.
-More efficient exact algorithms have been developed for finding MISs, such as the branching algorithms~\cite{Tarjan1977, Robson1986} and dynamic programming based algorithms~\cite{Courcelle1990, Fomin2013}.
-The branching algorithms can reduce the base of the exponential time scaling to, e.g., $1.1996^{|V|} {|V|}^{O(1)}$~\cite{Xiao2017}, 
-while dynamic programming approaches~\cite{Courcelle1990, Fomin2013} works better for graphs with a small treewidth $\text{tw}(G)$, producing algorithms of complexity $O(2^{\text{tw}(G)} \text{tw}(G) |V|)$.
-There is immense interest in finding better algorithms to solve the MIS problem, not only because it has 
-a wide range of applications in scheduling, logistics, wireless networks and telecommunication, and computer vision, etc.~\cite{Butenko2003, Wu2015}, 
-but also because it is a well-known NP-complete problem that can be mapped from many other important combinatorial optimization problems in polynomial time such as the 3-satisfiability problem, the maximum clique problem, and the minimum vertex cover problem~\cite{Moore2011}.
+One of the independent set properties that many computational complexity theorists are most interested in is to find a maximum independent set (MIS) and the size of the MIS, $\alpha(G) \equiv \max_{I}|I|$,
+not only because it has a wide range of applications in scheduling, logistics, wireless networks and telecommunication, and computer vision, etc.~\cite{Butenko2003, Wu2015}, 
+but also because it is a well-known NP-complete problem~\cite{Hastad1996} that can be mapped from many other important combinatorial optimization problems in polynomial time such as the 3-satisfiability problem, the maximum clique problem, and the minimum vertex cover problem~\cite{Moore2011}.
+However, a real world application often requires knowing more properties about independent sets,
+which include, for example, the number and enumeration of independent sets or maximal independent sets of a given size.
+Some of these properties are of great interest in physics applications such as the hard-core lattice gas model~\cite{Dyre2016, Fernandes2007}
+in statistical mechanics and the Rydberg hamiltonian with neutral atoms~\cite{Pichler2018, Ebadi2022} \red{replace with experiment paper when ready};
+they can, for example, be used to understand phase transitions, to identify harder graphs in an ensemble of graphs~\cite{Ebadi2022} and to analyze the overlap gap property~\cite{Gamarnik2013, Gamarnik2019}.
+Meanwhile, finding the number of independent sets of a given size is equivalent to computing the coefficients of the independence polynomial,
+which is a useful graph characteristic related to, for example, the partition functions~\cite{Lee1952,Yang1952} and Euler characteristics of the independence complex~\cite{Bousquet2008, Levit2009}.
+There are also interesting works on efficiently approximating the independence polynomial~\cite{Harvey2018}, but in this work, we focus on exact computations~\cite{Ferrin2014}. 
+%\blue{The primary interest of many computational complexity theorists is finding the maximum size of such vertex sets $\alpha(G) \equiv \max_{I}|I|$ and one of the sets of this size.}
+%Finding $\alpha(G)$ exactly is a hard computational problem, and it is NP-hard even to approximate $\alpha(G)$ within $|V|^{1-\epsilon}$ ~\cite{Hastad1996},
+%meaning there is unlikely a polynomial time algorithm to find an independent set with size $\alpha(G)/|V|^{1-\epsilon}$ for an arbitrarily small positive $\epsilon$.
+%Naive exhaustive search for an MIS requires a computational time of $O\left(2^{|V|} \right)$.
+%There is immense interest in finding better algorithms to solve the MIS problem, not only because it has 
+%a wide range of applications in scheduling, logistics, wireless networks and telecommunication, and computer vision, etc.~\cite{Butenko2003, Wu2015}, 
+%but also because it is a well-known NP-complete problem that can be mapped from many other important combinatorial optimization problems in polynomial time such as the 3-satisfiability problem, the maximum clique problem, and the minimum vertex cover problem~\cite{Moore2011}.
 
 %more concretely, an maximal independent set of a graph $G$ corresponds to a maximum clique in the complement graph of $G$,
 %and the complement vertex set of an MIS corresponds to a minimum vertex cover of the graph $G$.
 %In this paper, the term ``maximal'' has a different meaning from ``maximum''  which we discussed above; a maximal independent set is an independent set that is not a subset of any other independent set, but its size may not be the maximum.
-\blue{We need to distinct ourself in the problem we want to solve.}
 In this paper, we introduce a generic programming tensor-network framework to compute the various \textit{properties} pertaining to independent sets. 
 %In this paper, we do not limit our study to just finding an MIS and its size. 
 % We introduce a tensor-network based framework to compute the various \textit{properties} pertaining to independent sets.
-Beyond just finding an MIS and its size as described above, these properties also include, for example, the number and enumeration of independent sets or maximal independent sets of a given size.
+%Beyond just finding an MIS and its size as described above, these properties also include, for example, the number and enumeration of independent sets or maximal independent sets of a given size.
 % There are many other interesting problems pertaining to independent sets, such as the number of independent sets of a given size
 % and enumerating independent sets at a give size or what we call computing \textit{properties}.
-Some of these problems are of great interest in physics applications such as the hard-core lattice gas model~\cite{Dyre2016, Fernandes2007}
-in statistical mechanics and the Rydberg hamiltonian with neutral atoms~\cite{Pichler2018, Ebadi2022} \red{replace with experiment paper when ready};
-they can, for example, be used to understand phase transitions, to identify harder graphs in an ensemble of graphs~\cite{Ebadi2022} and to analyze the overlap gap property~\cite{Gamarnik2013, Gamarnik2019}. We map the computation of these independent set properties into generic tensor network contraction with specially designed tensor element algebra. This is different from standard tensor network methods, where tensor elements are restricted to standard number types such as floating point numbers and integers.
-
-Finding the number of independent sets of a given size is equivalent to computing the coefficients of the independence polynomial,
-which is a useful graph characteristic related to, for example, the partition functions~\cite{Lee1952,Yang1952} and Euler characteristics of the independence complex~\cite{Bousquet2008, Levit2009}.
-The computation of independence polynomials belongs to the complexity class \#P-hard 
-and only exponential algorithms~\cite{Ferrin2014} are known to exist for exact computations.
-There are also interesting works on efficiently approximating the independence polynomial~\cite{Harvey2018}, but in this work, we focus on exact computations. 
-The complexity of our tensor-network based algorithms is similar to that of dynamic programming, which scales exponentially with the treewidth, ${\rm tw}(G)$, of the graph.
+%Some of these problems are of great interest in physics applications such as the hard-core lattice gas model~\cite{Dyre2016, Fernandes2007}
+%in statistical mechanics and the Rydberg hamiltonian with neutral atoms~\cite{Pichler2018, Ebadi2022} \red{replace with experiment paper when ready};
+%they can, for example, be used to understand phase transitions, to identify harder graphs in an ensemble of graphs~\cite{Ebadi2022} and to analyze the overlap gap property~\cite{Gamarnik2013, Gamarnik2019}. 
+We map the computation of these independent set properties into generic tensor network contraction with specially designed tensor element algebra. This is different from standard tensor network methods, where tensor elements are restricted to standard number types such as floating point numbers and integers.
+%The computation of independence polynomials belongs to the complexity class \#P-hard 
+%and only exponential algorithms~\cite{Ferrin2014} are known to exist for exact computations.
+%Traditional algorithms for finding the MIS size problem include the branching algorithms~\cite{Tarjan1977, Robson1986} and dynamic programming based algorithms~\cite{Courcelle1990, Fomin2013}.
+%The branching algorithms can reduce the base of the exponential time scaling to, e.g., $1.1996^{|V|} {|V|}^{O(1)}$~\cite{Xiao2017}, 
+%while dynamic programming approaches~\cite{Courcelle1990, Fomin2013} works better for graphs with a small treewidth $\text{tw}(G)$, producing algorithms of complexity $O(2^{\text{tw}(G)} \text{tw}(G) |V|)$.
+The complexity of our tensor-network based algorithms is similar to that of dynamic programming~\cite{Courcelle1990, Fomin2013},
+which scales exponentially with the tree width, ${\rm tw}(G)$, of the graph.
+For sparse graphs, this quantity is usually much smaller than the number of vertices~\cite{Fomin2006}.
+This indicates it is a method that works better for sparse graphs or graphs,
+unlike another standard approach for solving the MIS size, the branching algorithm ~\cite{Robson1986,Tarjan1977,Xiao2017}, which usually works better for dense graphs.
 % We introduce a tensor-network based framework to compute the various properties pertaining to independent sets.
 % We map the independent set problem into generic tensor network contraction with specially designed tensor element algebra.
 % Its algorithmic complexity is similar to that of dynamic programming, i.e. scales exponentially as ${\rm tw}(G)$.
