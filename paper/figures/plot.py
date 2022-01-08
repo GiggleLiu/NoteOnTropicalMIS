@@ -144,6 +144,7 @@ class PLT(object):
             plt.bar(range(n), y[:n], lw=1.5, color="C4", ls="-")
             plt.xlabel("Hamming distance")
             plt.xlim(0, 200)
+            ax.ticklabel_format(style="scientific", scilimits=(-3, 3))
 
             plt.tight_layout(h_pad=30.0)
 
@@ -170,6 +171,7 @@ class PLT(object):
             n = np.max(np.where(y > 0)[0])
             plt.bar(range(n), y[:n], lw=1.5, color="C4", ls="-")
             plt.xlabel("Hamming distance")
+            ax.ticklabel_format(style="scientific", scilimits=(-3, 3))
             plt.xlim(0, nv)
 
             plt.tight_layout(h_pad=30.0)
