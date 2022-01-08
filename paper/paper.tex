@@ -926,17 +926,17 @@ where the \texttt{select} function picks one of $\sigma$ and $\tau$ by some crit
 \begin{figure}
     \centering
     \includegraphics[width=0.9\textwidth, trim={0cm 0cm 0cm 0cm}, clip]{figures/masktree.pdf}
-    \caption{Bounded enumeration of maximum independent sets. In these graphs, a circle is a tensor, an arrow specifies execution direction of a function and $\circ$ is the Hadamard (element-wise) multiplication. (a) is the forward pass with algebra \Eq{eq:tropical} for computing $\alpha(G)$.
+    \caption{Bounded enumeration of maximum independent sets. In these graphs, a circle is a tensor, an arrow specifies execution direction of a function and $\circ$ is the Hadamard (element-wise) multiplication. $\overline A$ means the boolean mask of $A$. (a) is the forward pass with algebra \Eq{eq:tropical} for computing $\alpha(G)$.
      (b) is the backward pass for computing boolean gradients as masks.
      (c) is the masked forward pass with algebra \Eq{eq:countingtropicalset} for enumerating configurations.}
      \label{fig:bounding}
 \end{figure}
 
 When we use the algebra in \Eq{eq:countingtropicalset} to enumerate all MIS configurations, we find that the program stores significantly more intermediate configurations than necessary and thus incur significant overheads in space.
-To speed up the computation and reduce space overhead, we bound the searching space using the MIS size $\alpha(G)$.
+To speed up the computation and reduce space overhead, we bound the searching space using the information from the computation of the MIS size $\alpha(G)$.
 As shown in \Fig{fig:bounding}, (a) we first compute the value of $\alpha(G)$ with tropical algebra and cache all intermediate tensors.
 (b) Then, we compute a boolean mask for each cached tensor, where we use a boolean true to represent a tensor element having a contribution to the MIS (i.e.\ with a non-zero gradient) and boolean false otherwise.
-(c) Finally, we perform masked tensor network contraction using the element type with the algebra in \Eq{eq:countingtropicalset} to obtaining all configurations.
+(c) Finally, we perform masked tensor network contraction (i.e.\ discarding the unnecessary intermediate configurations) using the element type with the algebra in \Eq{eq:countingtropicalset} to obtain all MIS configurations.
 Note that these masks in fact correspond to tensor elements with non-zero gradients with respect to the MIS size; we compute these masks by back propagating the gradients.
 To derive the back-propagation rule for tropical tensor contraction,
 we first reduce the problem to finding the back-propagation rule of a tropical matrix multiplication $C = A B$.
@@ -946,8 +946,8 @@ Since $ C_{ik} = \bigoplus_{j} \ A_{ij} \odot B_{jk} = \max_{j} \ A_{ij} \odot B
 \end{equation}
 Here $\leq$ on tropical numbers are the same as the real-number algebra.
 The equality holds for some $j'$, which means $A_{ij'}$ and $B_{j'k}$ have contributions to $C_{ik}$.
-Intuitively, one can use this relation to identify elements with nonzero gradients in $A$ and $B$ directly,
-however, doing this might make us lost the advantage of using BLAS libraries~\cite{TropicalGEMM}.
+Intuitively, one can use this relation to identify elements with nonzero gradients in $A$ and $B$,
+but if doing this directly, one loses the advantage of using BLAS libraries~\cite{TropicalGEMM} for high performance.
 Since $A_{ij} \odot B_{jk} = A_{ij} + B_{jk}$, one can move $B_{jk}$ to the right hand side of the inequality: 
 \begin{equation}
     A_{ij} \leq C_{ik} \odot B_{jk}^{\circ -1}
