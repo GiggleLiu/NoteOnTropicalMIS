@@ -16,6 +16,7 @@
 \usepackage[framemethod=TikZ]{mdframed}
 \usetikzlibrary{shapes}
 \usetikzlibrary{snakes}
+\usetikzlibrary{shapes.geometric}
 \usepackage{wrapfig}
 %\usepackage{caption}
 %\usepackage[plain]{algorithmic}
@@ -405,28 +406,63 @@ a \odot \mymathbb{0} = \mymathbb{0} \odot a = \mymathbb{0}
 \end{align*}
 We require the algebra being multiplicative commutative because the contraction order optimizer will change the multiplication order of elements, while we wish this contraction order does not change the contraction results.
 In the following sections, we show how to compute a number of properties of independent sets by designing tensor element types as specific commutative semirings without changing the tensor network contraction program~\cite{Stepanov2014}.
-Table~\ref{tbl:generictypes} summarizes those properties that can be computed by various tensor element types.
+The following diagram summarizes those properties that can be computed by various tensor element types.
 
-\begin{table}[t!]\centering
-\begin{minipage}{\columnwidth}
-\ra{1.3}
-        \begin{tabularx}{\textwidth}{sb}\toprule
-            \hline
-            \textbf{element type}     & \textbf{property/properties to compute} \\
-            {$\mathbbm{R}$}     & {the number of independent sets} \\
-            {$\mathbbm{C}$}     & {independence polynomial (approximate)} \\
-            {$\text{GF}(p)$} (\Eq{eq:finitefield}) & {independence polynomial} \\
-            {T} (\Eq{eq:tropical})    & {MIS size} \\
-            {P1} (\Eq{eq:countingtropical})     & {MIS size and the number of MISs} \\
-            {P2} (\Eq{eq:max2poly})     & {the number of MISs and independent sets of size $\alpha(G)-1$} \\
-            {PN} (\Eq{eq:polynomial})     & {independence polynomial (direct approach)} \\
-            {P1+S1}     & {MIS size and one MIS} \\
-            {P1+SN} (\Eq{eq:countingtropicalset})    & {MIS size and all MISs} \\
-            \bottomrule
-        \end{tabularx}
-    \caption{Tensor element types and the independent set properties that can be computed using them.}\label{tbl:generictypes}
+% \begin{table}[t!]\centering
+% \begin{minipage}{\columnwidth}
+% \ra{1.3}
+%         \begin{tabularx}{\textwidth}{sb}\toprule
+%             \hline
+%             \textbf{element type}     & \textbf{property/properties to compute} \\
+%             {$\mathbbm{R}$}     & {the number of independent sets} \\
+%             %{$\mathbbm{C}$}     & {independence polynomial (approximate)} \\
+%             {$\text{GF}(p)$} (\Eq{eq:finitefield}) & {independence polynomial} \\
+%             {T} (\Eq{eq:tropical})    & {MIS size} \\
+%             {P1} (\Eq{eq:countingtropical})     & {MIS size and the number of MISs} \\
+%             {P2} (\Eq{eq:max2poly})     & {the number of MISs and independent sets of size $\alpha(G)-1$} \\
+%             {PN} (\Eq{eq:polynomial})     & {independence polynomial (direct approach)} \\
+%             {P1+S1}     & {MIS size and one MIS} \\
+%             {P1+SN} (\Eq{eq:countingtropicalset})    & {MIS size and all MISs} \\
+%             \bottomrule
+%         \end{tabularx}
+%     \caption{Tensor element types and the independent set properties that can be computed using them.}\label{tbl:generictypes}
+% \end{minipage}
+% \end{table}
+
+\centerline{\begin{tikzpicture}[]
+    \scriptsize
+    \node[ellipse,draw,minimum width=2cm, minimum height=1cm,inner sep=0pt] at (0, 2.5) (R) {$\mathbbm{R}$};
+    % set and set sampler
+    \node[ellipse,draw,minimum width=5cm, minimum height=3cm,inner sep=0pt] at (0, 0) (SN) {};
+    \node[below of=1] at (SN) {Set};
+    \node[ellipse,draw,minimum width=4cm, minimum height=1.5cm,inner sep=0pt] at (-0.5, 0) (S1) {\hspace{1.5cm}Bit string};
+    \def\dx{-3};
+    \node[ellipse,draw,minimum width=5cm, minimum height=3cm,inner sep=0pt] at (\dx, 0) (PN) {\hspace{-3.5cm}Polynomial};
+    \node[ellipse,draw,minimum width=3.5cm, minimum height=1.2cm,inner sep=0pt] at (\dx, 0.7) (P1) {\hspace{-0.7cm}Highest order};
+    \node[ellipse,draw,minimum width=3.5cm, minimum height=0.7cm,inner sep=0pt] at (\dx, -0.4) (P2) {\hspace{-0.7cm}2nd highest order};
+    \node[ellipse,draw,minimum width=0.8cm, minimum height=0.3cm,inner sep=0pt] at (\dx, 1.0) (T) {};
+    \node at (\dx, -1.2) {$\ldots$};
+    \node[above of=2] at (T) (textT) {Tropical};
+    \draw[black,-latex] (textT) -- (T);
+\end{tikzpicture}}
+\vspace{2em}
+\centering{
+\begin{minipage}{0.8\columnwidth}\scriptsize
+\begin{tabularx}{\textwidth}{bb}
+    \textbf{element type}     & \textbf{property to compute} \\
+    {$\mathbbm{R}$}     & {the number of independent sets} \\
+    {$\text{GF}(p)$} (\Eq{eq:finitefield}) & {independence polynomial} \\
+    {Polynomial} (\Eq{eq:polynomial})     & {independence polynomial} \\
+    {Tropical (\Eq{eq:tropical})}    & {MIS size} \\
+    {Polynomial truncated to highest order (\Eq{eq:countingtropical})}     & {MIS size and the number of MISs} \\
+    {Polynomial truncated to 2nd highest order} (\Eq{eq:max2poly})     & {the number of MISs and independent sets of size $\alpha(G)-1$} \\
+    {Set} (\Eq{eq:set})     & {enumeration of independent sets} \\
+    {Bit string} (\Eq{eq:singleconfig})     & {one independent set} \\
+    {Polynomial truncated to highest order combined with Bit string}     & {MIS size and one MIS} \\
+    {Polynomial truncated to highest order combined with Set} (\Eq{eq:countingtropicalset})    & {MIS size and all MISs} \\
+\end{tabularx}
 \end{minipage}
-\end{table}
+}
 
 \section{Independence polynomial} \label{sec:indpoly}
 % \subsection{Independence polynomial}
