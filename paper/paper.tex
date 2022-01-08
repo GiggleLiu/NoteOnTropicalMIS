@@ -448,7 +448,7 @@ The following diagram summarizes those properties that can be computed by variou
     \draw[black,-latex] (textT) -- (T);
 \end{tikzpicture}}
 \vspace{2em}
-\centering{
+{\centering{
 \begin{minipage}{0.8\columnwidth}\scriptsize
 \begin{tabularx}{\textwidth}{bb}
     \textbf{element type}     & \textbf{property to compute} \\
@@ -463,7 +463,7 @@ The following diagram summarizes those properties that can be computed by variou
     {Polynomial truncated to highest order combined with Set} (\Eq{eq:countingtropicalset})    & {MIS size and all MISs} \\
 \end{tabularx}
 \end{minipage}
-}
+}}
 
 \section{Independence polynomial} \label{sec:indpoly}
 % \subsection{Independence polynomial}
@@ -685,12 +685,12 @@ In \App{app:fft}, we provide another method to solve the linear equation using d
 
 \section{Maximum independent sets and its counting}
 \subsection{Tropical algebra for finding the MIS size and counting MISs}
-In the previous section, we focused on computing the independence polynomial for a graph $G$ of given MIS size $\alpha(G)$, but we did not show how to compute this number.
+In the previous section, we focused on computing the independence polynomial for a graph $G$ of a given MIS size $\alpha(G)$, but we did not show how to compute this number.
 The method we use to compute this quantity is based on the following observations. Let $x=\infty$, the independence polynomial becomes
 \begin{equation}
 I(G, \infty) = a_{\alpha(G)} \infty^{\alpha(G)},
 \end{equation}
-where the lower-order terms vanish. We can thus replace the polynomial type $a = (a_0, a_1, \ldots, a_k)$ with new type with two fields: the largest exponent $k$ and its coefficient $a_k$.
+where the lower-order terms vanish. We can thus replace the polynomial type $a = (a_0, a_1, \ldots, a_k)$ with a new type with two fields: the largest exponent $k$ and its coefficient $a_k$.
 From this, we can define a new algebra as
 %\begin{equation}
 %\begin{split}
@@ -720,8 +720,8 @@ From this, we can define a new algebra as
 \end{equation}
 To implement this algebra programmatically, we create a data type with two fields $(x, a_x)$ to store the MIS size and its counting,
 and define the above operations and constants correspondingly.
-When we are only interested in knowing the MIS size, we can drop the counting field.
-The algebra of the exponents becomes the max-plus tropical algebra~\cite{Maclagan2015, Moore2011}.:
+If one is only interested in finding the MIS size, one can drop the counting field.
+The algebra of the exponents becomes the max-plus tropical algebra~\cite{Maclagan2015, Moore2011}:
 \begin{equation}\eqname{T}
     \begin{split}
         x \oplus y &= \max(x,y)\\
@@ -733,12 +733,12 @@ The algebra of the exponents becomes the max-plus tropical algebra~\cite{Maclaga
 This algebra is the same as the one used in Liu et al.~\cite{Liu2021} to calculate and count spin glass ground states.
 For independent set calculations here, the vertex tensor and edge tensor becomes:
 \begin{equation}
-    W^{\rm tropical} = \left(\begin{matrix}
+    W^{\rm T} = \left(\begin{matrix}
         \mymathbb{1} \\
         \infty
     \end{matrix}\right),   
     \qquad \qquad
-        B^{\rm tropical} = \left(\begin{matrix}
+        B^{\rm T} = \left(\begin{matrix}
         \mymathbb{1}  & \mymathbb{1} \\
         \mymathbb{1} & \mymathbb{0}
     \end{matrix}\right).
@@ -746,7 +746,7 @@ For independent set calculations here, the vertex tensor and edge tensor becomes
 
 \subsection{Truncated polynomial algebra for counting independent sets of large size}
 Instead of counting just the MISs, one may be interested in counting the independent sets of large sizes close to the MIS size.
-For example, if one is interested in counting only $a_{\alpha(G)}$ and $a_{\alpha(G)-1}$, we can define a truncated polynomial algebra by keeping only the largest two coefficients in the polynomial in \Eq{eq:polynomial}:
+For example, if one is interested in counting only $a_{\alpha(G)}$ and $a_{\alpha(G)-1}$, we can define a truncated polynomial algebra by keeping only the largest two coefficients in the polynomial in \Eq{eq:polynomial} as:
 \begin{equation}
     \eqname{P2}
     \begin{split}
@@ -764,7 +764,7 @@ As will be shown below, this algebra can also be extended to enumerate those lar
 \subsection{Set algebra for configuration enumeration}
 The enumeration problems of independent sets are also interesting and has been studied extensively in the literature~\cite{Bron1973, Eppstein2010, Johnson1988}, including,
 for example, the enumeration of all independent sets, the enumeration of all maximal independent sets, or the enumeration of all MISs.
-To enumerate all independent sets, we designed an algebra defined on sets of bitstrings.
+To enumerate all independent sets, we designed an algebra defined on sets of bitstrings:
 \begin{equation}
 \eqname{SN}
 \begin{split}
@@ -784,7 +784,7 @@ where $s$ and $t$ are each a set of $|V|$-bit strings and $\lor^\circ$ is the bi
 &\\
     &\{00001\} \odot \{01110, 01000\} = \{01110, 01000\} \odot \{00001\} = \{01111, 01001\}\\
     &\{00001\} \odot \{\} = \{\}\\
-    &\{00001\} \odot \{00000\} = \{00001\}
+    &\{00001\} \odot \{00000\} = \{00001\}.
 \end{split}
 \end{equation*}
 \end{example}
@@ -793,22 +793,22 @@ To enumerate all independent sets,
 we initialize variable $x_{i}$ in the vertex tensor to $x_i = \{\boldsymbol{e}_{i}\}$, where $\boldsymbol{e}_i$ is a basis bit string of size $|V|$ that has only one non-zero value at location $i$.
 The vertex and edge tensors are thus
 \begin{equation}
-    W^{\rm enum}(\{\boldsymbol{e}_{i}\}) = \left(\begin{matrix}
+    W^{\rm SN}(\{\boldsymbol{e}_{i}\}) = \left(\begin{matrix}
         \mymathbb{1} \\
         \{\boldsymbol{e}_{i}\}
     \end{matrix}\right),   
     \qquad \qquad
-        B^{\rm enum} = \left(\begin{matrix}
+        B^{\rm SN} = \left(\begin{matrix}
         \mymathbb{1}  & \mymathbb{1} \\
         \mymathbb{1} & \mymathbb{0}
     \end{matrix}\right).
 \end{equation}
 
-This set algebra can serve as the coefficients in \Eq{eq:countingtropical} to enumerate all MISs, \Eq{eq:polynomial} to enumerate independent sets of different sizes,
+This set algebra can serve as the coefficients in \Eq{eq:polynomial} to enumerate independent sets of all different sizes, \Eq{eq:countingtropical} to enumerate all MISs,
 or \Eq{eq:max2poly} to enumerate all independent sets of size $\alpha(G)$ and $\alpha(G)-1$.
-As long as the coefficients in a truncated polynomial forms a commutative semiring, the polynomial itself is a commutative semiring.
-For example, to enumerate only the MISs, with the tropical algebra, we define $s_{k}\infty^k$,
-where the coefficient follows the algebra in \Eq{eq:set} and the orders follows the max-plus tropical algebra.
+As long as the coefficients in a truncated polynomial forms a commutative semiring, the polynomial itself is still a commutative semiring.
+For example, to enumerate only the MISs, with the tropical algebra, we can define $s_{k}\infty^k$,
+where the coefficients follow the algebra in \Eq{eq:set} and the orders (exponents) follow the max-plus tropical algebra.
 The combined operations become: 
 %\begin{equation}
 %\begin{split}
@@ -837,12 +837,12 @@ The combined operations become:
 \end{equation}
 Clearly, the vertex tensor and edge tensor become
 \begin{equation}
-    W^{\rm MISenum}(\{\boldsymbol{e}_{i}\infty^1\}) = \left(\begin{matrix}
+    W^{\rm P1+SN}(\{\boldsymbol{e}_{i}\infty^1\}) = \left(\begin{matrix}
         \mymathbb{1} \\
         \{\boldsymbol{e}_{i}\}\infty^1
     \end{matrix}\right),   
     \qquad \qquad
-        B^{\rm MISenum} = \left(\begin{matrix}
+        B^{\rm P1+SN} = \left(\begin{matrix}
         \mymathbb{1}  & \mymathbb{1} \\
         \mymathbb{1} & \mymathbb{0}
     \end{matrix}\right).
@@ -886,7 +886,7 @@ where the \texttt{select} function picks one of $\sigma$ and $\tau$ by some crit
 \begin{figure}
     \centering
     \includegraphics[width=0.9\textwidth, trim={0cm 0cm 0cm 0cm}, clip]{figures/masktree.pdf}
-    \caption{Bounded enumeration of maximum independent sets. In the graph, a circle is a tensor, an arrow specifies execution direction of a function and $\circ$ is the Hadamard multiplication. (a) is the forward pass with algebra \Eq{eq:tropical} for computing $\alpha(G)$.
+    \caption{Bounded enumeration of maximum independent sets. In these graphs, a circle is a tensor, an arrow specifies execution direction of a function and $\circ$ is the Hadamard (element-wise) multiplication. (a) is the forward pass with algebra \Eq{eq:tropical} for computing $\alpha(G)$.
      (b) is the backward pass for computing boolean gradients as masks.
      (c) is the masked forward pass with algebra \Eq{eq:countingtropicalset} for enumerating configurations.}
      \label{fig:bounding}
