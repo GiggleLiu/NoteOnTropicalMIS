@@ -87,6 +87,7 @@ class PLT(object):
 
 
     def fig2(self, tp="pdf"):  # independence polynomials
+        ALPHA = 0.5
         nw = [(10, 6, 9.49), (20, 8, 12.40), (30, 9, 13.35), (40, 11, 15.14), (50, 16, 21.26), (60, 17, 22.58), (70, 16, 21.50), (80, 20, 27.48), (90, 26, 35.04), (100, 26, 35.06)]
         ns = [x[0] for x in nw]
         FS = 8
@@ -99,7 +100,7 @@ class PLT(object):
             plt.ylabel("complexity")
             tws = np.arange(0, 36, 5)
             plt.yticks(tws, ["$2^{%d}$"%tw for tw in tws])
-            plt.legend(loc="upper left", fontsize=FS, ncol=1)
+            plt.legend(loc="upper left", fontsize=FS, ncol=1, framealpha=ALPHA)
 
             ax=plt.subplot(122)   # size
             cornertex("(b)", ax, offset=(-0.02,0))
@@ -115,7 +116,7 @@ class PLT(object):
             plt.yscale("log")
             plt.xlabel("number of vertices, $|V|$")
             plt.ylabel("time/s")
-            plt.legend(loc="upper left", fontsize=FS)
+            plt.legend(loc="upper left", fontsize=FS, framealpha=ALPHA)
             plt.ylim(1e-3,1e4)
 
             plt.tight_layout()
