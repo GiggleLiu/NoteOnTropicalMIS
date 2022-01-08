@@ -292,7 +292,7 @@ unlike another standard approach for solving the MIS size, the branching algorit
 % We map the independent set problem into generic tensor network contraction with specially designed tensor element algebra.
 % Its algorithmic complexity is similar to that of dynamic programming, i.e. scales exponentially as ${\rm tw}(G)$.
 %But the tensor network approach is highly versatile so different problems can be generically solved with minimal implementation efforts without loss of efficiency.
-We benchmark our algorithms by computing various independent set properties of certain sparse graphs on central processing units (CPUs) and graphics processing units (GPUs) and show its good performacne.
+We benchmark our algorithms in \Sec{sec:benchmark} by computing various independent set properties of certain sparse graphs on central processing units (CPUs) and graphics processing units (GPUs) and show its good performacne.
 The high performance of our algorithms benefits from recent advances in random tensor-network contraction for the purposes of quantum circuit simulations~\cite{Gray2021, Pan2021, Kalachev2021},
 where efficient heuristic algorithms have been developed to optimize the contraction order for tensor networks up to thousands of vertices.
 For cases where the tensors are too large to fit into a GPU, slicing techniques can be used to further reduce the space consumption.
@@ -304,17 +304,17 @@ We show how to compute properties related to maximal independent sets and proper
 
 \section{Tensor networks}
 Tensor network~\cite{Cirac2020, Orus2014} is also known as einsum, factor graph or sum-product network~\cite{Bishop2006} in different contexts;
-it can be viewed as a generalization of matrix multiplication to multi-dimensional tensor contraction.
-Einstein's notation is often used to represent a tensor network, e.g.\ the matrix multiplication between two matrices $A$ and $B$ can be represented in Einstein's notation as $C_{ik} = A_{ij}B_{jk}$,
+it can be viewed as a generalization of binary matrix multiplication to nary tensor contraction.
+Einstein's notation is often used to represent a tensor network, e.g.\ it represents the matrix multiplication between two matrices $A$ and $B$ as $C_{ik} = A_{ij}B_{jk}$,
 where we use a label in the subscript to represent a degree of freedom.
 One can enumerate these degrees of freedom and accumulate the product of tensor elements to the output tensor.
-In the standard notation of Einstein's summation or tensor networks in physics, each index appears precisely twice.
+In the standard Einstein's notation for tensor networks in physics, each index appears precisely twice.
 Hence a tensor network can be represented as a simple graph,
-where a tensor is a vertex and two tensors sharing the same label are connected.
+where a tensor is mapped to a vertex and a label shared by two tensors is mapped to an edge.
 In this work, we do not impose such a restriction, so an index can appear an arbitrary number of times. 
 %In the main text, we do not have this restriction. An index can appear arbitrary times.
-The graphical representation of these generalized tensor networks is hypergraphs, in which an edge (label) can be shared by an arbitrary number of vertices (tensors).
-These two notations are equivalent in representation power because one can easily translate a generalized tensor network to the standard notation by adding $\delta$ tensors, which is a high dimensional equivalence of the identity matrix.
+The graphical representation of a generalized tensor network is a hypergraph, in which an edge (a label in subscript) can be shared by an arbitrary number of vertices (tensors).
+These two notations are equivalent in representation power because one can easily translate a generalized tensor network to the standard notation by adding $\delta$ tensors, a high dimensional equivalence of the identity matrix.
 However, introducing $\delta$ tensors may significantly increase the complexity of the tensor contraction. We illustrate this subtle point in \App{app:tensorbad}.
 
 \begin{example}
@@ -403,8 +403,8 @@ a \odot (b\oplus c) = a\odot b \oplus a\odot c  &  \hspace{5em}\text{$\triangler
 &\\
 a \odot \mymathbb{0} = \mymathbb{0} \odot a = \mymathbb{0}
 \end{align*}
-The requirement of being commutative is for the tensor contraction result to be independent of the contraction order.
-In the following sections, we show how to compute a number of properties of independent sets by designing tensor element types as specific commutative semirings while keeping the tensor network generic~\cite{Stepanov2014}.
+We require the algebra being multiplicative commutative because the contraction order optimizer will change the multiplication order of elements, while we wish this contraction order does not change the contraction results.
+In the following sections, we show how to compute a number of properties of independent sets by designing tensor element types as specific commutative semirings without changing the tensor network contraction program~\cite{Stepanov2014}.
 Table~\ref{tbl:generictypes} summarizes those properties that can be computed by various tensor element types.
 
 \begin{table}[t!]\centering
@@ -434,8 +434,8 @@ The independence polynomial is an important graph polynomial that contains the c
 \begin{equation}\label{eq:idpdef}
 I(G, x) = \sum_{k=0}^{\alpha(G)} a_k x^k,
 \end{equation}
-where $a_k$ is the number of independent sets of size $k$ in $G$. The total number of independent sets is thus equal to $I(G, 1)$.
-To compute the independence polynomial of a graph $G = (V, E)$, we reinterpret this problem as a tensor network contraction problem.
+where $a_k$ is the number of independent sets of size $k$ in graph $G=(V,E)$. The total number of independent sets is thus equal to $I(G, 1)$.
+To compute this polynomial, we map this expression to a tensor network contraction.
 We map a vertex $i\in V$ to a label $s_i \in \{0, 1\}$ of dimension $2$ in a tensor network, where we use $0$ ($1$) to denote a vertex is absent (present) in the set.
 For each label $s_i$, we defined a parametrized rank-one vertex tensor $W(x_i)$ as
 \begin{equation}
@@ -465,9 +465,9 @@ and the product over edge tensor elements gives a factor $1$ for a configuration
 
 %In the implementation of the algorithm, we benefit from recent advances in tensor network contraction,
 %where researchers working on quantum circuit simulation evaluate the tensor network by pairwise contracting tensors in a heuristic order~\cite{Gray2021, Pan2021}.
-To evaluate \Eq{eq:idp}, directly summing up the products is computationally inefficient.
-The standard approach to evaluate a tensor network is to contract two tensors at a time with a certain order utilizing the associativity and commutativity of tensor elements.
-A good contraction order can reduce the time complexity significantly, at the cost of having a space overhead of $O(2^{\text{tw}(G)})$~\cite{Markov2008}.
+To evaluate \Eq{eq:idp}, directly summing up the $2^{|V|}$ product terms is computationally inefficient.
+The standard approach to evaluate a tensor network is to contract two tensors at a time with a certain order utilizing the associativity and commutativity of tensor contraction.
+A fully optimized contraction order can reduce the time to $O(2^{\text{tw}(G)})$~\cite{Markov2008}, while requiring a space at the same order of magnitude to store intermediate contraction results.
 The pairwise tensor contraction also makes it possible to utilize basic linear algebra subprograms (BLAS) functions to speed up the computation for certain tensor element types.
 
 \begin{example}\label{eg:tensorcontraction}
@@ -890,10 +890,10 @@ where $\delta$ is the Dirac delta function that returns one if two arguments hav
 This rule defined on matrix multiplication can be easily generalized to tensor contraction by replacing the matrix multiplication between $C^{\circ-1} \circ \overline C$ and $B^{\mathsf{T}}$ by a tensor contraction.
 With the above method, one can significantly reduce the space needed to store the intermediate configurations by setting the tensor elements masked false to zero during contraction.
 
-\section{Benchmarks and case studies}
+\section{Benchmarks and case studies}\label{sec:benchmark}
 \subsection{Performance benchmarks}
 We run a single thread benchmark on CPU Intel(R) Xeon(R) CPU E5-2686 v4 @ 2.30GHz,
-and its CUDA version on a GPU Tesla V100.
+and its CUDA version on a GPU Tesla V100-SXM2 16G.
 The results are summarized in Figure~\ref{fig:benchmark}.
 The graphs that we use in benchmarks are random three regular graphs,
  a typical type of sparse graphs that has a small tree width that asymptotically smaller than $|V|/6$~\cite{Fomin2006}.
@@ -912,26 +912,26 @@ The graphs that we use in benchmarks are random three regular graphs,
     \label{fig:benchmark}
 \end{figure}
 
-Figure (a) shows the time and space complexity (without slicing) of tensor network contraction for variety of graph sizes, where the space complexity is the same as the tree width of the problem graph.
-It is obtained with tensor network contraction order optimization algorithm in Ref.~\cite{Kalachev2021}.
-In practice, slicing technique is used to fit the computation into a 32GB memory, the target tree width of slicing is $27$.
+Figure (a) shows the time and space complexity of tensor network contraction for variety of graph sizes, where the space complexity is the same as the tree width of the problem graph.
+The contraction order is obtained using the local search algorithm in Ref.~\cite{Kalachev2021}.
+In practice, slicing technique is used for graphs with tree width greater than 27 to fit the computation into a 16GB memory.
 One can see all the computing times in figure (b), (c) and (d) have a strong correlation with the tree width.
 %The computations shown in \Fig{fig:benchmark} include independent set counting, finding maximum independent set size (panel b),
 %computing independence polynomial (panel c) and find one independent set and enumerating independent sets (panel d).
 Among these benchmarks, computational tasks with data types \texttt{T (CPU)},
-\texttt{$\mathbbm{R}$ (CPU)}, \texttt{$\mathbbm{R}$ (GPU)}, \texttt{$\mathbbm{C}$ (CPU)}, \texttt{$\mathbbm{C}$ (GPU)} and \texttt{T+bounding (CPU)} can utilize fast BLAS functions, hence 
-are much faster comparing to non-BLAS methods in the same category.
-GPU computes much faster than CPU in all cases when the problem scale is large enough so that the actual computing time is comparable or larger than the launching time of CUDA kernels.
+\texttt{$\mathbbm{R}$ (CPU)}, \texttt{$\mathbbm{R}$ (GPU)}, \texttt{$\mathbbm{C}$ (CPU)}, \texttt{$\mathbbm{C}$ (GPU)} and \texttt{T+bounding (CPU)} can utilize fast BLAS functions to evaluate tensor contractions, hence 
+are much faster comparing to non-BLAS element types in the same category.
+GPU computes much faster than CPU in all cases when the problem scale is large enough such that the actual computing time is comparable or larger than the launching overhead of CUDA kernels.
 Most algebras can be computed on GPU, except those requiring dynamic sized structures, i.e. \texttt{PN} and \texttt{SN}.
 In figure (c), one can see the Fourier transformation based method is the fastest in computing the independence polynomial,
-however, it maybe suffer from the round off errors. The finite field (GF$(p)$) approach is the only method that does not incur round-off errors and can run on a GPU.
+however, it maybe suffer from the round off errors. The finite field (GF$(p)$) approach is the only method that does not have round-off errors and can run on a GPU.
 In figure (d), one can see the technique to bound the enumeration space improves the performance for more than one order in enumerating the MISs.
-Bounding can also reduce the memory usage significantly, without which the largest computable graph size is only $\sim150$ on a 32GB memory device.
+Bounding can also reduce the memory usage significantly, without which the largest computable graph size is only $\sim150$ on a device with 32GB main memory.
 
 \subsection{Example case studies} In this section, we give a few examples where the different properties of independence sets are used.
 
 \subsubsection{Number of independent sets and hard-square entropy constant}
-In this examples, the types of graphs we used are shown in Figure~\ref{fig:lattices}, where vertices are all placed on square lattices with lattice dimensions $L \times L$.
+We compute the counting of all independent sets for graphs shown in Figure~\ref{fig:lattices}, where vertices are all placed on square lattices with lattice dimensions $L \times L$.
 The graphs include: the square grid graphs, denoted as SG; the square grid graphs with a filling factor $p$, denoted as SG$(p)$, where $\lfloor pL^{2} \rceil$ square grids are occupied with vertices;
 the King's graphs, denoted as K; the King's graphs with a filling factor $p$, denoted as K$(p)$. 
 The number of independent sets for square grid graphs of size $L \times L$ form a well-known integer sequence (\href{https://oeis.org/A006506}{OEIS A006506}), which is thought as a two-dimensional generalization of the Fibonacci numbers.

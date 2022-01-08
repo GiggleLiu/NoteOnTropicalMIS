@@ -1,7 +1,7 @@
 #!/bin/bash
 
 FILE=paper.tex
-git show 4f3c7cc77a77cdd0470fd3b046ec5e97e07fdf95:paper/$FILE > _temp.tex
+git show HEAD~$1:paper/$FILE > _temp.tex
 latexdiff _temp.tex $FILE > _tempdiff.tex
 xelatex _tempdiff.tex
 xdg-open _tempdiff.pdf || open _tempdiff.pdf
