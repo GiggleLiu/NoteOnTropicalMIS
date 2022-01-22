@@ -1098,12 +1098,12 @@ We would also like to thank a number of open-source software developers, includi
 \appendix
 
 \section{Technical guide}\label{sec:technical}
-This project depends on multiple open source packages in Julia ecosystem.
-We list the Julia packages playing important roles in our code base as follows.
+This project depends on multiple open source packages in the Julia ecosystem.
+We list the Julia packages that play important roles in our code base as follows:
 
 \begin{description}
 	\item[\href{https://github.com/under-Peter/OMEinsum.jl}{OMEinsum} and \href{https://github.com/Happy-Diode/OMEinsumContractionOrders.jl}{OMEinsumContractionOrders}] are packages providing the support for Einstein's (or tensor network) notation and contraction order optimizations.
-    \texttt{OMEinsumContractionOrders} implements state of art algorithms for finding the optimal contraction order for the an tensor network, including the KaHypar+Greedy~\cite{Gray2021, Pan2021} and local transformation based approaches~\cite{Kalachev2021},
+    \texttt{OMEinsumContractionOrders} implements state-of-the-art algorithms for finding the optimal contraction order for a tensor network, including the KaHypar+Greedy~\cite{Gray2021, Pan2021} and local transformation based approaches~\cite{Kalachev2021},
 	\item[\href{https://github.com/TensorBFS/TropicalNumbers.jl}{TropicalNumbers} and \href{https://github.com/TensorBFS/TropicalGEMM.jl}{TropicalGEMM}] are packages providing tropical number and efficient tropical matrix multiplication,
 	\item[\href{https://github.com/JuliaGraphs/Graphs.jl}{Graphs}] is a package providing graph utilities, like random regular graph generator,
 	\item[\href{https://github.com/JuliaMath/Polynomials.jl}{Polynomials}] is a package providing polynomial algebra and polynomial fitting,
@@ -1115,12 +1115,12 @@ One can install these packages by opening a Julia REPL, type \colorbox{lightgray
 pkg> add OMEinsum Graphs Mods Primes Polynomials TropicalNumbers OMEinsumContractionOrders
 \end{lstlisting}
 
-It may surprise you that the Julia implementation of algorithms introduced in the paper is so short that except the bounding algorithm,
-all are contained in this appendix. After installing required packages, one can open a Julia REPL and copy the following code into it.
+The reader may find it surprising that the Julia implementation of the algorithms introduced in this work is so short that except the bounding algorithm,
+all are contained in this appendix. This is due to the power of generic programming. After installing the required packages, one can open a Julia REPL and copy the following codes into it.
 
 \lstinputlisting[breaklines]{../democode/demo.jl}
 
-For performance reason, we still recommend checking our GitHub repository for the full featured version:
+For better performance, we recommend checking our GitHub repository for the full featured version:
 \href{https://github.com/Happy-Diode/GraphTensorNetworks.jl}{https://github.com/Happy-Diode/GraphTensorNetworks.jl}.
 It can be installed in a similar style to other packages. Here is a short introduction to the functionalities in this package.
 
