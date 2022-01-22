@@ -252,11 +252,11 @@ One of the paradigmatic independent set \textit{properties} % that many computat
 is the maximum independent set (MIS) and the size of the MIS, $\alpha(G) \equiv \max_{I}|I|$. 
 There is widespread interest in this MIS problem not only because it is a well-known NP-complete problem~\cite{Hastad1996} that can be mapped from many other important combinatorial optimization problems in polynomial time such as the 3-satisfiability problem, the maximum clique problem, and the minimum vertex cover problem~\cite{Moore2011},
 but also because it has a wide range of applications in scheduling, logistics, wireless networks and telecommunication, and computer vision, etc.~\cite{Butenko2003, Wu2015}.
-Some other properties, such as the number and enumeration of independent sets or maximal independent sets of a given size, are equally interesting, if not more important, in many practical applications. These other properties can be found in physics applications such as in the hard-core lattice gas model~\cite{Dyre2016, Fernandes2007}
+On the other hand, some other properties, such as the number and enumeration of independent sets or maximal independent sets of a given size, are equally interesting, if not more important, in many practical applications. These other properties can be found in physics applications such as in the hard-core lattice gas model~\cite{Dyre2016, Fernandes2007}
 in statistical mechanics and the Rydberg hamiltonian with neutral atoms~\cite{Pichler2018, Ebadi2022} \red{replace with experiment paper when ready};
-they can, for example, be used to understand phase transitions~\cite{Dyre2016, Fernandes2007}, to identify harder graphs in an ensemble of graphs~\cite{Ebadi2022} and to analyze the presence of the overlap gap property~\cite{Gamarnik2013, Gamarnik2019}.
+they can, for example, be used to understand phase transitions~\cite{Dyre2016, Fernandes2007}, to identify harder graphs in an ensemble of graphs~\cite{Ebadi2022} and to analyze the presence of the overlap gap property~\cite{Gamarnik2013, Gamarnik2019} related to the clustering phenomenon of large independent sets.
 Meanwhile, finding the number of independent sets of a given size is equivalent to computing the coefficients of the independence polynomial~\cite{Harvey2018,Ferrin2014}.
-which is a useful graph characteristic related to, for example, the partition functions~\cite{Lee1952,Yang1952} and Euler characteristics of the independence complex~\cite{Bousquet2008, Levit2009}. However, there is a lack of general and versatile tool to compute the different properties of independent sets.
+which is a useful graph characteristic related to, for example, the partition functions~\cite{Lee1952,Yang1952} and Euler characteristics of the independence complex~\cite{Bousquet2008, Levit2009}. However, there is a lack of general and versatile tool to compute these different properties of independent sets.
 %\blue{The primary interest of many computational complexity theorists is finding the maximum size of such vertex sets $\alpha(G) \equiv \max_{I}|I|$ and one of the sets of this size.}
 %Finding $\alpha(G)$ exactly is a hard computational problem, and it is NP-hard even to approximate $\alpha(G)$ within $|V|^{1-\epsilon}$ ~\cite{Hastad1996},
 %meaning there is unlikely a polynomial time algorithm to find an independent set with size $\alpha(G)/|V|^{1-\epsilon}$ for an arbitrarily small positive $\epsilon$.
@@ -979,7 +979,7 @@ The graphs that we use in benchmarks are random three regular graphs,
     \centering
     \includegraphics[width=\textwidth, trim={0cm 0cm 0cm 0cm}, clip]{figures/fig1.pdf}
     \caption{Benchmark results for computing different properties of independent sets of a random three regular graph with different tensor element types.
-    The time in these plots only includes tensor network contraction, without taking the contraction order finding and just-in-time compiling time into account.
+    The time in these plots only includes tensor network contraction, without taking into account the contraction order finding and just-in-time compilation time.
     Legends are properties, algebra and devices that we used in the computation; one can find the corresponding computed property in \Tbl{tbl:generictypes}.
     (a) time and space complexity versus the number of vertices for the benchmarked graphs.
     (b) The computing time for calculating the MIS size and for counting of the number of all independent sets (ISs), the number of MISs, and the number of independent sets having size $\alpha(G)$ and $\alpha(G)-1$.
@@ -989,20 +989,20 @@ The graphs that we use in benchmarks are random three regular graphs,
     \label{fig:benchmark}
 \end{figure}
 
-Figure (a) shows the time and space complexity of tensor network contraction for different graph sizes, where the space complexity is the same as the treewidth of the problem graph.
+Figure~\ref{fig:benchmark}(a) shows the time and space complexity of tensor network contraction for different graph sizes, where the space complexity is the same as the treewidth of the problem graph.
 The contraction order is obtained using the local search algorithm in Ref.~\cite{Kalachev2021}.
 In practice, slicing technique is used for graphs with treewidth greater than 27 to fit the computation into a 16GB memory.
-One can see that all the computing times in figure (b), (c) and (d) have a strong correlation with the treewidth.
+One can see that all the computing times in figure~\ref{fig:benchmark}(b), (c) and (d) have a strong correlation with the treewidth.
 %The computations shown in \Fig{fig:benchmark} include independent set counting, finding maximum independent set size (panel b),
 %computing independence polynomial (panel c) and find one independent set and enumerating independent sets (panel d).
 Among these benchmarks, computational tasks with data types \texttt{T (CPU)},
 \texttt{$\mathbbm{R}$ (CPU)}, \texttt{$\mathbbm{R}$ (GPU)}, \texttt{$\mathbbm{C}$ (CPU)}, \texttt{$\mathbbm{C}$ (GPU)} and \texttt{T+bounding (CPU)} can utilize fast BLAS functions to evaluate tensor contractions, hence 
 are much faster comparing to non-BLAS element types in the same category.
 GPU computes much faster than CPU in all cases when the problem scale is large enough such that the actual computing time is comparable or larger than the launching overhead of CUDA kernels.
-Most algebras can be computed on GPU, except those requiring dynamic sized structures, i.e.\ \texttt{PN} and \texttt{SN}.
-In figure (c), one can see the Fourier transformation based method is the fastest in computing the independence polynomial,
+Most algebras can be computed on a GPU, except those requiring dynamic sized structures, i.e.\ \texttt{PN} and \texttt{SN}.
+In figure~\ref{fig:benchmark}(c), one can see the Fourier transformation based method is the fastest in computing the independence polynomial,
 but it may suffer from round-off errors. The finite field (GF$(p)$) approach is the only method that does not have round-off errors and can be run on a GPU.
-In figure (d), one can see the technique to bound the enumeration space improves the performance for more than one order of magnitude in enumerating the MISs.
+In figure~\ref{fig:benchmark}(d), one can see the technique to bound the enumeration space improves the performance for more than one order of magnitude in enumerating the MISs.
 Bounding can also reduce the memory usage significantly, without which the largest computable graph size is only $\sim150$ on a device with 32GB main memory.
 
 \subsection{Example case studies} In this section, we give a few examples where the different properties of independence sets are used.
@@ -1038,7 +1038,7 @@ A useful number that can be computed using the number of independent sets is the
 \end{figure}
 
 \subsubsection{The overlap gap property}
-With the tool to enumerate configurations, one can try to understand the structure of the independent set configuration space, such as the optimization landscape for finding the MISs and the geometry of the solution space. One of the known barriers for finding the MIS is the so-called overlap gap property~\cite{Gamarnik2013, Gamarnik2019}. Intuitively, if the overlap gap property is present, it means every two large independent sets either have a significant intersection or very small intersection; it implies that large independent sets are clustered together. This clustering property has been used to prove the limitations of local algorithms in finding the MISs~\cite{Gamarnik2013, Gamarnik2019}. Here, we use the computed configurations of large independent sets to investigate the presence or absence of the overlap gap property. In particular, in \Fig{fig:hamming}, we enumerated all ISs of size $\geq\alpha(G)-1$ for two random three regular graph instances of size 100 and show the pairwise Hamming distance statistics for the enumerated configurations. In \Fig{fig:hamming}(a), we observed the multiple peak structure for the pairwise Hamming distance for one of the graphs. This indicates the presence of the overlap gap property and disconnected clusters exist in the configuration space for large independent sets. We expect our numerical tool can be used to understand this phenomenon better and to further investigate the graph properties and the geometry of the configuration spaces for a variety of graph instances.
+With the tool to enumerate configurations, one can try to understand the structure of the independent set configuration space, such as the optimization landscape for finding the MISs and the geometry of the solution space. One of the known barriers for finding the MIS is the so-called overlap gap property~\cite{Gamarnik2013, Gamarnik2019}. Intuitively, if the overlap gap property is present, it means every two large independent sets either have a significant intersection or very small intersection; it implies that large independent sets are clustered together. This clustering property has been used to prove the limitations of local algorithms in finding the MISs~\cite{Gamarnik2013, Gamarnik2019}. Here, we use the computed configurations of large independent sets to investigate the presence or absence of the overlap gap property for some given graphs. In particular, in \Fig{fig:hamming}, we enumerated all ISs of size $\geq\alpha(G)-1$ for two random three regular graph instances of size 100 and show the pairwise Hamming distance statistics for the enumerated configurations. In \Fig{fig:hamming}(a), we observed the multiple peak structure for the pairwise Hamming distance for one of the graphs. This indicates the presence of the overlap gap property and disconnected clusters exist in the configuration space for large independent sets. We expect our numerical tool can be used to understand this phenomenon better and to further investigate the graph properties and the geometry of the configuration spaces for a variety of graph instances.
 \begin{figure} 
     \centering
     \includegraphics[width=\textwidth, trim={0cm 0cm 0cm 0cm}, clip]{figures/fig3.pdf}
@@ -1049,6 +1049,9 @@ With the tool to enumerate configurations, one can try to understand the structu
 \section{Discussion and conclusion}
 In this paper, we introduce a method to use generic programming tensor networks to compute a number of different independent set properties, including the size of the MISs and the number and enumeration of independent sets of a given size. For each property, we design an algebra of a commutative semiring with a particular element type and map the computation of the property to the contraction of a tensor network with such an element type. The data types introduced in the main text can be represented in the following diagram, where we use overlap to represent two algebras that can be combined to create a new algebra.
 
+\begin{figure}[th]
+   \centering
+%    \includegraphics[width=0.9\textwidth, trim={0cm 0cm 0cm 0cm}, clip]{}
 \centerline{\begin{tikzpicture}[]
     \scriptsize
     \node[ellipse,draw,minimum width=2cm, minimum height=1cm,inner sep=0pt] at (0, 2.5) (R) {$\mathbbm{R}$};
@@ -1066,9 +1069,13 @@ In this paper, we introduce a method to use generic programming tensor networks 
     \draw[black,-latex] (textT) -- (T);
 \end{tikzpicture}}
 
-Other than the the case with real numbers, we have polynomials and truncated polynomials as algebra types.
+    \caption{The element types of the tensor networks used in this work. The overlap between two algebra indicates that a new algebra can be created combining those two types of algebra.}
+     \label{fig:venn-diagram}
+\end{figure}
+
+Other than the case with real numbers, we have polynomials and truncated polynomials as algebra types.
 We combine them with the set algebra and the bitstring algebra for set enumeration and sampling. 
-These algebras are general purposed, they can be used to compute properties of maximal independent sets and a variety of other combinatorial problems such as the matching problem, the k-coloring problem, the max-cut problem, and the set packing problem, as detailed in \App{app:otherproblems}. 
+These algebras are of generic use: they can be utilized to compute properties of maximal independent sets and a variety of other combinatorial problems such as the matching problem, the k-coloring problem, the max-cut problem, and the set packing problem, as detailed in \App{app:otherproblems}. 
 Moreover, since the independence polynomial is closely related to the matching polynomial~\cite{Levit2005}, the clique polynomial~\cite{Hoede1994}, and the vertex cover polynomial~\cite{Akbari2013},
 our algorithm to compute the independence polynomial can also be used to compute these graph polynomials.
 %Some properties of the independence polynomial, such as the uni-modality, log-concavity, and roots of the polynomial, are well studied in the literature for special classes of graphs~\cite{Levit2005}.
@@ -1076,7 +1083,7 @@ our algorithm to compute the independence polynomial can also be used to compute
 By adapting to the style of generic programming, we can implement all the algorithms without much effort.
 We show some of the Julia language implementations in Appendix~\ref{sec:technical}.
 A complete implementation can be found in our Github repository~\cite{GraphTensorNetworks}. 
-We expect our tool can be used to understand and study many interesting applications of independent sets and beyond. This approach of generic tensor networks should also inspire future works on tensor network computations. 
+We expect our tool can be used to understand and study many interesting applications of independent sets and beyond. We also hope this approach of generic tensor networks can inspire future works on tensor network computations.
 
 \section*{Acknowledgments}
 We would like to thank Pan Zhang for sharing his python code for optimizing contraction orders of a tensor network.
