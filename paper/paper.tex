@@ -1126,7 +1126,7 @@ It can be installed in a similar style to other packages. Here is a short introd
 
 \lstinputlisting[breaklines]{../democode/tutorial.jl}
 
-\section{The reason to not using the standard tensor network notations}\label{app:tensorbad}
+\section{Additional contraction overhead using the standard tensor network notations}\label{app:tensorbad}
 As we have mentioned in the main text,
 a standard tensor network notation is equivalent to the generalized tensor network by introducing $\delta$ tensors,
 where a $\delta$ tensor of rank $d$ is defined as
@@ -1183,9 +1183,9 @@ By mapping the independent set problem to a standard tensor network, we have the
     \draw [decorate] (2.7, 0.5) -- (2.7, 5.5);
 \end{tikzpicture}}
 
-In this diagram, the circle on each vertex in the original graph is a $\delta$ tensor of rank $8$.
+In this diagram, the circle on each vertex in the original graph is a $\delta$ tensor up to rank $8$.
 If we contract this tensor network in a naive column-wise order, the maximum intermediate tensor has rank $\sim3L$, requiring a storage of size $\approx 2^{3L}$.
-If we relax the restriction that each label appears exactly twice. We have the following hypergraph representation of a generalized tensor network.
+If we relax the restriction that each label must appears exactly twice, we have the following hypergraph representation of a generalized tensor network.
 
 \centerline{\begin{tikzpicture}
     \def\r{0.08}
@@ -1247,9 +1247,9 @@ If we relax the restriction that each label appears exactly twice. We have the f
 \end{tikzpicture}}
 Here, we use different colors to distinguish different hyperedges.
 A vertex tensor always has rank $1$ and is not shown here since it does not change the contraction complexity.
-Again, if we contract this tensor network in the column-wise order, the maximum intermediate tensor rank is $\sim L$, which can be see by counting the number of colors.
+If we contract this tensor network in the column-wise order, the maximum intermediate tensor rank is $\sim L$, which can be seen by counting the number of colors.
 
-\section{Generalizing to other graph problems}\label{app:otherproblems}
+\section{Generalization to other graph problems}\label{app:otherproblems}
 %There are some other graph problems that can be encoded to a tensor network.
 %To understand its representation power, it is a good starting point to connect it with dynamic programming because
 %a tensor network can be viewed as a special type of dynamic programming where its update rule can be characterized by a linear operation.
@@ -1288,13 +1288,13 @@ Finding maximal independent sets of a graph is equivalent to finding the maximal
 Let us denote the neighborhood of a vertex $v$ as $N(v)$ and denote $N[v] = N(v)\cup \{v\}$.
 A maximal independent set $I_m$ is an independent set where there exists no vertex $v \in V$ such that $I_m \cap N[v]  = \emptyset$.
 Similar to the independence polynomial, the maximal independence polynomial counts the number of maximal independent sets of various sizes~\cite{Hu2017},
-which can help us understand why the program for solving MIS is trapped in a local minimum.
+which can be helpful for understanding why the program for solving MIS can be trapped in a local minimum.
 Concretely, it is defined as
 \begin{equation}
 I_{\rm max}(G, x) = \sum_{k=0}^{\alpha(G)} b_k x^k,
 \end{equation}
 where $b_k$ is the number of maximal independent sets of size $k$ in graph $G=(V, E)$.
-Comparing with the independence polynomial in \Eq{eq:idpdef}, we have $b_{k} \leq a_{k}$ and $b_{\alpha(G)} = a_{\alpha(G)}$. $I_{\rm max}(G, 1)$ counts the total number of maximal independent sets~\cite{Gaspers2012, Manne2013}, where the fastest algorithm currently has a runtime of $O(1.3642^{|V|})$~\cite{Gaspers2012}.
+Comparing with the independence polynomial in \Eq{eq:idpdef}, we have $b_{k} \leq a_{k}$ and $b_{\alpha(G)} = a_{\alpha(G)}$. $I_{\rm max}(G, 1)$ counts the total number of maximal independent sets~\cite{Gaspers2012, Manne2013}, where, to our knowledge, the fastest algorithm currently has a runtime of $O(1.3642^{|V|})$~\cite{Gaspers2012}.
 If we want to find an MIS, $b_{k}$ counts the number of local optimum at size $k < \alpha(G)$, and can, in some cases, provide hints on the difficulty of finding the MIS using local algorithms~\red{cite experiment}.
 The uni-modality, log-concavity, and real-rootness properties of the maximal independence polynomial for special classes of graphs have also been studied~\cite{Hu2017}. 
 
@@ -1321,8 +1321,8 @@ As an example, for a vertex of degree 2, the resulting rank-3 tensor is
     \end{matrix}\right).
 \end{equation}
  
-By contracting this tensor network with generic element type,
-we can compute the maximum independent set properties such as maximal independence polynomial, enumerating maximal independent sets.
+By contracting this tensor network with generic element types,
+we can compute the maximal independent set properties such as the maximal independence polynomial and the enumeration of maximal independent sets.
 Let us consider the example in~\Sec{eg:tensorcontraction}: its corresponding tensor network structure for computing the maximal independent polynomial becomes
 
     \centerline{\begin{tikzpicture}[
@@ -1362,10 +1362,10 @@ However, for most sparse graphs, this tensor network contraction approach is sti
 We show the benchmark of computing the maximal independent set properties in \Fig{fig:benchmark-maximal},
 including a comparison to the Bron-Kerbosch algorithm from Julia package Graphs~\cite{Graphs}.
 %Since the network for computing maximal independent set properties is different from the one for computing the independence polynomial,
-the treewidth of this tensor network is significantly larger, hence only small graphs can be benchmarked.
+The treewidth of this tensor network is significantly larger, so benchmark with only a smaller graph size is feasible.
 The time for the tensor network approach and the Bron-Kerbosch approach to enumerate all maximal independent sets are comparable,
 while the tensor network does counting much more efficiently.
-Due to the memory limit, this Bron-Kerbosch algorithm stops working at size $70$ and above.
+Due to the memory limit, this Bron-Kerbosch algorithm is only feasible up to a graph size around $70$.
 
 \begin{figure} 
     \centering
@@ -1383,9 +1383,9 @@ A matching polynomial of a graph $G$ is defined as
 \begin{equation}
     M(G, x) = \sum\limits_{k=1}^{|V|/2} c_k x^k,
 \end{equation}
-where $k$ is the number of matches, and coefficients $c_k$ are the corresponding counting.
+where $k$ is the size of a matching, and coefficients $c_k$ are the corresponding counting of the number of matchings of the size $k$.
 We map an edge $(u, v) \in E$ to a label $\langle u, v\rangle \in \{0, 1\}$ in a tensor network,
-where $1$ means two vertices of an edge are matched, $0$ means otherwise.
+where $1$ means two vertices of an edge are matched and $0$ otherwise.
 Then we define a tensor of rank $d(v) = |N(v)|$ on vertex $v$ such that,
 \begin{equation}
     W_{\langle v, n_1\rangle, \langle v, n_2 \rangle, \ldots, \langle v, n_{d(v)}\rangle} = \begin{cases}
@@ -1401,11 +1401,11 @@ and a tensor of rank $1$ on the bond
 \end{cases}
 \end{equation}
 where label $\langle v, w \rangle$ is equivalent to $\langle w,v\rangle$.
-Here, a vertex tensor specifies the restriction that a vertex can not be in two matched edges, while an edge tensor contributes the variable in the polynomial.
+Here, a vertex tensor specifies the restriction that a vertex cannot be matched by more than one edge, while an edge tensor contributes the variable in the polynomial.
 
-\subsection{k-Colouring}
-Let us use 3-colouring problem defined on vertices as an example.
-For a vertex $v$, we define the degree of freedoms $c_v\in\{1,2,3\}$ and a vertex tensor labelled by it as
+\subsection{$k$-Coloring}
+Let us use the 3-coloring problem defined on vertices as an example.
+For a vertex $v$, we define the degrees of freedom $c_v\in\{1,2,3\}$ and a vertex tensor labelled by it as
 \begin{equation}
     W(v) = \left(\begin{matrix}
         r_v\\
@@ -1421,14 +1421,14 @@ For an edge $(u, v)$, we define an edge tensor as a matrix labelled by $(c_u, c_
         1 & 1 & 0
     \end{matrix}\right).
 \end{equation}
-The number of possible colouring can be obtained by contracting this tensor network by setting vertex tensor elements $r_v, g_v$ and $b_v$ to $1$.
+The number of possible colorings can be obtained by contracting this tensor network by setting vertex tensor elements $r_v, g_v$ and $b_v$ to $1$.
 By designing generic types as tensor elements, one can get other properties.
-Similarly, one can define the k-colouring problem on edges too by switching the roles of edges and vertices.
+Similarly, one can also define the $k$-coloring problem on edges by switching the roles of edges and vertices.
 
-\subsection{Max cut problem}
-Max cut problem is also known as the boolean spin glass problem.
+\subsection{Max-Cut problem}
+The Max-Cut problem is also known as the boolean spin glass problem.
 For a vertex $v\in V$, we define a boolean degree of freedom $s_v\in\{0, 1\}$.
-Then the max cut problem can be encoded to tensor networks by mapping an edge $(i,j)\in E$ to an edge matrix labelled by $s_is_j$
+Then the Max-Cut problem can be encoded to tensor networks by mapping an edge $(i,j)\in E$ to an edge matrix labelled by $s_is_j$
 \begin{equation}
     B(x_{\langle i, j\rangle}) = \left(\begin{matrix}
         1 & x_{\langle i, j\rangle}\\
@@ -1436,12 +1436,12 @@ Then the max cut problem can be encoded to tensor networks by mapping an edge $(
     \end{matrix}\right),
 \end{equation}
 where variable $x_{\langle i, j\rangle}$ represents a cut on edge $(i, j)$ or a domain wall of an Ising spin glass.
-Similar to other problems, we can define a polynomial about edges variables by setting $x_{\langle i, j\rangle} = x$,
+Similar to other problems, we can define a polynomial with edge variables by setting $x_{\langle i, j\rangle} = x$,
 where its $k$th coefficient is two times the number of configurations of cut size $k$.
 
 \subsection{Set packing}
 Set packing is the hypergraph generalization of the maximum independent set problem, where a set corresponds to a vertex and an element corresponds to a hyperedge.
-To solve the set packing problem, we just remove the rank 2 restriction of the edge tensor in \Eq{eq:edgetensor}
+To solve the set packing problem, we can just remove the rank-2 restriction of the edge tensor in \Eq{eq:edgetensor}
 \begin{equation}
     B_{v,w,\ldots, z} = \begin{cases}
         1, & v+w+\ldots+z\leq 1,\\
@@ -1475,17 +1475,17 @@ y_0 \\ y_1 \\ \vdots \\ y_{\alpha(G)}
 Let us rearrange the coefficients $r^j$ to $a_j$, the matrix on the left side becomes the discrete Fourier transform matrix. Thus, we can obtain the coefficients by inverse Fourier transform $\vec a_r = {\rm FFT^{-1}}(\omega) \cdot \vec y$, where $(\vec a_r)_j = a_j r ^j$.
 By choosing different $r$, one can obtain better precision in low independent set size region by choosing $r<1$ or high independent set size region by choosing $r>1$.
 
-\section{Integer sequences formed by the number of independent sets}
+\section{Integer sequence formed by the number of independent sets}
 
 We computed the number of independent sets on square lattices and King's graphs
-with our generic tensor network contraction on GPUs.
-The tensor element type is finite field algebra so that we can reach arbitrary precision.
-We also computed independence polynomial rigorously for these lattices in our \href{https://github.com/GiggleLiu/NoteOnTropicalMIS/tree/master/data}{Github repo}.
+with our generic tensor network contraction algorithm on GPUs.
+The tensor element type is finite-field algebra so that we can reach arbitrary precision.
+We also computed the independence polynomial exactly for these lattices which can be found in our \href{https://github.com/GiggleLiu/NoteOnTropicalMIS/tree/master/data}{Github repo}.
 
 
 \begin{table}[h]
 \caption{The number of independent sets for square grid graphs of size $L\times L$. This forms the integer sequence \href{https://oeis.org/A006506}{OEIS A006506}.
-Here we only show two updated entries for $L=38,39$, which to our knowledge, has not been computed before.~\cite{Butera2014}
+Here we only include two updated entries for $L=38,39$, which, to our knowledge, has not been computed before~\cite{Butera2014}.
 }
 \begin{center}
 \scalebox{0.9}{
