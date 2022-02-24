@@ -35,6 +35,7 @@ end
 using TropicalNumbers
 mis_size(code) = independence_polynomial(TropicalF64(1.0), code)[]
 println("the maximum independent set size is $(mis_size(optimized_code).n)")
+
 # A `CountingTropical` object has two fields, tropical field `n` and counting field `c`.
 mis_count(code) = independence_polynomial(CountingTropical{Float64,Float64}(1.0, 1.0), code)[]
 println("the degeneracy of maximum independent sets is $(mis_count(optimized_code).c)")
@@ -44,56 +45,6 @@ println("the degeneracy of maximum independent sets is $(mis_count(optimized_cod
 # using Polynomial numbers to compute the polynomial directly
 using Polynomials
 println("the independence polynomial is $(independence_polynomial(Polynomial([0.0, 1.0]), optimized_code)[])")
-
-# using fast fourier transformation to compute the independence polynomial,
-# here we chose r > 1 because we care more about configurations with large independent set sizes.
-using FFTW
-function independence_polynomial_fft(code; mis_size=Int(mis_size(code)[].n), r=3.0)
-	ω = exp(-2im*π/(mis_size+1))
-	xs = r .* collect(ω .^ (0:mis_size))
-	ys = [independence_polynomial(x, code)[] for x in xs]
-	Polynomial(ifft(ys) ./ (r .^ (0:mis_size)))
-end
-println("the independence polynomial (fft) is $(independence_polynomial_fft(optimized_code))")
-
-# using finite field algebra to compute the independence polynomial
-using Mods, Primes
-# two patches to ensure gaussian elimination works
-Base.abs(x::Mod) = x
-Base.isless(x::Mod{N}, y::Mod{N}) where N = mod(x.val, N) < mod(y.val, N)
-
-function independence_polynomial_finitefield(code; mis_size=Int(mis_size(code)[].n), max_order=100)
-    N = typemax(Int32) # Int32 is faster than Int.
-    YS = []
-    local res
-    for k = 1:max_order
-	    N = Primes.prevprime(N-one(N))  # previous prime number
-        # evaluate the polynomial on a finite field algebra of modulus `N`
-        rk = _independance_polynomial(Mods.Mod{N,Int32}, code, mis_size)
-        push!(YS, rk)
-        if max_order==1
-            return Polynomial(Mods.value.(YS[1]))
-        elseif k != 1
-            ra = improved_counting(YS[1:end-1])
-            res = improved_counting(YS)
-            ra == res && return Polynomial(res)
-        end
-    end
-    @warn "result is potentially inconsistent."
-    return Polynomial(res)
-end
-function _independance_polynomial(::Type{T}, code, mis_size::Int) where T
-	xs = 0:mis_size
-	ys = [independence_polynomial(T(x), code)[] for x in xs]
-	A = zeros(T, mis_size+1, mis_size+1)
-	for j=1:mis_size+1, i=1:mis_size+1
-		A[j,i] = T(xs[j])^(i-1)
-	end
-	A \ T.(ys)  # gaussian elimination to compute ``A^{-1} y```
-end
-improved_counting(sequences) = map(yi->Mods.CRT(yi...), zip(sequences...))
-
-println("the independence polynomial (finite field) is $(independence_polynomial_finitefield(optimized_code))")
 
 ########## FINDING MIS CONFIGURATIONS ###########
 

@@ -1,7 +1,4 @@
 using DelimitedFiles, GraphTensorNetworks
-#using GraphTensorNetworks.OMEinsumContractionOrders
-#using GraphTensorNetworks.OMEinsum
-#using GraphTensorNetworks.TropicalNumbers
 
 function mis_configurations(n, seed; order, writefile, sc_target=12)
     folder = joinpath(homedir(), ".julia/dev/TropicalMIS", "project", "data", "configurations_L$(n)")
@@ -64,7 +61,8 @@ for (n, seeds) in [
     #(11, [571, 808, 438, 748, 802, 454, 13, 401, 596, 126, 412, 977, 645, 263, 208, 622, 971, 725, 328, 895])
     #(10, 81:99)
     #(11, 0:99)
-    (12, 51:99)
+    #(12, 51:99)
+    (10, [156, 773, 105, 222, 417, 269, 309, 350, 786, 590, 109, 83, 243, 699, 425, 174, 925])
     ]
     for seed in seeds
         @time mis_configurations(n, seed; order=2, writefile=true, sc_target=14)

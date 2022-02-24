@@ -112,7 +112,6 @@ Listing \thelstlisting: #1\hfill%\hfill%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-%\usepackage{CJK}
 %\usepackage[colorlinks, citecolor=blue]{hyperref}
 \DeclareMathOperator*{\argmax}{arg\,max}
 
@@ -223,11 +222,7 @@ Listing \thelstlisting: #1\hfill%\hfill%
 \begin{abstract}
 We introduce a method of using generic programming tensor network to compute various properties of independent sets,
 which include, for example, the size of the maximum independent sets and the number and enumeration of independent sets of a given size.
-% which include the size of the maximum independent sets, the number of independent sets and maximal independent sets of a given size, and enumeration of independent sets and maximal independent sets of a given size.
-%Although the computational complexity inevitably scales exponentially with treewidth of the graph,
-%our method using tensor network contraction with generic programming is highly versatile and is able to compute properties that are otherwise not known to be possible for up to several hundred vertices.
 By making use of generic programming, our algorithms are very simple to implement and one can in addition directly utilize recent advances in tensor network contraction techniques such as near-optimal contraction order finding and slicing to achieve high performance.
-%One can easily find a good contraction order for the tensor network representation of a graph $G$ with thousands of vertices. 
 The algorithmic complexity of this approach is $2^{{\rm tw}(G)}$, where ${\rm tw} (G)$ is the treewidth of the problem graph.
 Our framework can be easily extended to compute properties of other problems such as the cut size, coloring, and maximal cliques, among others.
 To demonstrate the versatility of this tool, we apply it to a few examples including the calculations of the entropy constant for some hardcore lattice gases on 2D square lattices and the study of the overlap gap property on three regular graphs.
@@ -246,62 +241,28 @@ independent set, tensor network, maximum independent set, independence polynomia
 
 \section{Introduction}
 In graph theory and combinatorial optimization, there are many interesting and hard computational problems concerning various properties of independent sets.
-%An independent set of a graph is a subset of its vertices that no two vertices in this set are adjacent to each other.
 For an undirected graph $G = (V,E)$, an independent set $I \subseteq V$ is a set of vertices that for any vertex pair $u,v \in I$, $(u, v) \not\in E$. %there is no edge connecting $u$ and $v$ in $G$. 
 One of the paradigmatic independent set \textit{properties} % that many computational complexity theorists are most interested in 
 is the maximum independent set (MIS) and the size of the MIS, $\alpha(G) \equiv \max_{I}|I|$. 
 There is widespread interest in this MIS problem not only because it is a well-known NP-complete problem~\cite{Hastad1996} that can be mapped from many other important combinatorial optimization problems in polynomial time such as the 3-satisfiability problem, the maximum clique problem, and the minimum vertex cover problem~\cite{Moore2011},
 but also because it has a wide range of applications in scheduling, logistics, wireless networks and telecommunication, and computer vision, etc.~\cite{Butenko2003, Wu2015}.
 On the other hand, some other properties, such as the number and enumeration of independent sets or maximal independent sets of a given size, are equally interesting, if not more important, in many practical applications. These other properties can be found in physics applications such as in the hard-core lattice gas model~\cite{Dyre2016, Fernandes2007}
-in statistical mechanics and the Rydberg hamiltonian with neutral atoms~\cite{Pichler2018, Ebadi2022} \red{replace with experiment paper when ready};
+in statistical mechanics and the Rydberg hamiltonian with neutral atoms~\cite{Pichler2018, Ebadi2022};
 they can, for example, be used to understand phase transitions~\cite{Dyre2016, Fernandes2007}, to identify harder graphs in an ensemble of graphs~\cite{Ebadi2022} and to analyze the presence of the overlap gap property~\cite{Gamarnik2013, Gamarnik2019} related to the clustering phenomenon of large independent sets.
 Meanwhile, finding the number of independent sets of a given size is equivalent to computing the coefficients of the independence polynomial~\cite{Harvey2018,Ferrin2014}.
 which is a useful graph characteristic related to, for example, the partition functions~\cite{Lee1952,Yang1952} and Euler characteristics of the independence complex~\cite{Bousquet2008, Levit2009}. However, there is a lack of general and versatile tool to compute these different properties of independent sets.
-%\blue{The primary interest of many computational complexity theorists is finding the maximum size of such vertex sets $\alpha(G) \equiv \max_{I}|I|$ and one of the sets of this size.}
-%Finding $\alpha(G)$ exactly is a hard computational problem, and it is NP-hard even to approximate $\alpha(G)$ within $|V|^{1-\epsilon}$ ~\cite{Hastad1996},
-%meaning there is unlikely a polynomial time algorithm to find an independent set with size $\alpha(G)/|V|^{1-\epsilon}$ for an arbitrarily small positive $\epsilon$.
-%Naive exhaustive search for an MIS requires a computational time of $O\left(2^{|V|} \right)$.
-%There is immense interest in finding better algorithms to solve the MIS problem, not only because it has 
-%a wide range of applications in scheduling, logistics, wireless networks and telecommunication, and computer vision, etc.~\cite{Butenko2003, Wu2015}, 
-%but also because it is a well-known NP-complete problem that can be mapped from many other important combinatorial optimization problems in polynomial time such as the 3-satisfiability problem, the maximum clique problem, and the minimum vertex cover problem~\cite{Moore2011}.
-
-%more concretely, an maximal independent set of a graph $G$ corresponds to a maximum clique in the complement graph of $G$,
-%and the complement vertex set of an MIS corresponds to a minimum vertex cover of the graph $G$.
-%In this paper, the term ``maximal'' has a different meaning from ``maximum''  which we discussed above; a maximal independent set is an independent set that is not a subset of any other independent set, but its size may not be the maximum.
-% We introduce a generic programming tensor-network framework to compute the various \textit{properties} pertaining to independent sets. 
-%In this paper, we do not limit our study to just finding an MIS and its size. 
-% We introduce a tensor-network based framework to compute the various \textit{properties} pertaining to independent sets.
-%Beyond just finding an MIS and its size as described above, these properties also include, for example, the number and enumeration of independent sets or maximal independent sets of a given size.
-% There are many other interesting problems pertaining to independent sets, such as the number of independent sets of a given size
-% and enumerating independent sets at a give size or what we call computing \textit{properties}.
-%Some of these problems are of great interest in physics applications such as the hard-core lattice gas model~\cite{Dyre2016, Fernandes2007}
-%in statistical mechanics and the Rydberg hamiltonian with neutral atoms~\cite{Pichler2018, Ebadi2022} \red{replace with experiment paper when ready};
-%they can, for example, be used to understand phase transitions, to identify harder graphs in an ensemble of graphs~\cite{Ebadi2022} and to analyze the overlap gap property~\cite{Gamarnik2013, Gamarnik2019}. 
-%In this paper, we focus on computing various independent set \textit{properties}. 
 In this paper, we introduce a generic programming tensor-network framework to compute a number of different independent set properties.
 We map the computation of these properties into generic tensor network contraction with specially designed tensor element algebra.
 It is different from the standard tensor network methods in that the tensor elements are not restricted to standard number types such as floating point numbers and integers.
-%The computation of independence polynomials belongs to the complexity class \#P-hard 
-%and only exponential algorithms~\cite{Ferrin2014} are known to exist for exact computations.
-%Traditional algorithms for finding the MIS size problem include the branching algorithms~\cite{Tarjan1977, Robson1986} and dynamic programming based algorithms~\cite{Courcelle1990, Fomin2013}.
-%The branching algorithms can reduce the base of the exponential time scaling to, e.g., $1.1996^{|V|} {|V|}^{O(1)}$~\cite{Xiao2017}, 
-%while dynamic programming approaches~\cite{Courcelle1990, Fomin2013} works better for graphs with a small treewidth $\text{tw}(G)$, producing algorithms of complexity $O(2^{\text{tw}(G)} \text{tw}(G) |V|)$.
 Traditional algorithms for finding the MIS size include the branching algorithms~\cite{Tarjan1977, Robson1986} and dynamic programming based algorithms~\cite{Courcelle1990, Fomin2013}.
 The complexity of our tensor-network based algorithms is similar to that of dynamic programming algorithms~\cite{Courcelle1990, Fomin2013}, which have a complexity scaling exponentially with the treewidth, ${\rm tw}(G)$, of the graph;
 for sparse graphs, the treewidth is usually much smaller than the number of vertices~\cite{Fomin2006}. Our algorithms, on the other hand, are much more versatile than traditional methods and can be used to compute many other properties than just the MIS size.
-% Thus, we expect our algorithms to works well for sparse graphs,
-% which is complementary to another standard approach for solving the MIS size, the branching algorithm ~\cite{Robson1986, Tarjan1977, Xiao2017}, which usually works better for dense graphs.
-% We introduce a tensor-network based framework to compute the various properties pertaining to independent sets.
-% We map the independent set problem into generic tensor network contraction with specially designed tensor element algebra.
-% Its algorithmic complexity is similar to that of dynamic programming, i.e. scales exponentially as ${\rm tw}(G)$.
-%But the tensor network approach is highly versatile so different problems can be generically solved with minimal implementation efforts without loss of efficiency.
 We benchmark our algorithms in \Sec{sec:benchmark} by computing a number of independent set properties of certain sparse graphs on central processing units (CPUs) and graphics processing units (GPUs) and show its good performance.
 The high performance benefits from recent advances in random tensor-network contraction for the purposes of quantum circuit simulations~\cite{Gray2021, Pan2021, Kalachev2021},
 where efficient heuristic algorithms have been developed to optimize the contraction order for tensor networks up to thousands of vertices.
 For cases where the tensors are too large to fit into a GPU, slicing techniques can be used to further reduce the space consumption.
 Lastly, we provide a few examples and demonstrate the versatility of our tool by computing the entropy constant for some hardcore lattice gases on 2D square lattices and analyzing the presence of overlap gap property on three regular graphs.
 Our method can also be used to find ``maximal'' independent set properties; 
-% Here, the term ``maximal'' has a different meaning from ``maximum''  which we discussed above;
 a maximal independent set is an independent set that is not a subset of any other independent set, but its size may not be the maximum. 
 We show how to compute properties related to maximal independent sets and properties for other combinatorial optimization problems in \App{app:otherproblems}.
 
@@ -315,7 +276,6 @@ In the standard Einstein's notation for tensor networks in physics, each index a
 Hence a tensor network can be represented as a simple graph,
 where a tensor is mapped to a vertex and a label shared by two tensors is mapped to an edge.
 In this work, we do not impose such a restriction, so an index can appear an arbitrary number of times. 
-%In the main text, we do not have this restriction. An index can appear arbitrary times.
 The graphical representation of a generalized tensor network is a hypergraph, in which an edge (a label in subscript) can be shared by an arbitrary number of vertices (tensors).
 These two notations are equivalent in representation power because one can easily translate a generalized tensor network to the standard notation by adding $\delta$ tensors, a high dimensional equivalence of the identity matrix.
 However, introducing $\delta$ tensors may significantly increase the complexity of the tensor contraction. We illustrate this subtle point in \App{app:tensorbad}.
@@ -323,7 +283,6 @@ However, introducing $\delta$ tensors may significantly increase the complexity 
 \begin{example}
 $C_{ijk} = A_{jkm} B_{mil} V_{jm}$ is a tensor network that can be evaluated as $C_{ijk} = \sum_{ml}A_{jkm} B_{mil} V_{jm}$.
 Its hypergraph representation is shown below, where we use different colors to represent different hyperedges.
-%It's equivalent standard notation is $C_{ijk} = A_{ukm} B_{pil} V_{vq} \delta_{mpq} \delta_{juv}\delta_l$. 
 
 \vspace{1em}
 \centerline{\begin{tikzpicture}[
@@ -408,62 +367,6 @@ a \odot \mymathbb{0} = \mymathbb{0} \odot a = \mymathbb{0}
 \end{align*}
 We require the algebra being multiplicative commutative because the contraction order optimizer will change the multiplication order of elements, while we wish this contraction order does not change the contraction results.
 In the following sections, we show how to compute a number of properties of independent sets by designing tensor element types as specific commutative semirings without changing the tensor network contraction program~\cite{Stepanov2014}.
-%The following diagram summarizes those properties that can be computed by various tensor element types.
-%
-%% \begin{table}[t!]\centering
-%% \begin{minipage}{\columnwidth}
-%% \ra{1.3}
-%%         \begin{tabularx}{\textwidth}{sb}\toprule
-%%             \hline
-%%             \textbf{element type}     & \textbf{property/properties to compute} \\
-%%             {$\mathbbm{R}$}     & {the number of independent sets} \\
-%%             %{$\mathbbm{C}$}     & {independence polynomial (approximate)} \\
-%%             {$\text{GF}(p)$} (\Eq{eq:finitefield}) & {independence polynomial} \\
-%%             {T} (\Eq{eq:tropical})    & {MIS size} \\
-%%             {P1} (\Eq{eq:countingtropical})     & {MIS size and the number of MISs} \\
-%%             {P2} (\Eq{eq:max2poly})     & {the number of MISs and independent sets of size $\alpha(G)-1$} \\
-%%             {PN} (\Eq{eq:polynomial})     & {independence polynomial (direct approach)} \\
-%%             {P1+S1}     & {MIS size and one MIS} \\
-%%             {P1+SN} (\Eq{eq:countingtropicalset})    & {MIS size and all MISs} \\
-%%             \bottomrule
-%%         \end{tabularx}
-%%     \caption{Tensor element types and the independent set properties that can be computed using them.}\label{tbl:generictypes}
-%% \end{minipage}
-%% \end{table}
-%
-%\centerline{\begin{tikzpicture}[]
-%    \scriptsize
-%    \node[ellipse,draw,minimum width=2cm, minimum height=1cm,inner sep=0pt] at (0, 2.5) (R) {$\mathbbm{R}$};
-%    % set and set sampler
-%    \node[ellipse,draw,minimum width=5cm, minimum height=3cm,inner sep=0pt] at (0, 0) (SN) {};
-%    \node[below of=1] at (SN) {Set};
-%    \node[ellipse,draw,minimum width=4cm, minimum height=1.5cm,inner sep=0pt] at (-0.5, 0) (S1) {\hspace{1.5cm}Bit string};
-%    \def\dx{-3};
-%    \node[ellipse,draw,minimum width=5cm, minimum height=3cm,inner sep=0pt] at (\dx, 0) (PN) {\hspace{-3.5cm}Polynomial};
-%    \node[ellipse,draw,minimum width=3.5cm, minimum height=1.2cm,inner sep=0pt] at (\dx, 0.7) (P1) {\hspace{-0.7cm}Highest order};
-%    \node[ellipse,draw,minimum width=3.5cm, minimum height=0.7cm,inner sep=0pt] at (\dx, -0.4) (P2) {\hspace{-0.7cm}2nd highest order};
-%    \node[ellipse,draw,minimum width=0.8cm, minimum height=0.3cm,inner sep=0pt] at (\dx, 1.0) (T) {};
-%    \node at (\dx, -1.2) {$\ldots$};
-%    \node[above of=2] at (T) (textT) {Tropical};
-%    \draw[black,-latex] (textT) -- (T);
-%\end{tikzpicture}}
-%\vspace{2em}
-%{\centering{
-%\begin{minipage}{0.8\columnwidth}\scriptsize
-%\begin{tabularx}{\textwidth}{bb}
-%    \textbf{element type}     & \textbf{property to compute} \\
-%    {$\mathbbm{R}$}     & {the number of independent sets} \\
-%    {Polynomial} (\Eq{eq:polynomial})     & {independence polynomial} \\
-%    {Tropical (\Eq{eq:tropical})}    & {MIS size} \\
-%    {Polynomial truncated to highest order (\Eq{eq:countingtropical})}     & {MIS size and the number of MISs} \\
-%    {Polynomial truncated to 2nd highest order} (\Eq{eq:max2poly})     & {the number of MISs and independent sets of size $\alpha(G)-1$} \\
-%    {Set} (\Eq{eq:set})     & {enumeration of independent sets} \\
-%    {Bit string} (\Eq{eq:singleconfig})     & {one independent set} \\
-%    {Polynomial truncated to highest order combined with Bit string}     & {MIS size and one MIS} \\
-%    {Polynomial truncated to highest order combined with Set} (\Eq{eq:countingtropicalset})    & {MIS size and all MISs} \\
-%\end{tabularx}
-%\end{minipage}
-%}}
 The Table~\ref{tbl:generictypes} summarizes those properties that can be computed by various tensor element types.
 
 \begin{table}[t!]\centering
@@ -487,26 +390,7 @@ The Table~\ref{tbl:generictypes} summarizes those properties that can be compute
 \end{minipage}
 \end{table}
 
-% \vspace{2em}
-% \centering{
-% \begin{minipage}{0.8\columnwidth}\scriptsize
-% \begin{tabularx}{\textwidth}{bb}
-%     \textbf{element type}     & \textbf{property to compute} \\
-%     {$\mathbbm{R}$}     & {the number of independent sets} \\
-%     {Polynomial} (\Eq{eq:polynomial})     & {independence polynomial} \\
-%     {Tropical (\Eq{eq:tropical})}    & {MIS size} \\
-%     {Polynomial truncated to highest order (\Eq{eq:countingtropical})}     & {MIS size and the number of MISs} \\
-%     {Polynomial truncated to 2nd highest order} (\Eq{eq:max2poly})     & {the number of MISs and independent sets of size $\alpha(G)-1$} \\
-%     {Set} (\Eq{eq:set})     & {enumeration of independent sets} \\
-%     {Bit string} (\Eq{eq:singleconfig})     & {one independent set} \\
-%     {Polynomial truncated to highest order combined with Bit string}     & {MIS size and one MIS} \\
-%     {Polynomial truncated to highest order combined with Set} (\Eq{eq:countingtropicalset})    & {MIS size and all MISs} \\
-% \end{tabularx}
-% \end{minipage}
-%}
-
 \section{Independence polynomial} \label{sec:indpoly}
-% \subsection{Independence polynomial}
 The independence polynomial is an important graph polynomial that contains the counting information of independent sets. It is defined as
 \begin{equation}\label{eq:idpdef}
 I(G, x) = \sum_{k=0}^{\alpha(G)} a_k x^k,
@@ -540,8 +424,6 @@ In the special case of $x_i = x$, the contraction result directly corresponds to
 The connection can be understood as follows: the product over vertex tensor elements produces a factor $x^k$, where $k=\sum_i s_i$ counts the set size,
 and the product over edge tensor elements gives a factor $1$ for a configuration being in an independent set and $0$ otherwise. The summation counts the number of independent sets of size $k$. 
 
-%In the implementation of the algorithm, we benefit from recent advances in tensor network contraction,
-%where researchers working on quantum circuit simulation evaluate the tensor network by pairwise contracting tensors in a heuristic order~\cite{Gray2021, Pan2021}.
 To evaluate \Eq{eq:idp}, directly summing up the $2^{|V|}$ product terms is computationally inefficient.
 The standard approach to evaluate a tensor network is to contract two tensors at a time with a certain order utilizing the associativity and commutativity of tensor contraction.
 A fully optimized contraction order can reduce the time to $O(2^{\text{tw}(G)})$~\cite{Markov2008}, while requiring a space at the same order of magnitude to store intermediate contraction results.
@@ -616,7 +498,6 @@ We attach a vertex tensor on each hyperedge and an edge tensor between two hyper
 
 Before contracting the tensor network and evaluating the independence polynomial numerically, let us first elevate the tensor elements $0$s and $1$s in tensors $W(x)$ and $B$ from integers and floating point numbers to the additive identity,
 $\mymathbb{0}$, and multiplicative identity, $\mymathbb{1}$, of a commutative semiring as discussed in Sec.~\ref{sec:generic}.
-%Then we can treat the tensor elements as polynomials and evaluate the polynomial directly.
 Let us create a polynomial type and represent a polynomial $a_0 + a_1 x + \ldots + a_k x^k$ as a coefficient vector $a = (a_0, a_1, \ldots, a_k) \in \mathbb{R}^k$, so, e.g., $x$ is represented as $(0, 1)$.
 We define the algebra between the polynomials $a$ of order $k_a$ and $b$ of order $k_b$ as
 \begin{equation}
@@ -710,19 +591,6 @@ In \App{app:fft}, we provide another method to solve the linear equation using d
     }\caption{Computing the independence polynomial exactly without integer overflow}\label{alg:finitefield} 
 \end{algorithm}
 
-% \begin{algorithm}[!ht]
-%     \small
-%     \SetAlgoNoLine
-%     %\LinesNumbered
-%     Let vector $\chi = (\chi_0,\chi_1,\chi_2, \ldots, \chi_{\alpha(G)})$ be a random sequence, matrix $X_{ij} = (\chi_i)^j$, where $i,j = 0, 1, \ldots, \alpha(G)$\;
-
-%     \For{$i=0\ldots\alpha(G)$}{
-%         $y_i$ = ${\rm contract\_tensor\_network}(\chi_i)$
-%     }
-
-%     \Return ${\rm gaussian\_elimination}(X, (y_0, y_1, \ldots, y_{\alpha{G}})) $\;
-% \end{algorithm}
-
 \section{Maximum independent sets and its counting}
 \subsection{Tropical algebra for finding the MIS size and counting MISs}
 In the previous section, we focused on computing the independence polynomial for a graph $G$ of a given MIS size $\alpha(G)$, but we did not show how to compute this number.
@@ -732,18 +600,6 @@ I(G, \infty) = a_{\alpha(G)} \infty^{\alpha(G)},
 \end{equation}
 where the lower-order terms vanish. We can thus replace the polynomial type $a = (a_0, a_1, \ldots, a_k)$ with a new type with two fields: the largest exponent $k$ and its coefficient $a_k$.
 From this, we can define a new algebra as
-%\begin{equation}
-%\begin{split}
-%    a(k) \oplus a(j) &= \begin{cases}
-%        \left(a_k + a_j, \max(k,j) \right), & k = j \\
-%        \left(a_j, \max(k,j) \right), & k < j \\
-%        \left(a_k, \max(k,j) \right), & k > j
-%    \end{cases}, \\
-%    a(k) \odot a(j) &= (a_k a_j, k+j) \\
-%    \mymathbb{0} &= (0, -\infty)\\
-%    \mymathbb{1} &= (1, 0). \label{eq:countingtropical}
-%\end{split}
-%\end{equation}
 \begin{equation}
     \eqname{P1}
 \begin{split}
@@ -850,18 +706,6 @@ As long as the coefficients in a truncated polynomial forms a commutative semiri
 For example, to enumerate only the MISs, with the tropical algebra, we can define $s_{k}\infty^k$,
 where the coefficients follow the algebra in \Eq{eq:set} and the orders (exponents) follow the max-plus tropical algebra.
 The combined operations become: 
-%\begin{equation}
-%\begin{split}
-%    s(k) \oplus s(j) &= \begin{cases}
-%        \left(s_k \cup s_j, \max(k,j) \right), & k = j \\
-%        \left(s_j, \max(k,j) \right), & k < j \\
-%        \left(s_k, \max(k,j) \right), & k > j
-%    \end{cases}, \\
-%    s(k) \odot s(j) &= (\{\sigma \lor^\circ \tau \, | \, \sigma \in s_k, \tau \in s_j\}, k+j) \\
-%    \mymathbb{0} &= (\{ \}, -\infty)\\
-%    \mymathbb{1} &= (\{0^{\otimes |V|}\}, 0). \label{eq:countingtropicalset}
-%\end{split}
-%\end{equation}
 \begin{equation}
 \eqname{P1+SN}
 \begin{split}
@@ -891,22 +735,7 @@ The contraction of the corresponding tensor network yields an enumeration of all
 
 If one is interested in obtaining only a single MIS configuration, one can just keep a single configuration in the intermediate computations to save the computational effort.
 Here is a new algebra defined on the bit strings, replacing the sets of bit strings in \Eq{eq:set}, 
-%We leave this as an exercise for readers.
-%
-%\iffalse
-%\begin{equation}
-%\begin{split}
-%    \sigma_x\infty^x \oplus \sigma_y\infty^y &= \begin{cases}
-%        {\rm select}(\sigma_x, \sigma_y)\infty^{\max(x,y)}, & x = y\\
-%        \sigma_y\infty^{\max(x,y)}, & x < y\\
-%        \sigma_x\infty^{\max(x,y)}, & x > y
-%    \end{cases},\\
-%    \sigma_x\infty^x \odot \sigma_y\infty^y &= (\sigma_x \lor^\circ \sigma_y)\infty^{x+y},\\
-%    \mymathbb{0} &= 1^{\otimes n}\infty^{-\infty},\\
-%    \mymathbb{1} &= 0^{\otimes n}\infty^{0},
-%\end{split}
-%\end{equation}
-%\fi
+
 \begin{equation}
 \eqname{S1}
 \begin{split}
@@ -917,10 +746,6 @@ Here is a new algebra defined on the bit strings, replacing the sets of bit stri
 \end{split}\label{eq:singleconfig}
 \end{equation}
 where the \texttt{select} function picks one of $\sigma$ and $\tau$ by some criteria to make the algebra commutative and associative, e.g. by picking the one with a smaller integer value.
-%In practice, we can just pick randomly from them, in which case the program will output one of the MIS configurations randomly.
-
-% Although the above discussion is in the context of the MIS problem, we can also combine the above algebras with the maximal independence network in \Eq{eq:maximal} to enumerate or sample maximal independent sets,
-% as well as other problems in \App{app:otherproblems} for configuration enumeration and sampling.
 
 \subsection{Bounding the MIS enumeration space}
 \begin{figure}
@@ -993,8 +818,6 @@ Figure~\ref{fig:benchmark}(a) shows the time and space complexity of tensor netw
 The contraction order is obtained using the local search algorithm in Ref.~\cite{Kalachev2021}.
 In practice, slicing technique is used for graphs with treewidth greater than 27 to fit the computation into a 16GB memory.
 One can see that all the computing times in figure~\ref{fig:benchmark}(b), (c) and (d) have a strong correlation with the treewidth.
-%The computations shown in \Fig{fig:benchmark} include independent set counting, finding maximum independent set size (panel b),
-%computing independence polynomial (panel c) and find one independent set and enumerating independent sets (panel d).
 Among these benchmarks, computational tasks with data types \texttt{T (CPU)},
 \texttt{$\mathbbm{R}$ (CPU)}, \texttt{$\mathbbm{R}$ (GPU)}, \texttt{$\mathbbm{C}$ (CPU)}, \texttt{$\mathbbm{C}$ (GPU)} and \texttt{T+bounding (CPU)} can utilize fast BLAS functions to evaluate tensor contractions, hence 
 are much faster comparing to non-BLAS element types in the same category.
@@ -1016,7 +839,6 @@ We computed the integer sequence for $L=38$ and $L=39$, which, to the best of ou
 In the computation, we used the finite-field algebra for contracting arbitrarily high precision integer tensor networks. 
 
 A useful number that can be computed using the number of independent sets is the entropy constant for the hardcore lattice gases on these graphs. For the square grid graphs, it is called the \textit{hard square entropy constant} (\href{https://oeis.org/A085850}{OEIS A085850}), which is defined as $\lim_{L\rightarrow \infty} F(L,L)^{1/L^2}$, where $F(L,L)$ is the number of independent sets of a given lattice dimensions $L \times L$. This quantity arises in statistical mechanics of hard-square lattice gases~\cite{Baxter1980, Pearce1988} and is used to understand phase transitions for these systems. This entropy constant is not known to have an exact representation, but it is accurately known in many digits. Similarly, we can define entropy constants for other lattice gases. In \Fig{fig:hardsquare}, we look at how $F(L,L)^{1/\lfloor pL^2\rceil}$ scales as a function of the grid size $L$ for all types of graphs shown in Figure~\ref{fig:lattices}. Our results match the known results for the non-disordered square grid and King's graphs. For disordered square grid and King's graphs with a filling factor $p=0.8$, we randomly sample 1000 graph instances. To our knowledge, the entropy constants for these disordered graphs have not been studied before. Interestingly, the variations due to different random instances are negligible for this entropy quantity. 
-% The lattices with holes have a much larger average value, which has an intuitive physical meaning that the hardcore lattices with holes have a much larger mean entropy than those without holes at the high temperature limit.
 
 \begin{figure}[t] 
     \centering
@@ -1051,25 +873,26 @@ In this paper, we introduce a method to use generic programming tensor networks 
 
 \begin{figure}[th]
    \centering
-%    \includegraphics[width=0.9\textwidth, trim={0cm 0cm 0cm 0cm}, clip]{}
 \centerline{\begin{tikzpicture}[]
     \scriptsize
-    \node[ellipse,draw,minimum width=2cm, minimum height=1cm,inner sep=0pt] at (0, 2.5) (R) {$\mathbbm{R}$};
-    % set and set sampler
-    \node[ellipse,draw,minimum width=5cm, minimum height=3cm,inner sep=0pt] at (0, 0) (SN) {};
-    \node[below of=1] at (SN) {Set};
-    \node[ellipse,draw,minimum width=4cm, minimum height=1.5cm,inner sep=0pt] at (-0.5, 0) (S1) {\hspace{1.5cm}Bit string};
+    \node[draw,fill=lime!80,fill opacity=1, text opacity=1.0,ellipse,minimum width=2cm, minimum height=1cm,inner sep=0pt] at (0, 2.5) (R) {$\mathbbm{R}$};
     \def\dx{-3};
-    \node[ellipse,draw,minimum width=5cm, minimum height=3cm,inner sep=0pt] at (\dx, 0) (PN) {\hspace{-3.5cm}Polynomial};
-    \node[ellipse,draw,minimum width=3.5cm, minimum height=1.2cm,inner sep=0pt] at (\dx, 0.7) (P1) {\hspace{-0.7cm}Highest order};
-    \node[ellipse,draw,minimum width=3.5cm, minimum height=0.7cm,inner sep=0pt] at (\dx, -0.4) (P2) {\hspace{-0.7cm}2nd highest order};
-    \node[ellipse,draw,minimum width=0.8cm, minimum height=0.3cm,inner sep=0pt] at (\dx, 1.0) (T) {};
+    \node[draw,fill=teal!50,fill opacity=1, text opacity=1.0,ellipse,minimum width=5cm, minimum height=3cm,inner sep=0pt] at (\dx, 0) (PN) {\hspace{-3.5cm}Polynomial};
+    \node[draw,fill=brown!75,fill opacity=1, text opacity=1.0,ellipse,minimum width=3.5cm, minimum height=1.2cm,inner sep=0pt] at (\dx, 0.7) (P1) {\hspace{-0.7cm}Highest order};
+    \node[draw,fill=brown!40,fill opacity=1, text opacity=1.0,ellipse,minimum width=3.5cm, minimum height=0.7cm,inner sep=0pt] at (\dx, -0.4) (P2) {\hspace{-0.7cm}2nd highest order};
+    \node[draw,fill=brown,fill opacity=1, text opacity=1.0,ellipse,minimum width=0.8cm, minimum height=0.3cm,inner sep=0pt] at (\dx, 1.0) (T) {};
     \node at (\dx, -1.2) {$\ldots$};
     \node[above of=2] at (T) (textT) {Tropical};
     \draw[black,-latex] (textT) -- (T);
+
+    % set and set sampler
+    \node[draw,fill=yellow,fill opacity=0.5, text opacity=1.0,ellipse,minimum width=5cm, minimum height=3cm,inner sep=0pt] at (0, 0) (SN) {};
+    \node[below of=1] at (SN) {Set};
+    \node[draw,fill=red!70,fill opacity=0.5, text opacity=1.0,ellipse,minimum width=4cm, minimum height=1.5cm,inner sep=0pt] at (-0.5, 0) (S1) {\hspace{1.5cm}Bit string};
 \end{tikzpicture}}
 
-    \caption{The element types of the tensor networks used in this work. The overlap between two algebra indicates that a new algebra can be created combining those two types of algebra.}
+    \caption{The the tensor network element types used in this work.
+    The overlap between two algebra indicates that a new algebra can be created by combining those two types of algebra.}
      \label{fig:venn-diagram}
 \end{figure}
 
@@ -1078,8 +901,6 @@ We combine them with the set algebra and the bitstring algebra for set enumerati
 These algebras are of generic use: they can be utilized to compute properties of maximal independent sets and a variety of other combinatorial problems such as the matching problem, the k-coloring problem, the max-cut problem, and the set packing problem, as detailed in \App{app:otherproblems}. 
 Moreover, since the independence polynomial is closely related to the matching polynomial~\cite{Levit2005}, the clique polynomial~\cite{Hoede1994}, and the vertex cover polynomial~\cite{Akbari2013},
 our algorithm to compute the independence polynomial can also be used to compute these graph polynomials.
-%Some properties of the independence polynomial, such as the uni-modality, log-concavity, and roots of the polynomial, are well studied in the literature for special classes of graphs~\cite{Levit2005}.
-%We hope our algorithms to calculate the independence polynomial can also help further research in these directions.
 By adapting to the style of generic programming, we can implement all the algorithms without much effort.
 We show some of the Julia language implementations in Appendix~\ref{sec:technical}.
 A complete implementation can be found in our Github repository~\cite{GraphTensorNetworks}. 
@@ -1248,39 +1069,6 @@ A vertex tensor always has rank $1$ and is not shown here since it does not chan
 If we contract this tensor network in the column-wise order, the maximum intermediate tensor rank is $\sim L$, which can be seen by counting the number of colors.
 
 \section{Generalization to other graph problems}\label{app:otherproblems}
-%There are some other graph problems that can be encoded to a tensor network.
-%To understand its representation power, it is a good starting point to connect it with dynamic programming because
-%a tensor network can be viewed as a special type of dynamic programming where its update rule can be characterized by a linear operation.
-%Dynamic programming can solve monadic second order logic (MSO) definable problem on a graph with small treewidth efficiently~\cite{Courcelle1990,Barr2020}.
-%It can solve the maximum independent set problem in $O(2^k)n$, which is similar to the tensor network approach.
-%The graph problem can be expressed in the tensor network language is clearly much less than that can be expressed by dynamic programming.
-%For example, it is hard to determine whether a collection of vertices forms a path in a graph using the tensor network language, while this problem is MSO definable.
-%As a gain, a tensor network has a nicer analytic property, which makes contraction order optimization, generic programming and utilizing BLAS libaries very convenient.
-%\iffalse
-%The cost is, it is less expressive than MSO because the tensor network described by \Eq{eq:edgetensor} can be expressed in MSO as
-%\begin{align}
-%    \begin{split}
-%    \exists_X\forall_{u}&(\\
-%    &\quad\forall_{v} 
-%    \neg {\rm adj}(u, v) \lor
-%    ({\rm adj}(u, v) \land ( \hspace{5em}\text{$\triangleright$ restrictions on edges}\\
-%    &\quad\quad(u \not\in X \land v \not\in X \land B_{00}) \lor\\
-%    &\quad\quad(u \not\in X \land v \in X \land B_{01}) \lor\\
-%    &\quad\quad(u \in X \land v \not\in X \land B_{10}) \lor\\
-%    &\quad\quad(u \in X \land v \in X \land B_{11})\\
-%    &\quad)\\
-%    &))\land\\
-%    &(\hspace{16.5em}\text{$\triangleright$ restrictions on vertices}\\
-%    &\quad(u \not\in X \land W_{0}) \lor\\
-%    &\quad(u \in X \land W_{1})\\
-%    &),
-%    \end{split}
-%\end{align}
-%while not all monadic second order logic can be represented as a tensor network contraction,
-%for example, it is hard to construct a tensor network to decide whether a graph is connected or not.
-%At the cost of losing expressiveness, we can encode the properties of the graph into the tensor elements.
-%\fi
-%In the following, we introduce some other problems that can be expressed by a tensor network.
 \subsection{Maximal independent sets and maximal cliques}\label{sec:maximal}
 Finding maximal independent sets of a graph is equivalent to finding the maximal cliques of its complement graph, so in the following we mainly discuss how to find maximal independent sets.
 Let us denote the neighborhood of a vertex $v$ as $N(v)$ and denote $N[v] = N(v)\cup \{v\}$.
@@ -1293,7 +1081,7 @@ I_{\rm max}(G, x) = \sum_{k=0}^{\alpha(G)} b_k x^k,
 \end{equation}
 where $b_k$ is the number of maximal independent sets of size $k$ in graph $G=(V, E)$.
 Comparing with the independence polynomial in \Eq{eq:idpdef}, we have $b_{k} \leq a_{k}$ and $b_{\alpha(G)} = a_{\alpha(G)}$. $I_{\rm max}(G, 1)$ counts the total number of maximal independent sets~\cite{Gaspers2012, Manne2013}, where, to our knowledge, the fastest algorithm currently has a runtime of $O(1.3642^{|V|})$~\cite{Gaspers2012}.
-If we want to find an MIS, $b_{k}$ counts the number of local optimum at size $k < \alpha(G)$, and can, in some cases, provide hints on the difficulty of finding the MIS using local algorithms~\red{cite experiment}.
+If we want to find an MIS, $b_{k}$ counts the number of local optimum at size $k < \alpha(G)$, and can, in some cases, provide hints on the difficulty of finding the MIS using local algorithms~\cite{Ebadi2022}.
 The uni-modality, log-concavity, and real-rootness properties of the maximal independence polynomial for special classes of graphs have also been studied~\cite{Hu2017}. 
 
 We can modify the tensor network for computing the independence polynomial to include this restriction. Instead of defining the restriction on vertices and edges, it is more natural to define it on $N[v]$:
@@ -1359,7 +1147,6 @@ The computational complexity of this new tensor network contraction is often gre
 However, for most sparse graphs, this tensor network contraction approach is still much faster than enumerating all the maximal cliques on its complement graph using the Bron-Kerbosch algorithm~\cite{Bron1973}, which is the standard algorithm that we are aware of to compute the maximal independence polynomial.
 We show the benchmark of computing the maximal independent set properties in \Fig{fig:benchmark-maximal},
 including a comparison to the Bron-Kerbosch algorithm from Julia package Graphs~\cite{Graphs}.
-%Since the network for computing maximal independent set properties is different from the one for computing the independence polynomial,
 The treewidth of this tensor network is significantly larger, so benchmark with only a smaller graph size is feasible.
 The time for the tensor network approach and the Bron-Kerbosch approach to enumerate all maximal independent sets are comparable,
 while the tensor network does counting much more efficiently.
