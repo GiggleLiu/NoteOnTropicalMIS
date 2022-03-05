@@ -14,7 +14,13 @@ function do_work(f, jobs, results) # define work function everywhere
     end
 end
 
-function mis_counting(graph, n, seed, mask; writefile, sc_target, usecuda, maximal, folderout)
+function mis_counting(graph, n, seed, mask; writefile, sc_target, usecuda, maximal, folderout, overwrite)
+    # avoid overwriting
+    ofname = joinpath(folderout, "$(seed).dat")
+    if !overwrite && isfile(ofname)
+        return nothing
+    end
+
     if graph == "diag"
         g = diagonal_coupled_graph(mask)
     elseif graph == "square"
@@ -23,12 +29,11 @@ function mis_counting(graph, n, seed, mask; writefile, sc_target, usecuda, maxim
     if maximal
         gp = MaximalIndependence(g; optimizer=TreeSA(sc_target=sc_target, niters=5))
     else
-        gp = Independence(g; optimizer=TreeSA(sc_target=sc_target, sc_weight=1.0, ntrials=3, βs=0.01:0.05:25.0, niters=20, rw_weight=1.0), simplifier=MergeGreedy())
-        #gp = Independence(g)
+        gp = Independence(g; optimizer=TreeSA(sc_target=sc_target, sc_weight=1.0, ntrials=1, βs=0.01:0.1:30.0, niters=10, rw_weight=1.0), simplifier=MergeGreedy())
     end
     println("Graph $graph of size $n, seed= $seed, usecuda = $usecuda")
-    res = graph_polynomial(gp, Val(:finitefield), usecuda=usecuda)[]
-    ofname = joinpath(folderout, "$(seed).dat")
+    res = solve(gp, GraphPolynomial(); usecuda=usecuda)[]
+
     writefile && writedlm(ofname, res.coeffs)
     return nothing
 end
@@ -50,11 +55,15 @@ end
 # patch
 const graph = ARGS[1]
 
-for L = 19:22
+const LS = 21:24
+const folderout_list = String[]
+const masks_list = []
+const maximal = false
+
+for L = LS
     println("computing L = $L")
     folder = joinpath(homedir(), ".julia/dev/TropicalMIS", "project", "data")
-    fname = joinpath(folder, "mis_degeneracy_L$L.dat")
-    maximal = false
+    fname = joinpath(folder, "mis_degeneracy2_L$L.dat")
     if maximal
         folderout = joinpath(folder, "$graph", "maximal_polynomial_L$(L)")
     else
@@ -66,9 +75,13 @@ for L = 19:22
     if !isdir(folderout)
         mkdir(folderout)
     end
-    masks = readdlm(fname)[:,4:end]
-    multiprocess_run(collect(0:999)) do i
-        mask = Matrix{Bool}(reshape(masks[i+1,:], L, L))
-        @time mis_counting(graph, L, i, mask; writefile=true, sc_target=26, usecuda=false, maximal=maximal, folderout=folderout)
-    end
+    masks = readdlm(fname)[:,5:end]
+    push!(folderout_list, folderout)
+    push!(masks_list, masks)
+end
+
+const args = vcat([tuple.(L, Ref(folderout), collect(0:999), [Matrix{Bool}(reshape(masks[k,:], L, L)) for k=1:1000]) for (masks, folderout, L) in zip(masks_list, folderout_list, LS)]...)
+
+multiprocess_run(args) do (L, folderout, i, mask)
+    @time mis_counting(graph, L, i, mask; writefile=true, sc_target=26, usecuda=false, maximal=maximal, folderout=folderout, overwrite=false)
 end
