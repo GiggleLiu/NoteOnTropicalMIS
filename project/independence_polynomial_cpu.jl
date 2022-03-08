@@ -50,7 +50,7 @@ end
 # patch
 const graph = ARGS[1]
 
-for L = 19:22
+for L = 5
     println("computing L = $L")
     folder = joinpath(homedir(), ".julia/dev/TropicalMIS", "project", "data")
     fname = joinpath(folder, "mis_degeneracy_L$L.dat")
@@ -67,7 +67,7 @@ for L = 19:22
         mkdir(folderout)
     end
     masks = readdlm(fname)[:,4:end]
-    multiprocess_run(collect(0:999)) do i
+    multiprocess_run(collect(154:154)) do i
         mask = Matrix{Bool}(reshape(masks[i+1,:], L, L))
         @time mis_counting(graph, L, i, mask; writefile=true, sc_target=26, usecuda=false, maximal=maximal, folderout=folderout)
     end

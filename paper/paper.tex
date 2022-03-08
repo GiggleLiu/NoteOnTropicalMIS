@@ -324,7 +324,7 @@ Its hypergraph representation is shown below, where we use different colors to r
 \end{tikzpicture}}
 \end{example}
 
-\section{Generic programming}\label{sec:generic}
+\section{Generic programming tensor contractions}\label{sec:generic}
 In previous works relating tensor networks and combinatoric problems~\cite{Kourtis2019, Biamonte2017},
 the elements in the tensor networks are limited to standard number types such as floating point numbers and integers.
 Owning to the development of modern compiling technology, we no longer need to limit our imagination to standard number types.
@@ -390,22 +390,17 @@ The Table~\ref{tbl:generictypes} summarizes those properties that can be compute
 \end{minipage}
 \end{table}
 
-\section{Independence polynomial} \label{sec:indpoly}
-The independence polynomial is an important graph polynomial that contains the counting information of independent sets. It is defined as
-\begin{equation}\label{eq:idpdef}
-I(G, x) = \sum_{k=0}^{\alpha(G)} a_k x^k,
-\end{equation}
-where $a_k$ is the number of independent sets of size $k$ in graph $G=(V,E)$. The total number of independent sets is thus equal to $I(G, 1)$.
-To compute this polynomial, we map this expression to a tensor network contraction.
+\section{Tensor network representation of independent sets} \label{sec:indpoly}
+Let $G=(V,E)$ be a weighted graph with each vertex $i\in V$ being associated with a weight $w_i$.
 We map a vertex $i\in V$ to a label $s_i \in \{0, 1\}$ of dimension $2$ in a tensor network, where we use $0$ ($1$) to denote a vertex is absent (present) in the set.
-For each label $s_i$, we defined a parametrized rank-one vertex tensor $W(x_i)$ as
+For each label $s_i$, we defined a parametrized rank-one vertex tensor $W(x_i, w_i)$ as
 \begin{equation}
-    W(x_i) = \left(\begin{matrix}
+    W(x_i, w_i) = \left(\begin{matrix}
         1 \\
-        x_i
+        x_i^{w_i}
     \end{matrix}\right).
 \end{equation}
-We use subscripts to index tensor elements, e.g.\ $W(x_i)_0=1$ is the first element associated with $s_i=0$ and $W(x_i)_1=x_i$ is the second element associated with $s_i=1$.
+We use subscripts to index tensor elements, e.g.\ $W(x_i, w_i)_0=1$ is the first element associated with $s_i=0$ and $W(x_i, w_i)_1=x_i^{w_i}$ is the second element associated with $s_i=1$.
 Similarly, on each edge $(u, v)$, we define a matrix $B$ indexed by $s_u$ and $s_v$ as
 \begin{equation}
     \qquad \quad 
@@ -416,13 +411,10 @@ Similarly, on each edge $(u, v)$, we define a matrix $B$ indexed by $s_u$ and $s
 \end{equation}
 The corresponding tensor network contraction gives
 \begin{equation}\label{eq:idp}
-    P(G, \{x_1, x_{2}, \ldots,x_{|V|}\}) = \sum\limits_{s_1, s_2, \ldots, s_{|V|} = 0}^{1} \prod\limits_{i=1}^{|V|} W(x_i)_{s_i} \prod\limits_{(i,j) \in E(G)} B_{s_i s_j},
+    P(G, \{x_1, x_{2}, \ldots,x_{|V|}\}) = \sum\limits_{s_1, s_2, \ldots, s_{|V|} = 0}^{1} \prod\limits_{i=1}^{|V|} W(x_i, w_i)_{s_i} \prod\limits_{(i,j) \in E(G)} B_{s_i s_j},
 \end{equation}
 where the summation runs over all vertex configurations $\{s_1, s_{2}, \ldots,s_{|V|}\}$ and accumulates the product of tensor elements to the output $P$ (see Example \ref{eg:tensorcontraction} for a concrete example).
 The edge tensor element $B_{s_{i}=1, s_{j}=1} = 0$ encodes the independent set constraint, meaning vertex $i$ and $j$ cannot be both in the independent set if they are connected by an edge $(i,j)$.
-In the special case of $x_i = x$, the contraction result directly corresponds to the independence polynomial.
-The connection can be understood as follows: the product over vertex tensor elements produces a factor $x^k$, where $k=\sum_i s_i$ counts the set size,
-and the product over edge tensor elements gives a factor $1$ for a configuration being in an independent set and $0$ otherwise. The summation counts the number of independent sets of size $k$. 
 
 To evaluate \Eq{eq:idp}, directly summing up the $2^{|V|}$ product terms is computationally inefficient.
 The standard approach to evaluate a tensor network is to contract two tensors at a time with a certain order utilizing the associativity and commutativity of tensor contraction.
@@ -466,7 +458,7 @@ We attach a vertex tensor on each hyperedge and an edge tensor between two hyper
         \foreach \x/\y/\v in {-0.5/-0.5/a, -0.5/2.0/b, 2.0/-0.5/c, 2.0/1.0/d, 3.0/2.0/e}
             \node[color=white,fill=black,dot=\r] at (\x+\dx,\y) (\v\v) {};
         \foreach \x/\y/\v in {-0.5/-0.5/a, -0.5/2.0/b, 2.0/-0.5/c, 2.0/1.0/d, 3.0/2.0/e}
-            \node[color=black] at (\x+\dx+0.5,\y) {\scriptsize $W(x_\v)$};
+            \node[color=black] at (\x+\dx+0.5,\y) {\scriptsize $W(x_\v, w_\v)$};
         \draw [cyan,thick] (a) -- (aa);
         \draw [cyan,thick] (a) -- (ab);
         \draw [cyan,thick] (a) -- (ac);
@@ -487,16 +479,28 @@ We attach a vertex tensor on each hyperedge and an edge tensor between two hyper
     \end{tikzpicture}}
     
     The contraction of this tensor network can be done in a pairwise order utilizing the associativity, additive commutativity, and multiplicative commutativity of tensor elements:
+    \small{
     \begin{align*}
-        &\sum_{s_a,s_b,s_c,s_d,s_e} W(x_a)_{s_a} W(x_b)_{s_b} W(x_c)_{s_c} W(x_d)_{s_d} W(x_e)_{s_e} B_{s_a s_b} B_{s_b s_d} B_{s_c s_d} B_{s_a s_c} B_{s_b s_c} B_{s_d s_e}\\
-        =&\sum_{s_b,s_c}\left(\sum_{s_d}\left(\left(\left(\left(\sum_{s_e}B_{s_d s_e}W(x_e)_{s_e}\right) W(x_d)_{s_d}\right) \left(B_{s_bs_d} W(x_b)_{s_b}\right)\right) \left(B_{s_cs_d} W(x_c)_{s_c}\right)\right)\right.\\
-        &\phantom{XXX}\left.\left(B_{s_bs_c}\left(\sum_{s_a}B_{s_as_b}\left(B_{s_as_c}W(x_a)_{s_a}\right)\right)\right)\right)\\
-        =&1 + x_a + x_b + x_c + x_d + x_e + x_ax_d + x_ax_e + x_cx_e + x_bx_e\\
-        =&1+5x+4x^2 \qquad \quad (x_{i} = x).
-    \end{align*}
+        &\sum_{s_a,s_b,s_c,s_d,s_e} W(x_a, w_a)_{s_a} W(x_b, w_b)_{s_b} W(x_c, w_c)_{s_c} W(x_d, w_d)_{s_d} W(x_e, w_e)_{s_e} B_{s_a s_b} B_{s_b s_d} B_{s_c s_d} B_{s_a s_c} B_{s_b s_c} B_{s_d s_e}\\
+        =&\sum_{s_b,s_c}\left(\sum_{s_d}\left(\left(\left(\left(\sum_{s_e}B_{s_d s_e}W(x_e,w_e)_{s_e}\right) W(x_d,w_d)_{s_d}\right) \left(B_{s_bs_d} W(x_b, w_b)_{s_b}\right)\right) \left(B_{s_cs_d} W(x_c, w_c)_{s_c}\right)\right)\right.\\
+        &\phantom{XXX}\left.\left(B_{s_bs_c}\left(\sum_{s_a}B_{s_as_b}\left(B_{s_as_c}W(x_a,w_a)_{s_a}\right)\right)\right)\right)\\
+        =&1 + x_a^{w_a} + x_b^{w_b} + x_c^{w_c} + x_d^{w_d} + x_e^{w_e} + x_a^{w_a}x_d^{w_d} + x_a^{w_a}x_e^{w_e} + x_c^{w_c}x_e^{w_e} + x_b^{w_b}x_e^{w_e}\\
+        =&1+5x+4x^2 \qquad \quad (x_{i} = x, w_{i}=1).
+    \end{align*}}
 \end{example}
 
-Before contracting the tensor network and evaluating the independence polynomial numerically, let us first elevate the tensor elements $0$s and $1$s in tensors $W(x)$ and $B$ from integers and floating point numbers to the additive identity,
+\section{Independence polynomial}
+In the special case of $x_i = x$ and $w_i = 1$, the contraction result directly corresponds to the independence polynomial.
+The independence polynomial is an important graph polynomial that contains the counting information of independent sets. It is defined as
+\begin{equation}\label{eq:idpdef}
+I(G, x) = \sum_{k=0}^{\alpha(G)} a_k x^k,
+\end{equation}
+where $a_k$ is the number of independent sets of size $k$ in graph $G=(V,E)$. The total number of independent sets is thus equal to $I(G, 1)$.
+Its connection to \Eq{eq:idp} can be understood as follows: the product over vertex tensor elements produces a factor $x^k$, where $k=\sum_i s_i$ counts the set size,
+and the product over edge tensor elements gives a factor $1$ for a configuration being in an independent set and $0$ otherwise. The summation counts the number of independent sets of size $k$. 
+One can feed the standard computer numbers types into this tensor network and evaluate the independence polynomial by contracting it numerically.
+However, we are more interested in finding the coefficients of this polynomial, because this quantity tells us the counting of independent sets at each size.
+To achieve this, let us first elevate the tensor elements $0$s and $1$s in tensors $W(x, 1)$ and $B$ from integers and floating point numbers to the additive identity,
 $\mymathbb{0}$, and multiplicative identity, $\mymathbb{1}$, of a commutative semiring as discussed in Sec.~\ref{sec:generic}.
 Let us create a polynomial type and represent a polynomial $a_0 + a_1 x + \ldots + a_k x^k$ as a coefficient vector $a = (a_0, a_1, \ldots, a_k) \in \mathbb{R}^k$, so, e.g., $x$ is represented as $(0, 1)$.
 We define the algebra between the polynomials $a$ of order $k_a$ and $b$ of order $k_b$ as
@@ -523,7 +527,7 @@ These operations are standard addition and multiplication operations of polynomi
     \end{matrix}\right).
 \end{equation}
 By contracting the tensor network with the polynomial type, we have the exact representation of the independence polynomial.
-However, using the polynomial type suffers a space overhead proportional to $\alpha(G)$ because each polynomial requires a vector of such size to store the coefficients. 
+In practise, using the polynomial type suffers a space overhead proportional to $\alpha(G)$ because each polynomial requires a vector of such size to store the coefficients. 
 Here, we propose to find the independence polynomial by fitting $\alpha(G)+1$ random pairs of $x_{i}$ and $y_{i} = I(G,x_{i})$. One can then compute the independence polynomial coefficients $a_{i}$ by solving the linear equation: 
 \begin{equation}
 \left(\begin{matrix}
@@ -656,7 +660,7 @@ In the program, we thus need a data structure that contains three fields, the la
 This approach can clearly be extended to calculate more independence polynomial coefficients and is more efficient than calculating the entire independence polynomial.
 As will be shown below, this algebra can also be extended to enumerate those large-size independent sets.
 
-\section{Enumeration of independent sets}
+\section{Enumerating and sampling independent sets}
 \subsection{Set algebra for configuration enumeration}
 The enumeration problems of independent sets are also interesting and has been studied extensively in the literature~\cite{Bron1973, Eppstein2010, Johnson1988}, including,
 for example, the enumeration of all independent sets, the enumeration of all maximal independent sets, or the enumeration of all MISs.
@@ -791,6 +795,50 @@ Let the gradient mask for $C$ be $\overline C$; the back-propagation rule for gr
 where $\delta$ is the Dirac delta function that returns one if two arguments have the same value and zero otherwise, $\circ$ is the element-wise product, boolean false is treated as the tropical number $\mymathbb{0}$, and boolean true is treated as the tropical number $\mymathbb{1}$.
 This rule defined on matrix multiplication can be easily generalized to tensor contraction by replacing the matrix multiplication between $C^{\circ-1} \circ \overline C$ and $B^{\mathsf{T}}$ by a tensor contraction.
 With the above method, one can significantly reduce the space needed to store the intermediate configurations by setting the tensor elements masked false to zero during contraction.
+
+\subsection{Extremely large MIS enumeration space}
+In many times, the number of configurations is too large to fit into any type of storage.
+Then instead of using the set algebra, we can use a binary sum-product tree as a compact representation of the results.
+We use a quadruple $(type, data, left, right)$ to represent a node in the tree, where $type$ is one of
+$\{\texttt{LEAF}, \texttt{ZERO}, \texttt{SUM}, \texttt{PROD}\}$, $data$ is a bit string as the content is a \texttt{LEAF} node,
+$left$ and $right$ are left and right operands of \texttt{SUM} and \texttt{PROD} nodes.
+
+\begin{equation}
+\eqname{EXPR}
+\begin{split}
+    s \oplus t &= (\texttt{SUM}, /, s, t)\\
+    s \odot t &= (\texttt{PROD}, /, s, t)\\
+    \mymathbb{0} &= (\texttt{ZERO}, /, /, /)\\
+    \mymathbb{1} &= (\texttt{LEAF}, 0^{\otimes |V|}, /, /).
+\end{split}\label{eq:expr}
+\end{equation}
+
+This algebra is a commutative semiring because we define the equivalence of two sum-product trees by comparing their expanded (using \Eq{eq:set}) forms, rather than their storages.
+Although one is probably unable to enumerate the configurations represented by this tree due to the extremely large configuration space size,
+but he can directly sample configurations from this tree.
+This is because once we have this sum-product representation of the configuration space,
+one can compute the number of configurations in each branch rigorously and efficiently.
+One can generate a random number and descent this expression tree by a probability proportional to the size of left and right branches.
+
+\section{Weighted graphs}
+In the previous discussion, we have limited ourselves to unweighted graphs.
+For integer weighted graphs, all results still holds,
+while for general weighted graphs, the independence polynomial is not computable anymore.
+For general weighted graphs, we are more interested to know the total weights of maximum $k$ independent set sizes and their configurations.
+Hence we define the extended tropical numbers as the following
+
+\begin{equation}
+\eqname{Tk}
+\begin{split}
+    s \oplus t &= \texttt{largest}(s \cup t, k)\\
+    s \odot t &= \texttt{largest}(\{a+b| a \in s, b\in t\}, k)\\
+    \mymathbb{0} &= -\infty^{\otimes k}\\
+    \mymathbb{1} &= -\infty^{\otimes k-1} \otimes 0
+\end{split}\label{eq:ext-tropical}
+\end{equation}
+where $\texttt{largest}(s, k)$ means truncating the set by only keeping $k$ largest values in the set $s$.
+Similarly, we can attach a bit string sampler algebra \Eq{eq:singleconfig} to it for finding the configuration for each size.
+Note here, the $\odot$ of configuration sampler is not used so that the resulting configurations are complete.
 
 \section{Benchmarks and case studies}\label{sec:benchmark}
 \subsection{Performance benchmarks}
