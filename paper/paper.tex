@@ -240,17 +240,31 @@ independent set, tensor network, maximum independent set, independence polynomia
 \end{AMS}
 
 \section{Introduction}
-In graph theory and combinatorial optimization, there are many interesting and hard computational problems concerning various properties of independent sets.
+In graph theory and combinatorial optimization, there is an important class of problems that can be quantified locally,
+including the independent set problem, the cutting problem, the 3-coloring problem, the 3-satisfiability problem,
+the maximal clique problem, and the vertex cover problem et al ~\cite{Moore2011}.
+There is a widespread interest of these problem because they have wide range of applications in scheduling, logistics,
+wireless networks and telecommunication, and computer vision, etc.~\cite{Butenko2003, Wu2015}.
+\blue{need more diversed applications not limited to IS}
+In combinatorial optimization, the most studied version of the above problems is finding the maximum/minimum set size and one of the solution with that size satisfying the contraints,
+while many of them belong to the hardness category NP-hard~\cite{Hastad1996}, i.e. people believe there is unlikely a polynomial time algorithm for solving them.
+In this paper, we study the property computing that can be harder but also more useful for people to understand a problem.
+The properties include finding the maximum/minimum size, counting sets of a give size, enumerating all such sets or direct sampling them when they are not enumeratable.
+For weighted version, it also includes finding sets with the largest/smallest $k$ sizes.
+%are many interesting and hard computational problems concerning various properties of independent sets.
+
+For avoid the discussion being too diversed, we limit the target problem to the independent set problem,
+and discuss other combinatorial optimization problems in \App{app:otherproblems}.
 For an undirected graph $G = (V,E)$, an independent set $I \subseteq V$ is a set of vertices that for any vertex pair $u,v \in I$, $(u, v) \not\in E$. %there is no edge connecting $u$ and $v$ in $G$. 
 One of the paradigmatic independent set \textit{properties} % that many computational complexity theorists are most interested in 
 is the maximum independent set (MIS) and the size of the MIS, $\alpha(G) \equiv \max_{I}|I|$. 
-There is widespread interest in this MIS problem not only because it is a well-known NP-complete problem~\cite{Hastad1996} that can be mapped from many other important combinatorial optimization problems in polynomial time such as the 3-satisfiability problem, the maximum clique problem, and the minimum vertex cover problem~\cite{Moore2011},
-but also because it has a wide range of applications in scheduling, logistics, wireless networks and telecommunication, and computer vision, etc.~\cite{Butenko2003, Wu2015}.
+
 On the other hand, some other properties, such as the number and enumeration of independent sets or maximal independent sets of a given size, are equally interesting, if not more important, in many practical applications. These other properties can be found in physics applications such as in the hard-core lattice gas model~\cite{Dyre2016, Fernandes2007}
 in statistical mechanics and the Rydberg hamiltonian with neutral atoms~\cite{Pichler2018, Ebadi2022};
 they can, for example, be used to understand phase transitions~\cite{Dyre2016, Fernandes2007}, to identify harder graphs in an ensemble of graphs~\cite{Ebadi2022} and to analyze the presence of the overlap gap property~\cite{Gamarnik2013, Gamarnik2019} related to the clustering phenomenon of large independent sets.
 Meanwhile, finding the number of independent sets of a given size is equivalent to computing the coefficients of the independence polynomial~\cite{Harvey2018,Ferrin2014}.
 which is a useful graph characteristic related to, for example, the partition functions~\cite{Lee1952,Yang1952} and Euler characteristics of the independence complex~\cite{Bousquet2008, Levit2009}. However, there is a lack of general and versatile tool to compute these different properties of independent sets.
+
 In this paper, we introduce a generic programming tensor-network framework to compute a number of different independent set properties.
 We map the computation of these properties into generic tensor network contraction with specially designed tensor element algebra.
 It is different from the standard tensor network methods in that the tensor elements are not restricted to standard number types such as floating point numbers and integers.
@@ -264,7 +278,6 @@ For cases where the tensors are too large to fit into a GPU, slicing techniques 
 Lastly, we provide a few examples and demonstrate the versatility of our tool by computing the entropy constant for some hardcore lattice gases on 2D square lattices and analyzing the presence of overlap gap property on three regular graphs.
 Our method can also be used to find ``maximal'' independent set properties; 
 a maximal independent set is an independent set that is not a subset of any other independent set, but its size may not be the maximum. 
-We show how to compute properties related to maximal independent sets and properties for other combinatorial optimization problems in \App{app:otherproblems}.
 
 \section{Tensor networks}
 Tensor network~\cite{Cirac2020, Orus2014} is also known as einsum, factor graph or sum-product network~\cite{Bishop2006} in different contexts;
@@ -458,7 +471,7 @@ We attach a vertex tensor on each hyperedge and an edge tensor between two hyper
         \foreach \x/\y/\v in {-0.5/-0.5/a, -0.5/2.0/b, 2.0/-0.5/c, 2.0/1.0/d, 3.0/2.0/e}
             \node[color=white,fill=black,dot=\r] at (\x+\dx,\y) (\v\v) {};
         \foreach \x/\y/\v in {-0.5/-0.5/a, -0.5/2.0/b, 2.0/-0.5/c, 2.0/1.0/d, 3.0/2.0/e}
-            \node[color=black] at (\x+\dx+0.5,\y) {\scriptsize $W(x_\v, w_\v)$};
+            \node[color=black] at (\x+\dx+0.6,\y) {\scriptsize $W(x_\v, w_\v)$};
         \draw [cyan,thick] (a) -- (aa);
         \draw [cyan,thick] (a) -- (ab);
         \draw [cyan,thick] (a) -- (ac);
