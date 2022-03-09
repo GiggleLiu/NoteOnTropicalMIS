@@ -262,7 +262,7 @@ Tensor network is also known as the sum product network or einsum in different f
 where its tensor element types are typically restricted to standard number types such as real numbers and complex numbers.
 We extend this concept to generic tensor network by generalizing the tensor element type to any type being a commutative semiring.
 %Traditional algorithms for finding the MIS size include the branching algorithms~\cite{Tarjan1977, Robson1986} and dynamic programming based algorithms~\cite{Courcelle1990, Fomin2013}.
-Given a good contraction order, contracting a tensor network in general has time complexity $2^{{\rm tw}(G)}$, where ${\rm tw}(G)$ is the treewidth of graph $G$.
+Given a good contraction order, contracting a tensor network in general has time complexity $2^{{\rm tw}(G)}$~\cite{Markov2008}, where ${\rm tw}(G)$ is the treewidth of graph $G$.
 Recent progress in simulating quantum circuits with random tensor networks~\cite{Gray2021, Pan2021, Kalachev2021} enables us to find such a good contraction order for a tensor network with thousands of tensors in a reasonable time.
 Although this time complexity is just on par with the dynamic programming algorithms~\cite{Courcelle1990, Fomin2013} for solving the maximum size and one of the best set, tensor network has richer algebraic structure, and this structure is crutial for computing properties.
 %For sparse graphs, the treewidth is usually much smaller than the number of vertices~\cite{Fomin2006}. Our algorithms, on the other hand, are much more versatile than traditional methods and can be used to compute many other properties than just the MIS size.
@@ -437,20 +437,66 @@ Similarly, on each edge $(u, v)$, we define a matrix $B$ indexed by $s_u$ and $s
 \end{equation}
 The corresponding tensor network contraction gives
 \begin{equation}\label{eq:idp}
-    P(G, \{x_1, x_{2}, \ldots,x_{|V|}\}) = \sum\limits_{s_1, s_2, \ldots, s_{|V|} = 0}^{1} \prod\limits_{i=1}^{|V|} W(x_i, w_i)_{s_i} \prod\limits_{(i,j) \in E(G)} B_{s_i s_j},
+    P(G, \{x_1^{w_1}, x_{2}^{w_2}, \ldots,x_{|V|}^{w_{|V|}}\}) = \sum\limits_{s_1, s_2, \ldots, s_{|V|} = 0}^{1} \prod\limits_{i=1}^{|V|} W(x_i, w_i)_{s_i} \prod\limits_{(i,j) \in E(G)} B_{s_i s_j},
 \end{equation}
 where the summation runs over all vertex configurations $\{s_1, s_{2}, \ldots,s_{|V|}\}$ and accumulates the product of tensor elements to the output $P$ (see Example \ref{eg:tensorcontraction} for a concrete example).
 The edge tensor element $B_{s_{i}=1, s_{j}=1} = 0$ encodes the independent set constraint, meaning vertex $i$ and $j$ cannot be both in the independent set if they are connected by an edge $(i,j)$.
 
-To evaluate \Eq{eq:idp}, directly summing up the $2^{|V|}$ product terms is computationally inefficient.
+\begin{example}\label{eg:twonode}
+In the following, we show a minimum example of mapping the independent problem of a 2 vertex graph (left) to a tensor network (right).
+
+\centerline{\begin{tikzpicture}[
+dot/.style = {circle, fill, minimum size=#1,
+            inner sep=0pt, outer sep=0pt},
+dot/.default = 6pt  % size of the circle diameter 
+                ]  
+    \def\dx{0};
+    \def\r{0.5cm}
+    \def\wr{0.25cm}
+    \node[dot=\r, fill=black] at (\dx,0) (a) {\color{white}{a}};
+    \node[dot=\r, fill=black] at (2.5+\dx,0) (b) {\color{white}{b}};
+    \draw [black,thick] (a) -- (b);
+
+    \def\dx{5};
+    \def\r{0.25cm}
+    \foreach \x/\y/\e in {1.25/0/ab}
+        \node[color=black,fill=black,dot=2*\r] at (\x+\dx,\y) (\e) {\scriptsize \color{white}{B}};
+    \foreach \x/\y/\v in {0.3/0/a, 2.2/0/b}
+        \node[color=black] at (\x+\dx,\y) (s\v) {$s_\v$};
+    \foreach \x/\y/\v in {-0.5/0/a, 3.0/0.0/b}{
+        \node[dot=\wr, color=black] at (\x+\dx,\y) (w\v) {};
+        \node at (\x+\dx,\y+0.5) () {\scriptsize \color{black}{$W(x_\v, w_\v)$}};
+    }
+    \draw [cyan,thick] (wa) -- (sa);
+    \draw [cyan,thick] (sa) -- (ab);
+    \draw [red,thick] (wb) -- (sb);
+    \draw [red,thick] (sb) -- (ab);
+\end{tikzpicture}}
+
+In the graphical representation of tensor network on the right panel,
+we use a circle to represent a tensor, a hyperedge in cyan color to represent the degree of freedom $s_a$,
+and a hyperedge in red color to represent a degree of freedom $s_b$.
+Tensors sharing a same degree of freedom are connected by that hyperedge.
+The contraction of this tensor network can be evaluated manually:
+\begin{equation}
+    \begin{split}
+    P(K2,\{x_a^{w_a}, x_b^{w_b}\}) &=
+    \left(\begin{matrix} 1 & x_a^{w_a} \end{matrix}\right)
+    \left(\begin{matrix} 1 & 1\\ 1  & 0 \end{matrix}\right)
+    \left(\begin{matrix} 1 \\ x_b^{w_b} \end{matrix}\right)\\
+    &= 1 + x_a^{w_a} + x_b^{w_b}
+    \end{split}
+\end{equation}
+The resulting polynomial represents 3 different independent sets $\{\}$, $\{a\}$ and $\{b\}$, with weights being $0$, $w_a$ and $w_b$ respectively.
+\end{example}
+ 
+It is in general not computational efficient to evaluate \Eq{eq:idp} by directly summing up the $2^{|V|}$ products.
 The standard approach to evaluate a tensor network is to contract two tensors at a time with a certain order utilizing the associativity and commutativity of tensor contraction.
 A fully optimized contraction order can reduce the time to $O(2^{\text{tw}(G)})$~\cite{Markov2008}, while requiring a space at the same order of magnitude to store intermediate contraction results.
 The pairwise tensor contraction also makes it possible to utilize basic linear algebra subprograms (BLAS) functions to speed up the computation for certain tensor element types.
 
 \begin{example}\label{eg:tensorcontraction}
-Mapping a graph (left) to a tensor network (right) that encodes the independence polynomial.
-In the generalized tensor network's graphical representation, a vertex is mapped to a hyperedge.
-We attach a vertex tensor on each hyperedge and an edge tensor between two hyperedges if vertices of the two hyperedges are connected in the original graph.
+In the following, we mapping a 5 vertex graph (left) to a tensor network (right) and show how the contraction order simplifies the computation.
     
     \centerline{\begin{tikzpicture}[
     dot/.style = {circle, fill, minimum size=#1,
@@ -510,13 +556,15 @@ We attach a vertex tensor on each hyperedge and an edge tensor between two hyper
         &\sum_{s_a,s_b,s_c,s_d,s_e} W(x_a, w_a)_{s_a} W(x_b, w_b)_{s_b} W(x_c, w_c)_{s_c} W(x_d, w_d)_{s_d} W(x_e, w_e)_{s_e} B_{s_a s_b} B_{s_b s_d} B_{s_c s_d} B_{s_a s_c} B_{s_b s_c} B_{s_d s_e}\\
         =&\sum_{s_b,s_c}\left(\sum_{s_d}\left(\left(\left(\left(\sum_{s_e}B_{s_d s_e}W(x_e,w_e)_{s_e}\right) W(x_d,w_d)_{s_d}\right) \left(B_{s_bs_d} W(x_b, w_b)_{s_b}\right)\right) \left(B_{s_cs_d} W(x_c, w_c)_{s_c}\right)\right)\right.\\
         &\phantom{XXX}\left.\left(B_{s_bs_c}\left(\sum_{s_a}B_{s_as_b}\left(B_{s_as_c}W(x_a,w_a)_{s_a}\right)\right)\right)\right)\\
-        =&1 + x_a^{w_a} + x_b^{w_b} + x_c^{w_c} + x_d^{w_d} + x_e^{w_e} + x_a^{w_a}x_d^{w_d} + x_a^{w_a}x_e^{w_e} + x_c^{w_c}x_e^{w_e} + x_b^{w_b}x_e^{w_e}\\
-        =&1+5x+4x^2 \qquad \quad (x_{i} = x, w_{i}=1).
+        =&1 + x_a^{w_a} + x_b^{w_b} + x_c^{w_c} + x_d^{w_d} + x_e^{w_e} + x_a^{w_a}x_d^{w_d} + x_a^{w_a}x_e^{w_e} + x_c^{w_c}x_e^{w_e} + x_b^{w_b}x_e^{w_e}
+        %=&1+5x+4x^2 \qquad \quad (x_{i} = x, w_{i}=1).
     \end{align*}}
+
+One can easily check the maximum tensor during computing is rank 2, and the total number of multiplication operations is reduced significantly.
 \end{example}
 
 \section{Independence polynomial}\label{sec:indpoly}
-In the special case of $x_i = x$ and $w_i = 1$, the contraction result directly corresponds to the independence polynomial.
+In the special case of $x_i = x$ and $w_i = 1$, the tensor network contraction result directly corresponds to the independence polynomial.
 The independence polynomial is an important graph polynomial that contains the counting information of independent sets. It is defined as
 \begin{equation}\label{eq:idpdef}
 I(G, x) = \sum_{k=0}^{\alpha(G)} a_k x^k,

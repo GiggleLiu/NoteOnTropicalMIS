@@ -25,3 +25,5 @@ output/
 *.swp
 *.thm
 Manifest.toml
+
+.vscode
