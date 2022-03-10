@@ -190,6 +190,8 @@ Listing \thelstlisting: #1\hfill%\hfill%
 \newcommand{\xgreen}[1]{[{\bf  \color{green}{\sout{XG: #1}}}]}
 \newcommand{\blue}[1]{[{\bf  \color{blue}{JG: #1}}]}
 \newcommand{\xblue}[1]{[{\bf  \color{blue}{\sout{JG: #1}}}]}
+\newcommand{\cyan}[1]{[{\bf  \color{cyan}{ML: #1}}]}
+\newcommand{\xcyan}[1]{[{\bf  \color{cyan}{\sout{ML: #1}}}]}
 \newcommand{\material}[1]{\iffalse[{\bf  \color{cyan}{Material: #1}}]\fi}
 
 \newcounter{example}
@@ -220,7 +222,7 @@ Listing \thelstlisting: #1\hfill%\hfill%
 \maketitle
 
 \begin{abstract}
-We introduce a method of using generic programming tensor network to compute various properties of independent sets,
+We introduce a method that uses generic programming tensor network to compute various properties of independent sets,
 which include, for example, the size of the maximum independent sets and the number and enumeration of independent sets of a given size.
 By making use of generic programming, our algorithms are very simple to implement and one can in addition directly utilize recent advances in tensor network contraction techniques such as near-optimal contraction order finding and slicing to achieve high performance.
 The algorithmic complexity of this approach is $2^{{\rm tw}(G)}$, where ${\rm tw} (G)$ is the treewidth of the problem graph.
@@ -238,6 +240,9 @@ independent set, tensor network, maximum independent set, independence polynomia
 \begin{AMS}
   05C31, 14N07
 \end{AMS}
+
+
+\cyan{a comment} and \xcyan{a resolved comment}
 
 \section{Introduction}
 In graph theory and combinatorial optimization, there are many interesting and hard computational problems concerning various properties of independent sets.
