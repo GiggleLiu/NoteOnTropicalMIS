@@ -42,9 +42,28 @@ function run_benchmarks(cases; output_file)
     writedlm(output_file, times)
 end
 
-function runcase(cases; task = :maxsize, usecuda = false)
+const property_dict = Dict{String, Any}(
+        "config_max" => SingleConfigMax(),
+        "config_max_(bounded)" => SingleConfigsMax(bounded=true),
+        "configs_max_(bounded)" => ConfigsMax(bounded=true),
+        "counting_max" => CountingMax(),
+        "counting_max2" => CountingMax2(),
+        "counting_sum" => CountingAll(),
+        "size_max" => SizeMax(),
+        "counting_all_(fft)" => GraphPolynomial(method=:fft),
+        "counting_all" => GraphPolynomial(method=:polynomial),
+        "configs_max" => ConfigsMax(; bounded=false),
+        "configs_all" => ConfigsAll(),
+        "configs_max2" => ConfigsMax(2; bounded=false),
+        "counting_all_(finitefield)" => GraphPolynomial(method=:finitefield),
+        "configs_max2_tree" => ConfigsMax2(; bounded=false, tree_storage=true),
+        "spectrum_max100" => SizeMax(100)
+       )
+ 
 
-    run_benchmarks([("n$(10*i)", ()->(usecuda ? (CUDA.@sync solve(case, replace(task, "_"=>" "); usecuda=true)) : solve((@show length(GraphTensorNetworks.labels(case.code)); case), replace(task, "_"=>" "); usecuda=false))) for (i, case) in enumerate(cases)],
+function runcase(cases; task, usecuda = false)
+    property = property_dict[task]
+    run_benchmarks([("n$(10*i)", ()->(usecuda ? (CUDA.@sync solve(case, property; usecuda=true)) : solve(case, property; usecuda=false))) for (i, case) in enumerate(cases)],
                    output_file=joinpath(@__DIR__, "data", "$(task)-r3-$(usecuda ? "GPU" : "CPU").dat"))
 end
 
@@ -82,6 +101,12 @@ end
     elseif group==7
         cases = generate_instances(180, 27)
         tasks = ("counting_all_(finitefield)",)
+    elseif group==8
+        cases = generate_instances(200, 27)
+        tasks = ("spectrum_max100",)
+    elseif group==9
+        cases = generate_instances(200, 27)
+        tasks = ("configs_max2_tree",)
     end
     for TASK in tasks
         println(TASK)
