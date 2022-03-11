@@ -1235,8 +1235,8 @@ The uni-modality, log-concavity, and real-rootness properties of the maximal ind
 
 We can modify the tensor network for computing the independence polynomial to include this restriction. Instead of defining the restriction on vertices and edges, it is more natural to define it on $N[v]$:
 \begin{equation}\label{eq:maximal}
-    T(x_v)_{s_1,s_2,\ldots,s_{|N(v)|},s_v} = \begin{cases}
-        s_vx_v & s_1=s_2=\ldots=s_{|N(v)|}=0,\\
+    T(x_v, w_v)_{s_1,s_2,\ldots,s_{|N(v)|},s_v} = \begin{cases}
+        s_vx_v^{w_v} & s_1=s_2=\ldots=s_{|N(v)|}=0,\\
         1-s_v& \text{otherwise}.\\
     \end{cases}
 \end{equation}
@@ -1244,13 +1244,13 @@ Intuitively, it means if all the neighbourhood vertices are not in $I_{m}$, i.e.
 otherwise, if any of the neighbourhood vertices is in $I_{m}$, then $v$ cannot be in $I_{m}$.
 As an example, for a vertex of degree 2, the resulting rank-3 tensor is
 \begin{equation}
-    T(x_v)=\left(\begin{matrix}
+    T(x_v, w_v)=\left(\begin{matrix}
     \left(\begin{matrix}
         0 &1 \\
         1 &1
     \end{matrix}\right)\\
     \left(\begin{matrix}
-        x_v &0 \\
+        x_v^{w_v} &0 \\
         0 &0
     \end{matrix}\right)
     \end{matrix}\right).
@@ -1339,23 +1339,24 @@ Here, a vertex tensor specifies the restriction that a vertex cannot be matched 
 
 \subsection{$k$-Coloring}
 Let us use the 3-coloring problem defined on vertices as an example.
-For a vertex $v$, we define the degrees of freedom $c_v\in\{1,2,3\}$ and a vertex tensor labelled by it as
+For a vertex $v$, we define the degrees of freedom $c_v\in\{0,1,2\}$ and a vertex tensor labelled by it as
 \begin{equation}
     W(v) = \left(\begin{matrix}
         r_v\\
         g_v\\
         b_v
-    \end{matrix}\right).
+    \end{matrix}\right),
 \end{equation}
+where $r_v$, $g_v$ and $b_v$ are colors used to label the configurations.
 For an edge $(u, v)$, we define an edge tensor as a matrix labelled by $(c_u, c_v)$ to specify the constraint
 \begin{equation}
-    B = \left(\begin{matrix}
-        0 & 1 & 1\\
-        1 & 0 & 1\\
-        1 & 1 & 0
+    B(x) = \left(\begin{matrix}
+        0 & x & x\\
+        x & 0 & x\\
+        x & x & 0
     \end{matrix}\right).
 \end{equation}
-The number of possible colorings can be obtained by contracting this tensor network by setting vertex tensor elements $r_v, g_v$ and $b_v$ to $1$.
+The number of possible colorings can be obtained by contracting this tensor network by setting $r_v, g_v$ and $b_v$ to $1$.
 By designing generic types as tensor elements, one can get other properties.
 Similarly, one can also define the $k$-coloring problem on edges by switching the roles of edges and vertices.
 
@@ -1372,6 +1373,42 @@ Then the Max-Cut problem can be encoded to tensor networks by mapping an edge $(
 where variable $x_{\langle i, j\rangle}$ represents a cut on edge $(i, j)$ or a domain wall of an Ising spin glass.
 Similar to other problems, we can define a polynomial with edge variables by setting $x_{\langle i, j\rangle} = x$,
 where its $k$th coefficient is two times the number of configurations of cut size $k$.
+
+\subsection{Dominating Set}
+Let $G=(V,E)$ be the target graph that we want to solve.
+The tensor network representation map a vertex $v\in V$ to a boolean degree of freedom $s_v\in\{0, 1\}$.
+We defined the restriction on a vertex and its neighbouring vertices $N(v)$:
+\begin{equation}
+T(x_v)_{s_1,s_2,\ldots,s_{|N(v)|},s_v} = \begin{cases}
+    0 & s_1=s_2=\ldots=s_{|N(v)|}=s_v=0,\\
+    1 & s_v=0,\\
+    x_v^{w_v} & \text{otherwise},
+\end{cases}
+\end{equation}
+where $w_v$ is the weight of vertex $v$.
+This tensor means if both $v$ and its neighbouring vertices are not in $D$, i.e., $s_1=s_2=\ldots=s_{|N(v)|}=s_v=0$,
+this configuration is forbidden because $v$ is not adjacent to any member in the set.
+otherwise, if $v$ is in $D$, it has a contribution $x_v^{w_v}$ to the final result.
+
+\subsection{Satisfiability Problem}
+We can contruct a satisfiability problem to solve the above problem.
+To generate a tensor network, we map a boolean variable $x$ and its negation $\neg x$ to a degree of freedom (label) $s_x \in \{0, 1\}$,
+where 0 stands for variable $x$ having value \texttt{false} while 1 stands for having value \texttt{true}.
+Then we map a clause to a tensor. For example, a clause $\neg x \vee y \vee \neg z$ can be mapped to a tensor labeled by $(s_x, s_y, s_z)$.
+\begin{equation}
+C = \left(\begin{matrix}
+\left(\begin{matrix}
+x & x \\
+x & x
+\end{matrix}\right) \\
+\left(\begin{matrix}
+x & x \\
+1 & x
+\end{matrix}\right)
+\end{matrix}\right).
+\end{equation}
+There is only one entry $(s_x, s_y, s_z) = (1, 0, 1)$ that makes this clause unsatisfied.
+If we contract this tensor network, we will get a multiplicative factor $x$ whenever there is a clause satisfied.
 
 \subsection{Set packing}
 Set packing is the hypergraph generalization of the maximum independent set problem, where a set corresponds to a vertex and an element corresponds to a hyperedge.
