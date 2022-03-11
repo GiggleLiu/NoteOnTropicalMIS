@@ -31,7 +31,8 @@ class PLT(object):
 
             ax=plt.subplot(222)   # size
             cornertex("(b)", ax, offset=(0,0))
-            for k,(prefix, l) in enumerate([("counting_sum", r"counting ISs ($\mathbb{R}$"), ("size_max", "MIS size (T"), ("counting_max", "counting MISs (P1"), ("counting_max2", r"counting ISs of size $\alpha(G)$ and $\alpha(G)-1$ (P2")]):
+            for k,(prefix, l) in enumerate([("counting_sum", r"counting ISs ($\mathbb{R}$"), ("size_max", "MIS size (T"), ("counting_max", "counting MISs (P1"), ("counting_max2", r"counting ISs of size $\alpha(G)$ and $\alpha(G)-1$ (P2"),
+                ("spectrum_max100", "maximum 100 sizes (T100")]):
                 for device in ["CPU", "GPU"]:
                     datafile = "../../benchmarks/data/"+prefix+"-r3-"+device+".dat"
                     if os.path.exists(datafile):
@@ -67,7 +68,11 @@ class PLT(object):
 
             ax = plt.subplot(224)  # configurations
             cornertex("(d)", ax, offset=(0,0))
-            for k,(prefix, l) in enumerate([("config_max", "one MIS (P1+S1"), ("config_max_(bounded)", "one MIS (T+bounding"), ("configs_max_(bounded)", "MISs (P1+SN+bounding"), ("configs_max", "MISs (P1+SN"), ("configs_max2", r"ISs of size $\alpha(G)$ and $\alpha(G)-1$ (P2+SN"), ("configs_all", "ISs (PN+SN")]):
+            for k,(prefix, l) in enumerate([("config_max", "one MIS (P1+S1"), ("config_max_(bounded)", "one MIS (T+bounding"), ("configs_max_(bounded)", "MISs (P1+SN+bounding"), ("configs_max", "MISs (P1+SN"),
+                ("configs_max2", r"ISs of size $\alpha(G)$ and $\alpha(G)-1$ (P2+SN"),
+                ("configs_all", "ISs (PN+SN"),
+                ("configs_max2_tree", r"ISs of size $\alpha(G)$ and $\alpha(G)-1$ (P2+SUMPROD"),
+                ]):
                 datafile = "../../benchmarks/data/"+prefix+"-r3-"+device+".dat"
                 for device in ["CPU", "GPU"]:
                     datafile = "../../benchmarks/data/"+prefix+"-r3-"+device+".dat"

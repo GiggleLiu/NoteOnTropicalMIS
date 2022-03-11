@@ -222,12 +222,13 @@ Listing \thelstlisting: #1\hfill%\hfill%
 \maketitle
 
 \begin{abstract}
-We introduce a method that uses generic programming tensor network to compute various properties of independent sets,
-which include, for example, the size of the maximum independent sets and the number and enumeration of independent sets of a given size.
+We introduce a method that uses generic programming tensor network to compute various properties of a class of hard graph problems that can be quantified locally.
+Let the independent set problem be an example, we show how to compute, for example, the maximum several independent set sizes, the counting of independent sets of a give size, the enumeration of independent sets of a given size.
 By making use of generic programming, our algorithms are very simple to implement and one can in addition directly utilize recent advances in tensor network contraction techniques such as near-optimal contraction order finding and slicing to achieve high performance.
 The algorithmic complexity of this approach is $2^{{\rm tw}(G)}$, where ${\rm tw} (G)$ is the treewidth of the problem graph.
-Our framework can be easily extended to compute properties of other problems such as the cut size, coloring, and maximal cliques, among others.
+Other hard graph problems solvable in our framework includes the cutting problem, the K-coloring problem, the maximal clique problem, the dominating set problem, and satisfiability problem, among others.
 To demonstrate the versatility of this tool, we apply it to a few examples including the calculations of the entropy constant for some hardcore lattice gases on 2D square lattices and the study of the overlap gap property on three regular graphs.
+We show how our method helps people understand these hard problems better.
 \end{abstract}
 
 % REQUIRED
@@ -246,18 +247,18 @@ independent set, tensor network, maximum independent set, independence polynomia
 
 \section{Introduction}
 In graph theory and combinatorial optimization, there is an important class of problems that can be quantified locally,
-including the independent set problem, the cutting problem, the 3-coloring problem, the 3-satisfiability problem,
+including the independent set problem, the cutting problem, the K-coloring problem, the satisfiability problem,
 the maximal clique problem, and the vertex cover problem et al ~\cite{Moore2011}.
 There is a widespread interest of these problem because they have wide range of applications in scheduling, logistics,
 wireless networks and telecommunication, and computer vision, etc.~\cite{Butenko2003, Wu2015}.
 \blue{need more diversed applications not limited to IS}
 
-The most studied version of the above problems is finding the maximum/minimum set size and one of the solution with that size satisfying the contraints,
-while many of them belong to the hardness category NP-hard~\cite{Hastad1996}, i.e. there is unlikely a polynomial time algorithm for solving them.
-In this paper, we focus on the less studied \textit{property} computation of these problems which can be harder but is crutial towards understanding a problem.
+The most studied version of the above problems is finding the maximum/minimum set size and one of the sets of that size satisfying the contraints,
+while many of them belong to the hardness category NP-hard~\cite{Hastad1996}, i.e. it is unlikely to solve them in a polynomial time.
+In this paper, we focus on the less studied \textit{property} computation which can be harder but is crutial towards understanding a problem.
 Here, the \textit{property} refers to a class of quantities that not only include the maximum/minimum set size,
 but also include the number of sets at a give size, enumeration of all sets at a give size or direct sampling of such sets when they are not enumeratable.
-For the weighted version, it also includes finding largest/smallest $k$ sets and their sizes.
+For the weighted version of the above problems, it also includes finding largest/smallest $k$ sets and their sizes.
 %are many interesting and hard computational problems concerning various properties of independent sets.
 
 We propose to view the computation of all these properties from an abstract algebra perspective and use a unified framework,
@@ -273,7 +274,7 @@ Although this time complexity is just on par with the dynamic programming algori
 %For sparse graphs, the treewidth is usually much smaller than the number of vertices~\cite{Fomin2006}. Our algorithms, on the other hand, are much more versatile than traditional methods and can be used to compute many other properties than just the MIS size.
 
 To avoid the discussion being overly diversed, we limit the target problem to the independent set problem,
-and discuss other combinatorial optimization problems in \App{app:otherproblems}.
+and discuss other combinatorial optimization problems in \App{sec:otherproblems}.
 For an undirected graph $G = (V,E)$, an independent set $I \subseteq V$ is a set of vertices that for any vertex pair $u,v \in I$, $(u, v) \not\in E$,
 and we denote the maximum independent set (MIS) size $\alpha(G) \equiv \max_{I}|I|$. 
 %The independent set problem is related to physics applications such as in the hard-core lattice gas model~\cite{Dyre2016, Fernandes2007}
@@ -307,7 +308,7 @@ where a tensor is mapped to a vertex and a label shared by two tensors is mapped
 In this work, we do not impose such a restriction, so an index can appear an arbitrary number of times. 
 The graphical representation of a generalized tensor network is a hypergraph, in which an edge (a label in subscript) can be shared by an arbitrary number of vertices (tensors).
 These two notations are equivalent in representation power because one can easily translate a generalized tensor network to the standard notation by adding $\delta$ tensors, a high dimensional equivalence of the identity matrix.
-However, introducing $\delta$ tensors may significantly increase the complexity of the tensor contraction. We illustrate this subtle point in \App{app:tensorbad}.
+However, introducing $\delta$ tensors may significantly increase the complexity of the tensor contraction. We illustrate this subtle point in \App{sec:tensorbad}.
 
 \begin{example}
 $C_{ijk} = A_{jkm} B_{mil} V_{jm}$ is a tensor network that can be evaluated as $C_{ijk} = \sum_{ml}A_{jkm} B_{mil} V_{jm}$.
@@ -485,7 +486,7 @@ Tensors sharing a same degree of freedom are connected by that hyperedge.
 The contraction of this tensor network can be evaluated manually:
 \begin{equation}
     \begin{split}
-    P(K2,\{x_a^{w_a}, x_b^{w_b}\}) &=
+    P({\rm K2},\{x_a^{w_a}, x_b^{w_b}\}) &=
     \left(\begin{matrix} 1 & x_a^{w_a} \end{matrix}\right)
     \left(\begin{matrix} 1 & 1\\ 1  & 0 \end{matrix}\right)
     \left(\begin{matrix} 1 \\ x_b^{w_b} \end{matrix}\right)\\
@@ -607,72 +608,8 @@ These operations are standard addition and multiplication operations of polynomi
 \end{equation}
 By contracting the tensor network with the polynomial type, we have the exact representation of the independence polynomial.
 In practise, using the polynomial type suffers a space overhead proportional to $\alpha(G)$ because each polynomial requires a vector of such size to store the coefficients. 
-Here, we propose to find the independence polynomial by fitting $\alpha(G)+1$ random pairs of $x_{i}$ and $y_{i} = I(G,x_{i})$. One can then compute the independence polynomial coefficients $a_{i}$ by solving the linear equation: 
-\begin{equation}
-\left(\begin{matrix}
-1 & x_0 & x_0^2 & \ldots & x_0^{\alpha(G)} \\
-1 & x_1 & x_1^2 & \ldots & x_1^{\alpha(G)} \\
-\vdots & \vdots & \vdots &\ddots & \vdots \\
-1 & x_{\alpha(G)} & x_{\alpha(G)}^2 & \ldots & x_{\alpha(G)}^{\alpha(G)}
-\end{matrix}\right)
-\left(\begin{matrix}
-a_0 \\ a_1 \\ \vdots \\ a_{\alpha(G)}
-\end{matrix}\right)
-= \left(\begin{matrix}
-y_0 \\ y_1 \\ \vdots \\ y_{\alpha(G)}
-\end{matrix}\right).\label{eq:lineareq}
-\end{equation}
-With this approach, we do not incur the linear overhead in space. However, because the independence polynomial coefficients can have a huge order-of-magnitude range, if we use floating point numbers in the computation, the round-off errors can be significant for the counting of large-size independent sets.
-In addition, the number could easily overflow if we use fixed-width integer types.
-The big integer type is also not a good option because big integers with varying width can be very slow and is incompatible with GPU devices. These problems can be solved by introducing a finite-field algebra $\text{GF}(p)$:
-\begin{equation}
-\eqname{GF$(p)$}
-\begin{split}
-    x ~\oplus~ y &= x+y\pmod p,\\
-    x ~\odot~ y &= xy\pmod p,\\
-    \mymathbb{0} &= 0,\\
-    \mymathbb{1} &= 1.
-\end{split}\label{eq:finitefield}
-\end{equation}
-With a finite-field algebra, we have the following observations:
-\begin{enumerate}
-    \item One can use Gaussian elimination~\cite{Golub2013} to solve the linear equation \Eq{eq:lineareq} since it is a generic algorithm that works for any elements with field algebra. The multiplicative inverse of a finite-field algebra can be computed with the extended Euclidean algorithm.
-    \item Given the remainders of a larger unknown integer $x$ over a set of co-prime integers $\{p_1, p_2, \ldots, p_n\}$,
-    $x \pmod {p_1 \times p_2 \times \ldots \times p_n}$ can be computed using the Chinese remainder theorem. With this, one can infer big integers from small integers.
-\end{enumerate}
-With these observations, we develop Algorithm~\ref{alg:finitefield} to compute the independence polynomial exactly without introducing space overheads.
-The algorithm iterates over a sequence of large prime numbers until convergence.
-In each iteration, we choose a large prime number $p$, and contract the tensor networks to evaluate the polynomial for each variable $\chi = (x_{0}, x_{1}, \ldots, x_{\alpha(G)})$ on ${\rm GF}(p)$ and denote the outputs as $(y_0, y_1, \ldots, y_{\alpha(G)}) \pmod p$.
-Then we solve \Eq{eq:lineareq} using Gaussian elimination on ${\rm GF}(p)$ to find the coefficient modulo $p$, $A_p \equiv (a_0, a_1, \ldots, a_{\alpha(G)})\pmod p$.
-As the last step of each iteration, we apply the Chinese remainder theorem to update $A \pmod P $ to $ A \pmod {P\times p}$, where $P$ is a product of all prime numbers chosen in previous iterations.
-If this number does not change compared with the previous iteration, it indicates the convergence of the result and the program terminates.
-All computations are done with integers of fixed width $W$ except the last step of applying the Chinese remainder theorem, where we use arbitrary precision integers to represent the counting.
-In \App{app:fft}, we provide another method to solve the linear equation using discrete Fourier transformation.
-
-\LinesNumberedHidden
-\begin{algorithm}[!ht]
-    \small
-    \SetAlgoNoLine
-    %\LinesNumbered
-    Let $P = 1$, $W$ be the integer width, vector $\chi = (0,1,2, \ldots, \alpha(G))$, matrix $X_{ij} = (\chi_i)^j$, where $i,j = 0, 1, \ldots, \alpha(G)$\;
-
-    \While{true}{
-        compute the largest prime $p$ that $\gcd(p, P) = 1$ and $p < 2^W$\;
-
-        \For{$i=0\ldots\alpha(G)$}{
-            $y_i \pmod p$ = ${\rm contract\_tensor\_network}(\chi_i\pmod p)$ \tcp*[l]{on $\text{GF}(p)$}
-        }
-
-        $A_p = (a_0, a_1, \ldots, a_{\alpha(G)}) \pmod p = {\rm gaussian\_elimination}(X, (y_0, y_1, \ldots, y_{\alpha(G)}) \pmod p) $\;
-
-        $A_{P\times p} = {\rm chinese\_remainder}(A_P, A_p)$\;
-
-        \If{$A_P = A_{P \times p}$}{
-            \Return $A_P$ \tcp*[l]{converged}
-        }
-        $P = P \times p$\;
-    }\caption{Computing the independence polynomial exactly without integer overflow}\label{alg:finitefield} 
-\end{algorithm}
+In \App{sec:finitefield}, we provide an accurate and memory efficient method to find the polynomial by fitting it in a finite field.
+Alternatively, one can use the method in \App{sec:fft} to fit this polynomial more time efficiently with complex number at the cost of precision.
 
 \section{Maximum independent sets and its counting}\label{sec:counting}
 \subsection{Tropical algebra for finding the MIS size and counting MISs}
@@ -1010,7 +947,7 @@ In this paper, we introduce a method to use generic programming tensor networks 
 
 Other than the case with real numbers, we have polynomials and truncated polynomials as algebra types.
 We combine them with the set algebra and the bitstring algebra for set enumeration and sampling. 
-These algebras are of generic use: they can be utilized to compute properties of maximal independent sets and a variety of other combinatorial problems such as the matching problem, the k-coloring problem, the max-cut problem, and the set packing problem, as detailed in \App{app:otherproblems}. 
+These algebras are of generic use: they can be utilized to compute properties of maximal independent sets and a variety of other combinatorial problems such as the matching problem, the k-coloring problem, the max-cut problem, and the set packing problem, as detailed in \App{sec:otherproblems}. 
 Moreover, since the independence polynomial is closely related to the matching polynomial~\cite{Levit2005}, the clique polynomial~\cite{Hoede1994}, and the vertex cover polynomial~\cite{Akbari2013},
 our algorithm to compute the independence polynomial can also be used to compute these graph polynomials.
 By adapting to the style of generic programming, we can implement all the algorithms without much effort.
@@ -1094,7 +1031,7 @@ For better performance, we recommend checking our GitHub repository for the full
 \href{https://github.com/Happy-Diode/GraphTensorNetworks.jl}{https://github.com/Happy-Diode/GraphTensorNetworks.jl}.
 It can be installed in a similar style to other packages.
 
-\section{Additional contraction overhead using the standard tensor network notations}\label{app:tensorbad}
+\section{Additional contraction overhead using the standard tensor network notations}\label{sec:tensorbad}
 As we have mentioned in the main text,
 a standard tensor network notation is equivalent to the generalized tensor network by introducing $\delta$ tensors,
 where a $\delta$ tensor of rank $d$ is defined as
@@ -1217,7 +1154,7 @@ Here, we use different colors to distinguish different hyperedges.
 A vertex tensor always has rank $1$ and is not shown here since it does not change the contraction complexity.
 If we contract this tensor network in the column-wise order, the maximum intermediate tensor rank is $\sim L$, which can be seen by counting the number of colors.
 
-\section{Generalization to other graph problems}\label{app:otherproblems}
+\section{Generalization to other graph problems}\label{sec:otherproblems}
 \subsection{Maximal independent sets and maximal cliques}\label{sec:maximal}
 Finding maximal independent sets of a graph is equivalent to finding the maximal cliques of its complement graph, so in the following we mainly discuss how to find maximal independent sets.
 Let us denote the neighborhood of a vertex $v$ as $N(v)$ and denote $N[v] = N(v)\cup \{v\}$.
@@ -1475,8 +1412,75 @@ where $\delta$ is the Dirac delta function that returns one if two arguments hav
 This rule defined on matrix multiplication can be easily generalized to tensor contraction by replacing the matrix multiplication between $C^{\circ-1} \circ \overline C$ and $B^{\mathsf{T}}$ by a tensor contraction.
 With the above method, one can significantly reduce the space needed to store the intermediate configurations by setting the tensor elements masked false to zero during contraction.
 
+\section{The fitting approach to computing the independence polynomial}\label{sec:finitefield}
+In this section, we propose to find the independence polynomial by fitting $\alpha(G)+1$ random pairs of $x_{i}$ and $y_{i} = I(G,x_{i})$. One can then compute the independence polynomial coefficients $a_{i}$ by solving the linear equation: 
+\begin{equation}
+\left(\begin{matrix}
+1 & x_0 & x_0^2 & \ldots & x_0^{\alpha(G)} \\
+1 & x_1 & x_1^2 & \ldots & x_1^{\alpha(G)} \\
+\vdots & \vdots & \vdots &\ddots & \vdots \\
+1 & x_{\alpha(G)} & x_{\alpha(G)}^2 & \ldots & x_{\alpha(G)}^{\alpha(G)}
+\end{matrix}\right)
+\left(\begin{matrix}
+a_0 \\ a_1 \\ \vdots \\ a_{\alpha(G)}
+\end{matrix}\right)
+= \left(\begin{matrix}
+y_0 \\ y_1 \\ \vdots \\ y_{\alpha(G)}
+\end{matrix}\right).\label{eq:lineareq}
+\end{equation}
+With this approach, we do not incur the linear overhead in space. However, because the independence polynomial coefficients can have a huge order-of-magnitude range, if we use floating point numbers in the computation, the round-off errors can be significant for the counting of large-size independent sets.
+In addition, the number could easily overflow if we use fixed-width integer types.
+The big integer type is also not a good option because big integers with varying width can be very slow and is incompatible with GPU devices. These problems can be solved by introducing a finite-field algebra $\text{GF}(p)$:
+\begin{equation}
+\eqname{GF$(p)$}
+\begin{split}
+    x ~\oplus~ y &= x+y\pmod p,\\
+    x ~\odot~ y &= xy\pmod p,\\
+    \mymathbb{0} &= 0,\\
+    \mymathbb{1} &= 1.
+\end{split}\label{eq:finitefield}
+\end{equation}
+With a finite-field algebra, we have the following observations:
+\begin{enumerate}
+    \item One can use Gaussian elimination~\cite{Golub2013} to solve the linear equation \Eq{eq:lineareq} since it is a generic algorithm that works for any elements with field algebra. The multiplicative inverse of a finite-field algebra can be computed with the extended Euclidean algorithm.
+    \item Given the remainders of a larger unknown integer $x$ over a set of co-prime integers $\{p_1, p_2, \ldots, p_n\}$,
+    $x \pmod {p_1 \times p_2 \times \ldots \times p_n}$ can be computed using the Chinese remainder theorem. With this, one can infer big integers from small integers.
+\end{enumerate}
+With these observations, we develop Algorithm~\ref{alg:finitefield} to compute the independence polynomial exactly without introducing space overheads.
+The algorithm iterates over a sequence of large prime numbers until convergence.
+In each iteration, we choose a large prime number $p$, and contract the tensor networks to evaluate the polynomial for each variable $\chi = (x_{0}, x_{1}, \ldots, x_{\alpha(G)})$ on ${\rm GF}(p)$ and denote the outputs as $(y_0, y_1, \ldots, y_{\alpha(G)}) \pmod p$.
+Then we solve \Eq{eq:lineareq} using Gaussian elimination on ${\rm GF}(p)$ to find the coefficient modulo $p$, $A_p \equiv (a_0, a_1, \ldots, a_{\alpha(G)})\pmod p$.
+As the last step of each iteration, we apply the Chinese remainder theorem to update $A \pmod P $ to $ A \pmod {P\times p}$, where $P$ is a product of all prime numbers chosen in previous iterations.
+If this number does not change compared with the previous iteration, it indicates the convergence of the result and the program terminates.
+All computations are done with integers of fixed width $W$ except the last step of applying the Chinese remainder theorem, where we use arbitrary precision integers to represent the counting.
 
-\section{The discrete Fourier transform approach to computing the independence polynomial}\label{app:fft}
+\LinesNumberedHidden
+\begin{algorithm}[!ht]
+    \small
+    \SetAlgoNoLine
+    %\LinesNumbered
+    Let $P = 1$, $W$ be the integer width, vector $\chi = (0,1,2, \ldots, \alpha(G))$, matrix $X_{ij} = (\chi_i)^j$, where $i,j = 0, 1, \ldots, \alpha(G)$\;
+
+    \While{true}{
+        compute the largest prime $p$ that $\gcd(p, P) = 1$ and $p < 2^W$\;
+
+        \For{$i=0\ldots\alpha(G)$}{
+            $y_i \pmod p$ = ${\rm contract\_tensor\_network}(\chi_i\pmod p)$ \tcp*[l]{on $\text{GF}(p)$}
+        }
+
+        $A_p = (a_0, a_1, \ldots, a_{\alpha(G)}) \pmod p = {\rm gaussian\_elimination}(X, (y_0, y_1, \ldots, y_{\alpha(G)}) \pmod p) $\;
+
+        $A_{P\times p} = {\rm chinese\_remainder}(A_P, A_p)$\;
+
+        \If{$A_P = A_{P \times p}$}{
+            \Return $A_P$ \tcp*[l]{converged}
+        }
+        $P = P \times p$\;
+    }\caption{Computing the independence polynomial exactly without integer overflow}\label{alg:finitefield} 
+\end{algorithm}
+
+
+\section{The discrete Fourier transform approach to computing the independence polynomial}\label{sec:fft}
 
 In section~\ref{sec:indpoly}, we show that the independence polynomial can be obtained by solving the linear equation \Eq{eq:lineareq}.
 Since the coefficients of the independence polynomial can range many orders of magnitude, the round-off errors in fitting can be significant if we use random floating point numbers for $x_{i}$.
