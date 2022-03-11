@@ -768,14 +768,14 @@ Here is a new algebra defined on the bit strings, replacing the sets of bit stri
 where the \texttt{select} function picks one of $\sigma$ and $\tau$ by some criteria to make the algebra commutative and associative, e.g. by picking the one with a smaller integer value.
 
 \subsection{Sampling extremely large configuration space}
-In many times, the number of configurations is too large to fit into any type of storage.
-Then instead of using the set algebra, we can use a binary sum-product tree as a compact representation of the results.
+When the graph size goes large, the configurations might be impossible to fit into any type of storage.
+Then instead of using the set algebra, one can use a binary sum-product tree as a compact representation of the configurations.
 We use a quadruple $(type, data, left, right)$ to represent a node in the tree, where $type$ is one of
-$\{\texttt{LEAF}, \texttt{ZERO}, \texttt{SUM}, \texttt{PROD}\}$, $data$ is a bit string as the content is a \texttt{LEAF} node,
+$\{\texttt{LEAF}, \texttt{ZERO}, \texttt{SUM}, \texttt{PROD}\}$, $data$ is a bit string as the content in a \texttt{LEAF} node,
 $left$ and $right$ are left and right operands of \texttt{SUM} and \texttt{PROD} nodes.
 
 \begin{equation}
-\eqname{SUMPROD}
+\eqname{SPT}
 \begin{split}
     s \oplus t &= (\texttt{SUM}, /, s, t)\\
     s \odot t &= (\texttt{PROD}, /, s, t)\\
@@ -785,12 +785,12 @@ $left$ and $right$ are left and right operands of \texttt{SUM} and \texttt{PROD}
 \end{equation}
 The vertex tensor and edge tensor become
 \begin{equation}
-    W^{\rm SUMPROD}((\texttt{LEAF},\boldsymbol{e}_i,/,/)) = \left(\begin{matrix}
+    W^{\rm SPT}((\texttt{LEAF},\boldsymbol{e}_i,/,/)) = \left(\begin{matrix}
         \mymathbb{1} \\
         (\texttt{LEAF},\boldsymbol{e}_i,/,/)
     \end{matrix}\right),   
     \qquad
-        B^{\rm SUMPROD} = \left(\begin{matrix}
+        B^{\rm SPT} = \left(\begin{matrix}
         \mymathbb{1}  & \mymathbb{1} \\
         \mymathbb{1} & \mymathbb{0}
     \end{matrix}\right).
@@ -801,7 +801,7 @@ Although one is probably unable to enumerate the configurations represented by t
 but he can directly sample configurations from this tree.
 This is because once we have this sum-product representation of the configuration space,
 one can compute the number of configurations in each branch rigorously and efficiently.
-One can generate a random number and descend this expression tree to left or right sibling with probability decided by the size of each branch while doing the computation specified by the first field.
+To generate samples, one just descends this sum product tree to left or right sibling with probability decided by the size of each branch while doing the computation specified by the first field.
 
 \section{Weighted graphs}\label{sec:weighted}
 In the previous discussion, we have limited ourselves to unweighted graphs.

@@ -71,7 +71,7 @@ class PLT(object):
             for k,(prefix, l) in enumerate([("config_max", "one MIS (P1+S1"), ("config_max_(bounded)", "one MIS (T+bounding"), ("configs_max_(bounded)", "MISs (P1+SN+bounding"), ("configs_max", "MISs (P1+SN"),
                 ("configs_max2", r"ISs of size $\alpha(G)$ and $\alpha(G)-1$ (P2+SN"),
                 ("configs_all", "ISs (PN+SN"),
-                ("configs_max2_tree", r"ISs of size $\alpha(G)$ and $\alpha(G)-1$ (P2+SUMPROD"),
+                ("configs_max2_tree", r"ISs of size $\alpha(G)$ and $\alpha(G)-1$ (P2+SPT"),
                 ]):
                 datafile = "../../benchmarks/data/"+prefix+"-r3-"+device+".dat"
                 for device in ["CPU", "GPU"]:
