@@ -1359,6 +1359,9 @@ For an edge $(u, v)$, we define an edge tensor as a matrix labelled by $(c_u, c_
 The number of possible colorings can be obtained by contracting this tensor network by setting $r_v, g_v$ and $b_v$ to $1$.
 By designing generic types as tensor elements, one can get other properties.
 Similarly, one can also define the $k$-coloring problem on edges by switching the roles of edges and vertices.
+Let $x_{\langle i,j\rangle} = x$, we have a graph polynomial,
+where its $k$th coefficient is the number of coloring with $k$ bonds are satisfied.
+If a graph is colorable, the maximum order of this polynomial should be equal to the number of edges in this graph.
 
 \subsection{Max-Cut problem}
 The Max-Cut problem is also known as the boolean spin glass problem.
@@ -1371,7 +1374,7 @@ Then the Max-Cut problem can be encoded to tensor networks by mapping an edge $(
     \end{matrix}\right),
 \end{equation}
 where variable $x_{\langle i, j\rangle}$ represents a cut on edge $(i, j)$ or a domain wall of an Ising spin glass.
-Similar to other problems, we can define a polynomial with edge variables by setting $x_{\langle i, j\rangle} = x$,
+Let $x_{\langle i,j\rangle} = x$, we have a graph polynomial similar to previous ones,
 where its $k$th coefficient is two times the number of configurations of cut size $k$.
 
 \subsection{Dominating Set}
@@ -1389,26 +1392,33 @@ where $w_v$ is the weight of vertex $v$.
 This tensor means if both $v$ and its neighbouring vertices are not in $D$, i.e., $s_1=s_2=\ldots=s_{|N(v)|}=s_v=0$,
 this configuration is forbidden because $v$ is not adjacent to any member in the set.
 otherwise, if $v$ is in $D$, it has a contribution $x_v^{w_v}$ to the final result.
+The graph polynomial for the dominating set problem is known as the domination polynomial~\cite{Alikhani2009},
+which is defined as
+\begin{equation}
+D(G, x) = \sum_{k=0}^{\gamma(G)} d_k x^k,
+\end{equation}
+where $d_k$ is the number of dominating sets of size $k$ in graph $G=(V, E)$.
 
 \subsection{Satisfiability Problem}
 We can contruct a satisfiability problem to solve the above problem.
-To generate a tensor network, we map a boolean variable $x$ and its negation $\neg x$ to a degree of freedom (label) $s_x \in \{0, 1\}$,
-where 0 stands for variable $x$ having value \texttt{false} while 1 stands for having value \texttt{true}.
-Then we map a clause to a tensor. For example, a clause $\neg x \vee y \vee \neg z$ can be mapped to a tensor labeled by $(s_x, s_y, s_z)$.
+To generate a tensor network, we map a boolean variable $a$ and its negation $\neg a$ to a degree of freedom (label) $s_a \in \{0, 1\}$,
+where 0 stands for variable $a$ having value \texttt{false} while 1 stands for having value \texttt{true}.
+Then we map a clause to a tensor. For example, a clause $\neg a \vee b \vee \neg c$ can be mapped to a tensor labeled by $(s_a, s_b, s_c)$.
 \begin{equation}
 C = \left(\begin{matrix}
 \left(\begin{matrix}
-x & x \\
-x & x
+x & x_{b} \\
+x_a & x_{ab}
 \end{matrix}\right) \\
 \left(\begin{matrix}
-x & x \\
-1 & x
+x_{c} & x_{bc} \\
+1 & x_{abc}
 \end{matrix}\right)
 \end{matrix}\right).
 \end{equation}
 There is only one entry $(s_x, s_y, s_z) = (1, 0, 1)$ that makes this clause unsatisfied.
 If we contract this tensor network, we will get a multiplicative factor $x$ whenever there is a clause satisfied.
+Let $x_{ab\ldots} = x$, then we can get a polynomial that its $k$-th coefficients gives us the number of assignments with $k$ clauses satisfied.
 
 \subsection{Set packing}
 Set packing is the hypergraph generalization of the maximum independent set problem, where a set corresponds to a vertex and an element corresponds to a hyperedge.
