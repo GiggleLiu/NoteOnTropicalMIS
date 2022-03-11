@@ -13,11 +13,11 @@ function case_r3(n, k=3; seed=2, maxsc)
     @assert length(connected_components(graph)) == 1  # connected graph
     # optimize the contraction order using KaHyPar + Greedy
     optcode = Independence(graph; optimizer=TreeSA(sc_target=0, sc_weight=1.0, ntrials=10, βs=0.01:0.05:25.0, niters=20, rw_weight=2.0), simplifier=MergeGreedy())
-    tw = timespace_complexity(optcode)[2]
+    tw = timespacereadwrite_complexity(optcode)[2]
     @info "n = $n, tw = $tw"
     if tw > maxsc
         optcode = Independence(graph; optimizer=TreeSA(sc_target=maxsc, sc_weight=1.0, ntrials=10, βs=0.01:0.05:25.0, niters=20, rw_weight=2.0, nslices=Int(tw-maxsc)), simplifier=MergeGreedy())
-        tw = timespace_complexity(optcode)[2]
+        tw = timespacereadwrite_complexity(optcode)[2]
         @info "sliced: n = $n, tw = $tw"
     end
     return optcode
@@ -44,10 +44,10 @@ end
 
 const property_dict = Dict{String, Any}(
         "config_max" => SingleConfigMax(),
-        "config_max_(bounded)" => SingleConfigsMax(bounded=true),
+        "config_max_(bounded)" => SingleConfigMax(bounded=true),
         "configs_max_(bounded)" => ConfigsMax(bounded=true),
         "counting_max" => CountingMax(),
-        "counting_max2" => CountingMax2(),
+        "counting_max2" => CountingMax(2),
         "counting_sum" => CountingAll(),
         "size_max" => SizeMax(),
         "counting_all_(fft)" => GraphPolynomial(method=:fft),
@@ -56,14 +56,14 @@ const property_dict = Dict{String, Any}(
         "configs_all" => ConfigsAll(),
         "configs_max2" => ConfigsMax(2; bounded=false),
         "counting_all_(finitefield)" => GraphPolynomial(method=:finitefield),
-        "configs_max2_tree" => ConfigsMax2(; bounded=false, tree_storage=true),
+        "configs_max2_tree" => ConfigsMax(2; bounded=true, tree_storage=true),
         "spectrum_max100" => SizeMax(100)
        )
  
 
 function runcase(cases; task, usecuda = false)
     property = property_dict[task]
-    run_benchmarks([("n$(10*i)", ()->(usecuda ? (CUDA.@sync solve(case, property; usecuda=true)) : solve(case, property; usecuda=false))) for (i, case) in enumerate(cases)],
+    run_benchmarks([("n$(10*i)", ()->(usecuda ? (CUDA.@sync solve(case, property; usecuda=true)) : solve((@show length(GraphTensorNetworks.labels(case.code)); case), property; usecuda=false))) for (i, case) in enumerate(cases)],
                    output_file=joinpath(@__DIR__, "data", "$(task)-r3-$(usecuda ? "GPU" : "CPU").dat"))
 end
 
@@ -102,10 +102,10 @@ end
         cases = generate_instances(180, 27)
         tasks = ("counting_all_(finitefield)",)
     elseif group==8
-        cases = generate_instances(200, 27)
+        cases = generate_instances(160, 27)
         tasks = ("spectrum_max100",)
     elseif group==9
-        cases = generate_instances(200, 27)
+        cases = generate_instances(160, 27)
         tasks = ("configs_max2_tree",)
     end
     for TASK in tasks
