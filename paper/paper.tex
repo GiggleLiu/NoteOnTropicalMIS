@@ -255,7 +255,7 @@ wireless networks and telecommunication, and computer vision, etc.~\cite{Butenko
 
 The most studied version of the above problems is finding the maximum/minimum set size and one of the sets of that size satisfying the contraints,
 while many of them belong to the hardness category NP-hard~\cite{Hastad1996}, i.e. it is unlikely to solve them in a polynomial time.
-In this paper, we focus on the less studied \textit{property} computation which can be harder but is crutial towards understanding a problem.
+In this paper, we focus on the less studied \textit{property} computation which can be harder but is crutial towards understanding a hard problem.
 Here, the \textit{property} refers to a class of quantities that not only include the maximum/minimum set size,
 but also include the number of sets at a give size, enumeration of all sets at a give size or direct sampling of such sets when they are not enumeratable.
 For the weighted version of the above problems, it also includes finding largest/smallest $k$ sets and their sizes.
@@ -268,23 +268,19 @@ Tensor network is also known as the sum product network or einsum in different f
 where its tensor element types are typically restricted to standard number types such as real numbers and complex numbers.
 We extend this concept to generic tensor network by generalizing the tensor element type to any type being a commutative semiring.
 %Traditional algorithms for finding the MIS size include the branching algorithms~\cite{Tarjan1977, Robson1986} and dynamic programming based algorithms~\cite{Courcelle1990, Fomin2013}.
-Given a good contraction order, contracting a tensor network in general has time complexity $2^{{\rm tw}(G)}$~\cite{Markov2008}, where ${\rm tw}(G)$ is the treewidth of graph $G$.
+Given a good contraction order, the time complexity of contracting a tensor network is $2^{{\rm tw}(G)}$~\cite{Markov2008}, where ${\rm tw}(G)$ is the treewidth of graph $G$.
 Recent progress in simulating quantum circuits with random tensor networks~\cite{Gray2021, Pan2021, Kalachev2021} enables us to find such a good contraction order for a tensor network with thousands of tensors in a reasonable time.
-Although this time complexity is just on par with the dynamic programming algorithms~\cite{Courcelle1990, Fomin2013} for solving the maximum size and one of the best set, tensor network has richer algebraic structure, and this structure is crutial for computing properties.
+Although this time complexity is just on par with the dynamic programming algorithms~\cite{Courcelle1990, Fomin2013} for solving the maximum size and one of the best set, tensor network has richer algebraic structure, and this structure is crutial for property computation.
 %For sparse graphs, the treewidth is usually much smaller than the number of vertices~\cite{Fomin2006}. Our algorithms, on the other hand, are much more versatile than traditional methods and can be used to compute many other properties than just the MIS size.
 
-To avoid the discussion being overly diversed, we limit the target problem to the independent set problem,
-and discuss other combinatorial optimization problems in \App{sec:otherproblems}.
-For an undirected graph $G = (V,E)$, an independent set $I \subseteq V$ is a set of vertices that for any vertex pair $u,v \in I$, $(u, v) \not\in E$,
-and we denote the maximum independent set (MIS) size $\alpha(G) \equiv \max_{I}|I|$. 
 %The independent set problem is related to physics applications such as in the hard-core lattice gas model~\cite{Dyre2016, Fernandes2007}
 %in statistical mechanics and the Rydberg hamiltonian with neutral atoms~\cite{Pichler2018, Ebadi2022};
 %Property computation can, for example, be used to understand phase transitions~\cite{Dyre2016, Fernandes2007},
 %to identify harder graphs in an ensemble of graphs~\cite{Ebadi2022} and to analyze the presence of the overlap gap property~\cite{Gamarnik2013, Gamarnik2019} related to the clustering phenomenon of large independent sets.
-Meanwhile, finding the number of independent sets of a given size is equivalent to computing the coefficients of the independence polynomial~\cite{Harvey2018,Ferrin2014}.
-which is a useful graph characteristic related to, for example, the partition functions~\cite{Lee1952,Yang1952} and Euler characteristics of the independence complex~\cite{Bousquet2008, Levit2009}.
 %However, there is a lack of general and versatile tool to compute these different properties of independent sets.
 
+To avoid the discussion being unnecessaryly diversed, we mainly focus on the independent set problem,
+and discuss other combinatorial optimization problems in \App{sec:otherproblems}.
 The paper is organized as follows.
 We first introduce the basic concepts of tensor networks and generic programming in \Sec{sec:tn} and \Sec{sec:generic}.
 Then we show how to reduce an independent set problem to a tensor network contraction problem \Sec{sec:tnmap}
@@ -357,7 +353,7 @@ Its hypergraph representation is shown below, where we use different colors to r
 \section{Generic programming tensor contractions}\label{sec:generic}
 In previous works relating tensor networks and combinatoric problems~\cite{Kourtis2019, Biamonte2017},
 the elements in the tensor networks are limited to standard number types such as floating point numbers and integers.
-Owning to the development of modern compiling technology, we no longer need to limit our imagination to standard number types.
+Owning to the development of modern compiling technology, we no longer need to re our imagination to standard number types.
 One of the key concepts that push the technology forward is called generic programming:
 
 \begin{definition}[Generic programming ~\cite{Stepanov2014}]
@@ -422,8 +418,10 @@ The Table~\ref{tbl:generictypes} summarizes those properties that can be compute
 
 \section{Tensor network representation of independent sets} \label{sec:tnmap}
 This section is about reducing the independent set problem to a tensor network contraction problem,
-for people with physics background, it is suggested to use an alternative approach described in \App{sec:energymodel} to understand this construction and the independence polynomial from the partition function perspective.
-Let $G=(V,E)$ be a weighted graph with each vertex $i\in V$ being associated with a weight $w_i$.
+for people with physics background, it is suggested to use an alternative approach described in \App{sec:energymodel} to understand this construction from the partition function perspective.
+Let $G=(V,E)$ be a weighted undirected graph with each vertex $i\in V$ being associated with a weight $w_i$.
+An independent set $I \subseteq V$ is a set of vertices that for any vertex pair $u,v \in I$, $(u, v) \not\in E$,
+and we denote the maximum independent set (MIS) size $\alpha(G) \equiv \max_{I}|I|$. 
 We map a vertex $i\in V$ to a label $s_i \in \{0, 1\}$ of dimension $2$ in a tensor network, where we use $0$ ($1$) to denote a vertex is absent (present) in the set.
 For each label $s_i$, we defined a parametrized rank-one vertex tensor $W(x_i, w_i)$ as
 \begin{equation}
@@ -570,7 +568,8 @@ One can easily check the maximum tensor during computing is rank 2, and the tota
 \end{example}
 
 \section{Independence polynomial}\label{sec:indpoly}
-In the special case of $x_i = x$ and $w_i = 1$, the tensor network contraction result directly corresponds to the independence polynomial.
+In the special case of $x_i = x$ and $w_i = 1$, the tensor network contraction result directly corresponds to the independence polynomial~\cite{Harvey2018,Ferrin2014}.
+which is a useful graph characteristic related to, for example, the partition functions~\cite{Lee1952,Yang1952} and Euler characteristics of the independence complex~\cite{Bousquet2008, Levit2009}.
 The independence polynomial is an important graph polynomial that contains the counting information of independent sets. It is defined as
 \begin{equation}\label{eq:idpdef}
 I(G, x) = \sum_{k=0}^{\alpha(G)} a_k x^k,
