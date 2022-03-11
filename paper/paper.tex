@@ -403,7 +403,7 @@ The Table~\ref{tbl:generictypes} summarizes those properties that can be compute
    {$\mathbbm{R}$}     & {Counting of all independent sets} \\
    {Polynomial} (\Eq{eq:polynomial})     & {Independence polynomial} \\
    {Tropical (\Eq{eq:tropical})}    & {Maximum independent set size} \\
-   {Extended Tropical of order $k$ (\Eq{eq:ext-tropical})}    & {Largest $k$ independent set sizes} \\
+   {Extended tropical of order $k$ (\Eq{eq:ext-tropical})}    & {Largest $k$ independent set sizes} \\
    {Polynomial truncated to $k$-th order (\Eq{eq:countingtropical} and \Eq{eq:max2poly})}     & {$k$ largest independent sizes and their counting} \\
    {Set} (\Eq{eq:set})     & {Enumeration of independent sets} \\
    {Sum Product Tree} (\Eq{eq:expr})     & {Sampling of independent sets} \\
@@ -801,17 +801,17 @@ Although one is probably unable to enumerate the configurations represented by t
 but he can directly sample configurations from this tree.
 This is because once we have this sum-product representation of the configuration space,
 one can compute the number of configurations in each branch rigorously and efficiently.
-One can generate a random number and descent this expression tree by a probability proportional to the size of left and right branches.
+One can generate a random number and descend this expression tree to left or right sibling with probability decided by the size of each branch while doing the computation specified by the first field.
 
 \section{Weighted graphs}\label{sec:weighted}
 In the previous discussion, we have limited ourselves to unweighted graphs.
 For integer weighted graphs, all results still holds,
 while for general weighted graphs, the independence polynomial is not computable anymore.
-For general weighted graphs, we are more interested to know the total weights of maximum $k$ independent set sizes and their configurations.
+For general weighted graphs, we are more interested to know the $k$ most weighted sets and their sizes.
 Hence we define the extended tropical numbers as the following
 
 \begin{equation}
-\eqname{Tk}
+\eqname{T$k$}
 \begin{split}
     s \oplus t &= \texttt{largest}(s \cup t, k)\\
     s \odot t &= \texttt{largest}(\{a+b| a \in s, b\in t\}, k)\\
@@ -822,19 +822,19 @@ Hence we define the extended tropical numbers as the following
 where $\texttt{largest}(s, k)$ means truncating the set by only keeping $k$ largest values in the set $s$.
 The vertex tensor and edge tensor become
 \begin{equation}
-    W^{\rm Tk}(-\infty^{\otimes k-1} \otimes 1) = \left(\begin{matrix}
+    W^{{\rm T}k}(-\infty^{\otimes k-1} \otimes 1) = \left(\begin{matrix}
         \mymathbb{1} \\
         -\infty^{\otimes k-1} \otimes 1
     \end{matrix}\right),   
     \qquad
-        B^{\rm Tk} = \left(\begin{matrix}
+        B^{{\rm T}k} = \left(\begin{matrix}
         \mymathbb{1}  & \mymathbb{1} \\
         \mymathbb{1} & \mymathbb{0}
     \end{matrix}\right).
 \end{equation}
 
-Similar to the Tropical numbers, we can attach a bit string sampler algebra \Eq{eq:singleconfig} to it for finding the configurations of each size.
-Note here, the $\odot$ of configuration sampler is not used so that the resulting configurations are complete.
+Similar to the tropical numbers, we can combine it with a bit string sampler (\Eq{eq:singleconfig}) for finding the configuration of each size.
+Note here, the $\odot$ of configuration sampler is not used so that the resulting configurations are deterministic and complete.
 
 \section{Performance benchmarks}\label{sec:benchmark}
 We run a single thread benchmark on CPU Intel(R) Xeon(R) CPU E5-2686 v4 @ 2.30GHz,
@@ -844,6 +844,7 @@ The graphs that we use in benchmarks are random three regular graphs,
  a typical type of sparse graphs that has a small treewidth that asymptotically smaller than $|V|/6$~\cite{Fomin2006}.
 In this benchmark, we do not include traditional algorithms for finding the MIS size like the branching algorithms~\cite{Tarjan1977, Robson1986} and dynamic programming based algorithms~\cite{Courcelle1990, Fomin2013},
 because to the best of our knowledge, most of the properties mentioned in this paper are not computable within these frameworks.
+The main goal of this section is to show the relative timing for computing different properties.
 
 \begin{figure} 
     \centering
@@ -852,9 +853,12 @@ because to the best of our knowledge, most of the properties mentioned in this p
     The time in these plots only includes tensor network contraction, without taking into account the contraction order finding and just-in-time compilation time.
     Legends are properties, algebra and devices that we used in the computation; one can find the corresponding computed property in \Tbl{tbl:generictypes}.
     (a) time and space complexity versus the number of vertices for the benchmarked graphs.
-    (b) The computing time for calculating the MIS size and for counting of the number of all independent sets (ISs), the number of MISs, and the number of independent sets having size $\alpha(G)$ and $\alpha(G)-1$.
+    (b) The computing time for calculating the MIS size and for counting of the number of all independent sets (ISs), the number of MISs,
+        the number of independent sets having size $\alpha(G)$ and $\alpha(G)-1$, and finding $100$ largest sets sizes.
     (c) The computing time for calculating the independence polynomials with different approaches.
-    (d) The computing time for configuration enumeration, including the enumeration of all independent set configurations, a single MIS configuration, all MIS configurations, all independent set configurations having size $\alpha(G)$ and $\alpha(G)-1$,  with or without bounding the enumeration space.
+    (d) The computing time for configuration enumeration, including the enumeration of all independent set configurations, a single MIS configuration, all MIS configurations,
+    all independent set configurations having size $\alpha(G)$ and $\alpha(G)-1$, and all independent set configurations having size $\alpha(G)$ and $\alpha(G)-1$ in the sum product tree format,
+    with or without bounding the enumeration space.
     }
     \label{fig:benchmark}
 \end{figure}
