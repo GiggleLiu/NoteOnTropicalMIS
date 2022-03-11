@@ -403,16 +403,16 @@ The Table~\ref{tbl:generictypes} summarizes those properties that can be compute
 \ra{1.3}
         \begin{tabularx}{\textwidth}{sb}\toprule
             \hline
-   \textbf{element type}     & \textbf{property to compute} \\
-   {$\mathbbm{R}$}     & {the number of independent sets} \\
-   {Polynomial} (\Eq{eq:polynomial})     & {independence polynomial} \\
-   {Tropical (\Eq{eq:tropical})}    & {MIS size} \\
-   {Polynomial truncated to highest order (\Eq{eq:countingtropical})}     & {MIS size and the number of MISs} \\
-   {Polynomial truncated to 2nd highest order} (\Eq{eq:max2poly})     & {the number of MISs and independent sets of size $\alpha(G)-1$} \\
-   {Set} (\Eq{eq:set})     & {enumeration of independent sets} \\
-   {Bit string} (\Eq{eq:singleconfig})     & {one independent set} \\
-   {Polynomial truncated to highest order combined with Bit string}     & {MIS size and one MIS} \\
-   {Polynomial truncated to highest order combined with Set} (\Eq{eq:countingtropicalset})    & {MIS size and all MISs} \\
+   \textbf{Element type}     & \textbf{Property to compute} \\
+   {$\mathbbm{R}$}     & {Counting of all independent sets} \\
+   {Polynomial} (\Eq{eq:polynomial})     & {Independence polynomial} \\
+   {Tropical (\Eq{eq:tropical})}    & {Maximum independent set size} \\
+   {Extended Tropical of order $k$ (\Eq{eq:ext-tropical})}    & {Largest $k$ independent set sizes} \\
+   {Polynomial truncated to $k$-th order (\Eq{eq:countingtropical} and \Eq{eq:max2poly})}     & {$k$ largest independent sizes and their counting} \\
+   {Set} (\Eq{eq:set})     & {Enumeration of independent sets} \\
+   {Sum Product Tree} (\Eq{eq:expr})     & {Sampling of independent sets} \\
+   {Polynomial truncated to highest order combined with Bit string} (\Eq{eq:singleconfig})     & {Maximum independent set size and one of such configurations} \\
+   {Polynomial truncated to $k$-th order combined with Set} (\Eq{eq:countingtropicalset})    & {$k$ largest independent set sizes and their enumeration} \\
             \bottomrule
         \end{tabularx}
     \caption{Tensor element types and the independent set properties that can be computed using them.}\label{tbl:generictypes}
@@ -815,6 +815,8 @@ Clearly, the vertex tensor and edge tensor become
     \end{matrix}\right).
 \end{equation}
 The contraction of the corresponding tensor network yields an enumeration of all MIS configurations.
+Direct implementing this algebra for configuration MISs might incur significant space overheads for keeping too many intermediate states not contributing to the final maximum independent sets,
+one can avoid this issue by using the bounding technique in \App{sec:bounding}.
 
 If one is interested in obtaining only a single MIS configuration, one can just keep a single configuration in the intermediate computations to save the computational effort.
 Here is a new algebra defined on the bit strings, replacing the sets of bit strings in \Eq{eq:set}, 
@@ -830,52 +832,7 @@ Here is a new algebra defined on the bit strings, replacing the sets of bit stri
 \end{equation}
 where the \texttt{select} function picks one of $\sigma$ and $\tau$ by some criteria to make the algebra commutative and associative, e.g. by picking the one with a smaller integer value.
 
-\subsection{Bounding the MIS enumeration space}
-\begin{figure}
-    \centering
-    \includegraphics[width=0.9\textwidth, trim={0cm 0cm 0cm 0cm}, clip]{figures/masktree.pdf}
-    \caption{Bounded enumeration of maximum independent sets. In these graphs, a circle is a tensor, an arrow specifies execution direction of a function and $\circ$ is the Hadamard (element-wise) multiplication. $\overline A$ means the boolean mask of $A$. (a) is the forward pass with algebra \Eq{eq:tropical} for computing $\alpha(G)$.
-     (b) is the backward pass for computing boolean gradients as masks.
-     (c) is the masked forward pass with algebra \Eq{eq:countingtropicalset} for enumerating configurations.}
-     \label{fig:bounding}
-\end{figure}
-
-When we use the algebra in \Eq{eq:countingtropicalset} to enumerate all MIS configurations, we find that the program stores significantly more intermediate configurations than necessary and thus incur significant overheads in space.
-To speed up the computation and reduce space overhead, we bound the searching space using the information from the computation of the MIS size $\alpha(G)$.
-As shown in \Fig{fig:bounding}, (a) we first compute the value of $\alpha(G)$ with tropical algebra and cache all intermediate tensors.
-(b) Then, we compute a boolean mask for each cached tensor, where we use a boolean true to represent a tensor element having a contribution to the MIS (i.e.\ with a non-zero gradient) and boolean false otherwise.
-(c) Finally, we perform masked tensor network contraction (i.e.\ discarding the unnecessary intermediate configurations) using the element type with the algebra in \Eq{eq:countingtropicalset} to obtain all MIS configurations.
-Note that these masks in fact correspond to tensor elements with non-zero gradients with respect to the MIS size; we compute these masks by back propagating the gradients.
-To derive the back-propagation rule for tropical tensor contraction,
-we first reduce the problem to finding the back-propagation rule of a tropical matrix multiplication $C = A B$.
-Since $ C_{ik} = \bigoplus_{j} \ A_{ij} \odot B_{jk} = \max_{j} \ A_{ij} \odot B_{jk}$ with tropical algebra, we have the following inequality
-\begin{equation}
-    A_{ij} \odot B_{jk} \leq C_{ik}.
-\end{equation}
-Here $\leq$ on tropical numbers are the same as the real-number algebra.
-The equality holds for some $j'$, which means $A_{ij'}$ and $B_{j'k}$ have contributions to $C_{ik}$.
-Intuitively, one can use this relation to identify elements with nonzero gradients in $A$ and $B$,
-but if doing this directly, one loses the advantage of using BLAS libraries~\cite{TropicalGEMM} for high performance.
-Since $A_{ij} \odot B_{jk} = A_{ij} + B_{jk}$, one can move $B_{jk}$ to the right hand side of the inequality: 
-\begin{equation}
-    A_{ij} \leq C_{ik} \odot B_{jk}^{\circ -1}
-\end{equation}
-where ${}^{\circ -1}$ is the element-wise multiplicative inverse on tropical algebra (which is the additive inverse on real numbers).
-The inequality still holds if we take the minimum over $k$: 
-\begin{equation}
-    A_{ij} \leq \min_{k}(C_{ik} \odot B_{jk}^{\circ -1}) = \left(\max_{k} \left(C_{ik}^{\circ -1} \odot B_{jk} \right) \right)^{\circ -1} = \left(\bigoplus_{k} \left(C_{ik}^{\circ -1} \odot B_{jk} \right) \right)^{\circ -1} = \left( C^{\circ-1} B^{\mathsf{T}} \right)^{\circ -1}_{ij}.
-\end{equation}
-On the right hand side, we transform the operation into a tropical matrix multiplication so that we can utilize the fast tropical BLAS routines~\cite{TropicalGEMM}.
-Again, the equality holds if and only if the element $A_{ij}$ has a contribution to $C$ (i.e.\ having a non-zero gradient).
-Let the gradient mask for $C$ be $\overline C$; the back-propagation rule for gradient masks reads
-\begin{equation}\label{eq:adrule}
-\overline{A}_{ij} = \delta \left(A_{ij}, \left( \left( C^{\circ-1} \circ \overline C \right) B^{\mathsf{T}} \right)_{ij}^{\circ -1} \right),
-\end{equation}
-where $\delta$ is the Dirac delta function that returns one if two arguments have the same value and zero otherwise, $\circ$ is the element-wise product, boolean false is treated as the tropical number $\mymathbb{0}$, and boolean true is treated as the tropical number $\mymathbb{1}$.
-This rule defined on matrix multiplication can be easily generalized to tensor contraction by replacing the matrix multiplication between $C^{\circ-1} \circ \overline C$ and $B^{\mathsf{T}}$ by a tensor contraction.
-With the above method, one can significantly reduce the space needed to store the intermediate configurations by setting the tensor elements masked false to zero during contraction.
-
-\subsection{Extremely large MIS enumeration space}
+\subsection{Sampling extremely large configuration space}
 In many times, the number of configurations is too large to fit into any type of storage.
 Then instead of using the set algebra, we can use a binary sum-product tree as a compact representation of the results.
 We use a quadruple $(type, data, left, right)$ to represent a node in the tree, where $type$ is one of
@@ -883,13 +840,25 @@ $\{\texttt{LEAF}, \texttt{ZERO}, \texttt{SUM}, \texttt{PROD}\}$, $data$ is a bit
 $left$ and $right$ are left and right operands of \texttt{SUM} and \texttt{PROD} nodes.
 
 \begin{equation}
-\eqname{EXPR}
+\eqname{SUMPROD}
 \begin{split}
     s \oplus t &= (\texttt{SUM}, /, s, t)\\
     s \odot t &= (\texttt{PROD}, /, s, t)\\
     \mymathbb{0} &= (\texttt{ZERO}, /, /, /)\\
     \mymathbb{1} &= (\texttt{LEAF}, 0^{\otimes |V|}, /, /).
 \end{split}\label{eq:expr}
+\end{equation}
+The vertex tensor and edge tensor become
+\begin{equation}
+    W^{\rm SUMPROD}((\texttt{LEAF},\boldsymbol{e}_i,/,/)) = \left(\begin{matrix}
+        \mymathbb{1} \\
+        (\texttt{LEAF},\boldsymbol{e}_i,/,/)
+    \end{matrix}\right),   
+    \qquad
+        B^{\rm SUMPROD} = \left(\begin{matrix}
+        \mymathbb{1}  & \mymathbb{1} \\
+        \mymathbb{1} & \mymathbb{0}
+    \end{matrix}\right).
 \end{equation}
 
 This algebra is a commutative semiring because we define the equivalence of two sum-product trees by comparing their expanded (using \Eq{eq:set}) forms, rather than their storages.
@@ -916,7 +885,20 @@ Hence we define the extended tropical numbers as the following
 \end{split}\label{eq:ext-tropical}
 \end{equation}
 where $\texttt{largest}(s, k)$ means truncating the set by only keeping $k$ largest values in the set $s$.
-Similarly, we can attach a bit string sampler algebra \Eq{eq:singleconfig} to it for finding the configuration for each size.
+The vertex tensor and edge tensor become
+\begin{equation}
+    W^{\rm Tk}(-\infty^{\otimes k-1} \otimes 1) = \left(\begin{matrix}
+        \mymathbb{1} \\
+        -\infty^{\otimes k-1} \otimes 1
+    \end{matrix}\right),   
+    \qquad
+        B^{\rm Tk} = \left(\begin{matrix}
+        \mymathbb{1}  & \mymathbb{1} \\
+        \mymathbb{1} & \mymathbb{0}
+    \end{matrix}\right).
+\end{equation}
+
+Similar to the Tropical numbers, we can attach a bit string sampler algebra \Eq{eq:singleconfig} to it for finding the configurations of each size.
 Note here, the $\odot$ of configuration sampler is not used so that the resulting configurations are complete.
 
 \section{Performance benchmarks}\label{sec:benchmark}
@@ -1005,12 +987,15 @@ In this paper, we introduce a method to use generic programming tensor networks 
     \node[draw,fill=lime!80,fill opacity=1, text opacity=1.0,ellipse,minimum width=2cm, minimum height=1cm,inner sep=0pt] at (0, 2.5) (R) {$\mathbbm{R}$};
     \def\dx{-3};
     \node[draw,fill=teal!50,fill opacity=1, text opacity=1.0,ellipse,minimum width=5cm, minimum height=3cm,inner sep=0pt] at (\dx, 0) (PN) {\hspace{-3.5cm}Polynomial};
-    \node[draw,fill=brown!75,fill opacity=1, text opacity=1.0,ellipse,minimum width=3.5cm, minimum height=1.2cm,inner sep=0pt] at (\dx, 0.7) (P1) {\hspace{-0.7cm}Highest order};
-    \node[draw,fill=brown!40,fill opacity=1, text opacity=1.0,ellipse,minimum width=3.5cm, minimum height=0.7cm,inner sep=0pt] at (\dx, -0.4) (P2) {\hspace{-0.7cm}2nd highest order};
+    \node[draw,fill=brown!75,fill opacity=1, text opacity=1.0,ellipse,minimum width=3.5cm, minimum height=1.0cm,inner sep=0pt] at (\dx, 0.7) (P1) {\hspace{-1.0cm}Highest order};
+    \node[draw,fill=brown!40,fill opacity=1, text opacity=1.0,ellipse,minimum width=3.5cm, minimum height=1.0cm,inner sep=0pt] at (\dx, -0.4) (P2) {\hspace{-0.8cm}2nd highest order};
     \node[draw,fill=brown,fill opacity=1, text opacity=1.0,ellipse,minimum width=0.8cm, minimum height=0.3cm,inner sep=0pt] at (\dx, 1.0) (T) {};
+    \node[draw,fill=brown!50,fill opacity=1, text opacity=1.0,ellipse,minimum width=0.8cm, minimum height=0.3cm,inner sep=0pt] at (\dx, -0.1) (T2) {};
     \node at (\dx, -1.2) {$\ldots$};
-    \node[above of=2] at (T) (textT) {Tropical};
+    \node[above = 1cm] at (T) (textT) {Tropical};
+    \node[below = 2cm, left=4cm] (textT2) {Extended Tropical};
     \draw[black,-latex] (textT) -- (T);
+    \draw[black,-latex] (textT2) -- (T2);
 
     % set and set sampler
     \node[draw,fill=yellow,fill opacity=0.5, text opacity=1.0,ellipse,minimum width=5cm, minimum height=3cm,inner sep=0pt] at (0, 0) (SN) {};
@@ -1397,6 +1382,52 @@ To solve the set packing problem, we can just remove the rank-2 restriction of t
         0, & \text{otherwise}.
     \end{cases}
 \end{equation}
+
+\section{Bounding the MIS enumeration space}\label{sec:bounding}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.9\textwidth, trim={0cm 0cm 0cm 0cm}, clip]{figures/masktree.pdf}
+    \caption{Bounded enumeration of maximum independent sets. In these graphs, a circle is a tensor, an arrow specifies execution direction of a function and $\circ$ is the Hadamard (element-wise) multiplication. $\overline A$ means the boolean mask of $A$. (a) is the forward pass with algebra \Eq{eq:tropical} for computing $\alpha(G)$.
+     (b) is the backward pass for computing boolean gradients as masks.
+     (c) is the masked forward pass with algebra \Eq{eq:countingtropicalset} for enumerating configurations.}
+     \label{fig:bounding}
+\end{figure}
+
+When we use the algebra in \Eq{eq:countingtropicalset} to enumerate all MIS configurations, we find that the program stores significantly more intermediate configurations than necessary and thus incur significant overheads in space.
+To speed up the computation and reduce space overhead, we bound the searching space using the information from the computation of the MIS size $\alpha(G)$.
+As shown in \Fig{fig:bounding}, (a) we first compute the value of $\alpha(G)$ with tropical algebra and cache all intermediate tensors.
+(b) Then, we compute a boolean mask for each cached tensor, where we use a boolean true to represent a tensor element having a contribution to the MIS (i.e.\ with a non-zero gradient) and boolean false otherwise.
+(c) Finally, we perform masked tensor network contraction (i.e.\ discarding the unnecessary intermediate configurations) using the element type with the algebra in \Eq{eq:countingtropicalset} to obtain all MIS configurations.
+Note that these masks in fact correspond to tensor elements with non-zero gradients with respect to the MIS size; we compute these masks by back propagating the gradients.
+To derive the back-propagation rule for tropical tensor contraction,
+we first reduce the problem to finding the back-propagation rule of a tropical matrix multiplication $C = A B$.
+Since $ C_{ik} = \bigoplus_{j} \ A_{ij} \odot B_{jk} = \max_{j} \ A_{ij} \odot B_{jk}$ with tropical algebra, we have the following inequality
+\begin{equation}
+    A_{ij} \odot B_{jk} \leq C_{ik}.
+\end{equation}
+Here $\leq$ on tropical numbers are the same as the real-number algebra.
+The equality holds for some $j'$, which means $A_{ij'}$ and $B_{j'k}$ have contributions to $C_{ik}$.
+Intuitively, one can use this relation to identify elements with nonzero gradients in $A$ and $B$,
+but if doing this directly, one loses the advantage of using BLAS libraries~\cite{TropicalGEMM} for high performance.
+Since $A_{ij} \odot B_{jk} = A_{ij} + B_{jk}$, one can move $B_{jk}$ to the right hand side of the inequality: 
+\begin{equation}
+    A_{ij} \leq C_{ik} \odot B_{jk}^{\circ -1}
+\end{equation}
+where ${}^{\circ -1}$ is the element-wise multiplicative inverse on tropical algebra (which is the additive inverse on real numbers).
+The inequality still holds if we take the minimum over $k$: 
+\begin{equation}
+    A_{ij} \leq \min_{k}(C_{ik} \odot B_{jk}^{\circ -1}) = \left(\max_{k} \left(C_{ik}^{\circ -1} \odot B_{jk} \right) \right)^{\circ -1} = \left(\bigoplus_{k} \left(C_{ik}^{\circ -1} \odot B_{jk} \right) \right)^{\circ -1} = \left( C^{\circ-1} B^{\mathsf{T}} \right)^{\circ -1}_{ij}.
+\end{equation}
+On the right hand side, we transform the operation into a tropical matrix multiplication so that we can utilize the fast tropical BLAS routines~\cite{TropicalGEMM}.
+Again, the equality holds if and only if the element $A_{ij}$ has a contribution to $C$ (i.e.\ having a non-zero gradient).
+Let the gradient mask for $C$ be $\overline C$; the back-propagation rule for gradient masks reads
+\begin{equation}\label{eq:adrule}
+\overline{A}_{ij} = \delta \left(A_{ij}, \left( \left( C^{\circ-1} \circ \overline C \right) B^{\mathsf{T}} \right)_{ij}^{\circ -1} \right),
+\end{equation}
+where $\delta$ is the Dirac delta function that returns one if two arguments have the same value and zero otherwise, $\circ$ is the element-wise product, boolean false is treated as the tropical number $\mymathbb{0}$, and boolean true is treated as the tropical number $\mymathbb{1}$.
+This rule defined on matrix multiplication can be easily generalized to tensor contraction by replacing the matrix multiplication between $C^{\circ-1} \circ \overline C$ and $B^{\mathsf{T}}$ by a tensor contraction.
+With the above method, one can significantly reduce the space needed to store the intermediate configurations by setting the tensor elements masked false to zero during contraction.
+
 
 \section{The discrete Fourier transform approach to computing the independence polynomial}\label{app:fft}
 
