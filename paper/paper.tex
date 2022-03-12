@@ -1329,12 +1329,12 @@ Then we define a tensor of rank $d(v) = |N(v)|$ on vertex $v$ such that,
 \end{equation}
 and a tensor of rank $1$ on the bond
 \begin{equation}
-    B_{\langle v, w\rangle} = \begin{cases}
-    1, & \langle v, w \rangle = 0 \\
-    x, & \langle v, w \rangle = 1,
+    B(w_{\langle u,v \rangle})_{\langle u, v\rangle} = \begin{cases}
+    1, & \langle u, v \rangle = 0 \\
+    x^{w_{\langle u,v \rangle}}_{\langle u, v\rangle}, & \langle u, v \rangle = 1,
 \end{cases}
 \end{equation}
-where label $\langle v, w \rangle$ is equivalent to $\langle w,v\rangle$.
+where label $\langle v, u \rangle$ is equivalent to $\langle u,v\rangle$.
 Here, a vertex tensor specifies the restriction that a vertex cannot be matched by more than one edge, while an edge tensor contributes the variable in the polynomial.
 
 \subsection{$k$-Coloring}
@@ -1350,16 +1350,16 @@ For a vertex $v$, we define the degrees of freedom $c_v\in\{0,1,2\}$ and a verte
 where $r_v$, $g_v$ and $b_v$ are colors used to label the configurations.
 For an edge $(u, v)$, we define an edge tensor as a matrix labelled by $(c_u, c_v)$ to specify the constraint
 \begin{equation}
-    B(x) = \left(\begin{matrix}
-        0 & x & x\\
-        x & 0 & x\\
-        x & x & 0
-    \end{matrix}\right).
+    B(x, w_{uv}) = \left(\begin{matrix}
+        0 & x^{w_{uv}} & x^{w_{uv}}\\
+        x^{w_{uv}} & 0 & x^{w_{uv}}\\
+        x^{w_{uv}} & x^{w_{uv}} & 0
+    \end{matrix}\right),
 \end{equation}
-The number of possible colorings can be obtained by contracting this tensor network by setting $r_v, g_v$ and $b_v$ to $1$.
+where weights are associated with edges. The number of possible colorings can be obtained by contracting this tensor network by setting $r_v, g_v$ and $b_v$ to $1$.
 By designing generic types as tensor elements, one can get other properties.
 Similarly, one can also define the $k$-coloring problem on edges by switching the roles of edges and vertices.
-Let $x_{\langle i,j\rangle} = x$, we have a graph polynomial,
+Let $x^{w_{uv}} = x$, we have a graph polynomial,
 where its $k$th coefficient is the number of coloring with $k$ bonds are satisfied.
 If a graph is colorable, the maximum order of this polynomial should be equal to the number of edges in this graph.
 
@@ -1368,13 +1368,13 @@ The Max-Cut problem is also known as the boolean spin glass problem.
 For a vertex $v\in V$, we define a boolean degree of freedom $s_v\in\{0, 1\}$.
 Then the Max-Cut problem can be encoded to tensor networks by mapping an edge $(i,j)\in E$ to an edge matrix labelled by $s_is_j$
 \begin{equation}
-    B(x_{\langle i, j\rangle}) = \left(\begin{matrix}
-        1 & x_{\langle i, j\rangle}\\
-        x_{\langle i, j\rangle} & 1
+    B(x, w_{\langle i, j\rangle}) = \left(\begin{matrix}
+        1 & x_{j}^{w_{\langle i,j\rangle}}\\
+        x_{i}^{w_{\langle i,j\rangle}} & 1
     \end{matrix}\right),
 \end{equation}
-where variable $x_{\langle i, j\rangle}$ represents a cut on edge $(i, j)$ or a domain wall of an Ising spin glass.
-Let $x_{\langle i,j\rangle} = x$, we have a graph polynomial similar to previous ones,
+where variables $x_i$ and $x_j$ represents a cut on edge $(i, j)$ or a domain wall of an Ising spin glass.
+Let $x_i^{w_{\langle i,j\rangle}} = x_j^{w_{\langle i,j\rangle}} = x$, we have a graph polynomial similar to previous ones,
 where its $k$th coefficient is two times the number of configurations of cut size $k$.
 
 \subsection{Dominating Set}
@@ -1382,10 +1382,10 @@ Let $G=(V,E)$ be the target graph that we want to solve.
 The tensor network representation map a vertex $v\in V$ to a boolean degree of freedom $s_v\in\{0, 1\}$.
 We defined the restriction on a vertex and its neighbouring vertices $N(v)$:
 \begin{equation}
-T(x_v)_{s_1,s_2,\ldots,s_{|N(v)|},s_v} = \begin{cases}
-    0 & s_1=s_2=\ldots=s_{|N(v)|}=s_v=0,\\
-    1 & s_v=0,\\
-    x_v^{w_v} & \text{otherwise},
+T(x, w_v)_{s_1,s_2,\ldots,s_{|N(v)|},s_v} = \begin{cases}
+    0_v & s_1=s_2=\ldots=s_{|N(v)|}=s_v=0,\\
+    1_v & s_v=0,\\
+    x^{w_v} & \text{otherwise},
 \end{cases}
 \end{equation}
 where $w_v$ is the weight of vertex $v$.
@@ -1403,20 +1403,20 @@ where $d_k$ is the number of dominating sets of size $k$ in graph $G=(V, E)$.
 We can contruct a satisfiability problem to solve the above problem.
 To generate a tensor network, we map a boolean variable $a$ and its negation $\neg a$ to a degree of freedom (label) $s_a \in \{0, 1\}$,
 where 0 stands for variable $a$ having value \texttt{false} while 1 stands for having value \texttt{true}.
-Then we map a clause to a tensor. For example, a clause $\neg a \vee b \vee \neg c$ can be mapped to a tensor labeled by $(s_a, s_b, s_c)$.
+Then we map a clause to a tensor. For example, the $k$-th clause $\neg a \vee b \vee \neg c$ can be mapped to a tensor labeled by $(s_a, s_b, s_c)$.
 \begin{equation}
-C = \left(\begin{matrix}
+C_{k} = \left(\begin{matrix}
 \left(\begin{matrix}
-x & x_{b} \\
-x_a & x_{ab}
+x^{w_k} & x_{b}^{w_k} \\
+x_a^{w_k} & x_{ab}^{w_k}
 \end{matrix}\right) \\
 \left(\begin{matrix}
-x_{c} & x_{bc} \\
-1 & x_{abc}
+x_{c}^{w_k} & x_{bc}^{w_k} \\
+1 & x_{abc}^{w_k}
 \end{matrix}\right)
-\end{matrix}\right).
+\end{matrix}\right),
 \end{equation}
-There is only one entry $(s_x, s_y, s_z) = (1, 0, 1)$ that makes this clause unsatisfied.
+where a weight is associated with a clause. There is only one entry $(s_x, s_y, s_z) = (1, 0, 1)$ that makes this clause unsatisfied.
 If we contract this tensor network, we will get a multiplicative factor $x$ whenever there is a clause satisfied.
 Let $x_{ab\ldots} = x$, then we can get a polynomial that its $k$-th coefficients gives us the number of assignments with $k$ clauses satisfied.
 
