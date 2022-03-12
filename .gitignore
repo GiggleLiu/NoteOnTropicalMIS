@@ -27,3 +27,4 @@ output/
 Manifest.toml
 
 .vscode
+paper.synctex(busy)
