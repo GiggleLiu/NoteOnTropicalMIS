@@ -446,7 +446,7 @@ where the summation runs over all vertex configurations $\{s_1, s_{2}, \ldots,s_
 The edge tensor element $B_{s_{i}=1, s_{j}=1} = 0$ encodes the independent set constraint, meaning vertex $i$ and $j$ cannot be both in the independent set if they are connected by an edge $(i,j)$.
 
 \begin{example}\label{eg:twonode}
-In the following, we show a minimum example of mapping the independent problem of a 2 vertex graph (left) to a tensor network (right).
+In the following, we show a minimum example of mapping the independent problem of a 2 vertex complete graph K2 (left) to a tensor network (right).
 
 \centerline{\begin{tikzpicture}[
 dot/.style = {circle, fill, minimum size=#1,
@@ -644,7 +644,7 @@ The algebra of the exponents becomes the max-plus tropical algebra~\cite{Maclaga
         \mymathbb{1} &= 0.
     \end{split}\label{eq:tropical}
 \end{equation}
-This algebra is the same as the one used in Liu et al.~\cite{Liu2021} to calculate and count spin glass ground states.
+Algebra \Eq{eq:tropical} and \Eq{eq:countingtropical} are the same as those used in Liu et al.~\cite{Liu2021} to calculate and count spin glass ground states.
 For independent set calculations here, the vertex tensor and edge tensor becomes:
 \begin{equation}
     W^{\rm T} = \left(\begin{matrix}
@@ -672,6 +672,7 @@ For example, if one is interested in counting only $a_{\alpha(G)}$ and $a_{\alph
 \end{equation}
 In the program, we thus need a data structure that contains three fields, the largest order $k$, and the coefficients for the two largest orders $a_k$ and $a_{k-1}$.
 This approach can clearly be extended to calculate more independence polynomial coefficients and is more efficient than calculating the entire independence polynomial.
+Similarly, one can also truncate the polynomial and keep only its smallest several orders, which can be used for e.g. counting the minimum maximal independent sets.
 As will be shown below, this algebra can also be extended to enumerate those large-size independent sets.
 
 \section{Enumerating and sampling independent sets}\label{sec:enumeration}
