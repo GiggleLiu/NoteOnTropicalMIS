@@ -1154,7 +1154,7 @@ If we contract this tensor network in the column-wise order, the maximum interme
 \subsection{Maximal independent sets and maximal cliques}\label{sec:maximal}
 Since finding maximal cliques of a graph is equivalent to finding the maximal independent sets of its complement graph, in the following,
 we limit our discussion to finding maximal independent sets.
-Let us denote the neighborhood of a vertex $v$ as $N(v)$ and $N[v] = N(v)\cup \{v\}$.
+Let us denote the neighborhood of a vertex $v$ as $N(v)$ and the closed neighborhood of $v$ as $N[v] = N(v)\cup \{v\}$.
 A maximal independent set $I_m$ is an independent set where there does exist a vertex $v \in V$ such that $I_m \cap N[v]  = \emptyset$,
 i.e. an independent set that can not become a larger one by adding a new vertex.
 To characterize the maximal independence restriction, one can quantify over a local set $N[v]$ with a local tensor:
@@ -1303,25 +1303,25 @@ in which the $k$-th coefficient is the number of coloring with $k$ bonds satisfi
 If a graph is colorable, the maximum order of this polynomial should be equal to the number of edges in this graph.
 Similarly, one can define the $k$-coloring problem on edges by defining the tensor network on the line graph of $G$.
 
-\subsection{Max-Cut problem}
+\subsection{Cutting problem}
 In graph theory, a cut is a partition of the vertices of a graph into two disjoint subsets,
 which is also known as the boolean spin glass problem in statistic physics.
-For a vertex $v\in V$, we define a boolean degree of freedom $s_v\in\{0, 1\}$.
-Then the Max-Cut problem can be encoded to tensor networks by mapping an edge $(i,j)\in E$ to an edge matrix labelled by $s_is_j$
+Let $G=(V,E)$ be a graph, to reduce the cutting problem on $G$ to the contraction of a tensor network, we first define a boolean degree of freedom $s_v\in\{0, 1\}$ for each vertex $v\in V$.
+Then for each edge $(u,v)\in E$, we define an edge matrix labelled by $s_us_v$ as
 \begin{equation}
-    B(x, w_{\langle i, j\rangle}) = \left(\begin{matrix}
-        1 & x_{j}^{w_{\langle i,j\rangle}}\\
-        x_{i}^{w_{\langle i,j\rangle}} & 1
+    B(x, w_{uv}) = \left(\begin{matrix}
+        1 & x_{v}^{w_{uv}}\\
+        x_{u}^{w_{uv}} & 1
     \end{matrix}\right),
 \end{equation}
-where variables $x_i$ and $x_j$ represents a cut on edge $(i, j)$ or a domain wall of an Ising spin glass.
-Let $x_i^{w_{\langle i,j\rangle}} = x_j^{w_{\langle i,j\rangle}} = x$, we have a graph polynomial similar to previous ones,
-where its $k$th coefficient is two times the number of configurations of cut size $k$.
+where variables $x_u$ and $x_v$ represents a cut on this edge or a domain wall in an spin glass.
+Let $x_u^{w_{uv}} = x_v^{w_{uv}} = x$, we have a graph polynomial similar to previous ones,
+where its $k$th coefficient is two times the number of cuts with size $k$ (i.e. cutting $k$ edges).
 
 \subsection{Dominating Set}
 In graph theory, a dominating set for a graph $G = (V, E)$ is a subset $D \subseteq V$ such that every vertex not in $D$ is adjacent to at least one member of $D$.
-The tensor network representation map a vertex $v\in V$ to a boolean degree of freedom $s_v\in\{0, 1\}$.
-We defined the restriction on a vertex and its neighbouring vertices $N(v)$:
+To reduce this problem to the contraction of a tensor network, we first map a vertex $v\in V$ to a boolean degree of freedom $s_v\in\{0, 1\}$.
+Then for each vertex $v\in V$ we define a tensor on its closed neighborhood $\{v\} \cup N(v)$ as
 \begin{equation}
 T(x, w_v)_{s_1,s_2,\ldots,s_{|N(v)|},s_v} = \begin{cases}
     0_v & s_1=s_2=\ldots=s_{|N(v)|}=s_v=0,\\
@@ -1332,19 +1332,19 @@ T(x, w_v)_{s_1,s_2,\ldots,s_{|N(v)|},s_v} = \begin{cases}
 where $w_v$ is the weight of vertex $v$.
 This tensor means if both $v$ and its neighbouring vertices are not in $D$, i.e., $s_1=s_2=\ldots=s_{|N(v)|}=s_v=0$,
 this configuration is forbidden because $v$ is not adjacent to any member in the set.
-otherwise, if $v$ is in $D$, it has a contribution $x_v^{w_v}$ to the final result.
+Otherwise, if $v$ is in $D$, this tensor contributes a multiplicative factor $x_v^{w_v}$ to the output.
 The graph polynomial for the dominating set problem is known as the domination polynomial~\cite{Alikhani2009},
 which is defined as
 \begin{equation}
 D(G, x) = \sum_{k=0}^{\gamma(G)} d_k x^k,
 \end{equation}
-where $d_k$ is the number of dominating sets of size $k$ in graph $G=(V, E)$.
+where $d_k$ is the number of dominating sets of size $k$.
 
 \subsection{Boolean satisfiability Problem}
 The boolean satisfiability problem is the problem of determining if there exists an interpretation that satisfies a given boolean formula.
 One can specify a satisfiable problem in the conjuctive normal form (CNF): a conjuction of disjunctions of boolean literals,
-where a disjunction of boolean literals is also called a clause.
-To reduce a CNF solving to a tensor network contraction, we first map a boolean literal $a$ and its negation $\neg a$ to a same degree of freedom (label) $s_a \in \{0, 1\}$,
+where a disjunction of boolean literals is also named a clause.
+To reduce the problem of solving CNF to a tensor network contraction, we first map a boolean literal $a$ and its negation $\neg a$ to a same degree of freedom (label) $s_a \in \{0, 1\}$,
 where 0 stands for variable $a$ having value \texttt{false} while 1 stands for having value \texttt{true}.
 Then we map a clause to a tensor. For example, the $k$-th clause $\neg a \vee b \vee \neg c$ can be mapped to a tensor labeled by $(s_a, s_b, s_c)$.
 \begin{equation}
@@ -1355,20 +1355,20 @@ x_a^{w_k} & x_{ab}^{w_k}
 \end{matrix}\right) \\
 \left(\begin{matrix}
 x_{c}^{w_k} & x_{bc}^{w_k} \\
-1 & x_{abc}^{w_k}
+1_{ac} & x_{abc}^{w_k}
 \end{matrix}\right)
 \end{matrix}\right),
 \end{equation}
-where a weight is associated with a clause. There is only one entry $(s_x, s_y, s_z) = (1, 0, 1)$ that makes this clause unsatisfied.
+where a weight $w_k$ is associated with a clause. There is only one entry $(s_a, s_b, s_c) = (1, 0, 1)$ that makes this clause unsatisfied.
 If we contract this tensor network, we will get a multiplicative factor $x$ whenever there is a clause satisfied.
-Let $x_{ab\ldots} = x$, then we can get a polynomial that its $k$-th coefficients gives us the number of assignments with $k$ clauses satisfied.
+Let $x^{w_k}_{\ldots} = x$, one can get a polynomial, in which the $k$-th coefficient gives the number of assignments with $k$ clauses satisfied.
 
 \subsection{Set packing}
 Set packing is the hypergraph generalization of the maximum independent set problem, where a set corresponds to a vertex and an element corresponds to a hyperedge.
 To solve the set packing problem, we can just remove the rank-2 restriction of the edge tensor in \Eq{eq:edgetensor}
 \begin{equation}
-    B_{v,w,\ldots, z} = \begin{cases}
-        1, & v+w+\ldots+z\leq 1,\\
+    B_{s_u,s_v,\ldots, s_w} = \begin{cases}
+        1, & s_u+s_v+\ldots+s_w\leq 1,\\
         0, & \text{otherwise}.
     \end{cases}
 \end{equation}
