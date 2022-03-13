@@ -222,7 +222,7 @@ Listing \thelstlisting: #1\hfill%\hfill%
 \maketitle
 
 \begin{abstract}
-We introduce a method that uses generic programming tensor network to compute various properties of a class of hard graph problems that can be quantified locally.
+We introduce a method that uses generic programming tensor network to compute various properties of a class of hard graph problems that can be quantified over a local set.
 Let the independent set problem be an example, we show how to compute, for example, the maximum several independent set sizes, the counting of independent sets of a give size, the enumeration of independent sets of a given size.
 By making use of generic programming, our algorithms are very simple to implement and one can in addition directly utilize recent advances in tensor network contraction techniques such as near-optimal contraction order finding and slicing to achieve high performance.
 The algorithmic complexity of this approach is $2^{{\rm tw}(G)}$, where ${\rm tw} (G)$ is the treewidth of the problem graph.
@@ -244,6 +244,10 @@ independent set, tensor network, maximum independent set, independence polynomia
 
 
 \cyan{a comment} and \xcyan{a resolved comment}
+\blue{I am not sure I an use the word ``quantify'' in a tensor network!
+It is borrowed from the field of logic,
+but I am feeling defining a local tensor in our paper is same as quantifing over a variable in logic.
+\href{https://en.wikipedia.org/wiki/Quantifier\_(logic)}{https://en.wikipedia.org/wiki/Quantifier\_(logic)}}
 
 \section{Introduction}
 In graph theory and combinatorial optimization, there is an important class of problems that can be quantified over a vertex and its neighborhood,
@@ -1145,21 +1149,12 @@ If we contract this tensor network in the column-wise order, the maximum interme
 
 \section{Generalization to other graph problems}\label{sec:otherproblems}
 \subsection{Maximal independent sets and maximal cliques}\label{sec:maximal}
-Finding maximal independent sets of a graph is equivalent to finding the maximal cliques of its complement graph, so in the following we mainly discuss how to find maximal independent sets.
-Let us denote the neighborhood of a vertex $v$ as $N(v)$ and denote $N[v] = N(v)\cup \{v\}$.
-A maximal independent set $I_m$ is an independent set where there exists no vertex $v \in V$ such that $I_m \cap N[v]  = \emptyset$.
-Similar to the independence polynomial, the maximal independence polynomial counts the number of maximal independent sets of various sizes~\cite{Hu2017},
-which can be helpful for understanding why the program for solving MIS can be trapped in a local minimum.
-Concretely, it is defined as
-\begin{equation}
-I_{\rm max}(G, x) = \sum_{k=0}^{\alpha(G)} b_k x^k,
-\end{equation}
-where $b_k$ is the number of maximal independent sets of size $k$ in graph $G=(V, E)$.
-Comparing with the independence polynomial in \Eq{eq:idpdef}, we have $b_{k} \leq a_{k}$ and $b_{\alpha(G)} = a_{\alpha(G)}$. $I_{\rm max}(G, 1)$ counts the total number of maximal independent sets~\cite{Gaspers2012, Manne2013}, where, to our knowledge, the fastest algorithm currently has a runtime of $O(1.3642^{|V|})$~\cite{Gaspers2012}.
-If we want to find an MIS, $b_{k}$ counts the number of local optimum at size $k < \alpha(G)$, and can, in some cases, provide hints on the difficulty of finding the MIS using local algorithms~\cite{Ebadi2022}.
-The uni-modality, log-concavity, and real-rootness properties of the maximal independence polynomial for special classes of graphs have also been studied~\cite{Hu2017}. 
-
-We can modify the tensor network for computing the independence polynomial to include this restriction. Instead of defining the restriction on vertices and edges, it is more natural to define it on $N[v]$:
+Since finding maximal cliques of a graph is equivalent to finding the maximal independent sets of its complement graph, in the following,
+we limit our discussion to finding maximal independent sets.
+Let us denote the neighborhood of a vertex $v$ as $N(v)$ and $N[v] = N(v)\cup \{v\}$.
+A maximal independent set $I_m$ is an independent set where there does exist a vertex $v \in V$ such that $I_m \cap N[v]  = \emptyset$,
+i.e. an independent set that can not become a larger one by adding a new vertex.
+To characterize the maximal independence restriction, one can quantify over a local set $N[v]$ with a local tensor:
 \begin{equation}\label{eq:maximal}
     T(x_v, w_v)_{s_1,s_2,\ldots,s_{|N(v)|},s_v} = \begin{cases}
         s_vx_v^{w_v} & s_1=s_2=\ldots=s_{|N(v)|}=0,\\
@@ -1172,8 +1167,8 @@ As an example, for a vertex of degree 2, the resulting rank-3 tensor is
 \begin{equation}
     T(x_v, w_v)=\left(\begin{matrix}
     \left(\begin{matrix}
-        0 &1 \\
-        1 &1
+        ~~0 &~1 \\
+        ~~1 &~1
     \end{matrix}\right)\\
     \left(\begin{matrix}
         x_v^{w_v} &0 \\
@@ -1182,8 +1177,6 @@ As an example, for a vertex of degree 2, the resulting rank-3 tensor is
     \end{matrix}\right).
 \end{equation}
  
-By contracting this tensor network with generic element types,
-we can compute the maximal independent set properties such as the maximal independence polynomial and the enumeration of maximal independent sets.
 Let us consider the example in~\Sec{eg:tensorcontraction}: its corresponding tensor network structure for computing the maximal independent polynomial becomes
 
     \centerline{\begin{tikzpicture}[
@@ -1192,12 +1185,12 @@ Let us consider the example in~\Sec{eg:tensorcontraction}: its corresponding ten
     dot/.default = 6pt  % size of the circle diameter 
                     ]  
         \def\dx{0};
-        \def\r{0.5cm}
+        \def\r{0.4cm}
         \def\G{1.0}
         \foreach \x/\y/\v in {0/0/a, 1/0/b, 2/0/c, 3/0/d, 4/0/e}
             \node[color=black] at (\x*\G+\dx,\y) (\v) {$s_\v$};
         \foreach \x/\v/\t in {0/A/$T_a$, 1/B/$T_b$, 2/C/$T_c$, 3/D/$T_d$, 4/E/$T_e$}
-            \node[color=white,fill=black,dot=\r] at (\x*\G+\dx,1.5) (\v) {\t};
+            \node[color=white,fill=black,dot=\r] at (\x*\G+\dx,1.5) (\v) {\scriptsize \t};
         \draw [cyan,thick] (a) -- (A);
         \draw [cyan,thick] (a) -- (B);
         \draw [cyan,thick] (a) -- (C);
@@ -1217,9 +1210,23 @@ Let us consider the example in~\Sec{eg:tensorcontraction}: its corresponding ten
         \draw [orange,thick] (e) -- (D);
     \end{tikzpicture}}
  
-One can see that the average degree of a tensor is increased.
+One can see that the average rank of a tensor is increased.
 The computational complexity of this new tensor network contraction is often greater than the one for computing the independence polynomial.
-However, for most sparse graphs, this tensor network contraction approach is still much faster than enumerating all the maximal cliques on its complement graph using the Bron-Kerbosch algorithm~\cite{Bron1973}, which is the standard algorithm that we are aware of to compute the maximal independence polynomial.
+
+By contracting this tensor network with generic element types,
+we can compute the maximal independent set properties such as the maximal independence polynomial and the enumeration of maximal independent sets.
+Similar to the independence polynomial, the maximal independence polynomial counts the number of maximal independent sets of various sizes~\cite{Hu2017}.
+%which can be helpful for understanding why the program for solving MIS can be trapped in a local minimum.
+Let $G=(V,E)$ be a graph, its maximal independence polynomial is defined as
+\begin{equation}
+D_{m}(G, x) = \sum_{k=0}^{\alpha(G)} b_k x^k,
+\end{equation}
+where $b_k$ is the number of maximal independent sets of size $k$.
+Comparing with the independence polynomial in \Eq{eq:idpdef}, we have $b_{k} \leq a_{k}$ and $b_{\alpha(G)} = a_{\alpha(G)}$. $D_m(G, 1)$ counts the total number of maximal independent sets~\cite{Gaspers2012, Manne2013},
+which to our knowledge, the best algorithm gives a time complexity $O(1.3642^{|V|})$~\cite{Gaspers2012}.
+If we want to find an MIS, $b_{k}$ can, in some cases, provide hints on the difficulty of finding the MIS using local algorithms~\cite{Ebadi2022}.
+%The uni-modality, log-concavity, and real-rootness properties of the maximal independence polynomial for special classes of graphs have also been studied~\cite{Hu2017}. 
+
 We show the benchmark of computing the maximal independent set properties in \Fig{fig:benchmark-maximal},
 including a comparison to the Bron-Kerbosch algorithm from Julia package Graphs~\cite{Graphs}.
 The treewidth of this tensor network is significantly larger, so benchmark with only a smaller graph size is feasible.
@@ -1239,14 +1246,10 @@ Due to the memory limit, this Bron-Kerbosch algorithm is only feasible up to a g
 
 
 \subsection{Matching problem}
-A matching polynomial of a graph $G$ is defined as
-\begin{equation}
-    M(G, x) = \sum\limits_{k=1}^{|V|/2} c_k x^k,
-\end{equation}
-where $k$ is the size of a matching, and coefficients $c_k$ are the corresponding counting of the number of matchings of the size $k$.
-We map an edge $(u, v) \in E$ to a label $\langle u, v\rangle \in \{0, 1\}$ in a tensor network,
-where $1$ means two vertices of an edge are matched and $0$ otherwise.
-Then we define a tensor of rank $d(v) = |N(v)|$ on vertex $v$ such that,
+A $k$-matching in a graph $G=(V,E)$ is a set of $k$ edges, no two of which have a vertex in common.
+We map an edge $(u, v) \in E$ to a degree of freedom $\langle u, v\rangle \in \{0, 1\}$ in a tensor network,
+where $1$ means this edge is in the set and $0$ otherwise.
+To characterize the matching, one can define a tensor of rank $d(v) = |N(v)|$ on vertex $v$
 \begin{equation}
     W_{\langle v, n_1\rangle, \langle v, n_2 \rangle, \ldots, \langle v, n_{d(v)}\rangle} = \begin{cases}
         1, & \sum_{i=1}^{d(v)} \langle v, n_i \rangle \leq 1,\\
@@ -1261,11 +1264,20 @@ and a tensor of rank $1$ on the bond
 \end{cases}
 \end{equation}
 where label $\langle v, u \rangle$ is equivalent to $\langle u,v\rangle$.
-Here, a vertex tensor specifies the restriction that a vertex cannot be matched by more than one edge, while an edge tensor contributes the variable in the polynomial.
+The vertex tensor specifies the constraint that a vertex cannot be shared by two edges in the matched set,
+while an edge tensor carries the weights as the target to optimize.
+Let $x_{\langle u,v\rangle}^{w_{\langle u,v\rangle}}=x$, the tensor network contraction gives us the matching polynomial
+\begin{equation}
+    M(G, x) = \sum\limits_{k=1}^{|V|/2} c_k x^k,
+\end{equation}
+where $k$ is the size of a matched edges set, and a coefficients $c_k$ is the number of $k$-matchings.
 
-\subsection{$k$-Coloring}
-Let us use the 3-coloring problem defined on vertices as an example.
-For a vertex $v$, we define the degrees of freedom $c_v\in\{0,1,2\}$ and a vertex tensor labelled by it as
+\subsection{Vertex coloring}
+Let $G=(V,E)$ be a graph, a vertex coloring is an assignment of colors to each vertex $v\in V$ such that no edge connects two identically colored vertices. 
+In a $k$-coloring problem, the number of different colors can be used is limited to less or equal to $k$.
+Let us use the 3-coloring problem as an example to show how to characterize with local tensors.
+For each vertex $v \in V$, we associate a degree of freedom $c_v\in\{0,1,2\}$ to it.
+Then we define a vertex tensor labelled by it as
 \begin{equation}
     W(v) = \left(\begin{matrix}
         r_v\\
@@ -1273,24 +1285,24 @@ For a vertex $v$, we define the degrees of freedom $c_v\in\{0,1,2\}$ and a verte
         b_v
     \end{matrix}\right),
 \end{equation}
-where $r_v$, $g_v$ and $b_v$ are colors used to label the configurations.
-For an edge $(u, v)$, we define an edge tensor as a matrix labelled by $(c_u, c_v)$ to specify the constraint
+where $r_v$, $g_v$ and $b_v$ are colors for labeling the configurations.
+For each edge $(u, v)$, we specify the constraint carrying a weight $w_{uv}$ on it by defining an edge tensor labelled by $(c_u, c_v)$ as
 \begin{equation}
     B(x, w_{uv}) = \left(\begin{matrix}
         0 & x^{w_{uv}} & x^{w_{uv}}\\
         x^{w_{uv}} & 0 & x^{w_{uv}}\\
         x^{w_{uv}} & x^{w_{uv}} & 0
-    \end{matrix}\right),
+    \end{matrix}\right).
 \end{equation}
-where weights are associated with edges. The number of possible colorings can be obtained by contracting this tensor network by setting $r_v, g_v$ and $b_v$ to $1$.
-By designing generic types as tensor elements, one can get other properties.
-Similarly, one can also define the $k$-coloring problem on edges by switching the roles of edges and vertices.
+The number of possible colorings can be obtained by contracting this tensor network by setting $r_v, g_v$ and $b_v$ to $1$.
 Let $x^{w_{uv}} = x$, we have a graph polynomial,
-where its $k$th coefficient is the number of coloring with $k$ bonds are satisfied.
+in which the $k$-th coefficient is the number of coloring with $k$ bonds satisfied.
 If a graph is colorable, the maximum order of this polynomial should be equal to the number of edges in this graph.
+Similarly, one can define the $k$-coloring problem on edges by defining the tensor network on the line graph of $G$.
 
 \subsection{Max-Cut problem}
-The Max-Cut problem is also known as the boolean spin glass problem.
+In graph theory, a cut is a partition of the vertices of a graph into two disjoint subsets,
+which is also known as the boolean spin glass problem in statistic physics.
 For a vertex $v\in V$, we define a boolean degree of freedom $s_v\in\{0, 1\}$.
 Then the Max-Cut problem can be encoded to tensor networks by mapping an edge $(i,j)\in E$ to an edge matrix labelled by $s_is_j$
 \begin{equation}
@@ -1304,7 +1316,7 @@ Let $x_i^{w_{\langle i,j\rangle}} = x_j^{w_{\langle i,j\rangle}} = x$, we have a
 where its $k$th coefficient is two times the number of configurations of cut size $k$.
 
 \subsection{Dominating Set}
-Let $G=(V,E)$ be the target graph that we want to solve.
+In graph theory, a dominating set for a graph $G = (V, E)$ is a subset $D \subseteq V$ such that every vertex not in $D$ is adjacent to at least one member of $D$.
 The tensor network representation map a vertex $v\in V$ to a boolean degree of freedom $s_v\in\{0, 1\}$.
 We defined the restriction on a vertex and its neighbouring vertices $N(v)$:
 \begin{equation}
@@ -1325,9 +1337,11 @@ D(G, x) = \sum_{k=0}^{\gamma(G)} d_k x^k,
 \end{equation}
 where $d_k$ is the number of dominating sets of size $k$ in graph $G=(V, E)$.
 
-\subsection{Satisfiability Problem}
-We can contruct a satisfiability problem to solve the above problem.
-To generate a tensor network, we map a boolean variable $a$ and its negation $\neg a$ to a degree of freedom (label) $s_a \in \{0, 1\}$,
+\subsection{Boolean satisfiability Problem}
+The boolean satisfiability problem is the problem of determining if there exists an interpretation that satisfies a given boolean formula.
+One can specify a satisfiable problem in the conjuctive normal form (CNF): a conjuction of disjunctions of boolean literals,
+where a disjunction of boolean literals is also called a clause.
+To reduce a CNF solving to a tensor network contraction, we first map a boolean literal $a$ and its negation $\neg a$ to a same degree of freedom (label) $s_a \in \{0, 1\}$,
 where 0 stands for variable $a$ having value \texttt{false} while 1 stands for having value \texttt{true}.
 Then we map a clause to a tensor. For example, the $k$-th clause $\neg a \vee b \vee \neg c$ can be mapped to a tensor labeled by $(s_a, s_b, s_c)$.
 \begin{equation}
