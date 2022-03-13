@@ -684,7 +684,7 @@ As will be shown below, this algebra can also be extended to enumerate those lar
 The configuration enumeration of independent sets includes,
 for example, the enumeration of all independent sets, the enumeration of all MISs and the enumeration of independent sets with maximum several sizes.
 The most studied enumeration of maximal independent sets~\cite{Bron1973, Eppstein2010, Johnson1988} requires using a different tensor network structure, which is discussed in \App{sec:maximal}.
-To enumerate all independent sets, we designed an algebra defined on sets of bitstrings:
+To enumerate all independent sets, we designed an algebra defined on sets of bit strings:
 \begin{equation}
 \eqname{SN}
 \begin{split}
@@ -930,8 +930,17 @@ In this paper, we introduce a method to use generic programming tensor networks 
 including the largest several independent sets sizes, the counting of independent sets of a given size and
 the enumeration of independent sets of a given size.
 For each property, we design an algebra being a commutative semiring and let it be the tensor element type.
-The contraction of the same tensor network gives us the corresponding property.
+With different algebras, the contraction of the same tensor network gives us the different properties.
 The data types introduced in the main text is summarized in the diagram in \Fig{fig:venn-diagram}.
+Other than the case with real numbers, we have polynomials and truncated polynomials.
+We combine them with the bit string algebra, the set algebra, and sum product tree algebra for finding, enumeration, and sampling of independent sets at a given size.
+These algebras are of generic use: they can be utilized to compute properties of maximal independent sets and a variety of other combinatorial problems such as the matching problem, the k-coloring problem, the max-cut problem, and the set packing problem, as detailed in \App{sec:otherproblems}. 
+Moreover, since the independence polynomial is closely related to the matching polynomial~\cite{Levit2005}, the clique polynomial~\cite{Hoede1994}, and the vertex cover polynomial~\cite{Akbari2013},
+our algorithm to compute the independence polynomial can also be used to compute these graph polynomials.
+By adapting to the style of generic programming, we can implement all the algorithms without much effort.
+We show some of the Julia language implementations in Appendix~\ref{sec:technical}.
+A complete implementation can be found in our Github repository~\cite{GraphTensorNetworks}. 
+We expect our tool can be used to understand and study many interesting applications of independent sets and beyond. We also hope this approach of generic tensor networks can inspire future works on tensor network computations.
 
 \begin{figure}[th]
    \centering
@@ -961,21 +970,12 @@ The data types introduced in the main text is summarized in the diagram in \Fig{
      \label{fig:venn-diagram}
 \end{figure}
 
-Other than the case with real numbers, we have polynomials and truncated polynomials as algebra types.
-We combine them with the set algebra and the bitstring algebra for set enumeration and sampling. 
-These algebras are of generic use: they can be utilized to compute properties of maximal independent sets and a variety of other combinatorial problems such as the matching problem, the k-coloring problem, the max-cut problem, and the set packing problem, as detailed in \App{sec:otherproblems}. 
-Moreover, since the independence polynomial is closely related to the matching polynomial~\cite{Levit2005}, the clique polynomial~\cite{Hoede1994}, and the vertex cover polynomial~\cite{Akbari2013},
-our algorithm to compute the independence polynomial can also be used to compute these graph polynomials.
-By adapting to the style of generic programming, we can implement all the algorithms without much effort.
-We show some of the Julia language implementations in Appendix~\ref{sec:technical}.
-A complete implementation can be found in our Github repository~\cite{GraphTensorNetworks}. 
-We expect our tool can be used to understand and study many interesting applications of independent sets and beyond. We also hope this approach of generic tensor networks can inspire future works on tensor network computations.
-
 \section*{Acknowledgments}
 We would like to thank Pan Zhang for sharing his python code for optimizing contraction orders of a tensor network.
 We acknowledge Sepehr Ebadi, Maddie Cain, and Leo Zhou for coming up with many interesting questions about independent sets and their questions strongly motivated the development of this project.
 We thank Chris Elord for helping us to write the fastest matrix multiplication library for tropical numbers, TropicalGEMM.jl. % he is a man of speed!
-We would also like to thank a number of open-source software developers, including Roger Luo, Time Besard, and Katharine Hyatt, for solving some implementation issues voluntarily.
+We would also like to thank a number of open-source software developers, including Roger Luo, Time Besard, and Katharine Hyatt,
+for actively maintaining their packages and resolving related issues voluntarily.
 \blue{funding information}
 
 \bibliographystyle{siamplain}
@@ -986,39 +986,40 @@ We would also like to thank a number of open-source software developers, includi
 \section{An alternative way to construct the tensor network}\label{sec:energymodel}
 
 Let us characterize the independent set problem on graph $G=(V, E)$ as an energy model
-\begin{equation}
+\begin{equation}\label{eq:eng}
     \mathcal{E}(G, s) = -\sum_{i\in V(G)} w_i s_i + \infty \sum_{\langle i,j\rangle \in E(G)}s_i s_j
 \end{equation}
-where $s_i$ is a spin on vertex $i \in V$ and $w_i$ is an onsite energy term.
+where $s_i$ is a spin on vertex $i \in V$ and $w_i$ is an onsite energy term associated with it.
 The first term is the energy that corresponds to the inverse of the independent set size and the second term describes the independence contraint.
 In physical systems, this contraint term usually corresponds to the Rydberg blockade~\cite{Pichler2018, Ebadi2022} in cold atom arrays or the repulsive force in hard core lattice model~\cite{Dyre2016, Fernandes2007}.
 Its partition function is defined as
-\begin{equation}
+\begin{equation}\label{eq:partition}
     \begin{split}
     Z(G, \beta) = \sum_{s}e^{-\beta \mathcal{E}(G, s)} = \sum_{s\in \mathcal{I}(G)} e^{\beta \sum w_i s_i}\\
-         = \sum_{k=0}^{\alpha(G)}D(k) e^{\beta k}  \qquad \quad (w_i = 1)
+         = \sum_{k=0}^{\alpha(G)}a(k) e^{\beta k}  \qquad \quad (k = \sum w_i s_i)
     \end{split}
 \end{equation}
 where $\mathcal{I}(G)$ is the set of independent sets of graph $G$.
-The second line corresponds to the unweighted independent set problem,
-$\alpha(G)$ is the absolute value of the minimum energy (maximum independent set size) and $D(k)$ is the number of states with energy $-k$ (independent sets of size $k$).
-It can be evaluated as a tensor network contraction,
-where the tensor network is constructed by placing a vertex tensor on each vertex $i$
+$\alpha(G)$ is the absolute value of the minimum energy (maximum independent set size).
+$a(k)$ is the number of spin configurations with energy $-k$ (independent sets of size $k$).
+The partition function can be evaluated as a tensor network contraction,
+where the tensor network is constructed by placing a vertex tensor on each spin $i$
 \begin{equation}
     W(\beta, w_i) = \left(\begin{matrix}
         1 \\
         e^{\beta w_i}
     \end{matrix}\right),
 \end{equation}
-and a bond tensor on each edge
+and an edge tensor on each bond
 \begin{equation}
        B = \left(\begin{matrix}
         1  & 1\\
         1 & 0
     \end{matrix}\right),
 \end{equation}
-where the $0$ in the bond tensor comes from $e^{-\beta\infty}$ from the second term of the energy model.
-By letting $x = e^{\beta w_i}$, we get the tensor network for computing the independence polynomial as described by \Eq{eq:vertextensor} and \Eq{eq:edgetensor}.
+where the $0$ in the bond tensor coming from $e^{-\beta\infty}$ in the second term of \Eq{eq:eng}.
+By letting $x = e^{\beta}$, we get the tensor network for computing the independence polynomial as described by \Eq{eq:vertextensor} and \Eq{eq:edgetensor},
+and by letting $w_i=1$, the second line of \Eq{eq:partition} is the independence polynomial.
 
 \section{An example of contraction complexity increase due to introducing $\delta$ tensors}\label{sec:tensorbad}
 As we have mentioned in the main text,
@@ -1031,6 +1032,7 @@ where a $\delta$ tensor of rank $d$ is defined as
     \end{cases}
 \end{equation}
 
+In the following, we are going to show introducing $\delta$ tensors might increase the contraction complexity of a tensor network.
 Let us consider the following King's graph.
 
 \centerline{\begin{tikzpicture}
@@ -1050,7 +1052,8 @@ Let us consider the following King's graph.
         }
 \end{tikzpicture}}
 
-By mapping the independent set problem to a standard tensor network, we have the following graphical representation.
+By mapping the independent set problem to a standard tensor network with $\delta$ tensors,
+we have the following graphical representation.
 
 \centerline{\begin{tikzpicture}
     \def\r{0.08}
@@ -1077,7 +1080,7 @@ By mapping the independent set problem to a standard tensor network, we have the
     \draw [decorate] (2.7, 0.5) -- (2.7, 5.5);
 \end{tikzpicture}}
 
-In this diagram, the circle on each vertex in the original graph is a $\delta$ tensor up to rank $8$.
+In this diagram, the circle on each vertex in the original graph is a $\delta$ tensor of rank $8$ or less.
 If we contract this tensor network in a naive column-wise order, the maximum intermediate tensor has rank $\sim3L$, requiring a storage of size $\approx 2^{3L}$.
 If we relax the restriction that each label must appears exactly twice, we have the following hypergraph representation of a generalized tensor network.
 
@@ -1141,9 +1144,9 @@ If we relax the restriction that each label must appears exactly twice, we have 
 \end{tikzpicture}}
 Here, we use different colors to distinguish different hyperedges.
 A vertex tensor always has rank $1$ and is not shown here since it does not change the contraction complexity.
-If we contract this tensor network in the column-wise order, the maximum intermediate tensor rank is $\sim L$, which can be seen by counting the number of colors.
+If we contract this tensor network in the column-wise order, the maximum intermediate tensor rank is $\sim L$, which can be seen by counting the number of colors at the cut.
 
-\section{Generalization to other graph problems}\label{sec:otherproblems}
+\section{Hard problems and tensor networks}\label{sec:otherproblems}
 \subsection{Maximal independent sets and maximal cliques}\label{sec:maximal}
 Finding maximal independent sets of a graph is equivalent to finding the maximal cliques of its complement graph, so in the following we mainly discuss how to find maximal independent sets.
 Let us denote the neighborhood of a vertex $v$ as $N(v)$ and denote $N[v] = N(v)\cup \{v\}$.
