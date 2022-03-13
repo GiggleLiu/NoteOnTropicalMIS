@@ -246,14 +246,14 @@ independent set, tensor network, maximum independent set, independence polynomia
 \cyan{a comment} and \xcyan{a resolved comment}
 
 \section{Introduction}
-In graph theory and combinatorial optimization, there is an important class of problems that can be quantified locally,
+In graph theory and combinatorial optimization, there is an important class of problems that can be quantified over a vertex and its neighborhood,
 including the independent set problem, the cutting problem, the K-coloring problem, the satisfiability problem,
 the maximal clique problem, and the vertex cover problem et al ~\cite{Moore2011}.
 There is a widespread interest of these problem because they have wide range of applications in scheduling, logistics,
 wireless networks and telecommunication, and computer vision, etc.~\cite{Butenko2003, Wu2015}.
 \blue{need more diversed applications not limited to IS}
 
-The most studied version of the above problems is finding the maximum/minimum set size and one of the sets of that size satisfying the contraints,
+The most studied version of the above problems is finding a maximum/minimum set satisfying the contraints and the corresponding set size ,
 while many of them belong to the hardness category NP-hard~\cite{Hastad1996}, i.e. it is unlikely to solve them in a polynomial time.
 In this paper, we focus on the less studied \textit{property} computation which can be harder but is crutial towards understanding a hard problem.
 Here, the \textit{property} refers to a class of quantities that not only include the maximum/minimum set size,
@@ -267,9 +267,11 @@ generic tensor-network, to solve these seeming unrelated properties all.
 Tensor network is also known as the sum product network or einsum in different fields,
 where its tensor element types are typically restricted to standard number types such as real numbers and complex numbers.
 We extend this concept to generic tensor network by generalizing the tensor element type to any type being a commutative semiring.
-Given a good contraction order, the time complexity of contracting a tensor network is $2^{{\rm tw}(G)}$~\cite{Markov2008}, where ${\rm tw}(G)$ is the treewidth of graph $G$.
+Given a good contraction order, the space required to contract a tensor network is 2 power the tree width of its line graph~\cite{Markov2008}.
 Recent progress in simulating quantum circuits with random tensor networks~\cite{Gray2021, Pan2021, Kalachev2021} enables us to find such a good contraction order for a tensor network with thousands of tensors in a reasonable time.
-Although this time complexity is just on par with the dynamic programming algorithms~\cite{Courcelle1990, Fomin2013} for solving the maximum size and one of the best set, tensor network has richer algebraic structure, and this structure is crutial for property computation.
+When using tensor network for solving one of the best sets with the maximum size,
+this time complexity is just on par with the dynamic programming algorithms~\cite{Courcelle1990, Fomin2013},
+however, tensor network has richer algebraic structure, and this structure is crutial for property computation.
 %For sparse graphs, the treewidth is usually much smaller than the number of vertices~\cite{Fomin2006}. Our algorithms, on the other hand, are much more versatile than traditional methods and can be used to compute many other properties than just the MIS size.
 
 %The independent set problem is related to physics applications such as in the hard-core lattice gas model~\cite{Dyre2016, Fernandes2007}
@@ -416,20 +418,21 @@ The Table~\ref{tbl:generictypes} summarizes those properties that can be compute
 \end{table}
 
 \section{Tensor network representation of independent sets} \label{sec:tnmap}
-This section is about reducing the independent set problem to a tensor network contraction problem,
-for people with physics background, it is suggested to use an alternative approach described in \App{sec:energymodel} to understand this construction from the partition function perspective.
+This section is about reducing the independent set problem to a tensor network contraction problem.
+For people with physics background, we suggest using an alternative approach described in \App{sec:energymodel} to understand this reduction from an energy model.
 Let $G=(V,E)$ be a weighted undirected graph with each vertex $i\in V$ being associated with a weight $w_i$.
 An independent set $I \subseteq V$ is a set of vertices that for any vertex pair $u,v \in I$, $(u, v) \not\in E$,
-and we denote the maximum independent set (MIS) size $\alpha(G) \equiv \max_{I}|I|$. 
-We map a vertex $i\in V$ to a label $s_i \in \{0, 1\}$ of dimension $2$ in a tensor network, where we use $0$ ($1$) to denote a vertex is absent (present) in the set.
-For each label $s_i$, we defined a parametrized rank-one vertex tensor $W(x_i, w_i)$ as
+and we denote the maximum independent set (MIS) size $\alpha(G) \equiv \max_{I}\sum_{v\in I}w_v$. 
+We map a vertex $v\in V$ to a label $s_v \in \{0, 1\}$ of dimension $2$ in a tensor network, where we use $0$ ($1$) to denote a vertex is absent (present) in the set.
+For each label $s_v$, we defined a parametrized rank-one vertex tensor $W(x_v, w_v)$ as
 \begin{equation}
-    W(x_i, w_i) = \left(\begin{matrix}
-        1 \\
-        x_i^{w_i}
+    W(x_v, w_v) = \left(\begin{matrix}
+        1_v \\
+        x_v^{w_v}
     \end{matrix}\right).\label{eq:vertextensor}
 \end{equation}
-We use subscripts to index tensor elements, e.g.\ $W(x_i, w_i)_0=1$ is the first element associated with $s_i=0$ and $W(x_i, w_i)_1=x_i^{w_i}$ is the second element associated with $s_i=1$.
+where we use subscripts to annotate different vertices, these annotation are only used in configuration enumeration and sampling.
+One can index tensor elements by subscripting tensors, e.g.\ $W(x_i, w_i)_0=1$ is the first element associated with $s_i=0$ and $W(x_i, w_i)_1=x_i^{w_i}$ is the second element associated with $s_i=1$.
 Similarly, on each edge $(u, v)$, we define a matrix $B$ indexed by $s_u$ and $s_v$ as
 \begin{equation}
     \qquad \quad 
@@ -567,7 +570,7 @@ One can easily check the maximum tensor during computing is rank 2, and the tota
 \end{example}
 
 \section{Independence polynomial}\label{sec:indpoly}
-In the special case of $x_i = x$ and $w_i = 1$, the tensor network contraction result directly corresponds to the independence polynomial~\cite{Harvey2018,Ferrin2014}.
+Let $x_i = x$ and $w_i = 1$, the evaluation of \Eq{eq:idp} corresponds to the independence polynomial~\cite{Harvey2018,Ferrin2014}.
 which is a useful graph characteristic related to, for example, the partition functions~\cite{Lee1952,Yang1952} and Euler characteristics of the independence complex~\cite{Bousquet2008, Levit2009}.
 The independence polynomial is an important graph polynomial that contains the counting information of independent sets. It is defined as
 \begin{equation}\label{eq:idpdef}
@@ -611,8 +614,9 @@ Alternatively, one can use the method in \App{sec:fft} to fit this polynomial mo
 
 \section{Maximum independent sets and its counting}\label{sec:counting}
 \subsection{Tropical algebra for finding the MIS size and counting MISs}
-In the previous section, we focused on computing the independence polynomial for a graph $G$ of a given MIS size $\alpha(G)$, but we did not show how to compute this number.
-The method we use to compute this quantity is based on the following observations. Let $x=\infty$, the independence polynomial becomes
+The MIS size $\alpha(G)$, or the independence number is an important graph characteristics.
+The method we use to compute this quantity is based on the following observations.
+Let $x=\infty$, the independence polynomial in the previous section becomes
 \begin{equation}
 I(G, \infty) = a_{\alpha(G)} \infty^{\alpha(G)},
 \end{equation}
@@ -659,7 +663,7 @@ For independent set calculations here, the vertex tensor and edge tensor becomes
 \end{equation}
 
 \subsection{Truncated polynomial algebra for counting independent sets of large size}
-Instead of counting just the MISs, one may be interested in counting the independent sets of large sizes close to the MIS size.
+Instead of counting just the MISs, one may also be interested in counting the independent sets with largest several sizes.
 For example, if one is interested in counting only $a_{\alpha(G)}$ and $a_{\alpha(G)-1}$, we can define a truncated polynomial algebra by keeping only the largest two coefficients in the polynomial in \Eq{eq:polynomial} as:
 \begin{equation}
     \eqname{P2}
@@ -677,8 +681,9 @@ As will be shown below, this algebra can also be extended to enumerate those lar
 
 \section{Enumerating and sampling independent sets}\label{sec:enumeration}
 \subsection{Set algebra for configuration enumeration}
-The enumeration problems of independent sets are also interesting and has been studied extensively in the literature~\cite{Bron1973, Eppstein2010, Johnson1988}, including,
-for example, the enumeration of all independent sets, the enumeration of all maximal independent sets, or the enumeration of all MISs.
+The configuration enumeration of independent sets includes,
+for example, the enumeration of all independent sets, the enumeration of all MISs and the enumeration of independent sets with maximum several sizes.
+The most studied enumeration of maximal independent sets~\cite{Bron1973, Eppstein2010, Johnson1988} requires using a different tensor network structure, which is discussed in \App{sec:maximal}.
 To enumerate all independent sets, we designed an algebra defined on sets of bitstrings:
 \begin{equation}
 \eqname{SN}
@@ -821,21 +826,22 @@ Hence we define the extended tropical numbers as the following
 \end{split}\label{eq:ext-tropical}
 \end{equation}
 where $\texttt{largest}(s, k)$ means truncating the set by only keeping $k$ largest values in the set $s$.
+The computation of $s \odot t$ is a maximum sum combination problem which can be done in time $\sim k\log(k)$.
 The vertex tensor and edge tensor become
 \begin{equation}
-    W^{{\rm T}k}(-\infty^{\otimes k-1} \otimes 1) = \left(\begin{matrix}
+    W^{{\rm T}k}(-\infty^{\otimes k-1} \otimes 1, w_v) = \left(\begin{matrix}
         \mymathbb{1} \\
-        -\infty^{\otimes k-1} \otimes 1
+        -\infty^{\otimes k-1} \otimes w_v
     \end{matrix}\right),   
     \qquad
         B^{{\rm T}k} = \left(\begin{matrix}
         \mymathbb{1}  & \mymathbb{1} \\
         \mymathbb{1} & \mymathbb{0}
-    \end{matrix}\right).
+    \end{matrix}\right),
 \end{equation}
-
+where we have used the relation $(-\infty^{\otimes k-1} \otimes 1)^{w_v} = -\infty^{\otimes k-1} \otimes w_v$.
 Similar to the tropical numbers, we can combine it with a bit string sampler (\Eq{eq:singleconfig}) for finding the configuration of each size.
-Note here, the $\odot$ of configuration sampler is not used so that the resulting configurations are deterministic and complete.
+Since the $\odot$ operation of configuration sampler is not used, the resulting configurations are deterministic and complete.
 
 \section{Performance benchmarks}\label{sec:benchmark}
 We run a single thread benchmark on CPU Intel(R) Xeon(R) CPU E5-2686 v4 @ 2.30GHz,
@@ -920,7 +926,12 @@ With the tool to enumerate configurations, one can try to understand the structu
 \end{figure}
 
 \section{Discussion and conclusion}
-In this paper, we introduce a method to use generic programming tensor networks to compute a number of different independent set properties, including the size of the MISs and the number and enumeration of independent sets of a given size. For each property, we design an algebra of a commutative semiring with a particular element type and map the computation of the property to the contraction of a tensor network with such an element type. The data types introduced in the main text can be represented in the following diagram, where we use overlap to represent two algebras that can be combined to create a new algebra.
+In this paper, we introduce a method to use generic programming tensor networks to compute a number of different properties of a hard problem,
+including the largest several independent sets sizes, the counting of independent sets of a given size and
+the enumeration of independent sets of a given size.
+For each property, we design an algebra being a commutative semiring and let it be the tensor element type.
+The contraction of the same tensor network gives us the corresponding property.
+The data types introduced in the main text is summarized in the diagram in \Fig{fig:venn-diagram}.
 
 \begin{figure}[th]
    \centering
@@ -945,7 +956,7 @@ In this paper, we introduce a method to use generic programming tensor networks 
     \node[draw,fill=red!70,fill opacity=0.5, text opacity=1.0,ellipse,minimum width=4cm, minimum height=1.5cm,inner sep=0pt] at (-0.5, 0) (S1) {\hspace{1.5cm}Bit string};
 \end{tikzpicture}}
 
-    \caption{The the tensor network element types used in this work.
+    \caption{The the tensor network element types used in this work, while the purpose of these element types can be found in \Tbl{tbl:generictypes}.
     The overlap between two algebra indicates that a new algebra can be created by combining those two types of algebra.}
      \label{fig:venn-diagram}
 \end{figure}
