@@ -921,7 +921,7 @@ A useful number that can be computed using the number of independent sets is the
     \label{fig:hardsquare}
 \end{figure}
 
-\subsection{The overlap gap property}
+\subsection{The overlap gap property\label{sec:overlap-gap}}
 With the tool to enumerate configurations, one can try to understand the structure of the independent set configuration space, such as the optimization landscape for finding the MISs and the geometry of the solution space. One of the known barriers for finding the MIS is the so-called overlap gap property~\cite{Gamarnik2013, Gamarnik2019}. Intuitively, if the overlap gap property is present, it means every two large independent sets either have a significant intersection or very small intersection; it implies that large independent sets are clustered together. This clustering property has been used to prove the limitations of local algorithms in finding the MISs~\cite{Gamarnik2013, Gamarnik2019}. Here, we use the computed configurations of large independent sets to investigate the presence or absence of the overlap gap property for some given graphs. In particular, in \Fig{fig:hamming}, we enumerated all ISs of size $\geq\alpha(G)-1$ for two random three regular graph instances of size 100 and show the pairwise Hamming distance statistics for the enumerated configurations. In \Fig{fig:hamming}(a), we observed the multiple peak structure for the pairwise Hamming distance for one of the graphs. This indicates the presence of the overlap gap property and disconnected clusters exist in the configuration space for large independent sets. We expect our numerical tool can be used to understand this phenomenon better and to further investigate the graph properties and the geometry of the configuration spaces for a variety of graph instances.
 \begin{figure} 
     \centering
@@ -929,6 +929,17 @@ With the tool to enumerate configurations, one can try to understand the structu
     \caption{The distribution of pairwise Hamming distances between every two independent sets of size $\geq\alpha(G)-1$ for two random three regular graph instances of size $100$.}
     \label{fig:hamming}
 \end{figure}
+
+\subsection{Visualizing experimental quantum algorithm outputs for solving Maximum Independent Set}
+
+\begin{figure} 
+    \centering
+    \includegraphics[width=.65\textwidth, trim={0cm 0cm 0cm 0cm}, clip]{paper/figures/exp_configurations.pdf}
+    \caption{A visualization of experimental outputs of a quantum algorithm for solving the Maximum Independent Set problem. Each vertex represents an independent set, with edges between independent sets with pairwise Hamming distance $\leq 2.$}
+    \label{fig:exp_configuratoins}
+\end{figure}
+The ability to enumerate configurations can also be used to understand the distribution of outputs from algorithms for solving the Maximum Independent Set problem. This can give detailed insights to performance of the algorithm, such as if the algorithm is likely to return independent sets from certain clusters of local or global minima in the solution space. As an example, we show in Figure~\ref{fig:exp_configuratoins} how our algorithm can be used to visualize experimental outputs of a quantum algorithm for solving the Maximum Independent Set problem using a programmable Rydberg atom array quantum computer~\cite{ebadi2022quantum}. The structure of the solution space for a King's graph with $39$ vertices and filling factor $\rho=0.8$ can be visualized on a graph where each vertex represents a large independent set, with edges between independent sets with a small pairwise Hamming distance $\leq 2.$ The algorithm either finds the largest independent set with size $\alpha(G)$ with high probability, or returns a suboptimal independent set, usually with size $\alpha(G)-1.$ The algorithm does not appear to return local minima with large Hamming distance from the MISs as suggested by~\cite{altshuler2010}, but samples from local minima with a wide range of Hamming distances from the MISs. Consistent with Sec.~\ref{sec:overlap-gap}, there are no disconnected clusters in the solution space for this particular King's graph.
+
 
 \section{Discussion and conclusion}
 In this paper, we introduce a method to use generic programming tensor networks to compute a number of different properties of a hard problem,
