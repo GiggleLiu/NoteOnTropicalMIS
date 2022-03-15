@@ -830,7 +830,8 @@ Hence we define the extended tropical numbers as the following
 \end{split}\label{eq:ext-tropical}
 \end{equation}
 where $\texttt{largest}(s, k)$ means truncating the set by only keeping $k$ largest values in the set $s$.
-The computation of $s \odot t$ is a maximum sum combination problem which can be done in time $\sim k\log(k)$.
+The computation of $s \odot t$ is a maximum sum combination problem which can be done in time $\sim k\log(k)$,
+one can find an implementation in \App{sec:maxsum}.
 The vertex tensor and edge tensor become
 \begin{equation}
     W^{{\rm T}k}(-\infty^{\otimes k-1} \otimes 1, w_v) = \left(\begin{matrix}
@@ -1537,6 +1538,110 @@ Here we only include two updated entries for $L=38,39$, which, to our knowledge,
 \label{tbl:squaregrid}
 \end{table}
 % online digit seperator: https://www.browserling.com/tools/thousands-separator
+
+\section{Computing maximum sum combination}\label{sec:maxsum}
+Given two sets $A$ and $B$ of the same size $n$.
+It is known that the maximum $n$ sum combination of $A$ and $B$ can be computed in time $n\log(n)$.
+The standard approach to solve the sum combination problem requires storing the variables in a heap - a highly dynamic binary tree structure which can can be much slower to manipulate than arrays.
+In the following, we show an algorithm that has roughly the same complexity (given the data range is not exponentially large)
+but does not need a heap.
+This algorithm first sorts both $A$ and $B$, then use the bisection to find the $n$-th largest value in the sum combination.
+The key point is we can count the number of entries greater than a specific value
+in the sum combination of $A$ and $B$ in linear time.
+We summarize the algorithm as in Algorithm~\ref{alg:sumcombination}.
+
+\LinesNumberedHidden
+\begin{algorithm}[!ht]
+    \SetKwProg{Fn}{function}{}{end}
+    \small
+    \SetAlgoNoLine
+    Let $A$ and $B$ be two sets of size $n$\;
+
+    \tcp{sort $A$ and $B$ in ascending order}
+    $A \gets {\rm sort}(A)$\;
+
+    $B \gets {\rm sort}(B)$\;
+
+    \tcp{use bisection to find the $n$-th largest value in sum combination}
+
+    ${\rm high} \gets A_n+B_n$\;
+
+    ${\rm low} \gets A_1+B_n$\;
+
+    \While{true}{
+        ${\rm mid} \gets ({\rm high} + {\rm low}) / 2$\;
+
+        $c \gets \texttt{count\_geq}(n, A, B, {\rm mid})$\;
+
+        \uIf{$c > n$}{
+            ${\rm low} \gets {\rm mid}$\;
+        }\uElseIf{$c = n$}{
+            \Return \texttt{collect\_geq}$(n, A, B, {\rm mid})$\;
+        }\Else{
+            ${\rm high} \gets {\rm mid}$\;
+        }
+    }
+
+    \Fn{{\rm \texttt{count\_geq}}($n$, $A$, $B$, $v$)}{
+        $k \gets 1$\; \tcp*[l]{number of entries in $A$ s.t. $a+b\geq v$}
+
+        $a \gets A_{n}$\; \tcp*[l]{the smallest entry in $A$ s.t. $a+b\geq v$}
+
+        $c \gets 0$\; \tcp*[l]{the counting of sum combinations s.t. $a+b\geq v$}
+
+        \For{$q$ = $n, n-1 \ldots 1$}{
+            $b \gets B_{n-q+1}$\;
+
+            \While{$k < n$ \textbf{and} $a+b \geq v$}{
+                $k \gets k+1$\;
+
+                $a \gets A_{n-k+1}$\;
+            }
+
+            \uIf{$a+b \geq v$}{
+                $c \gets c + k$\;
+            }\Else{
+                $c \gets c + k-1$\;
+            }
+        }
+        \Return c\;
+    }
+
+    % \Fn{\rm collect\_geq($n$, $A$, $B$, $v$)}{
+    %     $k \gets 1$\; \tcp*[l]{number of entries in $A$ s.t. $a+b\geq v$}
+
+    %     $a \gets A_{n}$\; \tcp*[l]{the smallest entry in $A$ s.t. $a+b\geq v$}
+
+    %     $S \gets \{\}$ \tcp*[l]{the sum combinations s.t. $a+b\geq v$}
+
+    %     \For{$q$ = $n, n-1 \ldots 1$}{
+    %         $b \gets B_{n-q+1}$\;
+
+    %         \While{$k < n$ \textbf{and} $a+b \geq v$}{
+    %             $k \gets k+1$\;
+
+    %             $a \gets A_{n-k+1}$\;
+    %         }
+
+    %         \uIf{$a+b \geq v$}{
+    %             $m \gets k$\;
+    %         }\Else{
+    %             $m \gets k-1$\;
+    %         }
+    %         \For{$j$ = \KwTo $1,2\ldots,m$}{
+    %             $S \gets S \cup \{b + A_{n-j+1}\}$
+    %         }
+    %     }
+    %     \Return S\;
+    % }
+    \caption{Fast sum combination without using heap}\label{alg:sumcombination} 
+\end{algorithm}
+
+Function \texttt{collect\_geq} is similar the \texttt{count\_geq} except the counting is replace by the item collection.
+Note in function \texttt{count\_geq}, variable $k$ monotoneously increase while $q$ monotoneously decrease in each iteration,
+the total number of iterations must be smaller or equal to $2n$.
+Here for simplicity, we do not handle the $-\infty$s in $A$ and $B$ and the degeneracy in the sums.
+They need to be taken seriously in practical implementations.
 
 \section{Technical guide}\label{sec:technical}
 This project depends on multiple open source packages in the Julia ecosystem.
