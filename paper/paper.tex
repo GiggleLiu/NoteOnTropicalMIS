@@ -222,7 +222,7 @@ Listing \thelstlisting: #1\hfill%\hfill%
 \maketitle
 
 \begin{abstract}
-We introduce a method that uses generic programming tensor network to compute various properties of a class of hard graph problems that can be quantified over a local set.
+We introduce a method that uses generic programming tensor network to compute various properties of a class of hard graph problems that can be decribed by local constraints.
 Let the independent set problem be an example, we show how to compute, for example, the maximum several independent set sizes, the counting of independent sets of a give size, the enumeration of independent sets of a given size.
 By making use of generic programming, our algorithms are very simple to implement and one can in addition directly utilize recent advances in tensor network contraction techniques such as near-optimal contraction order finding and slicing to achieve high performance.
 The algorithmic complexity of this approach is $2^{{\rm tw}(G)}$, where ${\rm tw} (G)$ is the treewidth of the problem graph.
@@ -250,17 +250,19 @@ but I am feeling defining a local tensor in our paper is same as quantifing over
 \href{https://en.wikipedia.org/wiki/Quantifier\_(logic)}{https://en.wikipedia.org/wiki/Quantifier\_(logic)}}
 
 \section{Introduction}
-In graph theory and combinatorial optimization, there is an important class of problems that can be quantified over a vertex and its neighborhood,
+In graph theory and combinatorial optimization, there is an important class of problems that can be local constraints over a vertex and its neighborhood,
 including the independent set problem, the cutting problem, the K-coloring problem, the satisfiability problem,
 the maximal clique problem, and the vertex cover problem et al ~\cite{Moore2011}.
-There is a widespread interest of these problem because they have wide range of applications in scheduling, logistics,
-wireless networks and telecommunication, and computer vision, etc.~\cite{Butenko2003, Wu2015}.
-\blue{need more diversed applications not limited to IS}
+%There is a widespread interest of these problem because they have wide range of applications in scheduling, logistics,
+%wireless networks and telecommunication, and computer vision, etc.~\cite{Butenko2003, Wu2015}.
+%\blue{need more diversed applications not limited to IS}
+Many decision and counting properties of these problems are in general intractable at large sizes (exponential runetime in problem size in the worst case),
+but it is nevertheless desirable to have high-performance algorithms because of their ubiquitous applications~\cite{Butenko2003, Wu2015}.
 
 The most studied version of the above problems is finding a maximum/minimum set satisfying the contraints and the corresponding set size ,
 while many of them belong to the hardness category NP-hard~\cite{Hastad1996}, i.e. it is unlikely to solve them in a polynomial time.
-In this paper, we focus on the less studied \textit{property} computation which can be harder but is crutial towards understanding a hard problem.
-Here, the \textit{property} refers to a class of quantities that not only include the maximum/minimum set size,
+In this paper, we focus on the less studied \textit{solution space property} computation which can be harder, e.g. counting independent sets of a general graph is \#P-complete~\cite{Vadhan2001}, but is crutial towards understanding a hard problem.
+Here, the \textit{solution space property} refers to a class of quantities that not only include the maximum/minimum set size,
 but also include the number of sets at a give size, enumeration of all sets at a give size or direct sampling of such sets when they are not enumeratable.
 For the weighted version of the above problems, it also includes finding largest/smallest $k$ sets and their sizes.
 %are many interesting and hard computational problems concerning various properties of independent sets.
