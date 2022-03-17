@@ -283,7 +283,7 @@ Tensor network is also known as the sum product network in probabilistic modelin
 It is composed of a set of tensors and a set of labels for specifying the contraction of tensors,
 where the tensor element types are typically restricted to standard number types such as real numbers and complex numbers.
 We extend this concept to generic tensor network by generalizing the tensor element type to any type being a commutative semiring.
-Given a good contraction order, the space required to contract a tensor network is 2 power the tree width of its line graph~\cite{Markov2008}.
+Given a good contraction order, the space required to contract a tensor network is 2 power the treewidth of its line graph~\cite{Markov2008}.
 \purple{I’d write out $2^{{\rm tw}(G)}$}\blue{I feel it is hard to explain line graph without texts.}
 Recent progress in simulating quantum circuits with random tensor networks~\cite{Gray2021, Pan2021, Kalachev2021} enables us to find such a good contraction order for a tensor network with thousands of tensors in a reasonable time.
 \purple{Is the scaling of these algorithms known?}\blue{They are not exact algorithms, the time can be any, typically a few minutes, will it be helpful to mention this?}
@@ -401,14 +401,14 @@ One of the key concepts that push the technology forward is called generic progr
 \end{definition}
 
 \purple{I think the following paragraph could be clarified. When you read the definition
-of generic programming, it’s not clear what “in the most general setting” means. My
+of generic programming, it's not clear what ``in the most general setting'' means. My
 understanding is it just means that the program will work regardless of the input data
 type - it would be good to say this explicitly. I also think the way it is written takes a while
 to understand what dynamically versus statically typed languages are. The definition,
 “When these languages “see” a new input type, the compiler can recompile the generic
 program for the new type.” comes rather late in the paragraph. Also, while I know what
 you mean, concepts like “inlining immutable elements” and “cache miss rate” would be
-lost on someone only with a physics background.}
+lost on someone only with a physics background.}\blue{This definition is from the book I cited, I also do not like ``in the most general setting'', maybe we just use our version?}
 This definition of generic programming contains two major aspects: a single program works in the most general setting and efficiency.
 To understand the first aspect on generality, suppose we want to write a function that raises an element to a power, $f(x, n) := x^n$.
 One can easily write a function for standard number types that computes the power of $x$ in $O \left( \log(n) \right)$ steps using the multiply and square trick.
@@ -554,7 +554,7 @@ complexity? Order of magnitude doesn't make sense to me in terms of scaling. Als
 what is the time complexity of finding a good contraction order? Is there a known
 average-case complexity? This seems important.}\blue{see added texts below.}
 The pairwise tensor contraction also makes it possible to utilize basic linear algebra subprograms (BLAS) functions to speed up the computation for certain tensor element types.
-In practise, it is difficult to find an optimal contraction order for large tensor networks because finding the tree width itself is NP-hard.
+In practise, it is difficult to find an optimal contraction order for large tensor networks because finding the treewidth itself is NP-hard.
 However, it is easy to find a close to optimal contraction order in typically a few minutes with a heuristic contraction order finding algorithm~\cite{Kourtis2019,Kalachev2021}.
 For large scale applications,
 it is also possible to slice over certain degrees of freedom to reduce the space complexity, i.e.
@@ -631,7 +631,7 @@ One can easily check the maximum tensor during computing is rank 2, and the tota
 \purple{I have not checked this yet but will
 tomorrow. Is it really easy/simple enough to do without writing stuff down? Is this the simplest
 example possible? The equations look quite formidable at first glance, and it takes a lot of time
-to match the hyperedge labels in the equation to the physical graph.}
+to match the hyperedge labels in the equation to the physical graph.}\blue{sometimes I am afraid the example is too trivial to be useful. The simplest example to show contraction order matters can be a 3-vertex one.}
 
 \section{Independence polynomial}\label{sec:indpoly}
 Let $x_i = x$ and $w_i = 1$, the evaluation of \Eq{eq:idp} corresponds to the independence polynomial~\cite{Harvey2018,Ferrin2014}.
@@ -643,21 +643,21 @@ I(G, x) = \sum_{k=0}^{\alpha(G)} a_k x^k,
 where $a_k$ is the number of independent sets of size $k$ in graph $G=(V,E)$. The total number of independent sets is thus equal to $I(G, 1)$.
 Its connection to \Eq{eq:idp} can be understood as follows: the product over vertex tensor elements produces a factor $x^k$, where $k=\sum_i s_i$ counts the set size,
 and the product over edge tensor elements gives a factor $1$ for a configuration being in an independent set and $0$ otherwise. The summation counts the number of independent sets of size $k$. 
-One can feed the standard computer numbers types into this tensor network and evaluate the independence polynomial by contracting it numerically.
+By assigning a standard computer number to $x$, one can evaluate this independence polynomial for this specific value by contracting this tensor network directly.
 \purple{By feed in standard computer number types into the network, do you mean for
 x? Then, you look at multiple x, you can fit the independence polynomial to solve for
-the coefficients? It's not very explicit this procedure works at this point.}
-However, we are more interested in finding the coefficients of this polynomial, because this quantity tells us the counting of independent sets at each size.
+the coefficients? It's not very explicit this procedure works at this point.}\blue{how about now?}
+However, instead of evaluating this polynomial for a certain value, we are more interested in finding the coefficients of this polynomial, because this quantity tells us the counting of independent sets at each size.
 \purple{Does the previous technique
 (contracting the tensor network numerically) give the coefficients of the polynomial?
-The use of the word “however” here is confusing to me because it feels like you’re
-saying that the previous technique doesn’t give the coefficients, or it’s very hard to
-obtain the coefficients.}
+The use of the word “however” here is confusing to me because it feels like you're
+saying that the previous technique doesn't give the coefficients, or it's very hard to
+obtain the coefficients.}\blue{Yep, we haven't found the coefficients. I tried to modify words a bit, does it look better now?}
 To achieve this, let us first elevate the tensor elements $0$s and $1$s in tensors $W(x, 1)$ and $B$ from integers and floating point numbers to the additive identity,
 $\mymathbb{0}$, and multiplicative identity, $\mymathbb{1}$, of a commutative semiring as discussed in Sec.~\ref{sec:generic}.
 \purple{I'd
-say that you're about to describe this semiring, otherwise it seems like you’re going to
-use the general definition of the semiring rather than a specific type of semiring}
+say that you're about to describe this semiring, otherwise it seems like you're going to
+use the general definition of the semiring rather than a specific type of semiring}\blue{from $1$ to $\mymathbb{1}$ and $0$ to $\mymathbb{0}$ applies for a general semiring, I haven't change this part, let's discuss to make sure I understand your point.}
 Let us create a polynomial type and represent a polynomial $a_0 + a_1 x + \ldots + a_k x^k$ as a coefficient vector $a = (a_0, a_1, \ldots, a_k) \in \mathbb{R}^k$, so, e.g., $x$ is represented as $(0, 1)$.
 We define the algebra between the polynomials $a$ of order $k_a$ and $b$ of order $k_b$ as
 \begin{equation}
@@ -684,11 +684,19 @@ These operations are standard addition and multiplication operations of polynomi
 \end{equation}
 By contracting the tensor network with the polynomial type, we have the exact representation of the independence polynomial.
 In practise, using the polynomial type suffers a space overhead proportional to $\alpha(G)$ because each polynomial requires a vector of such size to store the coefficients. 
-In \App{sec:finitefield}, we provide an accurate and memory efficient method to find the polynomial by fitting it in a finite field.
-Alternatively, one can use the method in \App{sec:fft} to fit this polynomial more time efficiently with complex number at the cost of precision.
+One may argue that one can first evaluate this polynomial at different $x$ being a standard number type,
+and then apply the gaussian elimination to fit the coefficients of this polynomial.
+This seemingly more time and space efficient approach suffers from severe issues in practise.
+The data ranges of standard integer types are too small to cover many practical using cases,
+while the floating point numbers may have round off error that much larger than the value itself, because the number of sets at different sizes may vary tens or even hundreds of orders and this makes the small coefficients can not be retrieved correctly by fitting.
+For the purpose of evaluating these coefficients, we refer readers to \App{sec:finitefield}, where we provide an accurate and memory efficient method to find the polynomial by fitting it in a finite field.
+Alternatively, one can use the method in \App{sec:fft} to fit this polynomial more time efficiently with complex numbers with controllable round off errors.
+For the purpose of discussion in the main text, let us stick to this less efficient polynomial algebra.
 \purple{It's not clear to me what we gain by using the
 polynomial semiring rather than floating points/integers here. Could you comment on
-how the compiler can optimize on this data type?}
+how the compiler can optimize on this data type?}\blue{I added some discussion here to address why we stick to polynomial number types,
+for short, it is a dynamic type that can be slow, so we do not use it a lot in practise.
+I mention it here because it is the base of the following discussion.}
 
 \section{Maximum independent sets and its counting}\label{sec:counting}
 \subsection{Tropical algebra for finding the MIS size and counting MISs}
@@ -704,7 +712,7 @@ because I thought 0 = (0, ?) where “?” could be anything positive since it's
 by zero. It confused me that ? could equal $-\infty$ since I thought you defined your ring for
 k positive, since a polynomial has positive exponents. If you have negative exponents I
 thought it is a Laurent polynomial or something. After re-reading I see why this doesn't
-matter, though.}
+matter, though.}\blue{I let $\mymathbb{0} = (1, -\infty)$ now, it is still correct, is it easier for understanding or I change it back?}
 From this, we can define a new algebra as
 \begin{equation}
     \eqname{P1}
@@ -715,7 +723,7 @@ From this, we can define a new algebra as
         a_x\infty^{\max(x,y)}, & x > y
     \end{cases}, \\
     a_x\infty^x \odot a_y\infty^y &= a_x a_y\infty^{x+y}\\
-    \mymathbb{0} &= 0\infty^{-\infty}\\
+    \mymathbb{0} &= 1\infty^{-\infty}\\
     \mymathbb{1} &= 1\infty^{0}.
 \end{split}%& \text{\rlap{(P1)}}
 \label{eq:countingtropical}
@@ -877,7 +885,7 @@ $left$ and $right$ are left and right operands of \texttt{SUM} and \texttt{PROD}
 \end{equation}
 \purple{It might be nice to have a picture of an example tree if you have time. However,
 it is pretty clear from the definition, it would just help to visualize. Do you ever use the
-zero element?}
+zero element?}\blue{now we have an example, but it does not include a zero element, do you think I should use a more concrete one instead of an abstract one?}
 The vertex tensor and edge tensor become
 \begin{equation}
     W^{\rm SPT}((\texttt{LEAF},\boldsymbol{e}_i,/,/)) = \left(\begin{matrix}
@@ -895,13 +903,47 @@ This algebra is a commutative semiring because we define the equivalence of two 
 Although one is probably unable to enumerate the configurations represented by this tree due to the extremely large configuration space size,
 but he can directly sample configurations from this tree.
 This is because once we have this sum-product representation of the configuration space,
+either generate by using this algebra directly or serve as the coefficients of (truncated) polynomials,
 one can compute the number of configurations in each branch rigorously and efficiently.
 \purple{To clarify - is the sum-product tree now the coefficients
 on the polynomial? I am a little confused on how we would, for instance, use this to
-compute the MISs}
+compute the MISs}\blue{added one more descriptive sentence, does it resolve your concern?}
 To generate samples, one just descends this sum product tree to left or right sibling with probability decided by the size of each branch while doing the computation specified by the first field.
-\purple{How do we compute the size of each
+\xpurple{How do we compute the size of each
 branch?}
+\begin{example}
+Let us consider the following sum product tree 
+\begin{equation*}
+    (\texttt{SUM}, /, (\texttt{PROD}, /, A, B), (\texttt{SUM}, /, C, D)),
+\end{equation*}
+where siblings $A, B, C$ and $D$ can be any four types of nodes.
+It can be represented diagramatically as the following.
+
+\centerline{\begin{tikzpicture}[]
+    \def\dx{0};
+    \def\a{1.0};
+    \def\b{0.5};
+    \def\ya{-1.0};
+    \def\yb{-0.8};
+    \node[] at (\dx, 0) (P1) {$\oplus$};
+    \node[] at (\dx+\a, \ya) (P2) {$\oplus$};
+    \node[] at (\dx-\a, \ya) (M1) {$\odot$};
+    \node[] at (\dx-\a-\b, \ya+\yb) (A) {$A$};
+    \node[] at (\dx-\a+\b, \ya+\yb) (B) {$B$};
+    \node[] at (\dx+\a+\b, \ya+\yb) (C) {$C$};
+    \node[] at (\dx+\a-\b, \ya+\yb) (D) {$D$};
+    \draw[] (P1) -- (M1);
+    \draw[] (P1) -- (P2);
+    \draw[] (P2) -- (C);
+    \draw[] (P2) -- (D);
+    \draw[] (M1) -- (A);
+    \draw[] (M1) -- (B);
+\end{tikzpicture}}
+
+The left and right sibling of root node has size $|A|\times |B|$ and $|C|+|D|$ respectively,
+and since the root node has type \texttt{SUM}, its size can be computed as $|A|\times |B| + |C|+|D|$.
+One can compute the sizes of $A, B, C$ and $D$ recursively until the program meets either a the \texttt{LEAF} node or a \texttt{ZERO} node, which has a known size of $1$ or $0$ respectively.
+\end{example}
 
 \section{Weighted graphs}\label{sec:weighted}
 In the previous discussion, we have limited ourselves to unweighted graphs.
@@ -983,7 +1025,7 @@ Also, it might be worth adding a couple descriptor words on bounding.}
 GPU computes much faster than CPU in all cases when the problem scale is large enough such that the actual computing time is comparable or larger than the launching overhead of CUDA kernels.
 Most algebras can be computed on a GPU, except those requiring dynamic sized structures, i.e.\ types with algebra defined in \Eq{eq:polynomial}, \Eq{eq:set}, \Eq{eq:ext-tropical} and \Eq{eq:expr}.
 In figure~\ref{fig:benchmark}(c), one can see the Fourier transformation based method is the fastest in computing the independence polynomial,
-but it may suffer from round-off errors\purple{Can the round-off error thing be seen from Figure c?}. The finite field (GF$(p)$) approach is the only method that does not have round-off errors and can be run on a GPU.
+but it may suffer from round-off errors (\App{sec:fft})\purple{Can the round-off error thing be seen from Figure c?}\blue{it is hard, so I added a ref to the appendix, is it more informative?}. The finite field (GF$(p)$) approach is the only method that does not have round-off errors and can be run on a GPU.
 In figure~\ref{fig:benchmark}(d), one can see the technique to bound the enumeration space improves the performance for more than one order of magnitude in enumerating the MISs.
 Bounding can also reduce the memory usage significantly, without which the largest computable graph size is only $\sim150$ on a device with 32GB main memory.
 
@@ -998,9 +1040,9 @@ The number of independent sets for square grid graphs of size $L \times L$ form 
 We computed the integer sequence for $L=38$ and $L=39$, which, to the best of our knowledge, is not known before.
 In the computation, we used the finite-field algebra for contracting arbitrarily high precision integer tensor networks. 
 
-A useful number that can be computed using the number of independent sets is the entropy constant for the hardcore lattice gases on these graphs.
+A theoretically interesting number that can be computed using the number of independent sets is the entropy constant for the hardcore lattice gases on these graphs, which can tell us thermal dynamic properties of these lattices at the high temperature limit.
 \purple{Why is it useful and
-what does it tell us about the physical system?}
+what does it tell us about the physical system?}\blue{It is probably useless, so: useful -> theoretically interesting}
 For the square grid graphs, it is called the \textit{hard square entropy constant} (\href{https://oeis.org/A085850}{OEIS A085850}), which is defined as $\lim_{L\rightarrow \infty} F(L,L)^{1/L^2}$, where $F(L,L)$ is the number of independent sets of a given lattice dimensions $L \times L$. This quantity arises in statistical mechanics of hard-square lattice gases~\cite{Baxter1980, Pearce1988} and is used to understand phase transitions for these systems. This entropy constant is not known to have an exact representation, but it is accurately known in many digits. Similarly, we can define entropy constants for other lattice gases. In \Fig{fig:hardsquare}, we look at how $F(L,L)^{1/\lfloor pL^2\rceil}$ scales as a function of the grid size $L$ for all types of graphs shown in Figure~\ref{fig:lattices}. Our results match the known results for the non-disordered square grid and King's graphs. For disordered square grid and King's graphs with a filling factor $p=0.8$, we randomly sample 1000 graph instances. To our knowledge, the entropy constants for these disordered graphs have not been studied before. Interestingly, the variations due to different random instances are negligible for this entropy quantity. 
 
 \begin{figure}[t] 
@@ -1082,8 +1124,8 @@ We expect our tool can be used to understand and study many interesting applicat
     \node[draw,fill=lime!80,fill opacity=1, text opacity=1.0,ellipse,minimum width=2cm, minimum height=1cm,inner sep=0pt] at (0, 2.5) (R) {$\mathbbm{R}$};
     \def\dx{-3};
     \node[draw,fill=teal!50,fill opacity=1, text opacity=1.0,ellipse,minimum width=5cm, minimum height=3cm,inner sep=0pt] at (\dx, 0) (PN) {\hspace{-3.5cm}Polynomial};
-    \node[draw,fill=brown!75,fill opacity=1, text opacity=1.0,ellipse,minimum width=3.5cm, minimum height=1.0cm,inner sep=0pt] at (\dx, 0.7) (P1) {\hspace{-1.0cm}Highest order};
-    \node[draw,fill=brown!40,fill opacity=1, text opacity=1.0,ellipse,minimum width=3.5cm, minimum height=1.0cm,inner sep=0pt] at (\dx, -0.4) (P2) {\hspace{-0.8cm}2nd highest order};
+    \node[draw,fill=brown!75,fill opacity=1, text opacity=1.0,ellipse,minimum width=3.5cm, minimum height=1.0cm,inner sep=0pt] at (\dx, 0.7) (P1) {\hspace{-1.0cm}Largest order};
+    \node[draw,fill=brown!40,fill opacity=1, text opacity=1.0,ellipse,minimum width=3.5cm, minimum height=1.0cm,inner sep=0pt] at (\dx, -0.4) (P2) {\hspace{-0.8cm}2nd largest order};
     \node[draw,fill=brown,fill opacity=1, text opacity=1.0,ellipse,minimum width=0.8cm, minimum height=0.3cm,inner sep=0pt] at (\dx, 1.0) (T) {};
     \node[draw,fill=brown!50,fill opacity=1, text opacity=1.0,ellipse,minimum width=0.8cm, minimum height=0.3cm,inner sep=0pt] at (\dx, -0.1) (T2) {};
     \node at (\dx, -1.2) {$\ldots$};
@@ -1102,6 +1144,7 @@ We expect our tool can be used to understand and study many interesting applicat
     The overlap between two algebra indicates that a new algebra can be created by combining those two types of algebra.}
     \purple{It's not clear what
 some words mean on this diagram, such as ``highest order'' and ``extended tropical''}
+\blue{the extended tropical is defined in \Sec{sec:weighted}, should I emphasis it more? also, ``highest''->``largest''}
      \label{fig:venn-diagram}
 \end{figure}
 
