@@ -1007,19 +1007,21 @@ The main goal of this section is to show the relative timing for computing diffe
     \label{fig:benchmark}
 \end{figure}
 
-Figure~\ref{fig:benchmark}(a) shows the time and space complexity of tensor network contraction for different graph sizes, where the space complexity is the same as the treewidth of the problem graph.
+Figure~\ref{fig:benchmark}(a) shows the time and space complexity of tensor network contraction for different graph sizes,
+where the space complexity is the same as the treewidth of the problem graph.
+Here, we assume our contraction order finding program has been converged to the optimal treewidth.
 The contraction order is obtained using the local search algorithm in Ref.~\cite{Kalachev2021}.
 In practice, slicing technique~\cite{Kalachev2021} is used for graphs with treewidth greater than 27 to fit the computation into a 16GB memory.
-One can see that all the computing times in figure~\ref{fig:benchmark}(b), (c) and (d) have a strong correlation with the treewidth\purple{with the number
-of vertices, and therefore the treewidth}.
-\purple{Does this say anything about how
+One can see that all the computing times in figure~\ref{fig:benchmark}(b), (c) and (d) have a strong correlation with the treewidth,
+while in panel (d), the timing of certain computing tasks also strongly correlates with other factors like the configuration space size.
+\purple{with the number of vertices, and therefore the treewidth}\blue{not sure it is safe to say this, because they do not always have a nice linear relation}.
+\xpurple{Does this say anything about how
 optimized the contraction order is? If so, it might be worth explicitly saying. Some of
 the quantities in panel d look like they might be superexponential in the number of
 vertices (tree-width).}
-Among these benchmarks, computational tasks with data types \texttt{T (CPU)},
-\texttt{$\mathbbm{R}$ (CPU)}, \texttt{$\mathbbm{R}$ (GPU)}, \texttt{$\mathbbm{C}$ (CPU)}, \texttt{$\mathbbm{C}$ (GPU)} and \texttt{T+bounding (CPU)} can utilize fast BLAS functions to evaluate tensor contractions, hence 
+Among these benchmarks, computational tasks with data types tropical number of on CPU and real and complex numbers on both CPU and GPU can utilize fast BLAS functions to evaluate tensor contractions, hence 
 are much faster comparing to non-BLAS element types in the same category.
-\purple{It might be worth explicitly saying
+\xpurple{It might be worth explicitly saying
 the data types the first time they're mentioned (for example, I don't know what T is.
 Also, it might be worth adding a couple descriptor words on bounding.}
 GPU computes much faster than CPU in all cases when the problem scale is large enough such that the actual computing time is comparable or larger than the launching overhead of CUDA kernels.
@@ -1065,7 +1067,28 @@ For the square grid graphs, it is called the \textit{hard square entropy constan
 \end{figure}
 
 \subsection{The overlap gap property\label{sec:overlap-gap}}
-With the tool to enumerate configurations, one can try to understand the structure of the independent set configuration space, such as the optimization landscape for finding the MISs and the geometry of the solution space. One of the known barriers for finding the MIS is the so-called overlap gap property~\cite{Gamarnik2013, Gamarnik2019}. Intuitively, if the overlap gap property is present, it means every two large independent sets either have a significant intersection or very small intersection; it implies that large independent sets are clustered together. This clustering property has been used to prove the limitations of local algorithms in finding the MISs~\cite{Gamarnik2013, Gamarnik2019}. Here, we use the computed configurations of large independent sets to investigate the presence or absence of the overlap gap property for some given graphs. In particular, in \Fig{fig:hamming}, we enumerated all ISs of size $\geq\alpha(G)-1$ for two random three regular graph instances of size 100 and show the pairwise Hamming distance statistics for the enumerated configurations. In \Fig{fig:hamming}(a), we observed the multiple peak structure for the pairwise Hamming distance for one of the graphs. This indicates the presence of the overlap gap property and disconnected clusters exist in the configuration space for large independent sets. We expect our numerical tool can be used to understand this phenomenon better and to further investigate the graph properties and the geometry of the configuration spaces for a variety of graph instances.
+With the tool to enumerate configurations, one can try to understand the structure of the independent set configuration space,
+such as the optimization landscape for finding the MISs and the geometry of the solution space.
+One of the known barriers for finding the MIS is the so-called overlap gap property~\cite{Gamarnik2013, Gamarnik2019}.
+Intuitively, if the overlap gap property is present, it means every two large independent sets either have a significant intersection or very small intersection;
+it implies that large independent sets are clustered together.
+This clustering property has been used to prove the limitations of local algorithms in finding the MISs~\cite{Gamarnik2013, Gamarnik2019}.
+It was shown that for finding MISs of $d$ regular graphs with $d$ and graph sizes both being large, there exists overlap gap property~\cite{Rahman2017,Gamarnik2021}.
+However, it is not yet clear whether for small $d$, e.g. three regular graphs, this statement is still true.
+Here, we direct sample from the computed configurations of large independent sets to investigate the presence or absence of the overlap gap property for some given graphs.
+We do no explore the full configurations space because the number of configurations is too large to fit into a storage,
+so we have to use the sum product tree representation to store it in a compact format and draw samples from it.
+We compare two categories of graphs, one is the King's graph at $0.8$ filling, a type of unit disk graph having no overlap gap property, \blue{@Maddie, do you have a good reference to justify this statement about unit disk graph OGP?}
+another is the vertex $3$-regular graph that we want to investigate.
+Each category contains $9$ randomly generated instances, due to the limitation of computing resources,
+the size of King's graph is $20\times 20$ ($320$ vertices) and the size of $3$-regular graphs are $110$.
+In particular, in \Fig{fig:hamming}, 
+we sample two sets of $10^4$ configurations from the ISs at sizes $\geq \text{ratio} \times \lfloor\alpha(G)\rfloor$ for each instance
+ and show the pairwise Hamming distance distribution for the enumerated configurations.
+In \Fig{fig:hamming}(a), we observed a clear single peak structure at a fixed distance normalized by the MIS size for the King's graphs.
+While in \Fig{fig:hamming}(b), we observed the multiple peak structure as the ratio becomes small for the $3$-regular graphs.
+This indicates the presence of the overlap gap property and disconnected clusters exist in the configuration space for large independent sets.
+We expect our numerical tool can be used to understand this phenomenon better and to further investigate the graph properties and the geometry of the configuration spaces for a variety of graph instances.
 \begin{figure} 
     \begin{subfigure}[t]{\textwidth}
         \centering
@@ -1097,7 +1120,14 @@ With the tool to enumerate configurations, one can try to understand the structu
     \caption{A visualization of experimental outputs of a quantum algorithm for solving the Maximum Independent Set problem. Each vertex represents an independent set, with edges between independent sets with pairwise Hamming distance $\leq 2.$}
     \label{fig:exp_configuratoins}
 \end{figure}
-The ability to enumerate configurations can also be used to understand the distribution of outputs from algorithms for solving the Maximum Independent Set problem. This can give detailed insights to performance of the algorithm, such as if the algorithm is likely to return independent sets from certain clusters of local or global minima in the solution space. As an example, we show in Figure~\ref{fig:exp_configuratoins} how our algorithm can be used to visualize experimental outputs of a quantum algorithm for solving the Maximum Independent Set problem using a programmable Rydberg atom array quantum computer~\cite{ebadi2022quantum}. The structure of the solution space for a King's graph with $39$ vertices and filling factor $\rho=0.8$ can be visualized on a graph where each vertex represents a large independent set, with edges between independent sets with a small pairwise Hamming distance $\leq 2.$ The algorithm either finds the largest independent set with size $\alpha(G)$ with high probability, or returns a suboptimal independent set, usually with size $\alpha(G)-1.$ The algorithm does not appear to return local minima with large Hamming distance from the MISs as suggested by~\cite{altshuler2010}, but samples from local minima with a wide range of Hamming distances from the MISs. Consistent with Sec.~\ref{sec:overlap-gap}, there are no disconnected clusters in the solution space for this particular King's graph.
+The ability to enumerate configurations can also be used to understand the distribution of outputs from algorithms for solving the Maximum Independent Set problem.
+This can give detailed insights to performance of the algorithm, such as if the algorithm is likely to return independent sets from certain clusters of local or global minima in the solution space.
+As an example, we show in Figure~\ref{fig:exp_configuratoins} how our algorithm can be used to visualize experimental outputs of a quantum algorithm for solving the Maximum Independent Set problem using a programmable Rydberg atom array quantum computer~\cite{Ebadi2022}.
+The structure of the solution space for a King's graph with $39$ vertices and filling factor $\rho=0.8$ can be visualized on a graph where each vertex represents a large independent set, with edges between independent sets with a small pairwise Hamming distance $\leq 2.$
+The algorithm either finds the largest independent set with size $\alpha(G)$ with high probability, or returns a suboptimal independent set, usually with size $\alpha(G)-1.$
+The algorithm does not appear to return local minima with large Hamming distance from the MISs as suggested by~\cite{altshuler2010},
+but samples from local minima with a wide range of Hamming distances from the MISs.
+Consistent with Sec.~\ref{sec:overlap-gap}, there are no disconnected clusters in the solution space for this particular King's graph.
 
 
 \section{Discussion and conclusion}
