@@ -228,7 +228,7 @@ We introduce a method that uses generic programming tensor network to compute va
 Let the independent set problem be an example, we show how to compute, for example, the maximum several independent set sizes, the counting of independent sets of a give size, the enumeration of independent sets of a given size.
 By making use of generic programming, our algorithms are very simple to implement and one can in addition directly utilize recent advances in tensor network contraction techniques such as near-optimal contraction order finding and slicing to achieve high performance.
 The algorithmic complexity of this approach is $2^{{\rm tw}(G)}$, where ${\rm tw} (G)$ is the treewidth of the problem graph.
-Other hard graph problems solvable in our framework includes the cutting problem, the K-coloring problem, the maximal clique problem, the dominating set problem, and satisfiability problem, among others.
+Other hard graph problems solvable in our framework includes the cutting problem, the vertex coloring problem, the maximal clique problem, the dominating set problem, and satisfiability problem, among others.
 To demonstrate the versatility of this tool, we apply it to a few examples including the calculations of the entropy constant for some hardcore lattice gases on 2D square lattices and the study of the overlap gap property on three regular graphs.
 We show how our method helps people understand these hard problems better.
 \end{abstract}
@@ -249,7 +249,7 @@ independent set, tensor network, maximum independent set, independence polynomia
 
 \section{Introduction}
 In graph theory and combinatorial optimization, there is an important class of problems that can be local constraints over a vertex and its neighborhood,
-including the independent set problem, the cutting problem, the K-coloring problem, the satisfiability problem,
+including the independent set problem, the cutting problem, the vertex coloring problem, the satisfiability problem,
 the maximal clique problem, and the vertex cover problem et al ~\cite{Moore2011}.
 %There is a widespread interest of these problem because they have wide range of applications in scheduling, logistics,
 %wireless networks and telecommunication, and computer vision, etc.~\cite{Butenko2003, Wu2015}.
@@ -301,8 +301,10 @@ Dynamic programming is more general purposed, while a tensor network has a riche
 %However, there is a lack of general and versatile tool to compute these different properties of independent sets.
 
 To avoid the discussion being unnecessarily diversed, we mainly focus on the independent set problem,
-and discuss other combinatorial optimization problems\purple{More details on which combinatorial optimization problems this
-applies to?} in \App{sec:otherproblems}.
+and discuss other combinatorial optimization problems,
+including the cutting problem, the matching problem, the vertex coloring problem, the satisfiability problem, the dominating set problem, the set packing problem and the maximal clique problem, in \App{sec:otherproblems}.
+\xpurple{More details on which combinatorial optimization problems this
+applies to?}
 The paper is organized as follows.
 We first introduce the basic concepts of tensor networks and generic programming in \Sec{sec:tn} and \Sec{sec:generic}.
 Then we show how to reduce an independent set problem to a tensor network contraction problem \Sec{sec:tnmap}
@@ -320,14 +322,17 @@ it can be viewed as a generalization of binary matrix multiplication to nary ten
 Einstein's notation is often used to represent a tensor network, e.g.\ it represents the matrix multiplication between two matrices $A$ and $B$ as $C_{ik} = A_{ij}B_{jk}$,
 where we use a label in the subscript to represent a degree of freedom.
 One can enumerate these degrees of freedom and accumulate the product of tensor elements to the output tensor.
-In the standard Einstein's notation for tensor networks in physics, each index appears precisely twice\purple{signifying which pairs of indices are summed over}.
+In the standard Einstein's notation for tensor networks in physics, each index appears precisely twice, either both in input tensors (which will be summed over) or one in a input tensor and another in the output tensor\xpurple{signifying which pairs of indices are summed over}.
 Hence a tensor network can be represented as a simple graph,
 where a tensor is mapped to a vertex and a label shared by two tensors is mapped to an edge.
 In this work, we do not impose such a restriction, so an index can appear an arbitrary number of times. 
 The graphical representation of a generalized tensor network is a hypergraph, in which an edge (a label in subscript) can be shared by an arbitrary number of vertices (tensors).
-These two notations are equivalent in representation power because one can easily translate a generalized tensor network to the standard notation by adding $\delta$ tensors, a high dimensional equivalence of the identity matrix.
-However, introducing $\delta$ tensors may significantly increase the complexity of the tensor contraction. We illustrate this subtle point in \App{sec:tensorbad}.
-\purple{I feel that the $\delta$ tensors point is unnecessary to mention in the main text. Because not much detail is given, I internalized what it meant only on the third read-through.}
+These two notations are equivalent in representation power,
+while the generalized tensor network might produce smaller contraction complexity,
+which will be illustrated in \App{sec:tensorbad}.
+% because one can easily translate a generalized tensor network to the standard notation by adding $\delta$ tensors, a high dimensional equivalence of the identity matrix.
+%However, introducing $\delta$ tensors may significantly increase the complexity of the tensor contraction. We illustrate this subtle point in \App{sec:tensorbad}.
+\xpurple{I feel that the $\delta$ tensors point is unnecessary to mention in the main text. Because not much detail is given, I internalized what it meant only on the third read-through.}
 
 \begin{example}
 $C_{ijk} = A_{jkm} B_{mil} V_{jm}$ is a tensor network that can be evaluated as $C_{ijk} = \sum_{ml}A_{jkm} B_{mil} V_{jm}$.
