@@ -454,9 +454,8 @@ The Table~\ref{tbl:generictypes} summarizes those properties that can be compute
    {Polynomial} (\Eq{eq:polynomial})     & {Independence polynomial} \\
    {Tropical (\Eq{eq:tropical})}    & {Maximum independent set size} \\
    {Extended tropical of order $k$ (\Eq{eq:ext-tropical})}    & {Largest $k$ independent set sizes} \\
-   {Polynomial truncated to $k$-th order (\Eq{eq:countingtropical} and \Eq{eq:max2poly})}     & {$k$ largest independent sizes and their numbers\purple{``and their counting'' is gramat-
-ically confusing, can we say independence
-polynomial or degeneracy or something?}} \\
+   {Polynomial truncated to $k$-th order (\Eq{eq:countingtropical} and \Eq{eq:max2poly})}     & {$k$ largest independent sizes and their numbers
+   \purple{``and their counting'' is gramatically confusing, can we say independence polynomial or degeneracy or something?}\blue{Since you mentioned degeneracy is bad, what about ``numbers''?}} \\
    {Set} (\Eq{eq:set})     & {Enumeration of independent sets} \\
    {Sum Product Tree} (\Eq{eq:expr})     & {Sampling of independent sets} \\
    {Polynomial truncated to highest order combined with Bit string} (\Eq{eq:singleconfig})     & {Maximum independent set size and one of such configurations} \\
@@ -546,15 +545,20 @@ The contraction of this tensor network can be evaluated manually:
 The resulting polynomial represents 3 different independent sets $\{\}$, $\{a\}$ and $\{b\}$, with weights being $0$, $w_a$ and $w_b$ respectively.
 \end{example}
  
-It is in general not computational efficient to evaluate \Eq{eq:idp} by directly summing up the $2^{|V|}$ products.
-\purple{Perhaps explicitly say what this scales as?}
+It is in general not computational efficient to evaluate \Eq{eq:idp} by directly summing up the $2^{|V|}$ products, which scales exponentially as the number of vertices.
+\purple{Perhaps explicitly say what this scales as?}\blue{I am not sure explicitly saying ``scales exponentially as the number of vertices'' is helpful, because treewidth often scales linearly as number of vertices, so tensor network also scales exponentially as the number vertices in most cases.}
 The standard approach to evaluate a tensor network is to contract two tensors at a time with a certain order utilizing the associativity and commutativity of tensor contraction.
-A fully optimized contraction order can reduce the time to $O(2^{\text{tw}(G)})$~\cite{Markov2008}, while requiring a space at the same order of magnitude to store intermediate contraction results.
+A fully optimized contraction order can reduce the time complexity significantly, while requiring a minimum space complexity $O(2^{\text{tw}(G)})$~\cite{Markov2008} to store intermediate contraction results.
 \purple{Perhaps just say time and space
-complexity? Order of magnitude doesn’t make sense to me in terms of scaling. Also,
+complexity? Order of magnitude doesn't make sense to me in terms of scaling. Also,
 what is the time complexity of finding a good contraction order? Is there a known
-average-case complexity? This seems important.}
+average-case complexity? This seems important.}\blue{see added texts below.}
 The pairwise tensor contraction also makes it possible to utilize basic linear algebra subprograms (BLAS) functions to speed up the computation for certain tensor element types.
+In practise, it is difficult to find an optimal contraction order for large tensor networks because finding the tree width itself is NP-hard.
+However, it is easy to find a close to optimal contraction order in typically a few minutes with a heuristic contraction order finding algorithm~\cite{Kourtis2019,Kalachev2021}.
+For large scale applications,
+it is also possible to slice over certain degrees of freedom to reduce the space complexity, i.e.
+enumerating certain degrees of freedom in an external loop so that the space complexity of contracting a smaller tensor network inside the loop can be smaller.
 
 \begin{example}\label{eg:tensorcontraction}
 In the following, we mapping a 5 vertex graph (left) to a tensor network (right) and show how the contraction order simplifies the computation.
