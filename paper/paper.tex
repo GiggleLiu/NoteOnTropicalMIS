@@ -390,11 +390,14 @@ However, when the input data type is only checked at runtime (as opposed to when
 code is compiled), type-specific optimization cannot be used. High efficiency is only
 achieved in statically typed languages, where modern compiling technology allows the
 function to be individually optimized for each input data type (then give C++/Julia
-examples).}
+examples).}\blue{how about now?}
 In previous works relating tensor networks and combinatoric problems~\cite{Kourtis2019, Biamonte2017},
 the elements in the tensor networks are limited to standard number types such as floating point numbers and integers.
-Owning to the development of modern compiling technology, we no longer need to re our imagination to standard number types.
-One of the key concepts that push the technology forward is called generic programming:
+%Owning to the development of modern compiling technology, we no longer need to restrict our imagination to standard number types.
+The truth is, the elements in a tensor does not have to be a regular number type,
+ or even a field (since division is not used in tensor contraction).
+One can use the same tensor contraction program for different purposes with different tensor element types,
+and this idea of using the same program for different purposes is also called the generic programming in computer science:
 
 \begin{definition}[Generic programming ~\cite{Stepanov2014}]
    Generic programming is an approach to programming that focuses on designing algorithms and data structures so that they work in the most general setting without loss of efficiency.
@@ -403,12 +406,14 @@ One of the key concepts that push the technology forward is called generic progr
 \purple{I think the following paragraph could be clarified. When you read the definition
 of generic programming, it's not clear what ``in the most general setting'' means. My
 understanding is it just means that the program will work regardless of the input data
-type - it would be good to say this explicitly. I also think the way it is written takes a while
+type - it would be good to say this explicitly. }
+\blue{This definition is from the book I cited, I also do not like ``in the most general setting'', maybe we just use our version?}
+\purple{I also think the way it is written takes a while
 to understand what dynamically versus statically typed languages are. The definition,
 “When these languages “see” a new input type, the compiler can recompile the generic
-program for the new type.” comes rather late in the paragraph. Also, while I know what
-you mean, concepts like “inlining immutable elements” and “cache miss rate” would be
-lost on someone only with a physics background.}\blue{This definition is from the book I cited, I also do not like ``in the most general setting'', maybe we just use our version?}
+program for the new type.” comes rather late in the paragraph.}
+\xpurple{Also, while I know what you mean, concepts like “inlining immutable elements” and “cache miss rate” would be
+lost on someone only with a physics background.}
 This definition of generic programming contains two major aspects: a single program works in the most general setting and efficiency.
 To understand the first aspect on generality, suppose we want to write a function that raises an element to a power, $f(x, n) := x^n$.
 One can easily write a function for standard number types that computes the power of $x$ in $O \left( \log(n) \right)$ steps using the multiply and square trick.
@@ -419,8 +424,8 @@ The second aspect is about performance. For dynamically typed languages such as 
 one can easily write very general codes, but the efficiency is not guaranteed; for example, the speed of computing the matrix multiplication between two numpy arrays with python objects as elements is much slower than statically typed languages such as C++ and Julia~\cite{Bezanson2012}.
 C++ uses templates for generic programming while Julia takes advantage of just-in-time compilation and multiple dispatch.
 When these languages ``see'' a new input type, the compiler can recompile the generic program for the new type.
-A myriad of optimizations can be done during the compilation, such as inlining immutable elements with fixed sizes in an array to decrease the cache miss rate when accessing data.
-In Julia, these inlined arrays can even be compiled to GPU devices for faster computation~\cite{Besard2018}.
+A myriad of optimizations can be done during the compilation, such as optimize the memory layout of immutable elements with fixed sizes in an array to speed up the array indexing.
+In Julia, arrays with immutable elements with fixed sizes can even be compiled to GPU devices for faster computation~\cite{Besard2018}.
 
 This motivates us to think about what is the most general tensor element type allowed in a tensor network contraction program.
 We find that as long as the algebra of tensor elements forms a commutative semiring, the tensor network contraction result will be valid and be independent of the contraction order.
