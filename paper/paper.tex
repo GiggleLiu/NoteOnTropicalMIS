@@ -257,19 +257,24 @@ the maximal clique problem, and the vertex cover problem et al ~\cite{Moore2011}
 Many decision and counting properties of these problems are in general intractable at large sizes (exponential runetime in problem size in the worst case),
 but it is nevertheless desirable to have high-performance algorithms because of their ubiquitous applications~\cite{Butenko2003, Wu2015}.
 
-The most studied version of the above problems is finding a maximum/minimum set satisfying the contraints and the corresponding set size ,
+The most studied version of the above problems is finding a maximum/minimum set satisfying the contraints and the corresponding set size,
 while many of them belong to the hardness category NP-hard~\cite{Hastad1996}, i.e. it is unlikely to solve them in a polynomial time.
 \purple{Is MIS really the most studied NP-hard optimization problem? I would guess it is heavily studied, but not necessarily the most studied.}
+\blue{Here, we haven't mentioned the independent set, here ``version'' means, e.g. counting, enumeration, devision. I think finding one of the largest/smallest set and its cardinality in the above mentioned problems is the most studied?}
 In this paper, we focus on the less studied \textit{solution space property} computation which can be harder, e.g. counting independent sets of a general graph is in \#P-complete~\cite{Vadhan2001}, but is crutial towards understanding a hard problem.
 Here, the \textit{solution space property} refers to a class of quantities that not only include the maximum/minimum set size,
 but also include the number of sets at a give size, enumeration of all sets at a give size or direct sampling of such sets when they are not enumeratable.
 For the weighted version of the above problems, it also includes finding largest/smallest $k$ sets and their sizes.
 %are many interesting and hard computational problems concerning various properties of independent sets.
+Solution space property computation allows us to understand the solution space better.
+With the counting of sets at different sizes, one can related the computational hardness with the counting of sets at different sizes~\cite{Xu2018}.
+With the configuration enumeration/sampling at a given size, one can measure the overlap gap property better,
+while the configuration space connectivity also privides us an intuition about designing a better classical or quantum algortihms.
 \purple{I would give examples of why we want to compute solution space
 properties.
 For instance, in statistical physics, computing thermal states and
 observables via the partition function. In complexity theory, proving limits on local
-algorithms (OGP).}
+algorithms (OGP).}\blue{now?}
 
 We propose to view the computation of all these properties from an abstract algebra perspective and use a unified framework,
 generic tensor-network, to solve these seeming unrelated properties all.
@@ -279,13 +284,14 @@ It is composed of a set of tensors and a set of labels for specifying the contra
 where the tensor element types are typically restricted to standard number types such as real numbers and complex numbers.
 We extend this concept to generic tensor network by generalizing the tensor element type to any type being a commutative semiring.
 Given a good contraction order, the space required to contract a tensor network is 2 power the tree width of its line graph~\cite{Markov2008}.
-\purple{I’d write out $2^{{\rm tw}(G)}$}
+\purple{I’d write out $2^{{\rm tw}(G)}$}\blue{I feel it is hard to explain line graph without texts.}
 Recent progress in simulating quantum circuits with random tensor networks~\cite{Gray2021, Pan2021, Kalachev2021} enables us to find such a good contraction order for a tensor network with thousands of tensors in a reasonable time.
-\purple{Is the scaling of these algorithms known?}
+\purple{Is the scaling of these algorithms known?}\blue{They are not exact algorithms, the time can be any, typically a few minutes, will it be helpful to mention this?}
 When using tensor network for solving one of the best sets with the maximum size,
-this time complexity is just on par with the dynamic programming algorithms~\cite{Courcelle1990, Fomin2013},
-however, tensor network has richer algebraic structure, and this structure is crutial for solution space property computation.
-\purple{Not clear how first part and second part of sentence are related}
+this time complexity is the same as the dynamic programming algorithm~\cite{Courcelle1990, Fomin2013}.
+These two algorithms are related but are not equivalent.
+Dynamic programming is more general purposed, while a tensor network has a richer algebraic structure, and this structure is crutial for solution space property computation.
+\purple{Not clear how first part and second part of sentence are related}\blue{now? or maybe just removing the comparison with dynamic programming?}
 %For sparse graphs, the treewidth is usually much smaller than the number of vertices~\cite{Fomin2006}. Our algorithms, on the other hand, are much more versatile than traditional methods and can be used to compute many other properties than just the MIS size.
 
 %The independent set problem is related to physics applications such as in the hard-core lattice gas model~\cite{Dyre2016, Fernandes2007}
