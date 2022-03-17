@@ -224,13 +224,13 @@ Listing \thelstlisting: #1\hfill%\hfill%
 \maketitle
 
 \begin{abstract}
-We introduce a method that uses generic programming tensor network to compute various properties of a class of hard graph problems that can be decribed by local constraints.
+We introduce a method that uses generic programming tensor networks to compute various properties of a class of hard graph problems that can be decribed by local constraints.
 Let the independent set problem be an example, we show how to compute, for example, the maximum several independent set sizes, the counting of independent sets of a give size, the enumeration of independent sets of a given size.
 By making use of generic programming, our algorithms are very simple to implement and one can in addition directly utilize recent advances in tensor network contraction techniques such as near-optimal contraction order finding and slicing to achieve high performance.
 The algorithmic complexity of this approach is $2^{{\rm tw}(G)}$, where ${\rm tw} (G)$ is the treewidth of the problem graph.
-Other hard graph problems solvable in our framework includes the cutting problem, the vertex coloring problem, the maximal clique problem, the dominating set problem, and satisfiability problem, among others.
+Other hard graph problems solvable in our framework includes the cutting problem, the vertex coloring problem, the maximal clique problem, the dominating set problem and the satisfiability problem, among others.
 To demonstrate the versatility of this tool, we apply it to a few examples including the calculations of the entropy constant for some hardcore lattice gases on 2D square lattices and the study of the overlap gap property on three regular graphs.
-We show how our method helps people understand these hard problems better.
+We show how our method helps to understand these hard problems better.
 \end{abstract}
 
 % REQUIRED
@@ -250,7 +250,7 @@ independent set, tensor network, maximum independent set, independence polynomia
 \section{Introduction}
 In graph theory and combinatorial optimization, there is an important class of problems that can be local constraints over a vertex and its neighborhood,
 including the independent set problem, the cutting problem, the vertex coloring problem, the satisfiability problem,
-the maximal clique problem, and the vertex cover problem et al ~\cite{Moore2011}.
+the maximal clique problem, and the vertex cover problem~\cite{Moore2011}.
 %There is a widespread interest of these problem because they have wide range of applications in scheduling, logistics,
 %wireless networks and telecommunication, and computer vision, etc.~\cite{Butenko2003, Wu2015}.
 %\blue{need more diversed applications not limited to IS}
@@ -258,10 +258,10 @@ Many decision and counting properties of these problems are in general intractab
 but it is nevertheless desirable to have high-performance algorithms because of their ubiquitous applications~\cite{Butenko2003, Wu2015}.
 
 The most studied version of the above problems is finding a maximum/minimum set satisfying the contraints and the corresponding set size,
-while many of them belong to the hardness category NP-hard~\cite{Hastad1996}, i.e. it is unlikely to solve them in a polynomial time.
+while many of them belong to the hardness category NP-hard~\cite{Hastad1996}, i.e. it is unlikely to be solved in a polynomial time.
 \purple{Is MIS really the most studied NP-hard optimization problem? I would guess it is heavily studied, but not necessarily the most studied.}
 \blue{Here, we haven't mentioned the independent set, here ``version'' means, e.g. counting, enumeration, devision. I think finding one of the largest/smallest set and its cardinality in the above mentioned problems is the most studied?}
-In this paper, we focus on the less studied \textit{solution space property} computation which can be harder, e.g. counting independent sets of a general graph is in \#P-complete~\cite{Vadhan2001}, but is crutial towards understanding a hard problem.
+In this paper, we focus on the less studied \textit{solution space property} computation which can be harder, e.g. counting independent sets of a general graph is in \#P-complete~\cite{Vadhan2001}, but is crucial towards understanding a hard problem.
 Here, the \textit{solution space property} refers to a class of quantities that not only include the maximum/minimum set size,
 but also include the number of sets at a give size, enumeration of all sets at a give size or direct sampling of such sets when they are not enumeratable.
 For the weighted version of the above problems, it also includes finding largest/smallest $k$ sets and their sizes.
@@ -276,8 +276,8 @@ For instance, in statistical physics, computing thermal states and
 observables via the partition function. In complexity theory, proving limits on local
 algorithms (OGP).}\blue{now?}
 
-We propose to view the computation of all these properties from an abstract algebra perspective and use a unified framework,
-generic tensor-network, to solve these seeming unrelated properties all.
+We propose to view the computation of all these properties from an abstract algebra perspective and use the unified framework of
+generic tensor-network to solve these seemingly unrelated properties all.
 %We map the computation of these properties into generic tensor network contraction with specially designed tensor element algebra.
 Tensor network is also known as the sum product network in probabilistic modeling~\cite{Bishop2006} or einsum in linear algebra libraries such as numpy.
 It is composed of a set of tensors and a set of labels for specifying the contraction of tensors,
@@ -290,7 +290,7 @@ Recent progress in simulating quantum circuits with random tensor networks~\cite
 When using tensor network for solving one of the best sets with the maximum size,
 this time complexity is the same as the dynamic programming algorithm~\cite{Courcelle1990, Fomin2013}.
 These two algorithms are related but are not equivalent.
-Dynamic programming is more general purposed, while a tensor network has a richer algebraic structure, and this structure is crutial for solution space property computation.
+Dynamic programming is more general purposed, while a tensor network has a richer algebraic structure, and this structure is crucial for solution space property computation.
 \purple{Not clear how first part and second part of sentence are related}\blue{now? or maybe just removing the comparison with dynamic programming?}
 %For sparse graphs, the treewidth is usually much smaller than the number of vertices~\cite{Fomin2006}. Our algorithms, on the other hand, are much more versatile than traditional methods and can be used to compute many other properties than just the MIS size.
 
@@ -307,8 +307,8 @@ including the cutting problem, the matching problem, the vertex coloring problem
 applies to?}
 The paper is organized as follows.
 We first introduce the basic concepts of tensor networks and generic programming in \Sec{sec:tn} and \Sec{sec:generic}.
-Then we show how to reduce an independent set problem to a tensor network contraction problem \Sec{sec:tnmap}
-and show how to engineer the element types in \Sec{sec:counting},\Sec{sec:enumeration} and \Sec{sec:weighted} to count independent sets at a given size, enumerate/sample independent sets at a given size and find largest set sizes in weighted graphs.
+Then we show how to reduce the independent set problem to a tensor network contraction problem in \Sec{sec:tnmap}
+and show how to engineer the element types in \Sec{sec:counting}, \Sec{sec:enumeration} and \Sec{sec:weighted} to count independent sets at a given size, enumerate/sample independent sets at a given size and find largest set sizes in weighted graphs.
 % by computing a number of independent set properties of certain sparse graphs on central processing units (CPUs) and graphics processing units (GPUs) and show its good performance.
 Lastly, we benchmark our algorithms in \Sec{sec:benchmark} and provide a few examples in \Sec{sec:examples} to demonstrate the versatility of our tool.
 We show how our method can help computing the entropy constant for some hardcore lattice gases on 2D square lattices
@@ -317,7 +317,7 @@ and analyzing the presence of overlap gap property on three regular graphs.
 %a maximal independent set is an independent set that is not a subset of any other independent set, but its size may not be the maximum. 
 
 \section{Tensor networks}\label{sec:tn}
-Tensor network~\cite{Cirac2020, Orus2014} is also known as einsum, factor graph or sum-product network~\cite{Bishop2006} in different contexts;
+A tensor network~\cite{Cirac2020, Orus2014} is also known as einsum, factor graph or sum-product network~\cite{Bishop2006} in different contexts;
 it can be viewed as a generalization of binary matrix multiplication to nary tensor contraction.
 Einstein's notation is often used to represent a tensor network, e.g.\ it represents the matrix multiplication between two matrices $A$ and $B$ as $C_{ik} = A_{ij}B_{jk}$,
 where we use a label in the subscript to represent a degree of freedom.
@@ -420,7 +420,7 @@ One can easily write a function for standard number types that computes the powe
 Generic programming does not require $x$ to be a standard number type,
 instead it treats $x$ as an element with an associative multiplication operation $\odot$ and a multiplicative identity $\mymathbb{1}$.
 In such a way, when the program takes a matrix as an input, it computes the matrix power without extra efforts.
-The second aspect is about performance. For dynamically typed languages such as Python,
+The second aspect is about performance. For dynamically typed languages, such as Python,
 one can easily write very general codes, but the efficiency is not guaranteed; for example, the speed of computing the matrix multiplication between two numpy arrays with python objects as elements is much slower than statically typed languages such as C++ and Julia~\cite{Bezanson2012}.
 C++ uses templates for generic programming while Julia takes advantage of just-in-time compilation and multiple dispatch.
 When these languages ``see'' a new input type, the compiler can recompile the generic program for the new type.
@@ -428,7 +428,7 @@ A myriad of optimizations can be done during the compilation, such as optimize t
 In Julia, arrays with immutable elements with fixed sizes can even be compiled to GPU devices for faster computation~\cite{Besard2018}.
 
 This motivates us to think about what is the most general tensor element type allowed in a tensor network contraction program.
-We find that as long as the algebra of tensor elements forms a commutative semiring, the tensor network contraction result will be valid and be independent of the contraction order.
+We find that, as long as the algebra of tensor elements forms a commutative semiring, the tensor network contraction result will be valid and be independent of the contraction order.
 A commutative semiring is a ring with its multiplication operation being commutative and without an additive inverse.
 To define a commutative semiring with the addition operation $\oplus$ and the multiplication operation $\odot$ on a set $R$, the following relations must hold for any arbitrary three elements $a, b, c \in R$.
 \begin{align*}
@@ -445,7 +445,7 @@ a \odot (b\oplus c) = a\odot b \oplus a\odot c  &  \hspace{5em}\text{$\triangler
 &\\
 a \odot \mymathbb{0} = \mymathbb{0} \odot a = \mymathbb{0}
 \end{align*}
-We require the algebra being multiplicative commutative because the contraction order optimizer will change the multiplication order of elements, while we wish this contraction order does not change the contraction results.
+We require the algebra being multiplicative commutative because the contraction order optimizer will change the multiplication order of elements, while we require that the contraction order does not change the contraction results.
 In the following sections, we show how to compute a number of properties of independent sets by designing tensor element types as specific commutative semirings without changing the tensor network contraction program~\cite{Stepanov2014}.
 The Table~\ref{tbl:generictypes} summarizes those properties that can be computed by various tensor element types.
 
@@ -462,9 +462,9 @@ The Table~\ref{tbl:generictypes} summarizes those properties that can be compute
    {Polynomial truncated to $k$-th order (\Eq{eq:countingtropical} and \Eq{eq:max2poly})}     & {$k$ largest independent sizes and their numbers
    \purple{``and their counting'' is gramatically confusing, can we say independence polynomial or degeneracy or something?}\blue{Since you mentioned degeneracy is bad, what about ``numbers''?}} \\
    {Set} (\Eq{eq:set})     & {Enumeration of independent sets} \\
-   {Sum Product Tree} (\Eq{eq:expr})     & {Sampling of independent sets} \\
-   {Polynomial truncated to highest order combined with Bit string} (\Eq{eq:singleconfig})     & {Maximum independent set size and one of such configurations} \\
-   {Polynomial truncated to $k$-th order combined with Set} (\Eq{eq:countingtropicalset})    & {$k$ largest independent set sizes and their enumeration} \\
+   {Expression tree} (\Eq{eq:expr})     & {Sampling of independent sets} \\
+   {Polynomial truncated to highest order combined with bit string} (\Eq{eq:singleconfig})     & {Maximum independent set size and one of such configurations} \\
+   {Polynomial truncated to $k$-th order combined with set} (\Eq{eq:countingtropicalset})    & {$k$ largest independent set sizes and their enumeration} \\
             \bottomrule
         \end{tabularx}
     \caption{Tensor element types and the independent set properties that can be computed using them.}\label{tbl:generictypes}
@@ -550,7 +550,7 @@ The contraction of this tensor network can be evaluated manually:
 The resulting polynomial represents 3 different independent sets $\{\}$, $\{a\}$ and $\{b\}$, with weights being $0$, $w_a$ and $w_b$ respectively.
 \end{example}
  
-It is in general not computational efficient to evaluate \Eq{eq:idp} by directly summing up the $2^{|V|}$ products, which scales exponentially as the number of vertices.
+It is in general not computationally efficient to evaluate \Eq{eq:idp} by directly summing up the $2^{|V|}$ products, which scales exponentially as the number of vertices.
 \purple{Perhaps explicitly say what this scales as?}\blue{I am not sure explicitly saying ``scales exponentially as the number of vertices'' is helpful, because treewidth often scales linearly as number of vertices, so tensor network also scales exponentially as the number vertices in most cases.}
 The standard approach to evaluate a tensor network is to contract two tensors at a time with a certain order utilizing the associativity and commutativity of tensor contraction.
 A fully optimized contraction order can reduce the time complexity significantly, while requiring a minimum space complexity $O(2^{\text{tw}(G)})$~\cite{Markov2008} to store intermediate contraction results.
@@ -566,7 +566,7 @@ it is also possible to slice over certain degrees of freedom to reduce the space
 enumerating certain degrees of freedom in an external loop so that the space complexity of contracting a smaller tensor network inside the loop can be smaller.
 
 \begin{example}\label{eg:tensorcontraction}
-In the following, we mapping a 5 vertex graph (left) to a tensor network (right) and show how the contraction order simplifies the computation.
+In the following, we map a 5-vertex graph (left) to a tensor network (right) and show how the contraction order simplifies the computation.
     
     \centerline{\begin{tikzpicture}[
     dot/.style = {circle, fill, minimum size=#1,
@@ -711,7 +711,7 @@ Let $x=\infty$, the independence polynomial in the previous section becomes
 \begin{equation}
 I(G, \infty) = \lim_{x\rightarrow \infty}\sum_{k=0}^{\alpha(G)}a_k x^k = a_{\alpha(G)} \infty^{\alpha(G)},
 \end{equation}
-where the lower-order terms vanish. We can thus replace the polynomial type $a = (a_0, a_1, \ldots, a_k)$ with a new type with two fields: the largest exponent $k$ and its coefficient $a_k$.
+where the lower-order terms vanish. We can thus replace the polynomial type $a = (a_0, a_1, \ldots, a_k)$ with a new type that has two fields: the largest exponent $k$ and its coefficient $a_k$.
 \purple{I was initially confused
 because I thought 0 = (0, ?) where “?” could be anything positive since it's multiplied
 by zero. It confused me that ? could equal $-\infty$ since I thought you defined your ring for
@@ -864,7 +864,7 @@ Here is a new algebra defined on the bit strings, replacing the sets of bit stri
 \begin{equation}
 \eqname{S1}
 \begin{split}
-    \sigma \oplus \tau &= {\rm select}(\sigma, \tau), \\
+    \sigma \oplus \tau &= \texttt{select}(\sigma, \tau), \\
     \sigma \odot \tau &= (\sigma\lor^\circ \tau),\\
     \mymathbb{0} &= 1^{\otimes |V|}, \\
     \mymathbb{1} &= 0^{\otimes |V|},
@@ -874,13 +874,13 @@ where the \texttt{select} function picks one of $\sigma$ and $\tau$ by some crit
 
 \subsection{Sampling extremely large configuration space}
 When the graph size goes large, the configurations might be impossible to fit into any type of storage.
-Then instead of using the set algebra, one can use a binary sum-product tree as a compact representation of the configurations.
+Then instead of using the set algebra, one can use a binary expression tree as a compact representation of the configurations.
 We use a quadruple $(type, data, left, right)$ to represent a node in the tree, where $type$ is one of
 \texttt{LEAF}, \texttt{ZERO}, \texttt{SUM} and \texttt{PROD}, $data$ is a bit string as the content in a \texttt{LEAF} node,
 $left$ and $right$ are left and right operands of \texttt{SUM} and \texttt{PROD} nodes.
 
 \begin{equation}
-\eqname{SPT}
+\eqname{EXPR}
 \begin{split}
     s \oplus t &= (\texttt{SUM}, /, s, t)\\
     s \odot t &= (\texttt{PROD}, /, s, t)\\
@@ -893,31 +893,31 @@ it is pretty clear from the definition, it would just help to visualize. Do you 
 zero element?}\blue{now we have an example, but it does not include a zero element, do you think I should use a more concrete one instead of an abstract one?}
 The vertex tensor and edge tensor become
 \begin{equation}
-    W^{\rm SPT}((\texttt{LEAF},\boldsymbol{e}_i,/,/)) = \left(\begin{matrix}
+    W^{\rm EXPR}((\texttt{LEAF},\boldsymbol{e}_i,/,/)) = \left(\begin{matrix}
         \mymathbb{1} \\
         (\texttt{LEAF},\boldsymbol{e}_i,/,/)
     \end{matrix}\right),   
     \qquad
-        B^{\rm SPT} = \left(\begin{matrix}
+        B^{\rm EXPR} = \left(\begin{matrix}
         \mymathbb{1}  & \mymathbb{1} \\
         \mymathbb{1} & \mymathbb{0}
     \end{matrix}\right).
 \end{equation}
 
-This algebra is a commutative semiring because we define the equivalence of two sum-product trees by comparing their expanded (using \Eq{eq:set}) forms, rather than their storages.
+This algebra is a commutative semiring because we define the equivalence of two expression trees by comparing their expanded (using \Eq{eq:set}) forms, rather than their storages.
 Although one is probably unable to enumerate the configurations represented by this tree due to the extremely large configuration space size,
 but he can directly sample configurations from this tree.
-This is because once we have this sum-product representation of the configuration space,
+This is because once we have this expression tree representation of the configuration space,
 either generate by using this algebra directly or serve as the coefficients of (truncated) polynomials,
 one can compute the number of configurations in each branch rigorously and efficiently.
-\purple{To clarify - is the sum-product tree now the coefficients
+\purple{To clarify - is the expression tree now the coefficients
 on the polynomial? I am a little confused on how we would, for instance, use this to
 compute the MISs}\blue{added one more descriptive sentence, does it resolve your concern?}
-To generate samples, one just descends this sum product tree to left or right sibling with probability decided by the size of each branch while doing the computation specified by the first field.
+To generate samples, one just descends this expression tree to left or right sibling with probability decided by the size of each branch while doing the computation specified by the first field.
 \xpurple{How do we compute the size of each
 branch?}
 \begin{example}
-Let us consider the following sum product tree 
+Let us consider the following expression tree 
 \begin{equation*}
     (\texttt{SUM}, /, (\texttt{PROD}, /, A, B), (\texttt{SUM}, /, C, D)),
 \end{equation*}
@@ -990,8 +990,8 @@ We run a single thread benchmark on CPU Intel(R) Xeon(R) CPU E5-2686 v4 @ 2.30GH
 and its CUDA version on a GPU Tesla V100-SXM2 16G.
 The results are summarized in Figure~\ref{fig:benchmark}.
 The graphs that we use in benchmarks are random three regular graphs,
- a typical type of sparse graphs that has a small treewidth that asymptotically smaller than $|V|/6$~\cite{Fomin2006}.
-In this benchmark, we do not include traditional algorithms for finding the MIS size like the branching algorithms~\cite{Tarjan1977, Robson1986} and dynamic programming based algorithms~\cite{Courcelle1990, Fomin2013},
+ a typical type of sparse graphs that have a small treewidth that asymptotically smaller than $|V|/6$~\cite{Fomin2006}.
+In this benchmark, we do not include traditional algorithms for finding the MIS size such as the branching algorithms~\cite{Tarjan1977, Robson1986} or dynamic programming based algorithms~\cite{Courcelle1990, Fomin2013},
 because to the best of our knowledge, most of the properties mentioned in this paper are not computable within these frameworks.
 The main goal of this section is to show the relative timing for computing different properties.
 
@@ -1006,7 +1006,7 @@ The main goal of this section is to show the relative timing for computing diffe
         the number of independent sets having size $\alpha(G)$ and $\alpha(G)-1$, and finding $100$ largest sets sizes.
     (c) The computing time for calculating the independence polynomials with different approaches.
     (d) The computing time for configuration enumeration, including the enumeration of all independent set configurations, a single MIS configuration, all MIS configurations,
-    all independent set configurations having size $\alpha(G)$ and $\alpha(G)-1$, and all independent set configurations having size $\alpha(G)$ and $\alpha(G)-1$ in the sum product tree format,
+    all independent set configurations having size $\alpha(G)$ and $\alpha(G)-1$, and all independent set configurations having size $\alpha(G)$ and $\alpha(G)-1$ in the expression tree format,
     with or without bounding the enumeration space.
     }
     \label{fig:benchmark}
@@ -1082,7 +1082,7 @@ It was shown that for finding MISs of $d$ regular graphs with $d$ and graph size
 However, it is not yet clear whether for small $d$, e.g. three regular graphs, this statement is still true.
 Here, we direct sample from the computed configurations of large independent sets to investigate the presence or absence of the overlap gap property for some given graphs.
 We do no explore the full configurations space because the number of configurations is too large to fit into a storage,
-so we have to use the sum product tree representation to store it in a compact format and draw samples from it.
+so we have to use the expression tree representation to store it in a compact format and draw samples from it.
 We compare two categories of graphs, one is the King's graph at $0.8$ filling, a type of unit disk graph having no overlap gap property, \blue{@Maddie, do you have a good reference to justify this statement about unit disk graph OGP?}
 another is the vertex $3$-regular graph that we want to investigate.
 Each category contains $9$ randomly generated instances, due to the limitation of computing resources,
@@ -1122,7 +1122,8 @@ We expect our numerical tool can be used to understand this phenomenon better an
 \begin{figure} 
     \centering
     \includegraphics[width=.65\textwidth, trim={0cm 0cm 0cm 0cm}, clip]{figures/exp_configurations.pdf}
-    \caption{A visualization of experimental outputs of a quantum algorithm for solving the Maximum Independent Set problem. Each vertex represents an independent set, with edges between independent sets with pairwise Hamming distance $\leq 2.$}
+    \caption{A visualization of experimental outputs of a quantum algorithm for solving the maximum independent set problem.
+    Each vertex represents an independent set, with edges between independent sets with pairwise Hamming distance $\leq 2.$ \blue{can be connected by a swap operation?}}
     \label{fig:exp_configuratoins}
 \end{figure}
 The ability to enumerate configurations can also be used to understand the distribution of outputs from algorithms for solving the Maximum Independent Set problem.
@@ -1143,7 +1144,7 @@ For each solution space property, we design an algebra being a commutative semir
 With different algebras, the contraction of the same tensor network gives us the different properties.
 The data types introduced in the main text is summarized in the diagram in \Fig{fig:venn-diagram}.
 Other than the case with real numbers, we have polynomials and truncated polynomials.
-We combine them with the bit string algebra, the set algebra, and sum product tree algebra for finding, enumeration, and sampling of independent sets at a given size.
+We combine them with the bit string algebra, the set algebra, and expression tree algebra for finding, enumeration, and sampling of independent sets at a given size.
 These algebras are of generic use: they can be utilized to compute properties of maximal independent sets and a variety of other combinatorial problems such as the matching problem, the k-coloring problem, the max-cut problem, and the set packing problem, as detailed in \App{sec:otherproblems}. 
 Moreover, since the independence polynomial is closely related to the matching polynomial~\cite{Levit2005}, the clique polynomial~\cite{Hoede1994}, and the vertex cover polynomial~\cite{Akbari2013},
 our algorithm to compute the independence polynomial can also be used to compute these graph polynomials.
@@ -1185,7 +1186,8 @@ some words mean on this diagram, such as ``highest order'' and ``extended tropic
 
 \section*{Acknowledgments}
 We would like to thank Pan Zhang for sharing his python code for optimizing contraction orders of a tensor network.
-We acknowledge Sepehr Ebadi, Maddie Cain, and Leo Zhou for coming up with many interesting questions about independent sets and their questions strongly motivated the development of this project.
+We acknowledge Sepehr Ebadi, and Leo Zhou for coming up with many interesting questions about independent sets and their questions strongly motivated the development of this project.
+We thank Benjamin Schiffer for providing helpful advices about writing.
 We thank Chris Elord for helping us to write the fastest matrix multiplication library for tropical numbers, TropicalGEMM.jl. % he is a man of speed!
 We would also like to thank a number of open-source software developers, including Roger Luo, Time Besard, and Katharine Hyatt,
 for actively maintaining their packages and resolving related issues voluntarily.
