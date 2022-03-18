@@ -224,13 +224,18 @@ Listing \thelstlisting: #1\hfill%\hfill%
 \maketitle
 
 \begin{abstract}
-We introduce a method that uses generic programming tensor networks to compute various properties of a class of hard graph problems that can be decribed by local constraints.
-Let the independent set problem be an example, we show how to compute, for example, the maximum several independent set sizes, the counting of independent sets of a give size, the enumeration of independent sets of a given size.
-By making use of generic programming, our algorithms are very simple to implement and one can in addition directly utilize recent advances in tensor network contraction techniques such as near-optimal contraction order finding and slicing to achieve high performance.
-The algorithmic complexity of this approach is $2^{{\rm tw}(G)}$, where ${\rm tw} (G)$ is the treewidth of the problem graph.
-Other hard graph problems solvable in our framework includes the cutting problem, the vertex coloring problem, the maximal clique problem, the dominating set problem and the satisfiability problem, among others.
-To demonstrate the versatility of this tool, we apply it to a few examples including the calculations of the entropy constant for some hardcore lattice gases on 2D square lattices and the study of the overlap gap property on three regular graphs.
-We show how our method helps to understand these hard problems better.
+%We introduce a method that uses generic programming tensor networks to compute various properties of a class of hard graph problems that can be decribed by local constraints.
+We introduce a tensor network algorithm %a method that combines generic programming and tensor network techniques 
+to compute various solution space properties of combinatorial optimization problems on graphs with local constraints. \purple{I still think there is a more concise way to word the class of combinatorial optimization problems this works on...}
+%Let the independent set problem be an example, we show how to compute, for example, the maximum several independent set sizes, the counting of independent sets of a give size, the enumeration of independent sets of a given size.
+We look at the independent set problem as an example, and show how to compute the size of the maximum independent set, count the number of independent sets of a given size, and enumerate the independent sets of a given size.
+%By making use of generic programming, our algorithms are very simple to implement and one can in addition directly utilize recent advances in tensor network contraction techniques such as near-optimal contraction order finding and slicing to achieve high performance.
+By using generic programming techniques, %which require a program to work correctly for different input data types without sacrificing efficiency,
+the same general, simple-to-implement framework can be used to compute all of these properties. Our algorithm utilizes recent advances in tensor network contraction techniques to achieve high performance, including methods to quickly find a near-optimal contraction order and slicing.
+The algorithmic complexity of this approach is $2^{{\rm tw}(G)}$, where ${\rm tw} (G)$ is the treewidth of the problem graph $G$.
+Other hard graph problems solvable in our framework include the maximum cut problem, the vertex coloring problem, the maximal clique problem, the dominating set problem, and the satisfiability problem, among others.
+To demonstrate the versatility of this tool, we apply it to a few examples, including computing the entropy constant for several hardcore gases on disordered lattices, studying the overlap gap property on 3-regular graphs, and visualizing the output of quantum optimization algorithms for the independent set problem. % including the calculations of the entropy constant for some hardcore lattice gases on 2D square lattices and the study of the overlap gap property on three regular graphs.
+We show how our method helps to understand these hard problems better. \purple{Say on systems with hundreds of vertices or spins?}
 \end{abstract}
 
 % REQUIRED
