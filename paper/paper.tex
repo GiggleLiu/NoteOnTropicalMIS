@@ -257,11 +257,14 @@ the maximal clique problem, and the vertex cover problem~\cite{Moore2011}.
 Many decision and counting properties of these problems are in general intractable at large sizes (exponential runetime in problem size in the worst case),
 but it is nevertheless desirable to have high-performance algorithms because of their ubiquitous applications~\cite{Butenko2003, Wu2015}.
 
-The most studied version of the above problems is finding a maximum/minimum set satisfying the contraints and the corresponding set size,
-while many of them belong to the hardness category NP-hard~\cite{Hastad1996}, i.e. it is unlikely to be solved in a polynomial time.
-\purple{Is MIS really the most studied NP-hard optimization problem? I would guess it is heavily studied, but not necessarily the most studied.}
-\blue{Here, we haven't mentioned the independent set, here ``version'' means, e.g. counting, enumeration, devision. I think finding one of the largest/smallest set and its cardinality in the above mentioned problems is the most studied?}
-In this paper, we focus on the less studied \textit{solution space property} computation which can be harder, e.g. counting independent sets of a general graph is in \#P-complete~\cite{Vadhan2001}, but is crucial towards understanding a hard problem.
+The most studied aspect of the above problems is finding an optimal solution, 
+%The most studied version of the above problems is finding an optimal solution maximum/minimum set satisfying the contraints and the corresponding set size,
+, which is typically 
+%while many of them belong to the hardness category
+NP-hard~\cite{Hastad1996}, i.e. it is unlikely to be solved in a polynomial time.
+%\purple{Is MIS really the most studied NP-hard optimization problem? I would guess it is heavily studied, but not necessarily the most studied.}
+%\blue{Here, we haven't mentioned the independent set, here ``version'' means, e.g. counting, enumeration, devision. I think finding one of the largest/smallest set and its cardinality in the above mentioned problems is the most studied?}
+In this paper, we focus on the less studied problem of computing \textit{solution space properties}  which can be much harder, e.g. counting independent sets of a general graph is \#P-complete~\cite{Vadhan2001}, but is crucial towards understanding a hard problem.
 Here, the \textit{solution space property} refers to a class of quantities that not only include the maximum/minimum set size,
 but also include the number of sets at a give size, enumeration of all sets at a give size or direct sampling of such sets when they are not enumeratable.
 For the weighted version of the above problems, it also includes finding largest/smallest $k$ sets and their sizes.
@@ -283,15 +286,17 @@ Tensor network is also known as the sum product network in probabilistic modelin
 It is composed of a set of tensors and a set of labels for specifying the contraction of tensors,
 where the tensor element types are typically restricted to standard number types such as real numbers and complex numbers.
 We extend this concept to generic tensor network by generalizing the tensor element type to any type being a commutative semiring.
-Given a good contraction order, the space required to contract a tensor network is 2 power the treewidth of its line graph~\cite{Markov2008}.
-\purple{I’d write out $2^{{\rm tw}(G)}$}\blue{I feel it is hard to explain line graph without texts.}
-Recent progress in simulating quantum circuits with random tensor networks~\cite{Gray2021, Pan2021, Kalachev2021} enables us to find such a good contraction order for a tensor network with thousands of tensors in a reasonable time.
-\purple{Is the scaling of these algorithms known?}\blue{They are not exact algorithms, the time can be any, typically a few minutes, will it be helpful to mention this?}
+Given a good contraction order, the space required to contract a tensor network is
+two to the power of the treewidth of its line graph~\cite{Markov2008}.
+%\purple{I’d write out $2^{{\rm tw}(G)}$}\blue{I feel it is hard to explain line graph without texts.}
+Recent progress in simulating quantum circuits with random tensor networks~\cite{Gray2021, Pan2021, Kalachev2021} enables us to find such a good contraction order for a tensor network with thousands of tensors in a reasonable time using heuristic (inexact) methods.
+%\purple{Is the scaling of these algorithms known?}\blue{They are not exact algorithms, the time can be any, typically a few minutes, will it be helpful to mention this?}
 When using tensor network for solving one of the best sets with the maximum size,
-this time complexity is the same as the dynamic programming algorithm~\cite{Courcelle1990, Fomin2013}.
-These two algorithms are related but are not equivalent.
-Dynamic programming is more general purposed, while a tensor network has a richer algebraic structure, and this structure is crucial for solution space property computation.
-\purple{Not clear how first part and second part of sentence are related}\blue{now? or maybe just removing the comparison with dynamic programming?}
+the time complexity is the same as the dynamic programming algorithm~\cite{Courcelle1990, Fomin2013}.
+However, the tensor network has a richer algebraic structure, which crucially enables the computation of solution space properties beyond finding the solution, which is not possible with dynamic programming.
+%These two algorithms are related but are not equivalent.
+%Dynamic programming is more general purpose, while a tensor network has a richer algebraic structure, and this structure is crucial for solution space property computation.
+%\purple{Not clear how first part and second part of sentence are related}\blue{now? or maybe just removing the comparison with dynamic programming?}
 %For sparse graphs, the treewidth is usually much smaller than the number of vertices~\cite{Fomin2006}. Our algorithms, on the other hand, are much more versatile than traditional methods and can be used to compute many other properties than just the MIS size.
 
 %The independent set problem is related to physics applications such as in the hard-core lattice gas model~\cite{Dyre2016, Fernandes2007}
@@ -303,8 +308,7 @@ Dynamic programming is more general purposed, while a tensor network has a riche
 To avoid the discussion being unnecessarily diversed, we mainly focus on the independent set problem,
 and discuss other combinatorial optimization problems,
 including the cutting problem, the matching problem, the vertex coloring problem, the satisfiability problem, the dominating set problem, the set packing problem and the maximal clique problem, in \App{sec:otherproblems}.
-\xpurple{More details on which combinatorial optimization problems this
-applies to?}
+%\xpurple{More details on which combinatorial optimization problems this applies to?}
 The paper is organized as follows.
 We first introduce the basic concepts of tensor networks and generic programming in \Sec{sec:tn} and \Sec{sec:generic}.
 Then we show how to reduce the independent set problem to a tensor network contraction problem in \Sec{sec:tnmap}
@@ -402,20 +406,16 @@ and this idea of using the same program for different purposes is also called th
 \begin{definition}[Generic programming ~\cite{Stepanov2014}]
    Generic programming is an approach to programming that focuses on designing algorithms and data structures so that they work in the most general setting without loss of efficiency.
 \end{definition}
-
-\purple{I think the following paragraph could be clarified. When you read the definition
-of generic programming, it's not clear what ``in the most general setting'' means. My
-understanding is it just means that the program will work regardless of the input data
-type - it would be good to say this explicitly. }
-\blue{This definition is from the book I cited, I also do not like ``in the most general setting'', maybe we just use our version?}
-\purple{I also think the way it is written takes a while
-to understand what dynamically versus statically typed languages are. The definition,
-“When these languages “see” a new input type, the compiler can recompile the generic
-program for the new type.” comes rather late in the paragraph.}
-\xpurple{Also, while I know what you mean, concepts like “inlining immutable elements” and “cache miss rate” would be
-lost on someone only with a physics background.}
-This definition of generic programming contains two major aspects: a single program works in the most general setting and efficiency.
-To understand the first aspect on generality, suppose we want to write a function that raises an element to a power, $f(x, n) := x^n$.
+\purple{efficiency}
+By in the most general setting, we mean that a single program should work correctly for different input data types. For example, 
+%\purple{I think the following paragraph could be clarified. When you read the definition of generic programming, it's not clear what ``in the most general setting'' means. My understanding is it just means that the program will work regardless of the input data type - it would be good to say this explicitly. }
+%\blue{This definition is from the book I cited, I also do not like ``in the most general setting'', maybe we just use our version?}
+%\purple{I also think the way it is written takes a while to understand what dynamically versus statically typed languages are. The definition, “When these languages “see” a new input type, the compiler can recompile the generic program for the new type.” comes rather late in the paragraph.}
+%\xpurple{Also, while I know what you mean, concepts like “inlining immutable elements” and “cache miss rate” would be
+%lost on someone only with a physics background.}
+%This definition of generic programming contains two major aspects: a single program works in the most general setting and efficiency.
+%To understand the first aspect on generality,
+suppose we want to write a function that raises an element to a power, $f(x, n) := x^n$.
 One can easily write a function for standard number types that computes the power of $x$ in $O \left( \log(n) \right)$ steps using the multiply and square trick.
 Generic programming does not require $x$ to be a standard number type,
 instead it treats $x$ as an element with an associative multiplication operation $\odot$ and a multiplicative identity $\mymathbb{1}$.
@@ -459,8 +459,7 @@ The Table~\ref{tbl:generictypes} summarizes those properties that can be compute
    {Polynomial} (\Eq{eq:polynomial})     & {Independence polynomial} \\
    {Tropical (\Eq{eq:tropical})}    & {Maximum independent set size} \\
    {Extended tropical of order $k$ (\Eq{eq:ext-tropical})}    & {Largest $k$ independent set sizes} \\
-   {Polynomial truncated to $k$-th order (\Eq{eq:countingtropical} and \Eq{eq:max2poly})}     & {$k$ largest independent sizes and their numbers
-   \purple{``and their counting'' is gramatically confusing, can we say independence polynomial or degeneracy or something?}\blue{Since you mentioned degeneracy is bad, what about ``numbers''?}} \\
+   {Polynomial truncated to $k$-th order (\Eq{eq:countingtropical} and \Eq{eq:max2poly})}     & {$k$ largest independent sizes and their degeneracy} \\
    {Set} (\Eq{eq:set})     & {Enumeration of independent sets} \\
    {Expression tree} (\Eq{eq:expr})     & {Sampling of independent sets} \\
    {Polynomial truncated to highest order combined with bit string} (\Eq{eq:singleconfig})     & {Maximum independent set size and one of such configurations} \\
@@ -550,17 +549,12 @@ The contraction of this tensor network can be evaluated manually:
 The resulting polynomial represents 3 different independent sets $\{\}$, $\{a\}$ and $\{b\}$, with weights being $0$, $w_a$ and $w_b$ respectively.
 \end{example}
  
-It is in general not computationally efficient to evaluate \Eq{eq:idp} by directly summing up the $2^{|V|}$ products, which scales exponentially as the number of vertices.
-\purple{Perhaps explicitly say what this scales as?}\blue{I am not sure explicitly saying ``scales exponentially as the number of vertices'' is helpful, because treewidth often scales linearly as number of vertices, so tensor network also scales exponentially as the number vertices in most cases.}
+It is in general not computationally efficient to evaluate \Eq{eq:idp} by directly summing up the $2^{|V|}$ products. %, which scales exponentially as the number of vertices.
+%\purple{Perhaps explicitly say what this scales as?}\blue{I am not sure explicitly saying ``scales exponentially as the number of vertices'' is helpful, because treewidth often scales linearly as number of vertices, so tensor network also scales exponentially as the number vertices in most cases.}
 The standard approach to evaluate a tensor network is to contract two tensors at a time with a certain order utilizing the associativity and commutativity of tensor contraction.
 A fully optimized contraction order can reduce the time complexity significantly, while requiring a minimum space complexity $O(2^{\text{tw}(G)})$~\cite{Markov2008} to store intermediate contraction results.
-\purple{Perhaps just say time and space
-complexity? Order of magnitude doesn't make sense to me in terms of scaling. Also,
-what is the time complexity of finding a good contraction order? Is there a known
-average-case complexity? This seems important.}\blue{see added texts below.}
-The pairwise tensor contraction also makes it possible to utilize basic linear algebra subprograms (BLAS) functions to speed up the computation for certain tensor element types.
-In practise, it is difficult to find an optimal contraction order for large tensor networks because finding the treewidth itself is NP-hard.
-However, it is easy to find a close to optimal contraction order in typically a few minutes with a heuristic contraction order finding algorithm~\cite{Kourtis2019,Kalachev2021}.
+In practice, it is difficult to find an optimal contraction order for large tensor networks because finding the treewidth itself is NP-hard.
+However, it is easy to find a close to optimal contraction order in typically a few minutes with a heuristic contraction order finding algorithm~\cite{Kourtis2019,Kalachev2021}. The pairwise tensor contraction also makes it possible to utilize basic linear algebra subprograms (BLAS) functions to speed up the computation for certain tensor element types.
 For large scale applications,
 it is also possible to slice over certain degrees of freedom to reduce the space complexity, i.e.
 enumerating certain degrees of freedom in an external loop so that the space complexity of contracting a smaller tensor network inside the loop can be smaller.
@@ -910,9 +904,9 @@ but he can directly sample configurations from this tree.
 This is because once we have this expression tree representation of the configuration space,
 either generate by using this algebra directly or serve as the coefficients of (truncated) polynomials,
 one can compute the number of configurations in each branch rigorously and efficiently.
-\purple{To clarify - is the expression tree now the coefficients
-on the polynomial? I am a little confused on how we would, for instance, use this to
-compute the MISs}\blue{added one more descriptive sentence, does it resolve your concern?}
+%\purple{To clarify - is the expression tree now the coefficients
+%on the polynomial? I am a little confused on how we would, for instance, use this to
+%compute the MISs}\blue{added one more descriptive sentence, does it resolve your concern?}
 To generate samples, one just descends this expression tree to left or right sibling with probability decided by the size of each branch while doing the computation specified by the first field.
 \xpurple{How do we compute the size of each
 branch?}
@@ -1048,8 +1042,6 @@ We computed the integer sequence for $L=38$ and $L=39$, which, to the best of ou
 In the computation, we used the finite-field algebra for contracting arbitrarily high precision integer tensor networks. 
 
 A theoretically interesting number that can be computed using the number of independent sets is the entropy constant for the hardcore lattice gases on these graphs, which can tell us thermal dynamic properties of these lattices at the high temperature limit.
-\purple{Why is it useful and
-what does it tell us about the physical system?}\blue{It is probably useless, so: useful -> theoretically interesting}
 For the square grid graphs, it is called the \textit{hard square entropy constant} (\href{https://oeis.org/A085850}{OEIS A085850}), which is defined as $\lim_{L\rightarrow \infty} F(L,L)^{1/L^2}$, where $F(L,L)$ is the number of independent sets of a given lattice dimensions $L \times L$. This quantity arises in statistical mechanics of hard-square lattice gases~\cite{Baxter1980, Pearce1988} and is used to understand phase transitions for these systems. This entropy constant is not known to have an exact representation, but it is accurately known in many digits. Similarly, we can define entropy constants for other lattice gases. In \Fig{fig:hardsquare}, we look at how $F(L,L)^{1/\lfloor pL^2\rceil}$ scales as a function of the grid size $L$ for all types of graphs shown in Figure~\ref{fig:lattices}. Our results match the known results for the non-disordered square grid and King's graphs. For disordered square grid and King's graphs with a filling factor $p=0.8$, we randomly sample 1000 graph instances. To our knowledge, the entropy constants for these disordered graphs have not been studied before. Interestingly, the variations due to different random instances are negligible for this entropy quantity. 
 
 \begin{figure}[t] 
@@ -1123,13 +1115,13 @@ We expect our numerical tool can be used to understand this phenomenon better an
     \centering
     \includegraphics[width=.65\textwidth, trim={0cm 0cm 0cm 0cm}, clip]{figures/exp_configurations.pdf}
     \caption{A visualization of experimental outputs of a quantum algorithm for solving the maximum independent set problem.
-    Each vertex represents an independent set, with edges between independent sets with pairwise Hamming distance $\leq 2.$ \blue{can be connected by a swap operation?}}
+    Each vertex represents an independent set, with edges between independent sets which differ by a swap operation or a vertex addition.}
     \label{fig:exp_configuratoins}
 \end{figure}
 The ability to enumerate configurations can also be used to understand the distribution of outputs from algorithms for solving the Maximum Independent Set problem.
 This can give detailed insights to performance of the algorithm, such as if the algorithm is likely to return independent sets from certain clusters of local or global minima in the solution space.
 As an example, we show in Figure~\ref{fig:exp_configuratoins} how our algorithm can be used to visualize experimental outputs of a quantum algorithm for solving the Maximum Independent Set problem using a programmable Rydberg atom array quantum computer~\cite{Ebadi2022}.
-The structure of the solution space for a King's graph with $39$ vertices and filling factor $\rho=0.8$ can be visualized on a graph where each vertex represents a large independent set, with edges between independent sets with a small pairwise Hamming distance $\leq 2.$
+The structure of the solution space for a King's graph with $39$ vertices and filling factor $\rho=0.8$ can be visualized on a graph where each vertex represents a large independent set, with edges between independent sets which differ by a swap operation or a vertex addition.
 The algorithm either finds the largest independent set with size $\alpha(G)$ with high probability, or returns a suboptimal independent set, usually with size $\alpha(G)-1.$
 The algorithm does not appear to return local minima with large Hamming distance from the MISs as suggested by~\cite{altshuler2010},
 but samples from local minima with a wide range of Hamming distances from the MISs.
