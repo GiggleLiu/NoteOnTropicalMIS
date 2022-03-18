@@ -226,7 +226,7 @@ Listing \thelstlisting: #1\hfill%\hfill%
 \begin{abstract}
 %We introduce a method that uses generic programming tensor networks to compute various properties of a class of hard graph problems that can be decribed by local constraints.
 We introduce a tensor network algorithm %a method that combines generic programming and tensor network techniques 
-to compute various solution space properties of combinatorial optimization problems on graphs with local constraints. \purple{I still think there is a more concise way to word the class of combinatorial optimization problems this works on...}
+to compute various solution space properties of a class of combinatorial optimization problems specified by local constraints. \purple{I still think there is a more concise way to word the class of combinatorial optimization problems this works on...}\blue{changed a bit, better?}
 %Let the independent set problem be an example, we show how to compute, for example, the maximum several independent set sizes, the counting of independent sets of a give size, the enumeration of independent sets of a given size.
 We look at the independent set problem as an example, and show how to compute the size of the maximum independent set, count the number of independent sets of a given size, and enumerate the independent sets of a given size.
 %By making use of generic programming, our algorithms are very simple to implement and one can in addition directly utilize recent advances in tensor network contraction techniques such as near-optimal contraction order finding and slicing to achieve high performance.
@@ -234,8 +234,8 @@ By using generic programming techniques, %which require a program to work correc
 the same general, simple-to-implement framework can be used to compute all of these properties. Our algorithm utilizes recent advances in tensor network contraction techniques to achieve high performance, including methods to quickly find a near-optimal contraction order and slicing.
 The algorithmic complexity of this approach is $2^{{\rm tw}(G)}$, where ${\rm tw} (G)$ is the treewidth of the problem graph $G$.
 Other hard graph problems solvable in our framework include the maximum cut problem, the vertex coloring problem, the maximal clique problem, the dominating set problem, and the satisfiability problem, among others.
-To demonstrate the versatility of this tool, we apply it to a few examples, including computing the entropy constant for several hardcore gases on disordered lattices, studying the overlap gap property on 3-regular graphs, and visualizing the output of quantum optimization algorithms for the independent set problem. % including the calculations of the entropy constant for some hardcore lattice gases on 2D square lattices and the study of the overlap gap property on three regular graphs.
-We show how our method helps to understand these hard problems better. \purple{Say on systems with hundreds of vertices or spins?}
+To demonstrate the versatility of this tool, we apply it to a few examples, including computing the entropy constant for several hardcore gases on disordered lattices, studying the overlap gap property on King's graphs at $0.8$ filling and 3-regular graphs, and visualizing the output of quantum optimization algorithms for the independent set problem. % including the calculations of the entropy constant for some hardcore lattice gases on 2D square lattices and the study of the overlap gap property on three regular graphs.
+We show how our method helps to understand these hard problems better on systems with hundreds of vertices or spins. \xpurple{Say on systems with hundreds of vertices or spins?}
 \end{abstract}
 
 % REQUIRED
@@ -276,7 +276,7 @@ For the weighted version of the above problems, it also includes finding largest
 %are many interesting and hard computational problems concerning various properties of independent sets.
 Solution space property computation allows us to understand the solution space better.
 With the counting of sets at different sizes, one can related the computational hardness with the counting of sets at different sizes~\cite{Xu2018}.
-With the configuration enumeration/sampling at a given size, one can measure the overlap gap property better,
+With the configuration enumeration/sampling at a given size, one can measure the overlap gap property~\cite{Gamarnik2013, Gamarnik2019} better,
 while the configuration space connectivity also privides us an intuition about designing a better classical or quantum algortihms.
 \purple{I would give examples of why we want to compute solution space
 properties.
@@ -310,7 +310,7 @@ However, the tensor network has a richer algebraic structure, which crucially en
 %to identify harder graphs in an ensemble of graphs~\cite{Ebadi2022} and to analyze the presence of the overlap gap property~\cite{Gamarnik2013, Gamarnik2019} related to the clustering phenomenon of large independent sets.
 %However, there is a lack of general and versatile tool to compute these different properties of independent sets.
 
-To avoid the discussion being unnecessarily diversed, we mainly focus on the independent set problem,
+To avoid the discussion being unnecessarily diverged, we mainly focus on the independent set problem,
 and discuss other combinatorial optimization problems,
 including the cutting problem, the matching problem, the vertex coloring problem, the satisfiability problem, the dominating set problem, the set packing problem and the maximal clique problem, in \App{sec:otherproblems}.
 %\xpurple{More details on which combinatorial optimization problems this applies to?}
@@ -319,9 +319,10 @@ We first introduce the basic concepts of tensor networks and generic programming
 Then we show how to reduce the independent set problem to a tensor network contraction problem in \Sec{sec:tnmap}
 and show how to engineer the element types in \Sec{sec:counting}, \Sec{sec:enumeration} and \Sec{sec:weighted} to count independent sets at a given size, enumerate/sample independent sets at a given size and find largest set sizes in weighted graphs.
 % by computing a number of independent set properties of certain sparse graphs on central processing units (CPUs) and graphics processing units (GPUs) and show its good performance.
-Lastly, we benchmark our algorithms in \Sec{sec:benchmark} and provide a few examples in \Sec{sec:examples} to demonstrate the versatility of our tool.
-We show how our method can help computing the entropy constant for some hardcore lattice gases on 2D square lattices
-and analyzing the presence of overlap gap property on three regular graphs.
+Lastly, we benchmark our algorithms in \Sec{sec:benchmark} and provide three examples in \Sec{sec:examples} to demonstrate the versatility of our tool.
+In the first example, we show how our method can help computing the entropy constant for some hardcore lattice gases on 2D square lattices. We compute the 2D generalization of Fibonacci integer sequence up to size $39$, while the previous best known result is $37$.
+In the second example, we analyze the pairwise Hamming distances from configurations directly sampled from large independent sets of King's graphs at $0.8$ filling and three regular graphs. We show the strongest numeric evidence so far of the absence of overlap gap property in King's graph and the existence of overlap gap properties in three regular graphs.
+In the last example, we show how our algorithm helps people to understand the performance of a quantum variational algorithms on Rydberg atom arrays to find maximum independent sets. This is a research frontier that understand which can help people design better quantum algorithms to beat its classical counterpart.
 %Our method can also be used to find ``maximal'' independent set properties; 
 %a maximal independent set is an independent set that is not a subset of any other independent set, but its size may not be the maximum. 
 
@@ -411,7 +412,7 @@ and this idea of using the same program for different purposes is also called th
 \begin{definition}[Generic programming ~\cite{Stepanov2014}]
    Generic programming is an approach to programming that focuses on designing algorithms and data structures so that they work in the most general setting without loss of efficiency.
 \end{definition}
-\purple{efficiency}
+This definition of generic programming covers two major aspects: ``work in the most general setting'' and ``with out loss of efficiency''.
 By in the most general setting, we mean that a single program should work correctly for different input data types. For example, 
 %\purple{I think the following paragraph could be clarified. When you read the definition of generic programming, it's not clear what ``in the most general setting'' means. My understanding is it just means that the program will work regardless of the input data type - it would be good to say this explicitly. }
 %\blue{This definition is from the book I cited, I also do not like ``in the most general setting'', maybe we just use our version?}
@@ -425,7 +426,7 @@ One can easily write a function for standard number types that computes the powe
 Generic programming does not require $x$ to be a standard number type,
 instead it treats $x$ as an element with an associative multiplication operation $\odot$ and a multiplicative identity $\mymathbb{1}$.
 In such a way, when the program takes a matrix as an input, it computes the matrix power without extra efforts.
-The second aspect is about performance. For dynamically typed languages, such as Python,
+The second aspect is about the efficiency. For dynamically typed languages, such as Python,
 one can easily write very general codes, but the efficiency is not guaranteed; for example, the speed of computing the matrix multiplication between two numpy arrays with python objects as elements is much slower than statically typed languages such as C++ and Julia~\cite{Bezanson2012}.
 C++ uses templates for generic programming while Julia takes advantage of just-in-time compilation and multiple dispatch.
 When these languages ``see'' a new input type, the compiler can recompile the generic program for the new type.
@@ -452,7 +453,37 @@ a \odot \mymathbb{0} = \mymathbb{0} \odot a = \mymathbb{0}
 \end{align*}
 We require the algebra being multiplicative commutative because the contraction order optimizer will change the multiplication order of elements, while we require that the contraction order does not change the contraction results.
 In the following sections, we show how to compute a number of properties of independent sets by designing tensor element types as specific commutative semirings without changing the tensor network contraction program~\cite{Stepanov2014}.
-The Table~\ref{tbl:generictypes} summarizes those properties that can be computed by various tensor element types.
+The Venn diagram in \Fig{fig:venn-diagram} shows the algebras we will introduce in the main text and how are they related, and Table~\ref{tbl:generictypes} summarizes those properties that can be computed by various tensor element types.
+
+
+
+\begin{figure}[th]
+   \centering
+\centerline{\begin{tikzpicture}[]
+    \scriptsize
+    \node[draw,fill=lime!80,fill opacity=1, text opacity=1.0,ellipse,minimum width=2cm, minimum height=1cm,inner sep=0pt] at (0, 2.5) (R) {$\mathbbm{R}$};
+    \def\dx{-3};
+    \node[draw,fill=teal!50,fill opacity=1, text opacity=1.0,ellipse,minimum width=5cm, minimum height=3cm,inner sep=0pt] at (\dx, 0) (PN) {\hspace{-3.5cm}Polynomial};
+    \node[draw,fill=brown!75,fill opacity=1, text opacity=1.0,ellipse,minimum width=3.5cm, minimum height=1.0cm,inner sep=0pt] at (\dx, 0.7) (P1) {\hspace{-1.0cm}Largest order};
+    \node[draw,fill=brown!40,fill opacity=1, text opacity=1.0,ellipse,minimum width=3.5cm, minimum height=1.0cm,inner sep=0pt] at (\dx, -0.4) (P2) {\hspace{-0.8cm}Largest 2 orders};
+    \node[draw,fill=brown,fill opacity=1, text opacity=1.0,ellipse,minimum width=0.8cm, minimum height=0.3cm,inner sep=0pt] at (\dx, 1.0) (T) {};
+    \node[draw,fill=brown!50,fill opacity=1, text opacity=1.0,ellipse,minimum width=0.8cm, minimum height=0.3cm,inner sep=0pt] at (\dx, -0.1) (T2) {};
+    \node at (\dx, -1.2) {$\ldots$};
+    \node[above = 1cm] at (T) (textT) {Tropical};
+    \node[below = 2cm, left=4cm] (textT2) {Extended Tropical};
+    \draw[black,-latex] (textT) -- (T);
+    \draw[black,-latex] (textT2) -- (T2);
+
+    % set and set sampler
+    \node[draw,fill=yellow,fill opacity=0.5, text opacity=1.0,ellipse,minimum width=5cm, minimum height=3cm,inner sep=0pt] at (0, 0) (SN) {};
+    \node[below of=1] at (SN) {Set};
+    \node[draw,fill=red!70,fill opacity=0.5, text opacity=1.0,ellipse,minimum width=4cm, minimum height=1.5cm,inner sep=0pt] at (-0.5, 0) (S1) {\hspace{1.5cm}Bit string};
+\end{tikzpicture}}
+
+    \caption{The the tensor network element types used in this work, while the purpose of these element types can be found in \Tbl{tbl:generictypes}.
+    The overlap between two algebra indicates that a new algebra can be created by combining those two types of algebra. ``Largest order'' and ``Largest 2 orders'' mean truncating the polynomial by only keeping its largest or largest two order.}
+     \label{fig:venn-diagram}
+\end{figure}
 
 \begin{table}[t!]\centering
 \begin{minipage}{\columnwidth}
@@ -467,7 +498,7 @@ The Table~\ref{tbl:generictypes} summarizes those properties that can be compute
    {Polynomial truncated to $k$-th order (\Eq{eq:countingtropical} and \Eq{eq:max2poly})}     & {$k$ largest independent sizes and their degeneracy} \\
    {Set} (\Eq{eq:set})     & {Enumeration of independent sets} \\
    {Expression tree} (\Eq{eq:expr})     & {Sampling of independent sets} \\
-   {Polynomial truncated to highest order combined with bit string} (\Eq{eq:singleconfig})     & {Maximum independent set size and one of such configurations} \\
+   {Polynomial truncated to largest order combined with bit string} (\Eq{eq:singleconfig})     & {Maximum independent set size and one of such configurations} \\
    {Polynomial truncated to $k$-th order combined with set} (\Eq{eq:countingtropicalset})    & {$k$ largest independent set sizes and their enumeration} \\
             \bottomrule
         \end{tabularx}
@@ -567,69 +598,122 @@ enumerating certain degrees of freedom in an external loop so that the space com
 \begin{example}\label{eg:tensorcontraction}
 In the following, we map a 5-vertex graph (left) to a tensor network (right) and show how the contraction order simplifies the computation.
     
-    \centerline{\begin{tikzpicture}[
-    dot/.style = {circle, fill, minimum size=#1,
-                inner sep=0pt, outer sep=0pt},
-    dot/.default = 6pt  % size of the circle diameter 
-                    ]  
-        \def\dx{0};
-        \def\r{0.25cm}
-        \filldraw[fill=black] (\dx,0) circle [radius=\r];
-        \filldraw[fill=black] (\dx,1.5) circle [radius=\r];
-        \filldraw[fill=black] (1.5+\dx,0) circle [radius=\r];
-        \filldraw[fill=black] (1.5+\dx,1.5) circle [radius=\r];
-        \filldraw[fill=black] (2.5+\dx,2.5) circle [radius=\r];
-        \draw [black,thick] (\dx,0) -- (\dx,1.5);
-        \draw [black,thick] (\dx,0) -- (1.5+\dx,0);
-        \draw [black,thick] (\dx,1.5) -- (1.5+\dx,1.5);
-        \draw [black,thick] (1.5+\dx,0) -- (1.5+\dx,1.5);
-        \draw [black,thick] (1.5+\dx,0) -- (\dx,1.5);
-        \draw [black,thick] (2.5+\dx,2.5) -- (1.5+\dx,1.5);
-        \node[color=white] at (\dx,0) {a};
-        \node[color=white] at (\dx,1.5) {b};
-        \node[color=white] at (1.5+\dx,0) {c};
-        \node[color=white] at (1.5+\dx,1.5) {d};
-        \node[color=white] at (2.5+\dx,2.5) {e};
-        \def\dx{5};
-        \def\r{0.25cm}
-        \foreach \x/\y/\e in {0.75/0/ac, 0/0.75/ab, 1.5/0.75/cd, 0.75/1.5/bd, 0.75/0.75/bc, 2/2/de}
-            \node[color=white,fill=black,dot=2*\r] at (\x+\dx,\y) (\e) {\scriptsize B};
-        \foreach \x/\y/\v in {0/0/a, 0/1.5/b, 1.5/0/c, 1.5/1.5/d, 2.5/2.5/e}
-            \node[color=black] at (\x+\dx,\y) (\v) {$s_\v$};
-        \foreach \x/\y/\v in {-0.5/-0.5/a, -0.5/2.0/b, 2.0/-0.5/c, 2.0/1.0/d, 3.0/2.0/e}
-            \node[color=white,fill=black,dot=\r] at (\x+\dx,\y) (\v\v) {};
-        \foreach \x/\y/\v in {-0.5/-0.5/a, -0.5/2.0/b, 2.0/-0.5/c, 2.0/1.0/d, 3.0/2.0/e}
-            \node[color=black] at (\x+\dx+0.6,\y) {\scriptsize $W(x_\v, w_\v)$};
-        \draw [cyan,thick] (a) -- (aa);
-        \draw [cyan,thick] (a) -- (ab);
-        \draw [cyan,thick] (a) -- (ac);
-        \draw [blue,thick] (b) -- (bb);
-        \draw [blue,thick] (b) -- (ab);
-        \draw [blue,thick] (b) -- (bc);
-        \draw [blue,thick] (b) -- (bd);
-        \draw [red,thick] (c) -- (cc);
-        \draw [red,thick] (c) -- (ac);
-        \draw [red,thick] (c) -- (bc);
-        \draw [red,thick] (c) -- (cd);
-        \draw [green,thick] (d) -- (dd);
-        \draw [green,thick] (d) -- (bd);
-        \draw [green,thick] (d) -- (de);
-        \draw [green,thick] (d) -- (cd);
-        \draw [orange,thick] (e) -- (ee);
-        \draw [orange,thick] (e) -- (de);
-    \end{tikzpicture}}
-    
-    The contraction of this tensor network can be done in a pairwise order utilizing the associativity, additive commutativity, and multiplicative commutativity of tensor elements:
-    \small{
-    \begin{align*}
-        &\sum_{s_a,s_b,s_c,s_d,s_e} W(x_a, w_a)_{s_a} W(x_b, w_b)_{s_b} W(x_c, w_c)_{s_c} W(x_d, w_d)_{s_d} W(x_e, w_e)_{s_e} B_{s_a s_b} B_{s_b s_d} B_{s_c s_d} B_{s_a s_c} B_{s_b s_c} B_{s_d s_e}\\
-        =&\sum_{s_b,s_c}\left(\sum_{s_d}\left(\left(\left(\left(\sum_{s_e}B_{s_d s_e}W(x_e,w_e)_{s_e}\right) W(x_d,w_d)_{s_d}\right) \left(B_{s_bs_d} W(x_b, w_b)_{s_b}\right)\right) \left(B_{s_cs_d} W(x_c, w_c)_{s_c}\right)\right)\right.\\
-        &\phantom{XXX}\left.\left(B_{s_bs_c}\left(\sum_{s_a}B_{s_as_b}\left(B_{s_as_c}W(x_a,w_a)_{s_a}\right)\right)\right)\right)\\
-        =&1 + x_a^{w_a} + x_b^{w_b} + x_c^{w_c} + x_d^{w_d} + x_e^{w_e} + x_a^{w_a}x_d^{w_d} + x_a^{w_a}x_e^{w_e} + x_c^{w_c}x_e^{w_e} + x_b^{w_b}x_e^{w_e}
-        %=&1+5x+4x^2 \qquad \quad (x_{i} = x, w_{i}=1).
-    \end{align*}}
+\centerline{\begin{tikzpicture}[
+dot/.style = {circle, fill, minimum size=#1,
+            inner sep=0pt, outer sep=0pt},
+dot/.default = 6pt  % size of the circle diameter 
+                ]  
+    \def\dx{0};
+    \def\r{0.25cm}
+    \filldraw[fill=black] (\dx,0) circle [radius=\r];
+    \filldraw[fill=black] (\dx,1.5) circle [radius=\r];
+    \filldraw[fill=black] (1.5+\dx,0) circle [radius=\r];
+    \filldraw[fill=black] (1.5+\dx,1.5) circle [radius=\r];
+    \filldraw[fill=black] (2.5+\dx,2.5) circle [radius=\r];
+    \draw [black,thick] (\dx,0) -- (\dx,1.5);
+    \draw [black,thick] (\dx,0) -- (1.5+\dx,0);
+    \draw [black,thick] (\dx,1.5) -- (1.5+\dx,1.5);
+    \draw [black,thick] (1.5+\dx,0) -- (1.5+\dx,1.5);
+    \draw [black,thick] (1.5+\dx,0) -- (\dx,1.5);
+    \draw [black,thick] (2.5+\dx,2.5) -- (1.5+\dx,1.5);
+    \node[color=white] at (\dx,0) {a};
+    \node[color=white] at (\dx,1.5) {b};
+    \node[color=white] at (1.5+\dx,0) {c};
+    \node[color=white] at (1.5+\dx,1.5) {d};
+    \node[color=white] at (2.5+\dx,2.5) {e};
+    \def\dx{5};
+    \def\r{0.25cm}
+    \foreach \x/\y/\e in {0.75/0/ac, 0/0.75/ab, 1.5/0.75/cd, 0.75/1.5/bd, 0.75/0.75/bc, 2/2/de}
+        \node[color=white,fill=black,dot=2*\r] at (\x+\dx,\y) (\e) {\scriptsize B};
+    \foreach \x/\y/\v in {0/0/a, 0/1.5/b, 1.5/0/c, 1.5/1.5/d, 2.5/2.5/e}
+        \node[color=black] at (\x+\dx,\y) (\v) {$s_\v$};
+    \foreach \x/\y/\v in {-0.5/-0.5/a, -0.5/2.0/b, 2.0/-0.5/c, 2.0/1.0/d, 3.0/2.0/e}
+        \node[color=white,fill=black,dot=\r] at (\x+\dx,\y) (\v\v) {};
+    \foreach \x/\y/\v in {-0.5/-0.5/a, -0.5/2.0/b, 2.0/-0.5/c, 2.0/1.0/d, 3.0/2.0/e}
+        \node[color=black] at (\x+\dx+0.6,\y) {\scriptsize $W(x_\v, w_\v)$};
+    \draw [cyan,thick] (a) -- (aa);
+    \draw [cyan,thick] (a) -- (ab);
+    \draw [cyan,thick] (a) -- (ac);
+    \draw [blue,thick] (b) -- (bb);
+    \draw [blue,thick] (b) -- (ab);
+    \draw [blue,thick] (b) -- (bc);
+    \draw [blue,thick] (b) -- (bd);
+    \draw [red,thick] (c) -- (cc);
+    \draw [red,thick] (c) -- (ac);
+    \draw [red,thick] (c) -- (bc);
+    \draw [red,thick] (c) -- (cd);
+    \draw [green,thick] (d) -- (dd);
+    \draw [green,thick] (d) -- (bd);
+    \draw [green,thick] (d) -- (de);
+    \draw [green,thick] (d) -- (cd);
+    \draw [orange,thick] (e) -- (ee);
+    \draw [orange,thick] (e) -- (de);
+\end{tikzpicture}}
 
-One can easily check the maximum tensor during computing is rank 2, and the total number of multiplication operations is reduced significantly.
+The contraction of this tensor network can be done in a pairwise order utilizing the associativity, additive commutativity, and multiplicative commutativity of tensor elements. The contraction process can be represented as a binary tree structure:
+
+\centerline{\begin{tikzpicture}[]
+    \def\dx{0};
+    \def\dy{0};
+    \def\d{1};
+    \def\a{1.0};
+    \def\b{1};
+    \def\ya{-1.0};
+    \def\yb{-0.8};
+    \node[] at (\dx+5*\a, \dy+5*\b) (R1) {$R[n^2]$};
+    \node[] at (\dx+3*\a, \dy+4*\b) (S1) {$S_{bc}[n^3]$};
+    \node[] at (\dx+2*\a, \dy+3*\b) (Q1) {$Q_{bd}[n^2]$};
+    \node[] at (\dx+8.5*\a, \dy+3*\b) (Q2) {$Q_{bc}[n^2]$};
+    \node[] at (\dx+\a, \dy+2*\b) (P1) {$P_{d}[n]$};
+    \node[] at (\dx+9*\a, \dy+2*\b) (P2) {$P_{bc}[n^3]$};
+    \node[] at (\dx+0.5*\d, \dy+\b) (M1) {$M_{d}[n^2]$};
+    \node[] at (\dx+3.5*\d, \dy+\b) (M2) {$M_{bd}[n^2]$};
+    \node[] at (\dx+5.5*\d, \dy+\b) (M3) {$M_{cd}[n^2]$};
+    \node[] at (\dx+9.5*\d, \dy+\b) (M4) {$M_{ac}[n^2]$};
+    \node[] at (\dx, \dy) (Bde) {$B_{de}$};
+    \node[] at (\dx+\d, \dy) (We) {$W_e$};
+    \node[] at (\dx+2*\d, \dy) (Wd) {$W_d$};
+    \node[] at (\dx+3*\d, \dy) (Bbd) {$B_{bd}$};
+    \node[] at (\dx+4*\d, \dy) (Wb) {$W_b$};
+    \node[] at (\dx+5*\d, \dy) (Bcd) {$B_{cd}$};
+    \node[] at (\dx+6*\d, \dy) (Wc) {$W_c$};
+    \node[] at (\dx+7*\d, \dy) (Bbc) {$B_{bc}$};
+    \node[] at (\dx+8*\d, \dy) (Bab) {$B_{ab}$};
+    \node[] at (\dx+9*\d, \dy) (Bac) {$B_{ac}$};
+    \node[] at (\dx+10*\d, \dy) (Wa) {$W_a$};
+    \draw[] (Bde) -- (M1);
+    \draw[] (We) -- (M1);
+    \draw[] (Bbd) -- (M2);
+    \draw[] (Wb) -- (M2);
+    \draw[] (Bcd) -- (M3);
+    \draw[] (Wc) -- (M3);
+    \draw[] (Bac) -- (M4);
+    \draw[] (Wa) -- (M4);
+    \draw[] (M1) -- (P1);
+    \draw[] (Wd) -- (P1);
+    \draw[] (Bab) -- (P2);
+    \draw[] (M4) -- (P2);
+    \draw[] (P1) -- (Q1);
+    \draw[] (M2) -- (Q1);
+    \draw[] (Bbc) -- (Q2);
+    \draw[] (P2) -- (Q2);
+    \draw[] (Bbc) -- (Q2);
+    \draw[] (P2) -- (Q2);
+    \draw[] (Q1) -- (S1);
+    \draw[] (M3) -- (S1);
+    \draw[] (S1) -- (R1);
+    \draw[] (Q2) -- (R1);
+\end{tikzpicture}}
+% \small{
+% \begin{align*}
+%     &\sum_{s_a,s_b,s_c,s_d,s_e} W(x_a, w_a)_{s_a} W(x_b, w_b)_{s_b} W(x_c, w_c)_{s_c} W(x_d, w_d)_{s_d} W(x_e, w_e)_{s_e} B_{s_a s_b} B_{s_b s_d} B_{s_c s_d} B_{s_a s_c} B_{s_b s_c} B_{s_d s_e}\\
+%     =&\sum_{s_b,s_c}\left(\sum_{s_d}\left(\left(\left(\left(\sum_{s_e}B_{s_d s_e}W(x_e,w_e)_{s_e}\right) W(x_d,w_d)_{s_d}\right) \left(B_{s_bs_d} W(x_b, w_b)_{s_b}\right)\right) \left(B_{s_cs_d} W(x_c, w_c)_{s_c}\right)\right)\right.\\
+%     &\phantom{XXX}\left.\left(B_{s_bs_c}\left(\sum_{s_a}B_{s_as_b}\left(B_{s_as_c}W(x_a,w_a)_{s_a}\right)\right)\right)\right)\\
+%     =&1 + x_a^{w_a} + x_b^{w_b} + x_c^{w_c} + x_d^{w_d} + x_e^{w_e} + x_a^{w_a}x_d^{w_d} + x_a^{w_a}x_e^{w_e} + x_c^{w_c}x_e^{w_e} + x_b^{w_b}x_e^{w_e}
+%     %=&1+5x+4x^2 \qquad \quad (x_{i} = x, w_{i}=1).
+% \end{align*}}
+The contraction process goes from bottom to top, where the root stores the contraction result that we want, the leaves are tensors in the our tensor network while the rest are all intermediate contraction results. Tensor subscripts are indices so that the number of subscripts indicates the space complexity to store this tensor, and the contraction complexity to generate a tensor is annotated in the square brackets, where $n$ is the dimension of degrees of freedom, which in our case is always $2$.
+One can easily check the largest tensor during computing has space complexity $n^2$, and the largest contraction time complexity is $n^3$, which is much smaller than direct enumeration ($n^5$).
 \end{example}
 
 \purple{I have not checked this yet but will
@@ -689,7 +773,7 @@ These operations are standard addition and multiplication operations of polynomi
 By contracting the tensor network with the polynomial type, we have the exact representation of the independence polynomial.
 In practise, using the polynomial type suffers a space overhead proportional to $\alpha(G)$ because each polynomial requires a vector of such size to store the coefficients. 
 One may argue that one can first evaluate this polynomial at different $x$ being a standard number type,
-and then apply the gaussian elimination to fit the coefficients of this polynomial.
+and then apply the Gaussian elimination to fit the coefficients of this polynomial.
 This seemingly more time and space efficient approach suffers from severe issues in practise.
 The data ranges of standard integer types are too small to cover many practical using cases,
 while the floating point numbers may have round off error that much larger than the value itself, because the number of sets at different sizes may vary tens or even hundreds of orders and this makes the small coefficients can not be retrieved correctly by fitting.
@@ -921,7 +1005,7 @@ Let us consider the following expression tree
     (\texttt{SUM}, /, (\texttt{PROD}, /, A, B), (\texttt{SUM}, /, C, D)),
 \end{equation*}
 where siblings $A, B, C$ and $D$ can be any four types of nodes.
-It can be represented diagramatically as the following.
+It can be represented diagrammatically as the following.
 
 \centerline{\begin{tikzpicture}[]
     \def\dx{0};
@@ -1080,7 +1164,7 @@ However, it is not yet clear whether for small $d$, e.g. three regular graphs, t
 Here, we direct sample from the computed configurations of large independent sets to investigate the presence or absence of the overlap gap property for some given graphs.
 We do no explore the full configurations space because the number of configurations is too large to fit into a storage,
 so we have to use the expression tree representation to store it in a compact format and draw samples from it.
-We compare two categories of graphs, one is the King's graph at $0.8$ filling, a type of unit disk graph having no overlap gap property, \blue{@Maddie, do you have a good reference to justify this statement about unit disk graph OGP?}
+We compare two categories of graphs, one is the King's graph at $0.8$ filling,
 another is the vertex $3$-regular graph that we want to investigate.
 Each category contains $9$ randomly generated instances, due to the limitation of computing resources,
 the size of King's graph is $20\times 20$ ($320$ vertices) and the size of $3$-regular graphs are $110$.
@@ -1088,6 +1172,8 @@ In particular, in \Fig{fig:hamming},
 we sample two sets of $10^4$ configurations from the ISs at sizes $\geq \text{ratio} \times \lfloor\alpha(G)\rfloor$ for each instance
  and show the pairwise Hamming distance distribution for the enumerated configurations.
 In \Fig{fig:hamming}(a), we observed a clear single peak structure at a fixed distance normalized by the MIS size for the King's graphs.
+Which is a clear evidence of that the overlap gap property is absent in $0.8$ filling King's graph.
+Given the fact that the MIS problem on an arbitrary graph can be mapped to a King's graph at a certain filling~\cite{Ebadi2022}, this result is highly nontrivial.
 While in \Fig{fig:hamming}(b), we observed the multiple peak structure as the ratio becomes small for the $3$-regular graphs.
 This indicates the presence of the overlap gap property and disconnected clusters exist in the configuration space for large independent sets.
 We expect our numerical tool can be used to understand this phenomenon better and to further investigate the graph properties and the geometry of the configuration spaces for a variety of graph instances.
@@ -1128,7 +1214,7 @@ This can give detailed insights to performance of the algorithm, such as if the 
 As an example, we show in Figure~\ref{fig:exp_configuratoins} how our algorithm can be used to visualize experimental outputs of a quantum algorithm for solving the Maximum Independent Set problem using a programmable Rydberg atom array quantum computer~\cite{Ebadi2022}.
 The structure of the solution space for a King's graph with $39$ vertices and filling factor $\rho=0.8$ can be visualized on a graph where each vertex represents a large independent set, with edges between independent sets which differ by a swap operation or a vertex addition.
 The algorithm either finds the largest independent set with size $\alpha(G)$ with high probability, or returns a suboptimal independent set, usually with size $\alpha(G)-1.$
-The algorithm does not appear to return local minima with large Hamming distance from the MISs as suggested by~\cite{altshuler2010},
+The algorithm does not appear to return local minima with large Hamming distance from the MISs as suggested by~\cite{altshuler2010}\blue{Fix ref.},
 but samples from local minima with a wide range of Hamming distances from the MISs.
 Consistent with Sec.~\ref{sec:overlap-gap}, there are no disconnected clusters in the solution space for this particular King's graph.
 
@@ -1149,37 +1235,6 @@ By adapting to the style of generic programming, we can implement all the algori
 We show some of the Julia language implementations in Appendix~\ref{sec:technical}.
 A complete implementation can be found in our Github repository~\cite{GraphTensorNetworks}. 
 We expect our tool can be used to understand and study many interesting applications of independent sets and beyond. We also hope this approach of generic tensor networks can inspire future works on tensor network computations.
-
-\begin{figure}[th]
-   \centering
-\centerline{\begin{tikzpicture}[]
-    \scriptsize
-    \node[draw,fill=lime!80,fill opacity=1, text opacity=1.0,ellipse,minimum width=2cm, minimum height=1cm,inner sep=0pt] at (0, 2.5) (R) {$\mathbbm{R}$};
-    \def\dx{-3};
-    \node[draw,fill=teal!50,fill opacity=1, text opacity=1.0,ellipse,minimum width=5cm, minimum height=3cm,inner sep=0pt] at (\dx, 0) (PN) {\hspace{-3.5cm}Polynomial};
-    \node[draw,fill=brown!75,fill opacity=1, text opacity=1.0,ellipse,minimum width=3.5cm, minimum height=1.0cm,inner sep=0pt] at (\dx, 0.7) (P1) {\hspace{-1.0cm}Largest order};
-    \node[draw,fill=brown!40,fill opacity=1, text opacity=1.0,ellipse,minimum width=3.5cm, minimum height=1.0cm,inner sep=0pt] at (\dx, -0.4) (P2) {\hspace{-0.8cm}2nd largest order};
-    \node[draw,fill=brown,fill opacity=1, text opacity=1.0,ellipse,minimum width=0.8cm, minimum height=0.3cm,inner sep=0pt] at (\dx, 1.0) (T) {};
-    \node[draw,fill=brown!50,fill opacity=1, text opacity=1.0,ellipse,minimum width=0.8cm, minimum height=0.3cm,inner sep=0pt] at (\dx, -0.1) (T2) {};
-    \node at (\dx, -1.2) {$\ldots$};
-    \node[above = 1cm] at (T) (textT) {Tropical};
-    \node[below = 2cm, left=4cm] (textT2) {Extended Tropical};
-    \draw[black,-latex] (textT) -- (T);
-    \draw[black,-latex] (textT2) -- (T2);
-
-    % set and set sampler
-    \node[draw,fill=yellow,fill opacity=0.5, text opacity=1.0,ellipse,minimum width=5cm, minimum height=3cm,inner sep=0pt] at (0, 0) (SN) {};
-    \node[below of=1] at (SN) {Set};
-    \node[draw,fill=red!70,fill opacity=0.5, text opacity=1.0,ellipse,minimum width=4cm, minimum height=1.5cm,inner sep=0pt] at (-0.5, 0) (S1) {\hspace{1.5cm}Bit string};
-\end{tikzpicture}}
-
-    \caption{The the tensor network element types used in this work, while the purpose of these element types can be found in \Tbl{tbl:generictypes}.
-    The overlap between two algebra indicates that a new algebra can be created by combining those two types of algebra.}
-    \purple{It's not clear what
-some words mean on this diagram, such as ``highest order'' and ``extended tropical''}
-\blue{the extended tropical is defined in \Sec{sec:weighted}, should I emphasis it more? also, ``highest''->``largest''}
-     \label{fig:venn-diagram}
-\end{figure}
 
 \section*{Acknowledgments}
 We would like to thank Pan Zhang for sharing his python code for optimizing contraction orders of a tensor network.
