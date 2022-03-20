@@ -4,10 +4,20 @@ import fire
 from plotlib import *
 import numpy as np
 import json
+import viznet
 from mpl_toolkits.axes_grid.anchored_artists import AnchoredText
 import os
 #from matplotlib.offsetbox import AnchoredText
 
+def unit_disk_graph(nb, eb, locs, unit):
+    n = len(locs)
+    nodes = []
+    for i in range(n):
+        nodes.append(nb >> locs[i])
+    for i in range(n):
+        for j in range(i+1,n):
+            if np.linalg.norm(locs[i] - locs[j]) < unit:
+                eb >> (nodes[i], nodes[j])
 
 class PLT(object):
     def fig1(self, tp="pdf"):  # independence polynomials
@@ -232,5 +242,42 @@ class PLT(object):
             meanvar[n-2,1] = np.var(data)
         fout = "../../project/data/%s/entropyconstant_summary.dat"%(which,)
         np.savetxt(fout, meanvar)
+
+    def lattices(self):
+        np.random.seed(2)
+        with viznet.DynamicShow(figsize=(10,4), filename="lattices.pdf") as pl:
+            node = viznet.NodeBrush('basic', size='normal', color="#000000")
+            edge = viznet.EdgeBrush('-', color='#000000', lw=1)
+            n = 6
+            FONTSIZE = 14
+            FONTSIZE2 = 12
+            dx = -n+1.5
+            dy = n
+            dx2 = -n+1.5
+            dy2 = -1
+            ns = int(round(0.8 * n ** 2))
+            xs, ys = np.meshgrid(np.arange(n), np.arange(n))
+            locs = np.concatenate([xs.reshape(-1, 1), ys.reshape(-1, 1)], axis=1)
+            unit_disk_graph(node, edge, locs, 1.1)
+            plt.text(n+1+dx, dy, "(a)", fontsize=FONTSIZE, va="center", ha="center")
+            plt.text(n+1+dx2, dy2, "Square lattice graphs", fontsize=FONTSIZE2, va="top", ha="center")
+
+            locs_ = locs[np.random.choice(n**2, ns, replace=False)]
+            locs_[:,0] += n+1
+            unit_disk_graph(node, edge, locs_, 1.1)
+            plt.text(2*(n+1)+dx, dy, "(b)", fontsize=FONTSIZE, va="center", ha="center")
+            plt.text(2*(n+1)+dx2, dy2, "Square lattice graphs\n(0.8 filling)", fontsize=FONTSIZE2, va="top", ha="center")
+
+            locs = locs.copy()
+            locs[:,0] += 2*(n+1)
+            unit_disk_graph(node, edge, locs, 1.6)
+            plt.text(3*(n+1)+dx, dy, "(c)", fontsize=FONTSIZE, va="center", ha="center")
+            plt.text(3*(n+1)+dx2, dy2, "King's graphs", fontsize=FONTSIZE2, va="top", ha="center")
+
+            locs_ = locs[np.random.choice(n**2, ns, replace=False)]
+            locs_[:,0] += n+1
+            unit_disk_graph(node, edge, locs_, 1.6)
+            plt.text(4*(n+1)+dx, dy, "(d)", fontsize=FONTSIZE, va="center", ha="center")
+            plt.text(4*(n+1)+dx2, dy2, "King's graphs\n(0.8 filling)", fontsize=FONTSIZE2, va="top", ha="center")
 
 fire.Fire(PLT())
