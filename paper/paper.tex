@@ -209,7 +209,7 @@ Listing \thelstlisting: #1\hfill%\hfill%
 
 %\externaldocument{ex_supplement}
 
-\title{Computing properties of independent sets by generic programming tensor networks
+\title{Computing solution space properties by generic programming tensor networks
 \thanks{\funding{...}}
 }
 
@@ -232,7 +232,7 @@ We look at the independent set problem as an example, and show how to compute th
 %By making use of generic programming, our algorithms are very simple to implement and one can in addition directly utilize recent advances in tensor network contraction techniques such as near-optimal contraction order finding and slicing to achieve high performance.
 By using generic programming techniques, %which require a program to work correctly for different input data types without sacrificing efficiency,
 the same simple-to-implement framework can be used to compute all of these properties. Our algorithm utilizes recent advances in tensor network contraction techniques to achieve high performance, including methods to quickly find a near-optimal contraction order and slicing.
-The algorithmic complexity of this approach is $2^{{\rm tw}(\overline G)}$, where ${\rm tw} (\overline G)$ is the treewidth of the line graph of the tensor network graph $G$.
+%The algorithmic complexity of this approach is two to the treewidth of the line graph of the tensor network graph.
 Other hard graph problems solvable in our framework include the maximum cut problem, the vertex coloring problem, the maximal clique problem, the dominating set problem, and the satisfiability problem, among others.
 To demonstrate how our versatile tool helps to understand these hard problems, we apply it to a few examples, including computing the entropy constant for several hardcore gases on disordered lattices, studying the Overlap Gap Property on unit disk graphs and regular graphs, and visualizing the output of quantum optimization algorithms for the independent set problem. \purple{I might not directly mention the classes of graphs we look at for Overlap Gap - it might be too much information. I'm not sure though, what do you think?} \blue{I agree ``King's graphs at 0.8 filling and 3-regular graphs'' is a bit too detailed, so I rephrased it as ``unit disk graphs and regular graphs'' that only conveys the most important information.} % including the calculations of the entropy constant for some hardcore lattice gases on 2D square lattices and the study of the Overlap Gap Property on three regular graphs.
 %We show how our method helps to understand these hard problems on systems with hundreds of vertices.
@@ -285,7 +285,7 @@ while the configuration space connectivity also provides us an intuition about d
 We propose to view the computation of all these properties from an abstract algebra perspective and use the unified framework of
 generic tensor-network to solve these seemingly unrelated properties all.
 %We map the computation of these properties into generic tensor network contraction with specially designed tensor element algebra.
-Tensor network is also known as the sum product network in probabilistic modeling~\cite{Bishop2006} or einsum in linear algebra libraries such as numpy.
+Tensor network is also known as the sum product network in probabilistic modeling~\cite{Bishop2006} or einsum in linear algebra libraries such as numpy~\cite{Harris2020}.
 It is composed of a set of labelled tensors, where the labels are used for specifying the contraction relation.
 The tensor element types are typically restricted to standard number types such as real numbers and complex numbers.
 We extend this concept to generic tensor network by generalizing the tensor element type to any type being a commutative semiring.
@@ -1136,9 +1136,9 @@ In particular, in \Fig{fig:hamming},
 we sample two sets of $10^4$ configurations from the ISs at sizes $\geq \lfloor (1-\text{ratio}) \times \alpha(G)\rfloor$ for each instance
  and show the pairwise Hamming distance distribution for the enumerated configurations.
 In \Fig{fig:hamming}(a), we observed a clear single peak structure at a fixed distance normalized by the MIS size for the King's graphs.
-Which is a clear evidence of that the Overlap Gap Property is absent in $0.8$ filling King's graph.
+Which is a clear evidence of the absence of the Overlap Gap Property in $0.8$ filling King's graph.
 Given the fact that the MIS problem on an arbitrary graph can be mapped to a King's graph at a certain filling~\cite{Ebadi2022}, this result is highly nontrivial.
-While in \Fig{fig:hamming}(b), we observed the multiple peak structure as the ratio becomes small for the $3$-regular graphs.
+While in \Fig{fig:hamming}(b), we observed the multiple peak structure in $3$-regular graphs as the ratio becomes small.
 This indicates the presence of the Overlap Gap Property \blue{@Maddie, I am not sure if we can say ``indicates the presence of the Overlap Gap Property'' here because it is so different from the official definition of OGP, I want to change it to ``disconnected clusters exist in the configuration space for large independent sets, however, it requires further study to show whether 3-regular graphs have the overlap gap property or not.'', which one do you think is more correct?} and disconnected clusters exist in the configuration space for large independent sets.
 We expect our numerical tool can be used to understand this phenomenon better and to further investigate the graph properties and the geometry of the configuration spaces for a variety of graph instances.
 \begin{figure} 
@@ -1158,8 +1158,9 @@ We expect our numerical tool can be used to understand this phenomenon better an
         \includegraphics[width=0.3\textwidth, trim={0.5cm 0cm 0.5cm 1cm}, clip]{figures/grid-regular-size110d3-k3-alpha0.025-n10000.pdf}
         \caption{Nine random three regular graphs of size $110$.}
     \end{subfigure}
-    \caption{The distribution of pairwise Hamming distances for configurations sampled from independent sets with sizes $\geq \lfloor(1-{\rm ratio}) \times \alpha(G)\rfloor$.
+    \caption{The plot of pairwise Hamming distances distribution for configurations sampled from independent sets with sizes $\geq \lfloor(1-{\rm ratio}) \times \alpha(G)\rfloor$.
     In each plot, the $x$-axis is the Hamming distance normalized by the total number of vertices and the $y$-axis is the probability.
+    The ``filled'' region is caused by the fast oscillation of configuration populations of even and odd Hamming distances.
     }
     \label{fig:hamming}
 \end{figure}
