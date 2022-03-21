@@ -33,8 +33,9 @@ class PLT(object):
             plt.xlabel("number of vertices, $|V|$")
             plt.ylabel("complexity")
             tws = np.arange(0, 45, 5)
-            plt.yticks(tws, ["$2^{%d}$"%tw for tw in tws])
-            plt.xticks(range(0, 300, 50))
+            plt.yticks(tws, ["$~~~~$2${}^{%d}$"%tw for tw in tws])
+            xs = range(0, 300, 50)
+            plt.xticks(xs)
             plt.xlim(0, 260)
             plt.legend(loc="upper left", fontsize=FS, ncol=1, framealpha=ALPHA)
 
@@ -113,7 +114,7 @@ class PLT(object):
             plt.xlabel("number of vertices, $|V|$")
             plt.ylabel("complexity")
             tws = np.arange(0, 36, 5)
-            plt.yticks(tws, ["$2^{%d}$"%tw for tw in tws])
+            plt.yticks(tws, ["2${}^{%d}$"%tw for tw in tws])
             plt.legend(loc="upper left", fontsize=FS, ncol=1, framealpha=ALPHA)
 
             ax=plt.subplot(122)   # size
@@ -209,7 +210,7 @@ class PLT(object):
             plt.xlim(0, 42)
             plt.ylim(1.4, 1.7)
             plt.axhline(y=1.50304, color="k", ls="--")
-            plt.legend(fontsize=12)
+            plt.legend(fontsize=10)
             plt.xlabel("lattice size $L$")
             plt.ylabel(r"$F(L,L)^{1/\lfloor pL^2\rceil}$")
             ax=plt.subplot(122)   # size
@@ -221,7 +222,7 @@ class PLT(object):
             plt.axhline(y=1.342643951124, color="k", ls="--")
             plt.xlabel("lattice size $L$")
             plt.ylabel(r"$F(L,L)^{1/\lfloor pL^2\rceil}$")
-            plt.legend(fontsize=12)
+            plt.legend(fontsize=10)
             plt.tight_layout()
 
     def preprocess_entropy(self, which):
@@ -259,25 +260,25 @@ class PLT(object):
             locs = np.concatenate([xs.reshape(-1, 1), ys.reshape(-1, 1)], axis=1)
             unit_disk_graph(node, edge, locs, 1.1)
             plt.text(n+1+dx, dy, "(a)", fontsize=FONTSIZE, va="center", ha="center")
-            plt.text(n+1+dx2, dy2, "Square lattice graphs", fontsize=FONTSIZE2, va="top", ha="center")
+            plt.text(n+1+dx2, dy2, "Square lattice graphs", fontsize=FONTSIZE2, va="top", ha="center", family="Times New Roman")
 
             locs_ = locs[np.random.choice(n**2, ns, replace=False)]
             locs_[:,0] += n+1
             unit_disk_graph(node, edge, locs_, 1.1)
             plt.text(2*(n+1)+dx, dy, "(b)", fontsize=FONTSIZE, va="center", ha="center")
-            plt.text(2*(n+1)+dx2, dy2, "Square lattice graphs\n(0.8 filling)", fontsize=FONTSIZE2, va="top", ha="center")
+            plt.text(2*(n+1)+dx2, dy2, "Square lattice graphs\n(0.8 filling)", fontsize=FONTSIZE2, va="top", ha="center", family="Times New Roman")
 
             locs = locs.copy()
             locs[:,0] += 2*(n+1)
             unit_disk_graph(node, edge, locs, 1.6)
             plt.text(3*(n+1)+dx, dy, "(c)", fontsize=FONTSIZE, va="center", ha="center")
-            plt.text(3*(n+1)+dx2, dy2, "King's graphs", fontsize=FONTSIZE2, va="top", ha="center")
+            plt.text(3*(n+1)+dx2, dy2, "King's graphs", fontsize=FONTSIZE2, va="top", ha="center", family="Times New Roman")
 
             locs_ = locs[np.random.choice(n**2, ns, replace=False)]
             locs_[:,0] += n+1
             unit_disk_graph(node, edge, locs_, 1.6)
             plt.text(4*(n+1)+dx, dy, "(d)", fontsize=FONTSIZE, va="center", ha="center")
-            plt.text(4*(n+1)+dx2, dy2, "King's graphs\n(0.8 filling)", fontsize=FONTSIZE2, va="top", ha="center")
+            plt.text(4*(n+1)+dx2, dy2, "King's graphs\n(0.8 filling)", fontsize=FONTSIZE2, va="top", ha="center", family="Times New Roman")
 
     def fig6(self):
         with NoBoxPlt(figsize=(12,7), filename="fig6.pdf") as pl:
@@ -300,20 +301,20 @@ class PLT(object):
                     ax.plot(np.arange(d.shape[0]), d[:,seed], lw=1)
                     ax.axis("off")
             ax = pl.fig.add_subplot(gs[3,:])
-            plt.text(0.5, 0.7, "(a) Nine King’s graphs of size 20 ×20, 0.8 filling.", ha="center", va="center", fontsize=20)
+            plt.text(0.5, 0.7, "(a) Nine King’s graphs of size 20 ×20, 0.8 filling.", ha="center", va="center", fontsize=20, family="Times New Roman")
             ax.axis("off")
 
 
             for i, d in enumerate([r1, r2, r3]):
                 ax = pl.fig.add_subplot(gs[i+4,0])
-                ax.text(0.75, 0.5, r"ratio = %s"%(ratios[i]), va="center", ha="right", fontsize=20)
+                ax.text(0.75, 0.5, r"ratio = %s"%(ratios[i]), va="center", ha="right", fontsize=20, family="Times New Roman")
                 ax.axis("off")
                 for seed in range(9):
                     ax = pl.fig.add_subplot(gs[i+4,1+seed])
                     ax.plot(np.arange(d.shape[0]), d[:,seed], lw=1)
                     ax.axis("off")
             ax = pl.fig.add_subplot(gs[7,:])
-            plt.text(0.5, 0.7, "(b) Nine random three regular graphs of size 110.", ha="center", va="center", fontsize=20)
+            plt.text(0.5, 0.7, "(b) Nine random three regular graphs of size 110.", ha="center", va="center", fontsize=20, family="Times New Roman")
             ax.axis("off")
 
 fire.Fire(PLT())
