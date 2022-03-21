@@ -288,7 +288,7 @@ class PLT(object):
             r2 = np.loadtxt("data/grid-regular-size110d3-k3-alpha0.05-n10000.dat")
             r3 = np.loadtxt("data/grid-regular-size110d3-k3-alpha0.025-n10000.dat")
 
-            gs = plt.GridSpec(7, 10)
+            gs = plt.GridSpec(8, 10)
             ratios = [0.1, 0.05, 0.025]
 
             for i, d in enumerate([d1, d2, d3]):
@@ -299,6 +299,10 @@ class PLT(object):
                     ax = pl.fig.add_subplot(gs[i,1+seed])
                     ax.plot(np.arange(d.shape[0]), d[:,seed], lw=1)
                     ax.axis("off")
+            ax = pl.fig.add_subplot(gs[3,:])
+            plt.text(0.5, 0.5, "(a) Nine King’s graphs of size 20 ×20, 0.8 filling.", ha="center", va="center", fontsize=14)
+            ax.axis("off")
+
 
             for i, d in enumerate([r1, r2, r3]):
                 ax = pl.fig.add_subplot(gs[i+4,0])
@@ -308,5 +312,8 @@ class PLT(object):
                     ax = pl.fig.add_subplot(gs[i+4,1+seed])
                     ax.plot(np.arange(d.shape[0]), d[:,seed], lw=1)
                     ax.axis("off")
+            ax = pl.fig.add_subplot(gs[7,:])
+            plt.text(0.5, 0.5, "(b) Nine random three regular graphs of size 110.", ha="center", va="center", fontsize=14)
+            ax.axis("off")
 
 fire.Fire(PLT())
