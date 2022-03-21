@@ -40,7 +40,7 @@ class PLT(object):
 
             ax=plt.subplot(222)   # size
             cornertex("(b)", ax, offset=(0,0))
-            for k,(prefix, l) in enumerate([("counting_sum", r"counting ISs ($\mathbb{R}$"), ("size_max", "MIS size (T"), ("counting_max", "counting MISs (P1"), ("counting_max2", r"counting ISs of size $\alpha(G)$ and $\alpha(G)-1$ (P2"),
+            for k,(prefix, l) in enumerate([("counting_sum", r"counting ISs (${\rm \mathbb{R}}$"), ("size_max", "MIS size (T"), ("counting_max", "counting MISs (P1"), ("counting_max2", r"counting ISs of size $\alpha(G)$ and $\alpha(G)-1$ (P2"),
                 ("spectrum_max100", "largest 100 sizes (T100")]):
                 for device in ["CPU", "GPU"]:
                     datafile = "../../benchmarks/data/"+prefix+"-r3-"+device+".dat"
@@ -60,7 +60,7 @@ class PLT(object):
             for k,(prefix, l) in enumerate([
                 ("counting_all", "direct (PN"),
                 ("counting_all_(finitefield)", r"finite field fitting (GF$(p)$"),
-                ("counting_all_(fft)", r"fourier transform ($\mathbb{C}$"),
+                ("counting_all_(fft)", r"fourier transform (${\rm \mathbb{C}}$"),
                 ]):
                 for device in ["CPU", "GPU"]:
                     datafile = "../../benchmarks/data/"+prefix+"-r3-"+device+".dat"
@@ -118,7 +118,7 @@ class PLT(object):
 
             ax=plt.subplot(122)   # size
             cornertex("(b)", ax, offset=(-0.02,0))
-            for k,(prefix, l) in enumerate([("counting_sum", r"counting of maximal ISs ($\mathbb{R}$"), ("counting_all_(finitefield)", "maximal independence polynomial (GF$(p)$"), ("configs_all", "maximal ISs (PN+SN")]):
+            for k,(prefix, l) in enumerate([("counting_sum", r"counting of maximal ISs (${\rm \mathbb{R}}$"), ("counting_all_(finitefield)", "maximal independence polynomial (GF$(p)$"), ("configs_all", "maximal ISs (PN+SN")]):
                 for device in ["CPU", "GPU"]:
                     datafile = "../../benchmarks/data/maximal-"+prefix+"-r3-"+device+".dat"
                     if os.path.exists(datafile):
