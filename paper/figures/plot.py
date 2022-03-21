@@ -248,8 +248,8 @@ class PLT(object):
             node = viznet.NodeBrush('basic', size='normal', color="#000000")
             edge = viznet.EdgeBrush('-', color='#000000', lw=1)
             n = 6
-            FONTSIZE = 14
-            FONTSIZE2 = 12
+            FONTSIZE = 18
+            FONTSIZE2 = 16
             dx = -n+1.5
             dy = n
             dx2 = -n+1.5
