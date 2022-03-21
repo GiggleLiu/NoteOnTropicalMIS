@@ -1,11 +1,10 @@
 #!/usr/bin/env python
-#The mpl_toolkits.axes_grid module was deprecated in Matplotlib 2.1 and will be removed two minor releases later. Use mpl_toolkits.axes_grid1 and mpl_toolkits.axisartist, which provide the same functionality instead.
 import fire
 from plotlib import *
 import numpy as np
 import json
 import viznet
-from mpl_toolkits.axes_grid.anchored_artists import AnchoredText
+from matplotlib.offsetbox import AnchoredText
 import os
 #from matplotlib.offsetbox import AnchoredText
 
@@ -245,7 +244,7 @@ class PLT(object):
 
     def lattices(self):
         np.random.seed(2)
-        with viznet.DynamicShow(figsize=(10,4), filename="lattices.pdf") as pl:
+        with NoBoxPlt(figsize=(10,4), filename="lattices.pdf") as pl:
             node = viznet.NodeBrush('basic', size='normal', color="#000000")
             edge = viznet.EdgeBrush('-', color='#000000', lw=1)
             n = 6
@@ -279,5 +278,35 @@ class PLT(object):
             unit_disk_graph(node, edge, locs_, 1.6)
             plt.text(4*(n+1)+dx, dy, "(d)", fontsize=FONTSIZE, va="center", ha="center")
             plt.text(4*(n+1)+dx2, dy2, "King's graphs\n(0.8 filling)", fontsize=FONTSIZE2, va="top", ha="center")
+
+    def fig6(self):
+        with NoBoxPlt(figsize=(12,7), filename="fig6.pdf") as pl:
+            d1 = np.loadtxt("data/grid-diag-size20d3-k3-alpha0.1-n10000.dat")
+            d2 = np.loadtxt("data/grid-diag-size20d3-k3-alpha0.05-n10000.dat")
+            d3 = np.loadtxt("data/grid-diag-size20d3-k3-alpha0.025-n10000.dat")
+            r1 = np.loadtxt("data/grid-regular-size110d3-k3-alpha0.1-n10000.dat")
+            r2 = np.loadtxt("data/grid-regular-size110d3-k3-alpha0.05-n10000.dat")
+            r3 = np.loadtxt("data/grid-regular-size110d3-k3-alpha0.025-n10000.dat")
+
+            gs = plt.GridSpec(7, 10)
+            ratios = [0.1, 0.05, 0.025]
+
+            for i, d in enumerate([d1, d2, d3]):
+                ax = pl.fig.add_subplot(gs[i,0])
+                ax.text(0.75, 0.5, r"${\rm ratio} = %s$"%(ratios[i]), va="center", ha="right", fontsize=14)
+                ax.axis("off")
+                for seed in range(9):
+                    ax = pl.fig.add_subplot(gs[i,1+seed])
+                    ax.plot(np.arange(d.shape[0]), d[:,seed], lw=1)
+                    ax.axis("off")
+
+            for i, d in enumerate([r1, r2, r3]):
+                ax = pl.fig.add_subplot(gs[i+4,0])
+                ax.text(0.75, 0.5, r"${\rm ratio} = %s$"%(ratios[i]), va="center", ha="right", fontsize=14)
+                ax.axis("off")
+                for seed in range(9):
+                    ax = pl.fig.add_subplot(gs[i+4,1+seed])
+                    ax.plot(np.arange(d.shape[0]), d[:,seed], lw=1)
+                    ax.axis("off")
 
 fire.Fire(PLT())

@@ -118,9 +118,9 @@ def _setup_mpl():
     plt.rcParams['lines.linewidth'] = 2
     plt.rcParams['axes.labelsize'] = 16
     plt.rcParams['axes.titlesize'] = 18
-    plt.rcParams['font.family'] = 'serif'
-    plt.rcParams['font.serif'] = 'Ubuntu'
-    plt.rcParams['font.monospace'] = 'Ubuntu Mono'
+    #plt.rcParams['font.family'] = 'serif'
+    #plt.rcParams['font.serif'] = 'Ubuntu'
+    #plt.rcParams['font.monospace'] = 'Ubuntu Mono'
     #plt.rcParams['axes.labelweight'] = 'bold'
     plt.rcParams['xtick.labelsize'] = 16
     plt.rcParams['ytick.labelsize'] = 16
