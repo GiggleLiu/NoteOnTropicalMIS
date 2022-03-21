@@ -293,14 +293,14 @@ class PLT(object):
 
             for i, d in enumerate([d1, d2, d3]):
                 ax = pl.fig.add_subplot(gs[i,0])
-                ax.text(0.75, 0.5, r"${\rm ratio} = %s$"%(ratios[i]), va="center", ha="right", fontsize=14)
+                ax.text(0.75, 0.5, r"${\rm ratio} = %s$"%(ratios[i]), va="center", ha="right", fontsize=14, family="Times New Roman")
                 ax.axis("off")
                 for seed in range(9):
                     ax = pl.fig.add_subplot(gs[i,1+seed])
                     ax.plot(np.arange(d.shape[0]), d[:,seed], lw=1)
                     ax.axis("off")
             ax = pl.fig.add_subplot(gs[3,:])
-            plt.text(0.5, 0.5, "(a) Nine King’s graphs of size 20 ×20, 0.8 filling.", ha="center", va="center", fontsize=14)
+            plt.text(0.5, 0.7, "(a) Nine King’s graphs of size 20 ×20, 0.8 filling.", ha="center", va="center", fontsize=16)
             ax.axis("off")
 
 
@@ -313,7 +313,7 @@ class PLT(object):
                     ax.plot(np.arange(d.shape[0]), d[:,seed], lw=1)
                     ax.axis("off")
             ax = pl.fig.add_subplot(gs[7,:])
-            plt.text(0.5, 0.5, "(b) Nine random three regular graphs of size 110.", ha="center", va="center", fontsize=14)
+            plt.text(0.5, 0.7, "(b) Nine random three regular graphs of size 110.", ha="center", va="center", fontsize=16)
             ax.axis("off")
 
 fire.Fire(PLT())

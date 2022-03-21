@@ -127,7 +127,7 @@ def _setup_mpl():
     plt.rcParams['ytick.labelsize'] = 16
     plt.rcParams['legend.fontsize'] = 14
     plt.rcParams['figure.titlesize'] = 18
-    matplotlib.rc('text', usetex=False)
+    plt.rcParams['text.latex.preamble'] = r'\usepackage{amsfonts}'
 
 
 def _setup_font():
