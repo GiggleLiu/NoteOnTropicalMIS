@@ -293,7 +293,7 @@ class PLT(object):
 
             for i, d in enumerate([d1, d2, d3]):
                 ax = pl.fig.add_subplot(gs[i,0])
-                ax.text(0.75, 0.5, r"${\rm ratio} = %s$"%(ratios[i]), va="center", ha="right", fontsize=20, family="Times New Roman")
+                ax.text(0.75, 0.5, r"ratio = %s"%(ratios[i]), va="center", ha="right", fontsize=20, family="Times New Roman")
                 ax.axis("off")
                 for seed in range(9):
                     ax = pl.fig.add_subplot(gs[i,1+seed])
@@ -306,7 +306,7 @@ class PLT(object):
 
             for i, d in enumerate([r1, r2, r3]):
                 ax = pl.fig.add_subplot(gs[i+4,0])
-                ax.text(0.75, 0.5, r"${\rm ratio} = %s$"%(ratios[i]), va="center", ha="right", fontsize=20)
+                ax.text(0.75, 0.5, r"ratio = %s"%(ratios[i]), va="center", ha="right", fontsize=20)
                 ax.axis("off")
                 for seed in range(9):
                     ax = pl.fig.add_subplot(gs[i+4,1+seed])

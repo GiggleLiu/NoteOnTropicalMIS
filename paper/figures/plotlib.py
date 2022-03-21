@@ -118,9 +118,13 @@ def _setup_mpl():
     plt.rcParams['lines.linewidth'] = 2
     plt.rcParams['axes.labelsize'] = 16
     plt.rcParams['axes.titlesize'] = 18
-    plt.rcParams['text.usetex'] = 'true'
+    plt.rcParams['text.usetex'] = 'false'
     plt.rcParams['font.family'] = 'serif'
-    plt.rcParams['font.serif'] = 'Times New Roman'
+    plt.rcParams['font.serif'] = ['Times New Roman'] + plt.rcParams["font.serif"]
+    plt.rcParams['mathtext.fontset'] = 'custom'
+    plt.rcParams['mathtext.rm'] = 'Times New Roman'
+    plt.rcParams['mathtext.it'] = 'Times New Roman:italic'
+    plt.rcParams['mathtext.bf'] = 'Times New Roman:bold'
     #plt.rcParams['font.monospace'] = 'Ubuntu Mono'
     #plt.rcParams['axes.labelweight'] = 'bold'
     plt.rcParams['xtick.labelsize'] = 16
