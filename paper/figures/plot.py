@@ -324,10 +324,13 @@ class PLT(object):
             grid = viznet.Grid((1.0,1.0))
             node = viznet.NodeBrush('box', size=(0.2,0.2), color="none", roundness=0.1)
             edge = viznet.EdgeBrush('->', color='#000000', lw=1.5)
+            n0 = node >> grid[-1:1, 0:1]
             n1 = node >> grid[-1:1, 2.25:3.25]
             n2 = node >> grid[2:3.5, -1.4:1]
             n3 = node >> grid[2:3.5, 2:3.5]
             n4 = node >> grid[5:6, 1.5:1.5]
+            n0.text("Optimizers", "top", weight=800, fontsize=F1)
+            n0.text("TreeSA\nGreedyMethod\nKaHyBipartite\nSABipartite\n$\ldots$", fontsize=F2, family="Ubuntu mono")
             n1.text("Graph", "top", weight=800, fontsize=F1)
             n1.text("random_regular_graph\nsmallgraph\nunit_disk_graph\nerdos_renyi\n$\ldots$", fontsize=F2, family="Ubuntu mono")
             n2.text("Property", "top", weight=800, fontsize=F1)
@@ -336,6 +339,7 @@ class PLT(object):
             n3.text("IndependentSet\nMaximalIS\nDominatingSet\nColoring\nMaxCut\nMatching\nSatisfiability\nPaintShop", fontsize=F2, family="Ubuntu mono")
             n4.text("solve", fontsize=F2, family="Ubuntu mono")
             edge >> (n1, n3)
+            edge >> (n0, n3)
             edge >> (n2.pin("right"), n4)
             edge >> (n3.pin("right"), n4)
 
