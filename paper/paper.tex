@@ -1142,22 +1142,23 @@ While in \Fig{fig:hamming}(b), we observed the multiple peak structure in $3$-re
 This indicates the presence of the Overlap Gap Property \blue{@Maddie, I am not sure if we can say ``indicates the presence of the Overlap Gap Property'' here because it is so different from the official definition of OGP, I want to change it to ``disconnected clusters exist in the configuration space for large independent sets, however, it requires further study to show whether 3-regular graphs have the overlap gap property or not.'', which one do you think is more correct?} and disconnected clusters exist in the configuration space for large independent sets.
 We expect our numerical tool can be used to understand this phenomenon better and to further investigate the graph properties and the geometry of the configuration spaces for a variety of graph instances.
 \begin{figure} 
-    \begin{subfigure}[t]{\textwidth}
-        \centering
-        %\includegraphics[width=\textwidth, trim={0cm 0cm 0cm 0cm}, clip]{figures/fig3.pdf}
-        \includegraphics[width=0.3\textwidth, trim={0.5cm 0cm 0.5cm 1cm}, clip]{figures/grid-diag-size20d3-k3-alpha0.1-n10000.pdf}
-        \includegraphics[width=0.3\textwidth, trim={0.5cm 0cm 0.5cm 1cm}, clip]{figures/grid-diag-size20d3-k3-alpha0.05-n10000.pdf}
-        \includegraphics[width=0.3\textwidth, trim={0.5cm 0cm 0.5cm 1cm}, clip]{figures/grid-diag-size20d3-k3-alpha0.025-n10000.pdf}
-        \caption{Nine King's graphs of size $20\times 20$, $0.8$ filling.}
-    \end{subfigure}
-    \begin{subfigure}[t]{\textwidth}
-        \centering
-        %\includegraphics[width=\textwidth, trim={0cm 0cm 0cm 0cm}, clip]{figures/fig3.pdf}
-        \includegraphics[width=0.3\textwidth, trim={0.5cm 0cm 0.5cm 1cm}, clip]{figures/grid-regular-size110d3-k3-alpha0.1-n10000.pdf}
-        \includegraphics[width=0.3\textwidth, trim={0.5cm 0cm 0.5cm 1cm}, clip]{figures/grid-regular-size110d3-k3-alpha0.05-n10000.pdf}
-        \includegraphics[width=0.3\textwidth, trim={0.5cm 0cm 0.5cm 1cm}, clip]{figures/grid-regular-size110d3-k3-alpha0.025-n10000.pdf}
-        \caption{Nine random three regular graphs of size $110$.}
-    \end{subfigure}
+    % \begin{subfigure}[t]{\textwidth}
+    %     \centering
+    %     %\includegraphics[width=\textwidth, trim={0cm 0cm 0cm 0cm}, clip]{figures/fig3.pdf}
+    %     \includegraphics[width=0.3\textwidth, trim={0.5cm 0cm 0.5cm 1cm}, clip]{figures/grid-diag-size20d3-k3-alpha0.1-n10000.pdf}
+    %     \includegraphics[width=0.3\textwidth, trim={0.5cm 0cm 0.5cm 1cm}, clip]{figures/grid-diag-size20d3-k3-alpha0.05-n10000.pdf}
+    %     \includegraphics[width=0.3\textwidth, trim={0.5cm 0cm 0.5cm 1cm}, clip]{figures/grid-diag-size20d3-k3-alpha0.025-n10000.pdf}
+    %     \caption{Nine King's graphs of size $20\times 20$, $0.8$ filling.}
+    % \end{subfigure}
+    % \begin{subfigure}[t]{\textwidth}
+    %     \centering
+    %     %\includegraphics[width=\textwidth, trim={0cm 0cm 0cm 0cm}, clip]{figures/fig3.pdf}
+    %     \includegraphics[width=0.3\textwidth, trim={0.5cm 0cm 0.5cm 1cm}, clip]{figures/grid-regular-size110d3-k3-alpha0.1-n10000.pdf}
+    %     \includegraphics[width=0.3\textwidth, trim={0.5cm 0cm 0.5cm 1cm}, clip]{figures/grid-regular-size110d3-k3-alpha0.05-n10000.pdf}
+    %     \includegraphics[width=0.3\textwidth, trim={0.5cm 0cm 0.5cm 1cm}, clip]{figures/grid-regular-size110d3-k3-alpha0.025-n10000.pdf}
+    %     \caption{Nine random three regular graphs of size $110$.}
+    % \end{subfigure}
+    \includegraphics[width=\textwidth, trim={0.5cm 0cm 0.5cm 1cm}, clip]{figures/fig6.pdf}
     \caption{The plot of pairwise Hamming distances distribution for configurations sampled from independent sets with sizes $\geq \lfloor(1-{\rm ratio}) \times \alpha(G)\rfloor$.
     In each plot, the $x$-axis is the Hamming distance normalized by the total number of vertices and the $y$-axis is the probability.
     The ``filled'' region is caused by the fast oscillation of configuration populations of even and odd Hamming distances.
