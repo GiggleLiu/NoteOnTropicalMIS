@@ -427,7 +427,7 @@ one can easily write very general codes, but the efficiency is not guaranteed; f
 C++ uses templates for generic programming while Julia takes advantage of just-in-time compilation and multiple dispatch.
 When these languages ``see'' a new input type, the compiler can recompile the generic program for the new type.
 A myriad of optimizations can be done during the compilation, such as optimize the memory layout of immutable elements with fixed sizes in an array to speed up the array indexing.
-In Julia, arrays with immutable elements with fixed sizes can even be compiled to GPU devices for faster computation~\cite{Besard2018}.
+In Julia, arrays with immutable elements with fixed sizes can even be compiled to graphics processing units (GPU) for faster computation~\cite{Besard2018}.
 
 This motivates us to think about what is the most general tensor element type allowed in a tensor network contraction program.
 We find that, as long as the algebra of tensor elements forms a commutative semiring, the tensor network contraction will be doable and the result will be independent of the contraction order.
@@ -1041,7 +1041,7 @@ Similar to the tropical numbers, we can combine the extended tropical algebra wi
 Since the $\odot$ operation of configuration sampler is not used, the resulting configurations are deterministic and complete.
 
 \section{Performance benchmarks}\label{sec:benchmark}
-We run a single thread benchmark on CPU Intel(R) Xeon(R) CPU E5-2686 v4 @ 2.30GHz,
+We run a single thread benchmark on central processing units (CPU) Intel(R) Xeon(R) CPU E5-2686 v4 @ 2.30GHz,
 and its CUDA version on a GPU Tesla V100-SXM2 16G.
 The results are summarized in Figure~\ref{fig:benchmark}.
 The graphs that we use in benchmarks are random three regular graphs,
@@ -1889,20 +1889,26 @@ julia> using GraphTensorNetworks, Graphs
 julia> solve(
            IndependentSet(
                Graphs.random_regular_graph(20, 3);
-               optimizer = TreeSA()
+               optimizer = TreeSA(),
+               weights = NoWeight(),
+               openvertices = ()
            ),
-           GraphPolynomial()
+           GraphPolynomial();
+           usecuda=false
        )
 0-dimensional Array{Polynomial{BigInt, :x}, 0}:
 Polynomial(1 + 20*x + 160*x^2 + 659*x^3 + 1500*x^4 + 1883*x^5 + 1223*x^6 + 347*x^7 + 25*x^8)
 \end{lstlisting}
 
-Here the main function \texttt{solve} takes two inputs, the problem instance of type \texttt{IndependentSet} and the property instance of type \texttt{GraphPolynomial}, while the problem instance also takes two arguments to initialize, one is the graph instance one wants to solve and the key word argument \texttt{optimizer} is for tensor network optimization.
+Here the main function \texttt{solve} takes three inputs, the problem instance of type \texttt{IndependentSet}, the property instance of type \texttt{GraphPolynomial} and an optional key word argument \texttt{usecuda} to decide use GPU or not.
+If one wants to use GPU to accelerate the computation, statement ``\texttt{using CUDA}'' must be executed before calling the solve function.
+The problem instance takes four arguments to initialize, the only positional argument is the graph instance one wants to solve, the key word argument \texttt{optimizer} is for tensor network optimization, the key word argument \texttt{weights} specifies the weights of vertices as either a vector or \texttt{NoWeight()} and the keyword argument \texttt{openvertices} allows one to specify the degrees of freedom not summed over, i.e. returning a tensor rather than its sum.
+Here, we use \texttt{TreeSA} method in Ref.~\cite{Kalachev2021}.
+The first execution of the code will trigger Julia's just in time compiling,
+which is a bit slow, but the following runs will be fast.
+The following diagram lists possible combinations of input arguments, where graphs are mainly defined in package \texttt{Graphs}, and the rest can be found in \texttt{GraphTensorNetworks}.
 
-\centering{\includegraphics[width=0.8\textwidth, trim={0cm 1cm 0cm 1cm}, clip]{figures/fig7.pdf}}
-
-The first time you run the code might trigger the just in time compiling,
-it will be a bit slow, but the following computing will be fast.
+\centerline{\includegraphics[width=0.8\textwidth, trim={0cm 1cm 0cm 1cm}, clip]{figures/fig7.pdf}}
 
 The code we will show below is a gist of how the above package is implemented, which is mainly for the pedagogical purpose.
 It covers most of the topics in the paper without caring much about the performance.
