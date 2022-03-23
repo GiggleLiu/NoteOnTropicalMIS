@@ -1,3 +1,6 @@
+# to install fonts
+# $ sudo apt install msttcorefonts -qq
+# $ rm ~/.cache/matplotlib -rf
 try:
     from matplotlib import pyplot as plt
     import matplotlib

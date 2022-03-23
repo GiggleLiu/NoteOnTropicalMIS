@@ -1133,12 +1133,12 @@ We compare  nine randomly generated instances from two categories of graphs: Kin
 %Each category contains nine randomly generated instances, due to the limitation of computing resources,
 Our method can sample from independent sets of King's graph up to $20\times 20$ ($320$ vertices) and the size of $3$-regular graphs are $110$.
 In particular, in \Fig{fig:hamming}, 
-we sample two sets of $10^4$ configurations from the ISs at sizes $\geq \lfloor (1-\text{ratio}) \times \alpha(G)\rfloor$ for each instance
+we sample two sets of $10^4$ configurations from the ISs at sizes $\geq \lceil \gamma \times \alpha(G)\rceil$ for each instance
  and show the pairwise Hamming distance distribution for the enumerated configurations.
 In \Fig{fig:hamming}(a), we observed a clear single peak structure at a fixed distance normalized by the MIS size for the King's graphs.
 Which is a clear evidence of the absence of the Overlap Gap Property in $0.8$ filling King's graph.
 Given the fact that the MIS problem on an arbitrary graph can be mapped to a King's graph at a certain filling~\cite{Ebadi2022}, this result is highly nontrivial.
-While in \Fig{fig:hamming}(b), we observed the multiple peak structure in $3$-regular graphs as the ratio becomes small.
+While in \Fig{fig:hamming}(b), we observed the multiple peak structure in $3$-regular graphs as the independent set sizes become large.
 This indicates the presence of the Overlap Gap Property \blue{@Maddie, I am not sure if we can say ``indicates the presence of the Overlap Gap Property'' here because it is so different from the official definition of OGP, I want to change it to ``disconnected clusters exist in the configuration space for large independent sets, however, it requires further study to show whether 3-regular graphs have the overlap gap property or not.'', which one do you think is more correct?} and disconnected clusters exist in the configuration space for large independent sets.
 We expect our numerical tool can be used to understand this phenomenon better and to further investigate the graph properties and the geometry of the configuration spaces for a variety of graph instances.
 \begin{figure} 
@@ -1159,7 +1159,7 @@ We expect our numerical tool can be used to understand this phenomenon better an
     %     \caption{Nine random three regular graphs of size $110$.}
     % \end{subfigure}
     \includegraphics[width=\textwidth, trim={0.0cm 1cm 0.0cm 0cm}, clip]{figures/fig6.pdf}
-    \caption{The plot of pairwise Hamming distances distribution for configurations sampled from independent sets with sizes $\geq \lfloor(1-{\rm ratio}) \times \alpha(G)\rfloor$.
+    \caption{The plot of pairwise Hamming distances distribution for configurations sampled from independent sets with sizes $\geq \lceil\gamma \times \alpha(G)\rceil$.
     In each plot, the $x$-axis is the Hamming distance normalized by the total number of vertices and the $y$-axis is the probability.
     The ``filled'' region is caused by the fast oscillation of configuration populations of even and odd Hamming distances.
     }
