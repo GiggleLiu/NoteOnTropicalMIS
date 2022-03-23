@@ -226,14 +226,13 @@ Listing \thelstlisting: #1\hfill%\hfill%
 \begin{abstract}
 %We introduce a method that uses generic programming tensor networks to compute various properties of a class of hard graph problems that can be decribed by local constraints.
 We introduce a tensor network algorithm %a method that combines generic programming and tensor network techniques 
-to compute various solution space properties of a class of combinatorial optimization problems that can be specified by local constraints. \purple{I still think there is a more concise way to word the class of combinatorial optimization problems this works on...}\blue{changed a bit, better?}
+to compute various solution space properties of a class of combinatorial optimization problems on graphs that can be rephrased as satisfiability problems quantified over local sets of vertices, including the independent set problem, the maximum cut problem, the vertex coloring problem, the maximal clique problem, the dominating set problem, and the satisfiability problem, among others.\purple{I still think there is a more concise way to word the class of combinatorial optimization problems this works on...}\blue{changed a bit, better?}
 %Let the independent set problem be an example, we show how to compute, for example, the maximum several independent set sizes, the counting of independent sets of a give size, the enumeration of independent sets of a given size.
 We look at the independent set problem as an example, and show how to compute the size of the maximum independent set, count the number of independent sets of a given size, and enumerate/sample the independent sets of a given size.
 %By making use of generic programming, our algorithms are very simple to implement and one can in addition directly utilize recent advances in tensor network contraction techniques such as near-optimal contraction order finding and slicing to achieve high performance.
 By using generic programming techniques, %which require a program to work correctly for different input data types without sacrificing efficiency,
 the same simple-to-implement framework can be used to compute all of these properties. Our algorithm utilizes recent advances in tensor network contraction techniques to achieve high performance, including methods to quickly find a near-optimal contraction order and slicing.
 %The algorithmic complexity of this approach is two to the treewidth of the line graph of the tensor network graph.
-Other hard graph problems solvable in our framework include the maximum cut problem, the vertex coloring problem, the maximal clique problem, the dominating set problem, and the satisfiability problem, among others.
 To demonstrate how our versatile tool helps to understand these hard problems, we apply it to a few examples, including computing the entropy constant for several hardcore gases on disordered lattices, studying the Overlap Gap Property on unit disk graphs and regular graphs, and visualizing the output of quantum optimization algorithms for the independent set problem. \purple{I might not directly mention the classes of graphs we look at for Overlap Gap - it might be too much information. I'm not sure though, what do you think?} \blue{I agree ``King's graphs at 0.8 filling and 3-regular graphs'' is a bit too detailed, so I rephrased it as ``unit disk graphs and regular graphs'' that only conveys the most important information.} % including the calculations of the entropy constant for some hardcore lattice gases on 2D square lattices and the study of the Overlap Gap Property on three regular graphs.
 %We show how our method helps to understand these hard problems on systems with hundreds of vertices.
 \end{abstract}
@@ -253,13 +252,13 @@ solution space property, tensor network, maximum independent set, independence p
 \cyan{a comment} and \xcyan{a resolved comment}
 
 \section{Introduction}
-In graph theory and combinatorial optimization, there is an important class of problems that can be local constraints over a vertex and its neighborhood,
-including the independent set problem, the cutting problem, the dominating set problem, the set packing problem, the vertex coloring problem, the satisfiability problem,
+In graph theory and combinatorial optimization, there is an important class of problems that can rephrased as satisfiability problems quantified over local sets that typically consists of a vertex and its neighborhood,
+including the independent set problem, the cutting problem, the dominating set problem, the set packing problem, the vertex coloring problem, the K-SAT problem,
 the maximal clique problem, and the vertex cover problem~\cite{Moore2011}.
 %There is a widespread interest of these problem because they have wide range of applications in scheduling, logistics,
 %wireless networks and telecommunication, and computer vision, etc.~\cite{Butenko2003, Wu2015}.
 %\blue{need more diversed applications not limited to IS}
-Many decision and counting properties of these problems are in general intractable at large sizes (exponential runetime in problem size in the worst case),
+Many decision and counting properties of these problems are in general intractable at large sizes (exponential run time in problem size in the worst case),
 but it is nevertheless desirable to have high-performance algorithms because of their ubiquitous applications~\cite{Butenko2003, Wu2015}.
 
 The most studied aspect of the above problems is finding an optimal solution, 
@@ -269,24 +268,22 @@ which is typically
 NP-hard~\cite{Hastad1996}, i.e.\ it is unlikely to be solved in a polynomial time.
 %\purple{Is MIS really the most studied NP-hard optimization problem? I would guess it is heavily studied, but not necessarily the most studied.}
 %\blue{Here, we haven't mentioned the independent set, here ``version'' means, e.g. counting, enumeration, devision. I think finding one of the largest/smallest set and its cardinality in the above mentioned problems is the most studied?}
-In this paper, we focus on the less studied problem of computing \textit{solution space properties}  which can be much harder, e.g.\ counting independent sets of a general graph is \#P-complete~\cite{Vadhan2001}, but is crucial towards understanding a hard problem.
+In this paper, we focus on the less studied problem of computing \textit{solution space properties}  which can be much harder, e.g.\ counting independent sets of a general graph is \#P-complete~\cite{Vadhan2001}, but is crucial towards understanding a hard combinatorial optimization problem.
 Here, the \textit{solution space property} refers to a class of quantities that not only include the maximum/minimum set size,
 but also include the number of sets at a give size, enumeration of all sets at a give size or direct sampling of such sets when they are not enumeratable.
 For the weighted version of the above problems, it also includes finding largest/smallest $k$ sets and their sizes.
 %are many interesting and hard computational problems concerning various properties of independent sets.
-Solution space property computation allows us to understand the solution space better.
-With the counting of sets at different sizes, one can related the computational hardness with the counting of sets at different sizes~\cite{Xu2018}.
-With the configuration enumeration/sampling at a given size, one can measure the Overlap Gap Property~\cite{Gamarnik2013, Gamarnik2019} better,
-while the configuration space connectivity also provides us an intuition about designing better classical or quantum algorithms.
+%Solution space property computation allows us to understand the solution space better.
+In the past, people use the counting of configurations at different sizes to tell how likely the simulated annealing will be trapped in certain size in the strong defensive alliance problem~\cite{Xu2018}, and use pair-wise Hamming distance distribution of configurations at a given size to tell the presence or absence of the Overlap Gap Property~\cite{Gamarnik2013, Gamarnik2019}, a no go theorem about when the solution space geometry is formidably hard for any local search algorithm.
+In a recent experiment of using Rydberg atom arrays to optimize the independent set problem~\cite{Ebadi2022}, the authors use the counting information and the configuration space connectivity to find instances hard for classical algorithms and design better quantum algorithms to solve these instances faster, and this experiment gives birth to the paper we are presenting.
 %\purple{I would give examples of why we want to compute solution space properties.
 %For instance, in statistical physics, computing thermal states and
 %observables via the partition function. In complexity theory, proving limits on local algorithms (OGP).}\blue{now?}
 
-We propose to view the computation of all these properties from an abstract algebra perspective and use the unified framework of
+We give an algebraic interpretation of the computation of all these properties and use the unified framework of
 generic tensor-network to solve these seemingly unrelated properties all.
 %We map the computation of these properties into generic tensor network contraction with specially designed tensor element algebra.
-Tensor network is also known as the sum product network in probabilistic modeling~\cite{Bishop2006} or einsum in linear algebra libraries such as numpy~\cite{Harris2020}.
-It is composed of a set of labelled tensors, where the labels are used for specifying the contraction relation.
+Tensor network is a computational model widely used in condensed matter physics~\cite{Orus2014}, quantum computing~\cite{Markov2008}, big data~\cite{Cichocki2014} and mathematics~\cite{Oseledets2011}, which is also known as the sum product network in probabilistic modeling~\cite{Bishop2006} or einsum in linear algebra libraries such as numpy~\cite{Harris2020}.
 The tensor element types are typically restricted to standard number types such as real numbers and complex numbers.
 We extend this concept to generic tensor network by generalizing the tensor element type to any type being a commutative semiring.
 Given a good contraction order, the space required to contract a tensor network is
@@ -294,9 +291,8 @@ two to the power of the treewidth of its line graph~\cite{Markov2008}.
 %\purple{I’d write out $2^{{\rm tw}(G)}$}\blue{I feel it is hard to explain line graph without texts.}
 Recent progress in simulating quantum circuits with random tensor networks~\cite{Gray2021, Pan2021, Kalachev2021} enables us to find such a good contraction order for a tensor network with thousands of tensors in a reasonable time using heuristic (inexact) methods.
 %\purple{Is the scaling of these algorithms known?}\blue{They are not exact algorithms, the time can be any, typically a few minutes, will it be helpful to mention this?}
-When using tensor network for solving one of the best solutions,
-the time complexity is the same as the dynamic programming algorithm~\cite{Courcelle1990, Fomin2013}.
-However, the tensor network has a richer algebraic structure, which crucially enables the computation of solution space properties beyond finding a single solution, which is not possible with dynamic programming.
+Tensor network is very related to a well known computer programming method, the dynamic programming~\cite{Courcelle1990, Fomin2013}, like the Viterbi algorithm for finding most probable configuration in the hidden Markov model has a nice matrix product state interpretation~\cite{Han2018}, and the tropical tensor network is very likely equivalent to dynamic programming in solving hard combinatorial optimization problems in certain way~\cite{Liu2021} and they have the same time complexity related to the treewidth of a graph.
+However, while being more restrictive regarding the problem set it can solve, the tensor network has a richer algebraic structure, which crucially enables the computation of solution space properties beyond finding a single solution, which is not possible with dynamic programming.
 %These two algorithms are related but are not equivalent.
 %Dynamic programming is more general purpose, while a tensor network has a richer algebraic structure, and this structure is crucial for solution space property computation.
 %\purple{Not clear how first part and second part of sentence are related}\blue{now? or maybe just removing the comparison with dynamic programming?}
@@ -325,17 +321,21 @@ Lastly, we benchmark our algorithms in \Sec{sec:benchmark} and provide three exa
 %a maximal independent set is an independent set that is not a subset of any other independent set, but its size may not be the maximum. 
 
 \section{Tensor networks}\label{sec:tn}
-A tensor network~\cite{Cirac2020, Orus2014} can be viewed as a generalization of binary matrix multiplication to nary tensor contraction.
-Einstein's notation is often used to represent a tensor network, e.g.\ it represents the matrix multiplication between two matrices $A$ and $B$ as $C_{ik} = A_{ij}B_{jk}$,
-where we use a label in the subscript to represent a degree of freedom.
-One can enumerate these degrees of freedom and accumulate the product of tensor elements to the output tensor.
-In the standard Einstein's notation for tensor networks in physics, each index appears precisely twice, either both in input tensors (which will be summed over) or one in a input tensor and another in the output tensor.
-Hence a tensor network can be represented as a open simple graph,
-where a tensor is mapped to a vertex, a label shared by two input tensors is mapped to a normal edge and a label appears in the output tensor is mapped to an open edge.
-In this work, we adopt a more general form of tensor networks that do not restrict how many times a label can appear in tensors. 
-The graphical representation of a generalized tensor network is a hypergraph, in which an edge (a label in subscript) can be shared by an arbitrary number of vertices (tensors).
-Although two notations are equivalent in representation power thought some transformation,
-the generalized tensor network might produce smaller contraction complexity,
+A tensor network~\cite{Cirac2020, Orus2014} is composed of a collection of tensors, a collection of labels associated with tensor dimensions to index tensor elements and an indicator of which tensor is the output, while the contraction of a tensor network is defined as a summation of products of tensor elements over the labels not appearing in the output tensor.
+e.g. the matrix multiplication is a special tensor network that can be represented as $C_{ik} = A_{ij}B_{jk}$, where $A, B$ and $C$ are tensors, $ik,ij$ and $ik$ are labels associated with them, and ``$=$'' is the indicator of $C$ being the output, while its contraction is defined as $C_{ik} = \sum_j A_{ij}B_{jk}$.
+%can be viewed as a generalization of binary matrix multiplication to nary tensor contraction.
+%Generalized Einstein's notation is often used to represent a tensor network, where we use a label in the subscript to represent a degree of freedom.
+%One can enumerate these degrees of freedom and accumulate the product of tensor elements to the output tensor.
+% Einstein's notation is often used to represent a tensor network, e.g.\ it represents the matrix multiplication between two matrices $A$ and $B$ as $C_{ik} = A_{ij}B_{jk}$,
+% where we use a label in the subscript to represent a degree of freedom.
+% One can enumerate these degrees of freedom and accumulate the product of tensor elements to the output tensor.
+% In the standard Einstein's notation for tensor networks in physics, each index appears precisely twice, either both in input tensors (which will be summed over) or one in a input tensor and another in the output tensor.
+% Hence a tensor network can be represented as a open simple graph,
+% where a tensor is mapped to a vertex, a label shared by two input tensors is mapped to a normal edge and a label appears in the output tensor is mapped to an open edge.
+% In this work, we adopt a more general form of tensor networks that do not restrict how many times a label can appear in tensors. 
+The graphical representation of a generalized tensor network is an open hypergraph, where an input tensor is mapped to a vertex and a label is mapped to a hyperedge that can connect an arbitrary number of vertices, while the labels appearing in the output tensor are open.
+As a reminder, our notation slightly generalizes the standard tensor network used in physics by not restricting how many times a label can appear in tensors, they are equivalent in representation power thought some transformation,
+but this generalized tensor network might produce smaller contraction complexity,
 which will be illustrated in \App{sec:tensorbad}.
 % because one can easily translate a generalized tensor network to the standard notation by adding $\delta$ tensors, a high dimensional equivalence of the identity matrix.
 %However, introducing $\delta$ tensors may significantly increase the complexity of the tensor contraction. We illustrate this subtle point in \App{sec:tensorbad}.
@@ -514,7 +514,7 @@ We map a vertex $v\in V$ to a label $s_v \in \{0, 1\}$ of dimension $2$ in a ten
 For each label $s_v$, we defined a parametrized rank-one vertex tensor $W(x_v, w_v)$ as
 \begin{equation}
     W(x_v, w_v) = \left(\begin{matrix}
-        1_v \\
+        1 \\
         x_v^{w_v}
     \end{matrix}\right).\label{eq:vertextensor}
 \end{equation}
@@ -1175,6 +1175,7 @@ We expect our numerical tool can be used to understand this phenomenon better an
     Each vertex represents an independent set, and each edge represents a pair of  independent sets that differ by a swap operation or a vertex addition.}
     \label{fig:exp_configuratoins}
 \end{figure}
+\purple{There are some other ideas I have to add to this...}
 The ability to enumerate configurations can also be used to understand the distribution of outputs from algorithms for solving NP-hard combinatorial optimization problems.
 This can give detailed insights to performance of the algorithm, such as if the algorithm is likely to return independent sets from certain clusters of local or global minima in the solution space.
 As an example, we show in Figure~\ref{fig:exp_configuratoins} how our algorithm can be used to visualize experimental outputs of a quantum algorithm for solving the Maximum Independent Set problem using a programmable Rydberg atom array quantum computer~\cite{Ebadi2022}.
@@ -1255,10 +1256,11 @@ where the $0$ in the bond tensor coming from $e^{-\beta\infty}$ in the second te
 By letting $x = e^{\beta}$, we get the tensor network for computing the independence polynomial as described by \Eq{eq:vertextensor} and \Eq{eq:edgetensor},
 and by letting $w_i=1$, the second line of \Eq{eq:partition} is the independence polynomial.
 
-\section{An example of contraction complexity increase due to introducing $\delta$ tensors}\label{sec:tensorbad}
-As we have mentioned in the main text,
-a standard tensor network notation is equivalent to the generalized tensor network by introducing $\delta$ tensors,
-where a $\delta$ tensor of rank $d$ is defined as
+\section{An example of contraction complexity increase due to using the standard tensor network notation}\label{sec:tensorbad}
+
+In the standard Einstein's notation for tensor networks in physics, each index appears precisely twice, either both in input tensors (which will be summed over) or one in a input tensor and another in the output tensor.
+Hence a tensor network can be represented as a open simple graph, where a tensor is mapped to a vertex, a label shared by two input tensors is mapped to a normal edge and a label appears in the output tensor is mapped to an open edge.
+A standard tensor network notation is equivalent to the generalized tensor network by introducing $\delta$ tensors, where a $\delta$ tensor of rank $d$ is defined as
 \begin{equation}
     \delta_{i_1, i_2,\ldots,i_d} = \begin{cases}
         1, & i_1=i_2=\ldots =i_d,\\
