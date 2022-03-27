@@ -233,7 +233,7 @@ We look at the independent set problem as an example, and show how to compute th
 By using generic programming techniques, %which require a program to work correctly for different input data types without sacrificing efficiency,
 the same simple-to-implement framework can be used to compute all of these properties. Our algorithm utilizes recent advances in tensor network contraction techniques to achieve high performance, including methods to quickly find a near-optimal contraction order and slicing.
 %The algorithmic complexity of this approach is two to the treewidth of the line graph of the tensor network graph.
-To demonstrate how our versatile tool helps to understand these hard problems, we apply it to a few examples, including computing the entropy constant for several hardcore gases on disordered lattices, studying the Overlap Gap Property on unit disk graphs and regular graphs, and visualizing the output of quantum optimization algorithms for the independent set problem. \purple{I might not directly mention the classes of graphs we look at for Overlap Gap - it might be too much information. I'm not sure though, what do you think?} \blue{I agree ``King's graphs at 0.8 filling and 3-regular graphs'' is a bit too detailed, so I rephrased it as ``unit disk graphs and regular graphs'' that only conveys the most important information.} % including the calculations of the entropy constant for some hardcore lattice gases on 2D square lattices and the study of the Overlap Gap Property on three regular graphs.
+To demonstrate how our versatile tool helps to understand these hard problems, we apply it to a few examples, including computing the entropy constant for several hardcore gases on disordered lattices, studying the Overlap Gap Property on unit disk graphs and regular graphs, and analyzing the performance of quantum and classical optimization algorithms for the independent set problem. \purple{I might not directly mention the classes of graphs we look at for Overlap Gap - it might be too much information. I'm not sure though, what do you think?} \blue{I agree ``King's graphs at 0.8 filling and 3-regular graphs'' is a bit too detailed, so I rephrased it as ``unit disk graphs and regular graphs'' that only conveys the most important information.}\purple{What about just ``studying the Overlap Gap property'', no mention of what classes of graphs? Or studying the Overlap Gap property on different classes of graphs''} % including the calculations of the entropy constant for some hardcore lattice gases on 2D square lattices and the study of the Overlap Gap Property on three regular graphs.
 %We show how our method helps to understand these hard problems on systems with hundreds of vertices.
 \end{abstract}
 
@@ -252,7 +252,7 @@ solution space property, tensor network, maximum independent set, independence p
 \cyan{a comment} and \xcyan{a resolved comment}
 
 \section{Introduction}
-In graph theory and combinatorial optimization, there is an important class of problems that can rephrased as satisfiability problems quantified over local sets that typically consists of a vertex and its neighborhood,
+In graph theory and combinatorial optimization, there is an important class of problems that can rephrased as satisfiability problems of constraints specified over local sets of variables that typically consists of a vertex and its neighborhood, \blue{I still think the information of being local is important, because it best characterizes tensor networks.}
 including the independent set problem, the cutting problem, the dominating set problem, the set packing problem, the vertex coloring problem, the K-SAT problem,
 the maximal clique problem, and the vertex cover problem~\cite{Moore2011}.
 %There is a widespread interest of these problem because they have wide range of applications in scheduling, logistics,
@@ -1139,7 +1139,7 @@ In \Fig{fig:hamming}(a), we observed a clear single peak structure at a fixed di
 Which is a clear evidence of the absence of the Overlap Gap Property in $0.8$ filling King's graph.
 Given the fact that the MIS problem on an arbitrary graph can be mapped to a King's graph at a certain filling~\cite{Ebadi2022}, this result is highly nontrivial.
 While in \Fig{fig:hamming}(b), we observed the multiple peak structure in $3$-regular graphs as the independent set sizes become large.
-This indicates the presence of the Overlap Gap Property \blue{@Maddie, I am not sure if we can say ``indicates the presence of the Overlap Gap Property'' here because it is so different from the official definition of OGP, I want to change it to ``disconnected clusters exist in the configuration space for large independent sets, however, it requires further study to show whether 3-regular graphs have the overlap gap property or not.'', which one do you think is more correct?} and disconnected clusters exist in the configuration space for large independent sets.
+This indicates the presence of the Overlap Gap Property \blue{@Maddie, I am not sure if we can say ``indicates the presence of the Overlap Gap Property'' here because it is so different from the official definition of OGP, I want to change it to ``disconnected clusters exist in the configuration space for large independent sets, however, it requires further study to show whether 3-regular graphs have the overlap gap property or not.'', which one do you think is more correct?}\purple{The second thing is correct to say. I would just say that.} and disconnected clusters exist in the configuration space for large independent sets.
 We expect our numerical tool can be used to understand this phenomenon better and to further investigate the graph properties and the geometry of the configuration spaces for a variety of graph instances.
 \begin{figure} 
     % \begin{subfigure}[t]{\textwidth}
@@ -1166,8 +1166,8 @@ We expect our numerical tool can be used to understand this phenomenon better an
     \label{fig:hamming}
 \end{figure}
 
-\subsection{Visualizing experimental quantum algorithm outputs for solving Maximum Independent Set}
-
+%\subsection{Visualizing experimental quantum algorithm outputs for solving Maximum Independent Set}
+\subsection{Analyzing quantum and classical algorithms for solving Maximum Independent Set}
 \begin{figure} 
     \centering
     \includegraphics[width=.65\textwidth, trim={0cm 0cm 0cm 0cm}, clip]{figures/exp_configurations.pdf}
@@ -1175,16 +1175,17 @@ We expect our numerical tool can be used to understand this phenomenon better an
     Each vertex represents an independent set, and each edge represents a pair of  independent sets that differ by a swap operation or a vertex addition.}
     \label{fig:exp_configuratoins}
 \end{figure}
-\purple{There are some other ideas I have to add to this...}
-The ability to enumerate configurations can also be used to understand the distribution of outputs from algorithms for solving NP-hard combinatorial optimization problems.
-This can give detailed insights to performance of the algorithm, such as if the algorithm is likely to return independent sets from certain clusters of local or global minima in the solution space.
-As an example, we show in Figure~\ref{fig:exp_configuratoins} how our algorithm can be used to visualize experimental outputs of a quantum algorithm for solving the Maximum Independent Set problem using a programmable Rydberg atom array quantum computer~\cite{Ebadi2022}.
-The structure of the solution space for a King's graph with $39$ vertices and filling factor $\rho=0.8$ can be visualized on a graph where each vertex represents a large independent set, and each edge represents a pair of  independent sets that differ by a swap operation or a vertex addition to the set.
-The algorithm either finds the MIS with size $\alpha(G)$ with high probability, or returns a suboptimal independent set, usually with size $\alpha(G)-1.$
-The algorithm does not appear to return solely local minima with large Hamming distance from the MISs as suggested by~\cite{altshuler2010}\blue{Fix ref.},
-but samples from local minima with a wide range of Hamming distances from the MISs.
-Consistent with Sec.~\ref{sec:overlap-gap}, there are no disconnected clusters in the solution space for this King's graph.
-
+The ability to enumerate configurations and compute independence polynomials was crucial in understanding the performance of quantum and classical algorithms for Maximum Independent Set in recent experiments~\cite{Ebadi2022}.
+We found that on King's graphs with $\rho=0.8$ filling, the hardest instances for classical simulated annealing could be accurately predicted from the independence polynomial, which gave information about the density of local minima at different independent set sizes. On the hardest graph instances for simulated annealing that we studied, a high density of local minima were present at independent set sizes of $\alpha(G)-1,$ which the algorithm became trapped in instead of finding the optimal solution of size $\alpha(G)$. Initially, we suspected that simulated annealing was trapped certain clusters of these local minima in the solution space. However, by enumerating the configurations, we determined that there was no clustering in the solution space as in Sec.~\ref{sec:overlap-gap}, and instead simulated annealing randomly explores the independent sets of size $\alpha(G)-1$ until an optimal solution is found. Therefore, it is the large ratio of local to global minima that prevents simulated annealing from efficiently finding the MIS.
+%and studying the solution space properties for independent sets of size $\alpha(G)$ and $\alpha(G)-1$, we gained detailed insights to performance of both the quantum algorithm and simulated annealing, and could determine if these algorithm were likely to return independent sets from certain clusters of local or global minima in the solution space. Instead, we found that simulated annealing becomes trapped in independent sets of size $\alpha(G)-1$ uniformly at random, which is related to observation that there are no disconnected clusters in the solution space for King's graphs in Sec.~\ref{sec:overlap-gap}.
+Although the performance of the quantum algorithm was more challenging to understand due to the inherent difficulty in studying quantum systems, we were able to visualize the experimental outputs of a quantum algorithm over the solution space, as shown in Figure~\ref{fig:exp_configuratoins} for an instances with $39$ nodes~\cite{Ebadi2022}.
+Here, the structure of the solution space is shown on a graph where each vertex represents a large independent set. Each edge represents a pair of  independent sets that differ by a swap operation or a vertex addition to the set, which are the operations naturally present in the effective dynamics at the end of the quantum algorithm. 
+%The quantum algorithm either finds the MIS with size $\alpha(G)$ with high probability, or returns a suboptimal independent set, usually with size $\alpha(G)-1.$
+\blue{We also get some unexpected discovery that the degrees of nodes in the configuration space is concentrated at a certain value, which is a feature not known before.}
+We find that the quantum algorithm does not appear to return solely local minima with large Hamming distance from the MISs as suggested for adiabatic algorithms by~\cite{altshuler2010},
+but rather samples from local minima with a wide range of Hamming distances from the MISs.
+%Consistent with Sec.~\ref{sec:overlap-gap}, there are no disconnected clusters in the solution space for this King's graph.
+Looking forward, these tools can be applied to understanding the performance of quantum and classical algorithms on a wide class of NP-hard combinatorial optimization problems.
 
 \section{Discussion and conclusion}
 In this paper, we introduce a method to use generic programming and tensor networks to compute a number of different solution space properties of certain classes of NP-hard combinatorial optimization problems. % the maximum independent set problem. %, including the largest several independent sets sizes, the number of independent sets of a given size, and the enumeration of independent sets of a given size.
