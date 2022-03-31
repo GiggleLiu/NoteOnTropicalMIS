@@ -27,7 +27,7 @@ class PLT(object):
         with DataPlt(filename="fig1.%s"%tp, figsize=(10,7)) as dp:
             ax = plt.subplot(221)   # treewidth
             cornertex("(a)", ax, offset=(0,0))
-            plt.plot(ns, treewidth[:,1], label="space complexity (tree width)", color="C1")
+            plt.plot(ns, treewidth[:,1], label="space complexity (treewidth)", color="C1")
             plt.axhline(y=27, color="C1", ls="--", label="slicing threshold")
             plt.plot(ns, treewidth[:,0], label="time complexity")
             plt.xlabel("number of vertices, $|V|$")
@@ -96,7 +96,7 @@ class PLT(object):
             plt.xlim(0, 260)
             plt.legend(loc="upper left", fontsize=FS, framealpha=ALPHA)
             plt.ylim(1e-3,1e4)
-            #plt.plot(twinx(), ns, getindex.(nw, 2), label="tree width",ytickfontsize=12, xticks=:none,yguidefontsize=14,legend=:bottomright, color=:black, ls=:dash, lw=2, ylabel="tree width")
+            #plt.plot(twinx(), ns, getindex.(nw, 2), label="treewidth",ytickfontsize=12, xticks=:none,yguidefontsize=14,legend=:bottomright, color=:black, ls=:dash, lw=2, ylabel="treewidth")
 
             plt.tight_layout()
 
@@ -109,7 +109,7 @@ class PLT(object):
         with DataPlt(filename="fig2.%s"%tp, figsize=(8,3)) as dp:
             ax = plt.subplot(121)   # treewidth
             cornertex("(a)", ax, offset=(-0.02,0))
-            plt.plot(ns, [x[1] for x in nw], label="space complexity (tree width)")
+            plt.plot(ns, [x[1] for x in nw], label="space complexity (treewidth)")
             plt.plot(ns, [x[2] for x in nw], label="time complexity")
             plt.xlabel("number of vertices, $|V|$")
             plt.ylabel("complexity")
@@ -301,7 +301,7 @@ class PLT(object):
                     ax.plot(np.arange(d.shape[0]), d[:,seed], lw=1)
                     ax.axis("off")
             ax = pl.fig.add_subplot(gs[3,:])
-            plt.text(0.5, 0.7, "(a) Nine King’s graphs of size 20 ×20, 0.8 filling.", ha="center", va="center", fontsize=20, family="Times New Roman")
+            plt.text(0.5, 0.7, "(a) Nine King's graphs of size 20 ×20, 0.8 filling.", ha="center", va="center", fontsize=20, family="Times New Roman")
             ax.axis("off")
 
 
@@ -342,5 +342,16 @@ class PLT(object):
             edge >> (n0, n3)
             edge >> (n2.pin("right"), n4)
             edge >> (n3.pin("right"), n4)
+
+    def fig9(self):
+        with NoBoxPlt(figsize=(12,7), filename="fig6.pdf") as pl:
+            gs = plt.GridSpec(3,3)
+
+            for seed in range(9):
+                for seed in range(9):
+                    d = np.loadtxt("data/hamming-K3-n10000-diag80seed%d.dat"%(seed+1))
+                    ax = pl.fig.add_subplot(gs[seed//3,seed%3])
+                    ax.plot(np.arange(d.shape[0]), d, lw=1)
+                    ax.axis("off")
 
 fire.Fire(PLT())
