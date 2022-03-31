@@ -288,7 +288,8 @@ The need to understand this experiment motivates us to find methodologies to com
 %For instance, in statistical physics, computing thermal states and
 %observables via the partition function. In complexity theory, proving limits on local algorithms (OGP).}\blue{now?}
 
-We show how to solve all of these seemingly unrelated properties in a unified framework of generic tensor networks. Tensor networks are a computational model widely used in condensed matter physics~\cite{Orus2014}, quantum computing~\cite{Markov2008}, big data~\cite{Cichocki2014} and mathematics~\cite{Oseledets2011}. They are also known as the sum-product networks in probabilistic modeling~\cite{Bishop2006} or \texttt{einsum} in linear algebra libraries such as NumPy~\cite{Harris2020}.
+We show how to solve all of these seemingly unrelated properties in a unified framework of generic tensor networks. Tensor networks are a computational model widely used in condensed matter physics~\cite{Orus2014}, quantum computing~\cite{Markov2008}, big data~\cite{Cichocki2014} and mathematics~\cite{Oseledets2011}.
+They are also known as the sum-product networks in probabilistic modeling~\cite{Bishop2006} or \texttt{einsum} in linear algebra libraries such as NumPy~\cite{Harris2020}.
 %\purple{I’d write out $2^{{\rm tw}(G)}$}\blue{I feel it is hard to explain line graph without texts.}
 Recent progress in simulating quantum circuits with tensor networks~\cite{Gray2021, Pan2021, Kalachev2021} enables us to contract a randomly structured sparse tensor network with up to thousands of tensors in a reasonable time.
 %\purple{Is the scaling of these algorithms known?}\blue{They are not exact algorithms, the time can be any, typically a few minutes, will it be helpful to mention this?}
@@ -903,11 +904,12 @@ Clearly, the vertex tensor and edge tensor become
     \end{matrix}\right).
 \end{equation}
 The enumeration of all MIS configurations corresponds to the contraction of this tensor network.
-However, direct contraction might incur significant space overheads for keeping too many intermediate states irrelevant to the final maximum independent sets.
-This issue can be avoided by using the bounding technique in \App{sec:bounding}.
-One may also be interested in a more studied maximal independent sets~\cite{Bron1973, Eppstein2010, Johnson1988} enumeration. We will discuss this issue in \App{sec:maximal} since it requires using a different tensor network structure for the maximal independent set problem.
+However, direct contraction might have significant space overheads for keeping too many intermediate states irrelevant to the final maximum independent sets.
+We introduce the bounding technique in \App{sec:bounding} to avoid this issue.
+One may also be interested in a more studied maximal independent sets~\cite{Bron1973, Eppstein2010, Johnson1988} enumeration.
+It will be discussed in \App{sec:maximal} since it requires using a different tensor network structure.
 
-If one is interested in obtaining only a single MIS configuration, he can just keep one configuration in each tensor element to save the computational effort.
+If one is interested in obtaining only one MIS configuration, he can just keep one configuration in each tensor element to save the computational effort.
 By replacing the sets of bit strings in \Eq{eq:set} with a single bit string, we have the following algebra
 
 \begin{equation}
@@ -1210,25 +1212,21 @@ for actively maintaining their packages and resolving related issues voluntarily
 
 \section{An alternative way to construct the tensor network}\label{sec:energymodel}
 
-Let us characterize the independent set problem on graph $G=(V, E)$ as an energy model
+Let us characterize the independent set problem on graph $G=(V, E)$ as an energy model with two parts
 \begin{equation}\label{eq:eng}
-    \mathcal{E}(G, s) = -\sum_{i\in V(G)} w_i s_i + \infty \sum_{\langle i,j\rangle \in E(G)}s_i s_j
+    \mathcal{E}(G, s) = -\sum_{i\in V} w_i s_i + \infty \sum_{\langle i,j\rangle \in E}s_i s_j
 \end{equation}
 where $s_i$ is a spin on vertex $i \in V$ and $w_i$ is an onsite energy term associated with it.
-The first term is the energy that corresponds to the inverse of the independent set size and the second term describes the independence contraint.
-In physical systems, this contraint term usually corresponds to the Rydberg blockade~\cite{Pichler2018, Ebadi2022} in cold atom arrays or the repulsive force in hard core lattice model~\cite{Dyre2016, Fernandes2007}.
-Its partition function is defined as
+The first part corresponds to the negative independent set size and the second part describes the independence contraint, which corresponds to the Rydberg blockade~\cite{Pichler2018, Ebadi2022} in cold atom arrays or the repulsive force in hard core lattice model~\cite{Dyre2016, Fernandes2007}.
+The partition function is defined as
 \begin{equation}\label{eq:partition}
     \begin{split}
     Z(G, \beta) = \sum_{s}e^{-\beta \mathcal{E}(G, s)} = \sum_{s\in \mathcal{I}(G)} e^{\beta \sum w_i s_i}\\
          = \sum_{k=0}^{\alpha(G)}a(k) e^{\beta k}  \qquad \quad (k = \sum w_i s_i)
     \end{split}
 \end{equation}
-where $\mathcal{I}(G)$ is the set of independent sets of graph $G$.
-$\alpha(G)$ is the absolute value of the minimum energy (maximum independent set size).
-$a(k)$ is the number of spin configurations with energy $-k$ (independent sets of size $k$).
-The partition function can be evaluated as a tensor network contraction,
-where the tensor network is constructed by placing a vertex tensor on each spin $i$
+where $\mathcal{I}(G)$ is the set of independent sets of graph $G$, $\alpha(G)$ is the absolute value of the minimum energy (maximum independent set size), $a(k)$ is the number of spin configurations with energy $-k$ (independent sets of size $k$).
+The partition function can be expressed as a tensor network by placing a vertex tensor on each spin $i$
 \begin{equation}
     W(e^{\beta w_i}) = \left(\begin{matrix}
         1 \\
@@ -1243,14 +1241,15 @@ and an edge tensor on each bond
     \end{matrix}\right),
 \end{equation}
 where the $0$ in the bond tensor coming from $e^{-\beta\infty}$ in the second term of \Eq{eq:eng}.
-By letting $x = e^{\beta}$, we get the tensor network for computing the independence polynomial as described by \Eq{eq:vertextensor} and \Eq{eq:edgetensor},
-and by letting $w_i=1$, the second line of \Eq{eq:partition} is the independence polynomial.
+By letting $x = e^{\beta}$, we get the tensor network for computing the independence polynomial as described by \Eq{eq:vertextensor} and \Eq{eq:edgetensor}.
+If we further let $w_i=1$, the second line of \Eq{eq:partition} is equivalent to the independence polynomial.
 
 \section{An example of contraction complexity increase due to using the standard tensor network notation}\label{sec:tensorbad}
 
-In the standard Einstein's notation for tensor networks in physics, each index appears precisely twice, either both in input tensors (which will be summed over) or one in a input tensor and another in the output tensor.
-Hence a tensor network can be represented as a open simple graph, where a tensor is mapped to a vertex, a label shared by two input tensors is mapped to a normal edge and a label appears in the output tensor is mapped to an open edge.
-A standard tensor network notation is equivalent to the generalized tensor network by introducing $\delta$ tensors, where a $\delta$ tensor of rank $d$ is defined as
+In the standard Einstein's notation for tensor networks in physics, each index appears precisely twice: either both in input tensors (which will be summed over) or one in a input tensor and another in the output tensor.
+Hence a tensor network can be represented as a open simple graph, where an input tensor is mapped to a vertex, a label shared by two input tensors is mapped to an edge and a label appears in the output tensor is mapped to an open edge.
+A standard tensor network notation is equivalent to the generalized tensor network in representation power.
+A generalized tensor network can be converted to a standard one by adding a $\delta$ tensors at each hyperedge, where a $\delta$ tensor of rank $d$ is defined as
 \begin{equation}
     \delta_{i_1, i_2,\ldots,i_d} = \begin{cases}
         1, & i_1=i_2=\ldots =i_d,\\
@@ -1258,7 +1257,7 @@ A standard tensor network notation is equivalent to the generalized tensor netwo
     \end{cases}
 \end{equation}
 
-In the following, we are going to show introducing $\delta$ tensors might increase the contraction complexity of a tensor network.
+In the following example, we will show this conversion might increase the contraction complexity of a tensor network.
 Let us consider the following King's graph.
 
 \centerline{\begin{tikzpicture}
@@ -1278,37 +1277,7 @@ Let us consider the following King's graph.
         }
 \end{tikzpicture}}
 
-By mapping the independent set problem to a standard tensor network with $\delta$ tensors,
-we have the following graphical representation.
-
-\centerline{\begin{tikzpicture}
-    \def\r{0.08}
-    \def\a{0.1}
-    \foreach \x in {1,...,5}
-        \foreach \y in {1,...,5}
-            \filldraw[fill=black] (\x,\y) circle [radius=\r];
-    \foreach \x in {1,...,5}
-        \foreach \y in {1,...,4}{
-            \filldraw[fill=black] (\x,\y+0.5) circle [radius=\r];
-            \filldraw[fill=black] (\y+0.5,\x) circle [radius=\r];
-            \draw [black,thick] (\x,\y) -- (\x,\y+1);
-            \draw [black,thick] (\y,\x) -- (\y+1,\x);
-        }
-    \foreach \x in {1,...,4}
-        \foreach \y in {1,...,4}{
-            \filldraw[fill=black] (\x+0.3,\y+0.3) circle [radius=\r];
-            \filldraw[fill=black] (\y+0.3,\x+0.7) circle [radius=\r];
-            \draw [black,thick] (\x,\y) -- (\x+1,\y+1);
-            \draw [black,thick] (\y+1,\x) -- (\y,\x+1);
-        }
-    \tikzset{decoration={snake,amplitude=.4mm,segment length=2mm,
-                    post length=0mm,pre length=0mm}}
-    \draw [decorate] (2.7, 0.5) -- (2.7, 5.5);
-\end{tikzpicture}}
-
-In this diagram, the circle on each vertex in the original graph is a $\delta$ tensor of rank $8$ or less.
-If we contract this tensor network in a naive column-wise order, the maximum intermediate tensor has rank $\sim3L$, requiring a storage of size $\approx 2^{3L}$.
-If we relax the restriction that each label must appears exactly twice, we have the following hypergraph representation of a generalized tensor network.
+The generalized tensor network for solving the MIS problem on this graph has the following hypergraph representation, where we use different colors to distinguish different hyperedges.
 
 \centerline{\begin{tikzpicture}
     \def\r{0.08}
@@ -1368,27 +1337,53 @@ If we relax the restriction that each label must appears exactly twice, we have 
                     post length=0mm,pre length=0mm}}
     \draw [decorate] (2.7, 0.5) -- (2.7, 5.5);
 \end{tikzpicture}}
-Here, we use different colors to distinguish different hyperedges.
-A vertex tensor always has rank $1$ and is not shown here since it does not change the contraction complexity.
-If we contract this tensor network in the column-wise order, the maximum intermediate tensor rank is $\sim L$, which can be seen by counting the number of colors at the cut.
+Here, vertex tensors are not shown here because they can be absorbed into an edge tensor hence do not change the contraction complexity.
+If we contract this tensor network in the column-wise order, the maximum intermediate tensor has rank $\sim L$, which can be seen by counting the number of colors at the cut.
+
+By adding $\delta$ tensors to hyperedges, we have the standard tensor network represented as the following simple graph.
+
+\centerline{\begin{tikzpicture}
+    \def\r{0.08}
+    \def\a{0.1}
+    \foreach \x in {1,...,5}
+        \foreach \y in {1,...,5}
+            \filldraw[fill=black] (\x,\y) circle [radius=\r];
+    \foreach \x in {1,...,5}
+        \foreach \y in {1,...,4}{
+            \filldraw[fill=black] (\x,\y+0.5) circle [radius=\r];
+            \filldraw[fill=black] (\y+0.5,\x) circle [radius=\r];
+            \draw [black,thick] (\x,\y) -- (\x,\y+1);
+            \draw [black,thick] (\y,\x) -- (\y+1,\x);
+        }
+    \foreach \x in {1,...,4}
+        \foreach \y in {1,...,4}{
+            \filldraw[fill=black] (\x+0.3,\y+0.3) circle [radius=\r];
+            \filldraw[fill=black] (\y+0.3,\x+0.7) circle [radius=\r];
+            \draw [black,thick] (\x,\y) -- (\x+1,\y+1);
+            \draw [black,thick] (\y+1,\x) -- (\y,\x+1);
+        }
+    \tikzset{decoration={snake,amplitude=.4mm,segment length=2mm,
+                    post length=0mm,pre length=0mm}}
+    \draw [decorate] (2.7, 0.5) -- (2.7, 5.5);
+\end{tikzpicture}}
+
+In this diagram,the additional $\delta$ tensors can have ranks upto $8$.
+If we still contract this tensor network in a column-wise order, the maximum intermediate tensor has rank $\sim3L$, i.e. the space complexity is $\approx 2^{3L}$.
 
 \section{Hard problems and tensor networks}\label{sec:otherproblems}
 \subsection{Maximal independent sets and maximal cliques}\label{sec:maximal}
-Since finding maximal cliques of a graph is equivalent to finding the maximal independent sets of its complement graph, in the following,
-we limit our discussion to finding maximal independent sets.
-Let us denote the neighborhood of a vertex $v$ as $N(v)$ and the closed neighborhood of $v$ as $N[v] = N(v)\cup \{v\}$.
-A maximal independent set $I_m$ is an independent set where there does exist a vertex $v \in V$ such that $I_m \cap N[v]  = \emptyset$,
-i.e. an independent set that can not become a larger one by adding a new vertex.
-To characterize the maximal independence restriction, one can quantify over a local set $N[v]$ with a local tensor:
+In this section, we focus the discussion on the maximal independent sets problem since finding maximal cliques of a graph is equivalent to finding the maximal independent sets of the complement of the graph.
+Let $G=(V,E)$ be a graph, we denote the neighborhood of a vertex $v\in V$ as $N(v)$.
+A maximal independent set $I_m$ is an independent set that there does exist a vertex $v \in V$ such that $I_m \cap (\{v\} \cup N[v])  = \emptyset$, i.e. an independent set that can not become a larger one by adding a new vertex.
+To characterize the maximal independence restriction, we defined a tensor on each $\{v\}\cup N(v)$ as
 \begin{equation}\label{eq:maximal}
     T(x_v, w_v)_{s_1,s_2,\ldots,s_{|N(v)|},s_v} = \begin{cases}
         s_vx_v^{w_v} & s_1=s_2=\ldots=s_{|N(v)|}=0,\\
         1-s_v& \text{otherwise}.\\
     \end{cases}
 \end{equation}
-Intuitively, it means if all the neighbourhood vertices are not in $I_{m}$, i.e., $ s_1=s_2=\ldots=s_{|N(v)|}=0$, then $v$ should be in $I_{m}$ and contribute a factor $x_{v}$,
-otherwise, if any of the neighbourhood vertices is in $I_{m}$, then $v$ cannot be in $I_{m}$.
-As an example, for a vertex of degree 2, the resulting rank-3 tensor is
+It means if none of the neighbours of $v$ are in $I_{m}$ ($ s_1=s_2=\ldots=s_{|N(v)|}=0$), then $v$ must be in $I_{m}$ and contribute a factor $x_{v}$, otherwise, if any of the neighbourhood vertices is in $I_{m}$, then $v$ cannot be in $I_{m}$.
+For a vertex $v$ having degree 2, this tensor has the following form
 \begin{equation}
     T(x_v, w_v)=\left(\begin{matrix}
     \left(\begin{matrix}
@@ -1402,7 +1397,7 @@ As an example, for a vertex of degree 2, the resulting rank-3 tensor is
     \end{matrix}\right).
 \end{equation}
  
-Let us consider the example in~\Sec{eg:tensorcontraction}: its corresponding tensor network structure for computing the maximal independent polynomial becomes
+Let us consider the graph in Example~\ref{eg:tensorcontraction}, the corresponding tensor network structure for computing the maximal independent polynomial has the following hypergraph representation.
 
     \centerline{\begin{tikzpicture}[
     dot/.style = {circle, fill, minimum size=#1,
@@ -1435,74 +1430,67 @@ Let us consider the example in~\Sec{eg:tensorcontraction}: its corresponding ten
         \draw [orange,thick] (e) -- (D);
     \end{tikzpicture}}
  
-One can see that the average rank of a tensor is increased.
-The computational complexity of this new tensor network contraction is often greater than the one for computing the independence polynomial.
-
+%The contraction complexity of this tensor network is often greater than the one for the independence set problem.
 By contracting this tensor network with generic element types,
 we can compute the maximal independent set properties such as the maximal independence polynomial and the enumeration of maximal independent sets.
-Similar to the independence polynomial, the maximal independence polynomial counts the number of maximal independent sets of various sizes~\cite{Hu2017}.
-%which can be helpful for understanding why the program for solving MIS can be trapped in a local minimum.
-Let $G=(V,E)$ be a graph, its maximal independence polynomial is defined as
+The maximal independence polynomial is defined as
 \begin{equation}
 D_{m}(G, x) = \sum_{k=0}^{\alpha(G)} b_k x^k,
 \end{equation}
 where $b_k$ is the number of maximal independent sets of size $k$.
 Comparing with the independence polynomial in \Eq{eq:idpdef}, we have $b_{k} \leq a_{k}$ and $b_{\alpha(G)} = a_{\alpha(G)}$. $D_m(G, 1)$ counts the total number of maximal independent sets~\cite{Gaspers2012, Manne2013},
 which to our knowledge, the best algorithm gives a time complexity $O(1.3642^{|V|})$~\cite{Gaspers2012}.
-If we want to find an MIS, $b_{k}$ can, in some cases, provide hints on the difficulty of finding the MIS using local algorithms~\cite{Ebadi2022}.
+%If we want to find an MIS, $b_{k}$ can, in some cases, provide hints on the difficulty of finding the MIS using local algorithms~\cite{Ebadi2022}.
 %The uni-modality, log-concavity, and real-rootness properties of the maximal independence polynomial for special classes of graphs have also been studied~\cite{Hu2017}. 
 
-We show the benchmark of computing the maximal independent set properties in \Fig{fig:benchmark-maximal},
-including a comparison to the Bron-Kerbosch algorithm from Julia package Graphs~\cite{Graphs}.
-The treewidth of this tensor network is significantly larger, so benchmark with only a smaller graph size is feasible.
-The time for the tensor network approach and the Bron-Kerbosch approach to enumerate all maximal independent sets are comparable,
-while the tensor network does counting much more efficiently.
-Due to the memory limit, this Bron-Kerbosch algorithm is only feasible up to a graph size around $70$.
+We show the benchmark of computing the maximal independent set properties on $3$-regular graphs in \Fig{fig:benchmark-maximal},
+including a comparison to the Bron-Kerbosch algorithm from Julia package \href{https://github.com/JuliaGraphs/Graphs.jl}{Graphs}~\cite{Graphs}.
+\Fig{fig:benchmark-maximal} (a) shows the space and time complexities of tensor contraction, which are typically larger than those for the independence set problem.
+In \Fig{fig:benchmark-maximal} (b), one can see counting maximal independent sets are much more efficient than enumerating them, while our generic tensor network approach runs slightly faster than the Bron-Kerbosch approach in enumerating all maximal independent sets.
 
 \begin{figure} 
     \centering
     \includegraphics[width=\textwidth, trim={0cm 0cm 0cm 0cm}, clip]{figures/fig2.pdf}
-    \caption{Benchmark results for computing different properties of maximal independent sets on a random three regular graph with different tensor element types.
-    (a) treewidth versus the number of vertices for the benchmarked graphs. 
-    (b) The computing time for calculating the number of independent sets and enumerate all MISs.
+    \caption{Benchmarks of computing different solution space properties of the maximal independent sets (ISs) problem on random three regular graphs at different sizes.
+    (a) time and space complexity of tensor network contraction. 
+    (b) The wall clock time for counting and enumeration of maximal ISs. The missing data is due to due to the memory limit.
     }
     \label{fig:benchmark-maximal}
 \end{figure}
 
 
 \subsection{Matching problem}
-A $k$-matching in a graph $G=(V,E)$ is a set of $k$ edges, no two of which have a vertex in common.
-We map an edge $(u, v) \in E$ to a degree of freedom $\langle u, v\rangle \in \{0, 1\}$ in a tensor network,
-where $1$ means this edge is in the set and $0$ otherwise.
-To characterize the matching, one can define a tensor of rank $d(v) = |N(v)|$ on vertex $v$
+A $k$-matching in a graph $G=(V,E)$ is a set of $k$ edges that no two of which have a vertex in common.
+We map an edge $(u, v) \in E$ to a degree of freedom $\langle u, v\rangle \in \{0, 1\}$ in a tensor network, where $1$ means an edge is in the set and $0$ otherwise.
+To characterize the matching constraint, we define a tensor for each $N(v)=\{n_1, n_2,\ldots, n_{d(v)}\}$ as
 \begin{equation}
     W_{\langle v, n_1\rangle, \langle v, n_2 \rangle, \ldots, \langle v, n_{d(v)}\rangle} = \begin{cases}
         1, & \sum_{i=1}^{d(v)} \langle v, n_i \rangle \leq 1,\\
         0, & \text{otherwise},
     \end{cases}
 \end{equation}
-and a tensor of rank $1$ on the bond
+and a tensor for each bond as
 \begin{equation}
-    B(w_{\langle u,v \rangle})_{\langle u, v\rangle} = \begin{cases}
+    B(x^{w_{\langle u,v \rangle}}_{\langle u,v\rangle})_{\langle u, v\rangle} = \begin{cases}
     1, & \langle u, v \rangle = 0 \\
     x^{w_{\langle u,v \rangle}}_{\langle u, v\rangle}, & \langle u, v \rangle = 1,
 \end{cases}
 \end{equation}
-where label $\langle v, u \rangle$ is equivalent to $\langle u,v\rangle$.
-The vertex tensor specifies the constraint that a vertex cannot be shared by two edges in the matched set,
-while an edge tensor carries the weights as the target to optimize.
-Let $x_{\langle u,v\rangle}^{w_{\langle u,v\rangle}}=x$, the tensor network contraction gives us the matching polynomial
+where a label $\langle v, u \rangle$ is equivalent to $\langle u,v\rangle$.
+$W$ tensor specifies the constraint that a vertex cannot be shared by two edges in the edge set,
+and an edge tensor carries the weights.
+Let $x_{\langle u,v\rangle}^{w_{\langle u,v\rangle}}=x$, the tensor network contraction corresponds to the matching polynomial
 \begin{equation}
     M(G, x) = \sum\limits_{k=1}^{|V|/2} c_k x^k,
 \end{equation}
-where $k$ is the size of a matched edges set, and a coefficients $c_k$ is the number of $k$-matchings.
+where $k$ is the size of an edge set, and a coefficients $c_k$ is the number of $k$-matchings.
 
 \subsection{Vertex coloring}
 Let $G=(V,E)$ be a graph, a vertex coloring is an assignment of colors to each vertex $v\in V$ such that no edge connects two identically colored vertices. 
-In a $k$-coloring problem, the number of different colors can be used is limited to less or equal to $k$.
-Let us use the 3-coloring problem as an example to show how to characterize with local tensors.
-For each vertex $v \in V$, we associate a degree of freedom $c_v\in\{0,1,2\}$ to it.
-Then we define a vertex tensor labelled by it as
+In a $k$-coloring problem, the number of colors is limited to less or equal to $k$.
+Let us use the 3-coloring problem as an example to show how to reduce it to tensor contractions.
+We first map a vertex $v \in V$ to a degree of freedom $c_v\in\{0,1,2\}$.
+Then we define a tensor labelled by $c_v$ for each vertex $v$ as
 \begin{equation}
     W = \left(\begin{matrix}
         r_v\\
@@ -1510,53 +1498,51 @@ Then we define a vertex tensor labelled by it as
         b_v
     \end{matrix}\right),
 \end{equation}
-where $r_v$, $g_v$ and $b_v$ are colors for labeling the configurations.
-For each edge $(u, v)$, we specify the constraint carrying a weight $w_{uv}$ on it by defining an edge tensor labelled by $(c_u, c_v)$ as
+and a bond tensor labelled by $(c_u, c_v) $ for each edge $(u, v) \in E$ as
 \begin{equation}
     B(x^{w_{uv}}) = \left(\begin{matrix}
         0 & x^{w_{uv}} & x^{w_{uv}}\\
         x^{w_{uv}} & 0 & x^{w_{uv}}\\
         x^{w_{uv}} & x^{w_{uv}} & 0
-    \end{matrix}\right).
+    \end{matrix}\right),
 \end{equation}
-The number of possible colorings can be obtained by contracting this tensor network by setting $r_v, g_v$ and $b_v$ to $1$.
-Let $x^{w_{uv}} = x$, we have a graph polynomial,
-in which the $k$-th coefficient is the number of coloring with $k$ bonds satisfied.
+where $r_v$, $g_v$ and $b_v$ are colors for labeling the configurations. $B$ tensors are for specifying the coloring constraints and $W$ tensors are for labeling the solutions.
+%The number of possible colorings can be obtained by contracting this tensor network by setting $r_v, g_v$ and $b_v$ to $1$.
+Let $x^{w_{uv}} = x$ and $r_v = g_v = b_v = 1$, we have a graph polynomial,
+in which the $k$-th coefficient is the number of coloring that $k$ bonds satisfy constraints.
 If a graph is colorable, the maximum order of this polynomial should be equal to the number of edges in this graph.
-Similarly, one can define the $k$-coloring problem on edges by defining the tensor network on the line graph of $G$.
+Similarly, one can define an edge coloring problem by defining the tensor network on the line graph of $G$.
 
 \subsection{Cutting problem}
 In graph theory, a cut is a partition of the vertices of a graph into two disjoint subsets,
-which is also known as the boolean spin glass problem in statistic physics.
-Let $G=(V,E)$ be a graph, to reduce the cutting problem on $G$ to the contraction of a tensor network, we first define a boolean degree of freedom $s_v\in\{0, 1\}$ for each vertex $v\in V$.
-Then for each edge $(u,v)\in E$, we define an edge matrix labelled by $s_us_v$ as
+which is also known as the spin glass problem in statistic physics.
+Let $G=(V,E)$ be a graph, we associate a weight $w_v$ to each $v\in V$. To reduce the cutting problem on $G$ to the contraction of a tensor network, we first define a boolean degree of freedom $s_v\in\{0, 1\}$ for each vertex $v\in V$.
+Then for each edge $(u,v)\in E$, we define an edge matrix labelled by $(s_u, s_v)$ as
 \begin{equation}
-    B(x, w_{uv}) = \left(\begin{matrix}
+    B(x^{w_{uv}}_u, x^{w_{uv}}_v) = \left(\begin{matrix}
         1 & x_{v}^{w_{uv}}\\
         x_{u}^{w_{uv}} & 1
     \end{matrix}\right),
 \end{equation}
-where variables $x_u$ and $x_v$ represents a cut on this edge or a domain wall in an spin glass.
+where variables $x_u^{w_{uv}}$ and $x_v^{w_{uv}}$ are for a cut on this edge or a domain wall in an spin glass.
 Let $x_u^{w_{uv}} = x_v^{w_{uv}} = x$, we have a graph polynomial similar to previous ones,
-where its $k$th coefficient is two times the number of cuts with size $k$ (i.e. cutting $k$ edges).
+in which the $k$th coefficient is two times the number of cut configurations having size $k$ (i.e. cutting $k$ edges).
 
 \subsection{Dominating Set}
 In graph theory, a dominating set for a graph $G = (V, E)$ is a subset $D \subseteq V$ such that every vertex not in $D$ is adjacent to at least one member of $D$.
 To reduce this problem to the contraction of a tensor network, we first map a vertex $v\in V$ to a boolean degree of freedom $s_v\in\{0, 1\}$.
-Then for each vertex $v\in V$ we define a tensor on its closed neighborhood $\{v\} \cup N(v)$ as
+Then for each vertex $v$ we define a tensor on its closed neighborhood $\{v\} \cup N(v)$ as
 \begin{equation}
-T(x, w_v)_{s_1,s_2,\ldots,s_{|N(v)|},s_v} = \begin{cases}
-    0_v & s_1=s_2=\ldots=s_{|N(v)|}=s_v=0,\\
-    1_v & s_v=0,\\
-    x^{w_v} & \text{otherwise},
+T(x^{w_v}_v)_{s_1,s_2,\ldots,s_{|N(v)|},s_v} = \begin{cases}
+    0 & s_1=s_2=\ldots=s_{|N(v)|}=s_v=0,\\
+    1 & s_v=0,\\
+    x^{w_v}_v & \text{otherwise},
 \end{cases}
 \end{equation}
-where $w_v$ is the weight of vertex $v$.
-This tensor means if both $v$ and its neighbouring vertices are not in $D$, i.e., $s_1=s_2=\ldots=s_{|N(v)|}=s_v=0$,
-this configuration is forbidden because $v$ is not adjacent to any member in the set.
+where $w_v$ is the weight associated with the vertex $v$.
+This tensor means a configurations having a closed neighborhood of $v$ not in $D$ ($s_1=s_2=\ldots=s_{|N(v)|}=s_v=0$) can not be a dominating set.
 Otherwise, if $v$ is in $D$, this tensor contributes a multiplicative factor $x_v^{w_v}$ to the output.
-The graph polynomial for the dominating set problem is known as the domination polynomial~\cite{Alikhani2009},
-which is defined as
+The graph polynomial for the dominating set problem is known as the domination polynomial~\cite{Alikhani2009}
 \begin{equation}
 D(G, x) = \sum_{k=0}^{\gamma(G)} d_k x^k,
 \end{equation}
@@ -1564,11 +1550,10 @@ where $d_k$ is the number of dominating sets of size $k$.
 
 \subsection{Boolean satisfiability Problem}
 The boolean satisfiability problem is the problem of determining if there exists an interpretation that satisfies a given boolean formula.
-One can specify a satisfiable problem in the conjuctive normal form (CNF): a conjuction of disjunctions of boolean literals,
-where a disjunction of boolean literals is also named a clause.
-To reduce the problem of solving CNF to a tensor network contraction, we first map a boolean literal $a$ and its negation $\neg a$ to a same degree of freedom (label) $s_a \in \{0, 1\}$,
-where 0 stands for variable $a$ having value \texttt{false} while 1 stands for having value \texttt{true}.
-Then we map a clause to a tensor. For example, the $k$-th clause $\neg a \vee b \vee \neg c$ can be mapped to a tensor labeled by $(s_a, s_b, s_c)$.
+One can specify a satisfiable problem in the conjuctive normal form (CNF), i.e. a conjuction of clauses (or disjunctions of boolean literals).
+To reduce the problem of solving a CNF to a tensor network contraction, we first map a boolean literal $a$ and its negation $\neg a$ to a same degree of freedom $s_a \in \{0, 1\}$.
+$s_a = 0$ stands for variable $a$ having value \texttt{false} while $s_a=1$ stands for having value \texttt{true}.
+Then we map a clause to a tensor. For example, a $k$-th clause $\neg a \vee b \vee \neg c$ can be mapped to a tensor labeled by $(s_a, s_b, s_c)$.
 \begin{equation}
 C_{k} = \left(\begin{matrix}
 \left(\begin{matrix}
@@ -1581,13 +1566,13 @@ x_{c}^{w_k} & x_{bc}^{w_k} \\
 \end{matrix}\right)
 \end{matrix}\right),
 \end{equation}
-where a weight $w_k$ is associated with a clause. There is only one entry $(s_a, s_b, s_c) = (1, 0, 1)$ that makes this clause unsatisfied.
-If we contract this tensor network, we will get a multiplicative factor $x$ whenever there is a clause satisfied.
-Let $x^{w_k}_{\ldots} = x$, one can get a polynomial, in which the $k$-th coefficient gives the number of assignments with $k$ clauses satisfied.
+where $w_k$ is a weight associated with a clause. There is only one entry $(s_a, s_b, s_c) = (1, 0, 1)$ that makes this clause unsatisfied.
+%If we contract this tensor network, we will get a multiplicative factor $x$ whenever there is a clause satisfied.
+Let $x^{w_k}_{\ldots} = x$, one can get a polynomial, in which the $k$-th coefficient gives the number of assignments that $k$ clauses are satisfied.
 
 \subsection{Set packing}
 Set packing is the hypergraph generalization of the maximum independent set problem, where a set corresponds to a vertex and an element corresponds to a hyperedge.
-To solve the set packing problem, we can just remove the rank-2 restriction of the edge tensor in \Eq{eq:edgetensor}
+To solve the set packing problem, we generalize the edge tensor in \Eq{eq:edgetensor} as
 \begin{equation}
     B_{s_u,s_v,\ldots, s_w} = \begin{cases}
         1, & s_u+s_v+\ldots+s_w\leq 1,\\
@@ -1605,12 +1590,12 @@ To solve the set packing problem, we can just remove the rank-2 restriction of t
      \label{fig:bounding}
 \end{figure}
 
-When we use the algebra in \Eq{eq:countingtropicalset} to enumerate all MIS configurations, we find that the program stores significantly more intermediate configurations than necessary and thus incur significant overheads in space.
-To speed up the computation and reduce space overhead, we bound the searching space using the information from the computation of the MIS size $\alpha(G)$.
-As shown in \Fig{fig:bounding}, (a) we first compute the value of $\alpha(G)$ with tropical algebra and cache all intermediate tensors.
-(b) Then, we compute a boolean mask for each cached tensor, where we use a boolean true to represent a tensor element having a contribution to the MIS (i.e.\ with a non-zero gradient) and boolean false otherwise.
-(c) Finally, we perform masked tensor network contraction (i.e.\ discarding the unnecessary intermediate configurations) using the element type with the algebra in \Eq{eq:countingtropicalset} to obtain all MIS configurations.
-Note that these masks in fact correspond to tensor elements with non-zero gradients with respect to the MIS size; we compute these masks by back propagating the gradients.
+When using the algebra in \Eq{eq:countingtropicalset} to enumerate all MISs, the program often stores significantly more intermediate configurations than necessary.
+To reduce the space overhead, we will show how to bound the searching space using the MIS size $\alpha(G)$.
+The bounded contraction consists of three stages as shown in \Fig{fig:bounding}. (a) We first compute the value of $\alpha(G)$ with tropical algebra and cache all intermediate tensors.
+(b) Then, we compute a boolean mask for each cached tensor, where we use a boolean \texttt{true} to represent a tensor element having contribution to the MIS and boolean \texttt{false} otherwise.
+(c) Finally, we perform masked tensor network contraction (i.e.\ discarding elements masked \texttt{false}) using the element type with the algebra in \Eq{eq:countingtropicalset} to obtain all MIS configurations.
+The crucial part is computing the masks in step (b). Note that these masks in fact correspond to tensor elements with non-zero gradients with respect to the MIS size; we can compute these masks by back propagating the gradients.
 To derive the back-propagation rule for tropical tensor contraction,
 we first reduce the problem to finding the back-propagation rule of a tropical matrix multiplication $C = A B$.
 Since $ C_{ik} = \bigoplus_{j} \ A_{ij} \odot B_{jk} = \max_{j} \ A_{ij} \odot B_{jk}$ with tropical algebra, we have the following inequality
@@ -1656,9 +1641,10 @@ a_0 \\ a_1 \\ \vdots \\ a_{\alpha(G)}
 y_0 \\ y_1 \\ \vdots \\ y_{\alpha(G)}
 \end{matrix}\right).\label{eq:lineareq}
 \end{equation}
-With this approach, we do not incur the linear overhead in space. However, because the independence polynomial coefficients can have a huge order-of-magnitude range, if we use floating point numbers in the computation, the round-off errors can be significant for the counting of large-size independent sets.
-In addition, the number could easily overflow if we use fixed-width integer types.
-The big integer type is also not a good option because big integers with varying width can be very slow and is incompatible with GPU devices. These problems can be solved by introducing a finite-field algebra $\text{GF}(p)$:
+Unlike using the polynomial numbers in \Eq{eq:polynomial},  the fitting approach does not have the linear overhead in space.
+However, since the independence polynomial coefficients can have a huge order-of-magnitude range, the round-off errors can be larger than the value itself when using floating point number in computation.
+%In addition, the number could easily overflow if we use fixed-width integer types.
+To avoid using the arbitrary precision number that can be very slow and is incompatible with GPU devices, we introduce the following finite-field algebra $\text{GF}(p)$ approach:
 \begin{equation}
 \eqname{GF$(p)$}
 \begin{split}
@@ -1668,7 +1654,7 @@ The big integer type is also not a good option because big integers with varying
     \mymathbb{1} &= 1.
 \end{split}\label{eq:finitefield}
 \end{equation}
-With a finite-field algebra, we have the following observations:
+Regarding the finite-field algebra, we have the following observations:
 \begin{enumerate}
     \item One can use Gaussian elimination~\cite{Golub2013} to solve the linear equation \Eq{eq:lineareq} since it is a generic algorithm that works for any elements with field algebra. The multiplicative inverse of a finite-field algebra can be computed with the extended Euclidean algorithm.
     \item Given the remainders of a larger unknown integer $x$ over a set of co-prime integers $\{p_1, p_2, \ldots, p_n\}$,
@@ -1710,11 +1696,9 @@ All computations are done with integers of fixed width $W$ except the last step 
 
 \section{The discrete Fourier transform approach to computing the independence polynomial}\label{sec:fft}
 
-In section~\ref{sec:indpoly}, we show that the independence polynomial can be obtained by solving the linear equation \Eq{eq:lineareq}.
-Since the coefficients of the independence polynomial can range many orders of magnitude, the round-off errors in fitting can be significant if we use random floating point numbers for $x_{i}$.
-In the main text, we propose to use a finite field $\text{GF}(p)$ to circumvent integer overflow and round-off errors.
+In  \App{sec:finitefield}, we show that the independence polynomial can be obtained by solving the linear equation \Eq{eq:lineareq} using the finite field algebra.
 One drawback of using finite field algebra is its matrix multiplication is less computational efficient compared with floating point matrix multiplication.
-Here, we give an alternative method based on discrete Fourier transform with controllable round off errors.
+Here, we show an alternative method with standard number types but with controllable round off errors.
 Instead of choosing $x_{i}$ as random numbers, we can choose them such that they form a geometric sequence in the complex domain $x_j = r\omega^j$, where $r \in \mathbb{R}$ and $\omega = e^{-2\pi i/( \alpha(G)+1)}$. The linear equation thus becomes
 \begin{equation}
 \left(\begin{matrix}
@@ -1732,14 +1716,13 @@ y_0 \\ y_1 \\ \vdots \\ y_{\alpha(G)}
 \end{equation}
 
 Let us rearrange the coefficients $r^j$ to $a_j$, the matrix on the left side becomes the discrete Fourier transform matrix. Thus, we can obtain the coefficients by inverse Fourier transform $\vec a_r = {\rm FFT^{-1}}(\omega) \cdot \vec y$, where $(\vec a_r)_j = a_j r ^j$.
-By choosing different $r$, one can obtain better precision in low independent set size region by choosing $r<1$ or high independent set size region by choosing $r>1$.
+By choosing different $r$, one can obtain better precision for small $j$ by choosing $r<1$ or large $j$ by choosing $r>1$.
 
 \section{Integer sequence formed by the number of independent sets}
 
-We computed the number of independent sets on square lattices and King's graphs
-with our generic tensor network contraction algorithm on GPUs.
+We computed the number of independent sets on square lattices and King's graphs with our generic tensor network contraction algorithm on GPUs.
 The tensor element type is finite-field algebra so that we can reach arbitrary precision.
-We also computed the independence polynomial exactly for these lattices which can be found in our \href{https://github.com/GiggleLiu/NoteOnTropicalMIS/tree/master/data}{Github repo}.
+We also computed the independence polynomial for these lattices up to size $30\times 30$ in our \href{https://github.com/GiggleLiu/NoteOnTropicalMIS/tree/master/data}{Github repository}.
 
 
 \begin{table}[h]
@@ -1762,13 +1745,13 @@ Here we only include two updated entries for $L=38,39$, which, to our knowledge,
 
 \section{Computing maximum sum combination}\label{sec:maxsum}
 Given two sets $A$ and $B$ of the same size $n$.
-It is known that the maximum $n$ sum combination of $A$ and $B$ can be computed in time $n\log(n)$.
-The standard approach to solve the sum combination problem requires storing the variables in a heap - a highly dynamic binary tree structure which can can be much slower to manipulate than arrays.
-In the following, we show an algorithm that has roughly the same complexity (given the data range is not exponentially large)
-but does not need a heap.
+It is known that the maximum $n$ sum combination of $A$ and $B$ can be computed in time $O(n\log(n))$.
+The standard approach to solve the sum combination problem requires storing the variables in a heap - a highly dynamic binary tree structure that can can be much slower to manipulate than arrays.
+In the following, we show an algorithm with roughly the same complexity, but does not need a heap.
 This algorithm first sorts both $A$ and $B$, then use the bisection to find the $n$-th largest value in the sum combination.
 The key point is we can count the number of entries greater than a specific value
 in the sum combination of $A$ and $B$ in linear time.
+As long as the data range is not exponentially large, the bisection can be done in $O(\log(n))$ steps, giving the time complexity $O(n\log(n))$.
 We summarize the algorithm as in Algorithm~\ref{alg:sumcombination}.
 
 \LinesNumberedHidden
@@ -1858,11 +1841,11 @@ We summarize the algorithm as in Algorithm~\ref{alg:sumcombination}.
     \caption{Fast sum combination without using heap}\label{alg:sumcombination} 
 \end{algorithm}
 
-Function \texttt{collect\_geq} is similar the \texttt{count\_geq} except the counting is replace by the item collection.
-Note in function \texttt{count\_geq}, variable $k$ monotoneously increase while $q$ monotoneously decrease in each iteration,
-the total number of iterations must be smaller or equal to $2n$.
-Here for simplicity, we do not handle the $-\infty$s in $A$ and $B$ and the degeneracy in the sums.
-They need to be taken seriously in practical implementations.
+In this algorithm, function \texttt{collect\_geq} is similar the \texttt{count\_geq} except the counting is replace by collecting the items to a set.
+Inside the function \texttt{count\_geq}, variable $k$ monotoneously increase while $q$ monotoneously decrease in each iteration,
+the total number of iterations is upper bounded by $2n$.
+Here for simplicity, we do not handle the special element $-\infty$ in $A$ and $B$ and the potential degeneracy in the sums.
+It is nevertheless important to handle them properly in a practical implementation.
 
 \section{Technical guide}\label{sec:technical}
 
