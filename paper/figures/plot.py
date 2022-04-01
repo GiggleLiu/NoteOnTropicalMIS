@@ -344,7 +344,7 @@ class PLT(object):
             edge >> (n3.pin("right"), n4)
 
     def fig9(self):
-        with NoBoxPlt(figsize=(12,7), filename="fig6.pdf") as pl:
+        with NoBoxPlt(figsize=(12,7), filename="fig9.pdf") as pl:
             gs = plt.GridSpec(3,3)
 
             for seed in range(9):
