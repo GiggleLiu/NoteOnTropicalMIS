@@ -579,11 +579,12 @@ The resulting polynomial represents 3 different independent sets $\{\}$, $\{a\}$
  
 For a general graph, it is computationally inefficient to evaluate \Eq{eq:idp} by directly summing up the $2^{|V|}$ products. %, which scales exponentially as the number of vertices.
 %\purple{Perhaps explicitly say what this scales as?}\blue{I am not sure explicitly saying ``scales exponentially as the number of vertices'' is helpful, because treewidth often scales linearly as number of vertices, so tensor network also scales exponentially as the number vertices in most cases.}
-The standard approach to evaluate a randomly structured tensor network is: first find a good pair-wise tensor contraction order as a binary tree, and then contract two tensors a time by this order.
-A contraction order of a tensor network corresponds to a tree decomposition of the line graph of its hypergraph representation and the largest intermediate tensor has a rank equal to the width of this tree decomposition~\cite{Markov2008}.
-An optimal (in terms of space complexity) contraction order corresponds to the tree decomposition with smallest width, i.e. the treewidth.
-Here, this line graph is equivalent to the graph this tensor network mapped from. 
-In practice, it is difficult to find an optimal contraction order for large tensor networks because finding the treewidth itself is NP-hard.
+The standard approach to evaluate a randomly structured tensor network is: find a good pair-wise tensor contraction order as a binary tree, and then contract two tensors a time by this order.
+Let us denote the line graph of the hypergraph representation of a tensor network as $G'$.
+A contraction order of this tensor network corresponds to a tree decomposition of $G'$ and the largest intermediate tensor has a rank equal to the width of this tree decomposition~\cite{Markov2008}.
+Therefore, an optimal (in terms of space complexity) contraction order corresponds to the tree decomposition of $G'$ with smallest width (or the treewidth ${\rm tw}(G')$).
+In the independent set problem, treewidth of $G'$ is the same to the treewidth of the graph this tensor network mapped from. 
+In practice, it is difficult to find an optimal contraction order for large tensor networks because finding the treewidth is well known NP-hard problem.
 However, it is easy to find a close to optimal contraction order within typically a few minutes with a heuristic algorithm~\cite{Kourtis2019,Kalachev2021}.
 %The pairwise tensor contraction also makes it possible to utilize basic linear algebra subprograms (BLAS) functions to speed up the computation for certain tensor element types.
 For large scale applications, it is also possible to slice over certain degrees of freedom to reduce the space complexity, i.e.
@@ -706,9 +707,10 @@ One can represent a possible pair-wise contraction of tensors as a binary tree s
 %     =&1 + x_a^{w_a} + x_b^{w_b} + x_c^{w_c} + x_d^{w_d} + x_e^{w_e} + x_a^{w_a}x_d^{w_d} + x_a^{w_a}x_e^{w_e} + x_c^{w_c}x_e^{w_e} + x_b^{w_b}x_e^{w_e}
 %     %=&1+5x+4x^2 \qquad \quad (x_{i} = x, w_{i}=1).
 % \end{align*}}
-The contraction process goes from bottom to top, where the root node stores the contraction result, the leaves are input tensors and the rest nodes are all intermediate contraction results.
-Tensor subscripts are indices so that the number of subscripts indicates the space complexity to store this tensor. The contraction complexity to generate a tensor is annotated in the square brackets, where $n$ is the dimension of degrees of freedom, which in our case is $2$.
-One can easily check the largest tensor during computing has space complexity $O(n^2)$ and this is optimal, i.e. the treewidth of the original $5$-vertex graph is $2$. The time complexity is $O(n^3)$, which is much smaller than that of direct enumeration $O(n^5)$.
+The contraction process goes from bottom to top, where the root node stores the contraction result; the leaves are input tensors and the rest nodes are all intermediate contraction results.
+Tensor subscripts are indices so that the number of subscripts indicates the space complexity to store this tensor.
+The contraction complexity to generate a tensor is annotated in the square brackets, where $n$ is the dimension of degree of freedoms, which is $2$ in a tensor network mapped from an independent set problem.
+One can easily check the largest tensor in contraction has space complexity $O(n^2)$ and this is the smallest over all possible contraction trees, i.e. the treewidth of the original $5$-vertex graph is $2$. The time complexity is $O(n^3)$, which is much smaller than that of direct enumeration $O(n^5)$.
 \end{example}
 
 \section{Independence polynomial}\label{sec:indpoly}
@@ -720,10 +722,10 @@ where $a_k$ is the number of independent sets of size $k$, $\alpha(G) \equiv \ma
 An independence polynomial is a useful graph characteristic related to, for example, the partition functions~\cite{Lee1952,Yang1952} and Euler characteristics of the independence complex~\cite{Bousquet2008, Levit2009}.
 %Its connection to \Eq{eq:idp} can be understood as follows: the product over vertex tensor elements produces a factor $x^k$, where $k=\sum_i s_i$ counts the set size,
 %and the product over edge tensor elements gives a factor $1$ for a configuration being in an independent set and $0$ otherwise. The summation counts the number of independent sets of size $k$. 
-By assigning a real number to $x$, one can evaluate this independence polynomial for this specific value directly by contracting this tensor network, e.g. the total number of independent sets is equal to $I(G, 1)$.
-However, instead of evaluating this polynomial for a certain value, we are more interested in knowing the coefficients of this polynomial, because this quantity tells us the counting of independent sets at each size.
-To achieve this, let us first elevate the tensor elements $0$s and $1$s in tensors $W(x)$ and $B$ from the standard number types to the additive identity,
-$\mymathbb{0}$, and multiplicative identity, $\mymathbb{1}$, of a commutative semiring as discussed in Sec.~\ref{sec:generic}.
+By assigning a real number to $x$, one can evaluate this independence polynomial for this specific value directly using tensor network contraction.
+It is already very useful, for example, the total number of independent sets can be evaluated as $I(G, 1)$.
+However, instead of evaluating this polynomial for a certain value, we are more interested in knowing the coefficients of this polynomial, because this quantity tells us the counting of independent sets at different sizes.
+To this end, let us first elevate the tensor elements $0$s and $1$s in tensors $W(x)$ and $B$ from the standard number types to the additive identity, $\mymathbb{0}$, and multiplicative identity, $\mymathbb{1}$, of a commutative semiring as discussed in Sec.~\ref{sec:generic}.
 \purple{I'd
 say that you're about to describe this semiring, otherwise it seems like you're going to
 use the general definition of the semiring rather than a specific type of semiring}\blue{from $1$ to $\mymathbb{1}$ and $0$ to $\mymathbb{0}$ applies for a general semiring, I haven't change this part, let's discuss to make sure I understand your point.}
@@ -739,7 +741,8 @@ The algebra between the polynomials $a$ of order $k_a$ and $b$ of order $k_b$ is
     \end{split}
 \end{equation}
 Here, the multiplication of two polynomial numbers can be evaluated in time $O(k\log(k))$ using the convolution theorem~\cite{Schonhage1971}, where $k=\max(k_a, k_b)$.
-%These operations are standard addition and multiplication operations of polynomials, and the polynomial type forms a commutative ring. The tensors $W$ and $B$ can thus be written as 
+%These operations are standard addition and multiplication operations of polynomials, and the polynomial type forms a commutative ring.
+The tensors $W$ and $B$ can thus be written as 
 \begin{equation}
     W^{\rm PN} = \left(\begin{matrix}
         \mymathbb{1} \\
@@ -759,7 +762,7 @@ This seemingly more time and space efficient approach suffers from precision iss
 The data ranges of standard integer types are too small to cover many practical using cases,
 while the floating point numbers may have round off error that much larger than the value itself.
 These are due to the fact that the number of independent sets at different sizes may vary tens or even hundreds of orders.
-For practical methods to evaluate these coefficients, we refer readers to \App{sec:finitefield}, where we provide an accurate and memory efficient method to find the polynomial by contracting and fitting with finite field algebra.
+For practical methods to evaluate these coefficients, we refer readers to \App{sec:finitefield}, where we provide an accurate and memory efficient method to find the polynomial by contracting and fitting on finite field algebra.
 Alternatively, one can use the method in \App{sec:fft} to fit this polynomial faster with complex numbers with controllable round off errors.
 For the purpose of discussion in the main text, let us stick to this less efficient polynomial algebra.
 
@@ -834,8 +837,7 @@ As will be shown below, this algebra can also be extended to enumerate those lar
 \section{Enumerating and sampling independent sets}\label{sec:enumeration}
 
 \subsection{Set algebra for configuration enumeration}
-The configuration enumeration of independent sets includes,
-for example, the enumeration of all independent sets, the enumeration of all MISs and the enumeration of independent sets with maximum several sizes.
+The configuration enumeration of independent sets includes, for example, the enumeration of all independent sets, the enumeration of all MISs and the enumeration of independent sets with maximum several sizes.
 Recall that in the definition of a vertex tensor in \Eq{eq:vertextensor}, variables carry labels, so that one can read out all independent sets directly from the output polynomials.
 The multiplication between labelled variables are commutative while the summation of labelled variables forms a set.
 Intuitively, one can use a bit string as the representation of a labelled variable and use the bit-wise or $\lor^\circ$ as the multiplication operation.
