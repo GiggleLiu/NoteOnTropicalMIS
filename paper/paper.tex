@@ -725,12 +725,14 @@ An independence polynomial is a useful graph characteristic related to, for exam
 By assigning a real number to $x$, one can evaluate this independence polynomial for this specific value directly using tensor network contraction.
 It is already very useful, for example, the total number of independent sets can be evaluated as $I(G, 1)$.
 However, instead of evaluating this polynomial for a certain value, we are more interested in knowing the coefficients of this polynomial, because this quantity tells us the counting of independent sets at different sizes.
-To this end, let us first elevate the tensor elements $0$s and $1$s in tensors $W(x)$ and $B$ from the standard number types to the additive identity, $\mymathbb{0}$, and multiplicative identity, $\mymathbb{1}$, of a commutative semiring as discussed in Sec.~\ref{sec:generic}.
-\purple{I'd
-say that you're about to describe this semiring, otherwise it seems like you're going to
-use the general definition of the semiring rather than a specific type of semiring}\blue{from $1$ to $\mymathbb{1}$ and $0$ to $\mymathbb{0}$ applies for a general semiring, I haven't change this part, let's discuss to make sure I understand your point.}
-Then we create a polynomial type and represent a polynomial $a_0 + a_1 x + \ldots + a_k x^k$ as a coefficient vector $a = (a_0, a_1, \ldots, a_k) \in \mathbb{R}^k$, e.g. $x$ is represented as $(0, 1)$.
-The algebra between the polynomials $a$ of order $k_a$ and $b$ of order $k_b$ is defined as
+%first elevate the tensor elements $0$s and $1$s in tensors $W(x)$ and $B$ from the standard number types to the additive identity, $\mymathbb{0}$, and multiplicative identity, $\mymathbb{1}$, of a commutative semiring as discussed in Sec.~\ref{sec:generic}.
+%\purple{I'd
+%say that you're about to describe this semiring, otherwise it seems like you're going to
+%use the general definition of the semiring rather than a specific type of semiring}\blue{from $1$ to $\mymathbb{1}$ and $0$ to $\mymathbb{0}$ applies for a general semiring, I haven't change this part, let's discuss to make sure I understand your point.}\purple{Perhaps start the sentence with: Our semiring elements are a polynomial type...}
+To this end, let us create a polynomial number data type by representing a polynomial $a_0 + a_1 x + \ldots + a_k x^k$ as a coefficient vector $a = (a_0, a_1, \ldots, a_k) \in \mathbb{R}^k$, e.g. $x$ is represented as $(0, 1)$.
+Then we can define an algebra among coefficient vectors, including a redefinition of additive identity and multiplicative identity.
+To avoid potential confusion, let us denote the additive identity as $\mymathbb{0}$, and multiplicative identity as $\mymathbb{1}$.
+The algebra between the polynomials number $a$ of order $k_a$ and $b$ of order $k_b$ is defined as
 \begin{equation}
     \eqname{PN}
     \begin{split}
@@ -933,7 +935,7 @@ It can be picking the one smaller in the lexicographical order such that the add
 In most cases, it is completely fine for the \texttt{select} function to pick a random one (not commutative and associative anymore) to generate a random MIS.
 
 \subsection{Sampling extremely large configuration space}
-When the problem scale goes large, a set of configurations might be impossible to fit into any type of storage.
+When the problem scale goes large, a set of bitstrings might be impossible to fit into any type of storage.
 To get something meaningful out of the configuration space, we use a binary sum-product expression tree as a compact representation of a set of configurations, i.e. instead of directly computing a set using the algebra in \Eq{eq:set}, we store the process of computing it.
 Each node in this tree is a quadruple $(type, data, left, right)$, where $type$ is one of \texttt{LEAF}, \texttt{ZERO}, \texttt{SUM} and \texttt{PROD}, $data$ is a bit string as the content in a \texttt{LEAF} node, and $left$ and $right$ are left and right operands of a \texttt{SUM} or \texttt{PROD} node.
 
@@ -1113,7 +1115,7 @@ This quantity arises in statistical mechanics of hard-square lattice gases~\cite
 With the tool to enumerate or sample configurations, one can understand the structure of the independent set configuration space, such as the optimization landscape for finding the MISs.
 One of the known barriers for finding the MIS is the so-called overlap gap property~\cite{Gamarnik2013, Gamarnik2019}.
 If the overlap gap property is present, it means every two large independent sets either have a significant intersection or very small intersection;
-it implies that large independent sets are clustered together. \purple{Do you want me to write a more formal definition as well or do you think it's not necessary?}\blue{Explaining the concept overlap gap property well seems to be impossible in a this paper (you need at least some plots).}
+it implies that large independent sets are clustered together. %\purple{Do you want me to write a more formal definition as well or do you think it's not necessary?}\blue{Explaining the concept overlap gap property well seems to be impossible in a this paper (you need at least some plots).}
 This clustering property has been used to rigorously prove upper bounds on the performance of local search algorithms~\cite{Gamarnik2013, Gamarnik2019}.
 To investigate the overlap gap property, we compute pair-wise Hamming distance distributions of large independent sets as they are good indicators of the presence or absence of overlap gap properties.
 %Pair-wise Hamming distance distributions are good indicators of the overlap gap properties that a single peak in the distribution indicates the absence of Hamming distances.
@@ -1171,12 +1173,12 @@ On the hardest graph instances for simulated annealing that we studied, a high d
 Initially, we suspected that simulated annealing was trapped certain clusters of these local minima in the solution space. However, by enumerating the configurations, we determined that there was no clustering in the solution space as in Sec.~\ref{sec:overlap-gap}, and instead simulated annealing randomly explores the independent sets of size $\alpha(G)-1$ until an optimal solution is found.
 Therefore, it is the large ratio of local to global minima that prevents simulated annealing from efficiently finding the MIS.
 %and studying the solution space properties for independent sets of size $\alpha(G)$ and $\alpha(G)-1$, we gained detailed insights to performance of both the quantum algorithm and simulated annealing, and could determine if these algorithm were likely to return independent sets from certain clusters of local or global minima in the solution space. Instead, we found that simulated annealing becomes trapped in independent sets of size $\alpha(G)-1$ uniformly at random, which is related to observation that there are no disconnected clusters in the solution space for King's graphs in Sec.~\ref{sec:overlap-gap}.
-Although the performance of the quantum algorithm was more challenging to understand due to the inherent difficulty in studying quantum systems, we were able to visualize the experimental outputs of a quantum algorithm over the solution space, as shown in Figure~\ref{fig:exp_configuratoins} for an instances with $39$ nodes~\cite{Ebadi2022}.
+
+Although the performance of the quantum algorithm was more challenging to understand due to the inherent difficulty in studying quantum systems, we were able to gain insight by visualizing the experimental outputs of a quantum algorithm over the solution space, as shown in Figure~\ref{fig:exp_configuratoins} for an instances with $39$ nodes~\cite{Ebadi2022}.
 Here, the structure of the solution space is shown on a graph where each vertex represents a large independent set. Each edge represents a pair of  independent sets that differ by a swap operation or a vertex addition to the set, which are the operations naturally present in the effective dynamics at the end of the quantum algorithm. 
 %The quantum algorithm either finds the MIS with size $\alpha(G)$ with high probability, or returns a suboptimal independent set, usually with size $\alpha(G)-1.$
-\blue{Mention the degrees of nodes in the configuration space is concentrated at a certain value, which is a feature not known before.}
-We find that the quantum algorithm does not appear to return solely local minima with large Hamming distance from the MISs as suggested for adiabatic algorithms by~\cite{altshuler2010},
-but rather samples from local minima with a wide range of Hamming distances from the MISs.
+The solution space graph is well-connected by local changes to the spin configurations, has small diameter, and the degree of each node appears to concentrate. 
+From this visualization, we see that the quantum algorithm does not appear to return solely local minima with large Hamming distance from the MISs as suggested for adiabatic algorithms by~\cite{altshuler2010}, which would appear as a long path on the solution space graph from the sampled local minima to the MIS. Rather, the quantum algorithm samples from local minima across the solution space graph with a wide range of Hamming distances from the MISs.
 %Consistent with Sec.~\ref{sec:overlap-gap}, there are no disconnected clusters in the solution space for this King's graph.
 Looking forward, these tools can be applied to understanding the performance of quantum and classical algorithms on a wide class of NP-hard combinatorial optimization problems.
 
@@ -1194,10 +1196,12 @@ The class of problems solvable by a tensor network include but is not limited to
 %In the second example, we analyze the pairwise Hamming distances from configurations directly sampled from large independent sets of King's graphs at $0.8$ filling and three regular graphs. We show the strongest numeric evidence so far of the absence of overlap gap property in King's graph and the existence of Overlap Gap properties in three regular graphs.
 %In the last example, we show how our algorithm helps people to understand the performance of a quantum variational algorithms on Rydberg atom arrays to find maximum independent sets. This is a research frontier that understanding which can help people design better quantum algorithms to beat its classical counterpart.
 
-It would be interesting to generalize the idea of generic programming to other algorithms for property computing with certain algebraic structures such as those using the inclusion-exclusion principle or subset Onconvolution~\cite{Fomin2013}.
-To this end, it is worth mentioning the dynamic programming~\cite{Courcelle1990, Fomin2013} that closely related to a tensor network.
-For example, the Viterbi algorithm for finding most probable configuration in the hidden Markov model has a nice matrix product state interpretation~\cite{Han2018}, and the tropical tensor network is very likely equivalent to dynamic programming in solving hard combinatorial optimization problems in certain way~\cite{Liu2021}.
-However, while being less restrictive regarding the problem it can solve, e.g. the traveling sales man can be solved easily with dynamic programming but not with a tensor network to the best of our knowledge, it is still an open question whether dynamic programming can have an algebraic interpretation for computing solution space properties beyond finding a single best solution or not.
+It would be interesting to generalize the idea of generic programming to other algorithms that have certain algebraic structures such as those using the inclusion-exclusion principle or subset convolution~\cite{Fomin2013} and see what new properties can be computed.
+To this end, it is worth mentioning the dynamic programming~\cite{Courcelle1990, Fomin2013}.
+Dynamic programming is closely related to a tropical tensor network~\cite{Liu2021}, for example, the Viterbi algorithm for finding the most probable configuration in a hidden Markov model can be interpreted as a matrix product state featured with tropical algebra, and the tropical tensor network in the main text is probably equivalent to dynamic programming in finding a best solution.
+However, while having broader applications,
+%e.g. the traveling sales man can be solved easily with dynamic programming but not with a tensor network to the best of our knowledge, 
+dynamic programming does not have a clear algebraic interpretation required by computing solution space properties beyond finding a best solution.
 %Moreover, since the independence polynomial is closely related to the matching polynomial~\cite{Levit2005}, the clique polynomial~\cite{Hoede1994}, and the vertex cover polynomial~\cite{Akbari2013},
 %our algorithm to compute the independence polynomial can also be used to compute these graph polynomials.
 %By adapting to the style of generic programming, we can implement all the algorithms without much effort.
