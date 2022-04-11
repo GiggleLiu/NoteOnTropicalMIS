@@ -1,4 +1,4 @@
-using GraphTensorNetworks, Random
+using GenericTensorNetworks, Random
 using CUDA
 CUDA.allowscalar(false)
 using MKL
@@ -14,7 +14,7 @@ function sequencing(n; writefile, sc_target, usecuda, nslices=1)
         ntrials=7, βs=0.01:0.05:22.0, niters=20, rw_weight=2.0), simplifier=MergeGreedy())
     println("Graph size $n, usecuda = $usecuda")
     @show timespace_complexity(gp)
-    @time res = Array(GraphTensorNetworks.contractx(gp, 1.0; usecuda=usecuda))
+    @time res = Array(GenericTensorNetworks.contractx(gp, 1.0; usecuda=usecuda))
     @show res
     ofname = joinpath(@__DIR__, "data", "entropyconstant-$n.dat")
     writefile && writedlm(ofname, res)

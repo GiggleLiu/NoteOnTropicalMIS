@@ -1,5 +1,5 @@
 using MethodAnalysis
-using OMEinsum, GraphTensorNetworks, LightGraphs
+using OMEinsum, GenericTensorNetworks, LightGraphs
 
 for i=1:10
     print(i)

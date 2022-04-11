@@ -1,4 +1,4 @@
-using Distributed, CUDA, GraphTensorNetworks, Random, DelimitedFiles, GraphTensorNetworks.OMEinsumContractionOrders, GraphTensorNetworks.OMEinsum
+using Distributed, CUDA, GenericTensorNetworks, Random, DelimitedFiles, GenericTensorNetworks.OMEinsumContractionOrders, GenericTensorNetworks.OMEinsum
 USECUDA = parse(Bool, ARGS[1])
 @show USECUDA
 const gpus = collect(devices())
@@ -8,7 +8,7 @@ const process_device_map = Dict(zip(procs, gpus))
 @show process_device_map
 
 @everywhere begin
-using GraphTensorNetworks, Random, GraphTensorNetworks.OMEinsumContractionOrders, GraphTensorNetworks.OMEinsum
+using GenericTensorNetworks, Random, GenericTensorNetworks.OMEinsumContractionOrders, GenericTensorNetworks.OMEinsum
 using CUDA
 CUDA.allowscalar(false)
 using DelimitedFiles
@@ -65,13 +65,13 @@ function sequencing(n; writefile, sc_target, usecuda, nslices=1, process_device_
         ntrials=4, βs=0.01:0.05:25.0, niters=50, rw_weight=1.0), simplifier=MergeGreedy())
     println("Graph size $n, usecuda = $usecuda")
     @show timespace_complexity(gp)
-    res = GraphTensorNetworks.big_integer_solve(Int32, 100) do T
+    res = GenericTensorNetworks.big_integer_solve(Int32, 100) do T
         @info "T = $T"
-        filename = joinpath(@__DIR__, "data", "$n-$(GraphTensorNetworks.modulus(one(T))).dat")
+        filename = joinpath(@__DIR__, "data", "$n-$(GenericTensorNetworks.modulus(one(T))).dat")
         if isfile(filename)
             fill(T(readdlm(filename)[]))
         else
-            xs = GraphTensorNetworks.generate_tensors(x->one(T), gp)
+            xs = GenericTensorNetworks.generate_tensors(x->one(T), gp)
             @time res = multigpu_contract(gp.code, (xs...,); process_device_map=process_device_map)
             writedlm(filename, res[].val)
             res

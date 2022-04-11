@@ -1,4 +1,4 @@
-using GraphTensorNetworks, Random, Graphs
+using GenericTensorNetworks, Random, Graphs
 using DelimitedFiles
 
 function case_r3(n, k=3; sc_target, seed=2)

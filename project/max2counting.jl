@@ -1,4 +1,4 @@
-using GraphTensorNetworks, Random
+using GenericTensorNetworks, Random
 using CUDA
 CUDA.allowscalar(false)
 
@@ -15,7 +15,7 @@ function mis_counting(n, seed; writefile, sc_target, usecuda, maximal)
         gp = Independence(g; optimizer=TreeSA(sc_target=sc_target, sc_weight=1.0, ntrials=1, βs=0.01:0.05:15.0, niters=10, rw_weight=0.2), simplifier=MergeGreedy())
     end
     println("Graph $seed, usecuda = $usecuda")
-    res = GraphTensorNetworks.contractx(gp, Max2Poly(0f0, 1f0, 1f0); usecuda=usecuda)[]
+    res = GenericTensorNetworks.contractx(gp, Max2Poly(0f0, 1f0, 1f0); usecuda=usecuda)[]
     if maximal
         folderout = joinpath(folder, "maximal_max2_L$(n)")
     else

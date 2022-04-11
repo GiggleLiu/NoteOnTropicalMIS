@@ -1,4 +1,4 @@
-using GraphTensorNetworks, DelimitedFiles, TropicalGEMM
+using GenericTensorNetworks, DelimitedFiles, TropicalGEMM
 using Graphs
 using BenchmarkTools, Random
 using LinearAlgebra
@@ -65,7 +65,7 @@ const truncatedict = Dict([string(task)=>ntruncate for (task, ntruncate) in [
         ][1:end-ntruncate]]
     else
         ntruncate=truncatedict[task]
-        run_benchmarks([("n$(10*i)", ()->(usecuda ? (CUDA.@sync solve(case, replace(task, "_"=>" "); usecuda=true)) : solve((@show length(GraphTensorNetworks.labels(case.code)); case), replace(task, "_"=>" "); usecuda=false))) for (i, case) in enumerate(cases)],
+        run_benchmarks([("n$(10*i)", ()->(usecuda ? (CUDA.@sync solve(case, replace(task, "_"=>" "); usecuda=true)) : solve((@show length(GenericTensorNetworks.labels(case.code)); case), replace(task, "_"=>" "); usecuda=false))) for (i, case) in enumerate(cases)],
                     output_file=joinpath(@__DIR__, "data", "maximal-$(task)-r3-$(usecuda ? "GPU" : "CPU").dat"))
     end
 end

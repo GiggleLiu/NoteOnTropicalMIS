@@ -1,4 +1,4 @@
-using GraphTensorNetworks, DelimitedFiles, TropicalGEMM
+using GenericTensorNetworks, DelimitedFiles, TropicalGEMM
 using Graphs
 using BenchmarkTools, Random
 using LinearAlgebra
@@ -63,7 +63,7 @@ const property_dict = Dict{String, Any}(
 
 function runcase(cases; task, usecuda = false)
     property = property_dict[task]
-    run_benchmarks([("n$(10*i)", ()->(usecuda ? (CUDA.@sync solve(case, property; usecuda=true)) : solve((@show length(GraphTensorNetworks.labels(case.code)); case), property; usecuda=false))) for (i, case) in enumerate(cases)],
+    run_benchmarks([("n$(10*i)", ()->(usecuda ? (CUDA.@sync solve(case, property; usecuda=true)) : solve((@show length(GenericTensorNetworks.labels(case.code)); case), property; usecuda=false))) for (i, case) in enumerate(cases)],
                    output_file=joinpath(@__DIR__, "data", "$(task)-r3-$(usecuda ? "GPU" : "CPU").dat"))
 end
 
