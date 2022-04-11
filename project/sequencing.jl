@@ -1,4 +1,4 @@
-using GraphTensorNetworks, Random
+using GenericTensorNetworks, Random
 using CUDA
 CUDA.allowscalar(false)
 
@@ -10,8 +10,8 @@ function sequencing(n; writefile, sc_target, usecuda, nslices=1)
         ntrials=7, βs=0.01:0.05:22.0, niters=20, rw_weight=2.0), simplifier=MergeGreedy())
     println("Graph size $n, usecuda = $usecuda")
     @show timespace_complexity(gp)
-    res = GraphTensorNetworks.big_integer_solve(Int32, 100) do T
-        @time Array(GraphTensorNetworks.contractx(gp, one(T); usecuda=usecuda))
+    res = GenericTensorNetworks.big_integer_solve(Int32, 100) do T
+        @time Array(GenericTensorNetworks.contractx(gp, one(T); usecuda=usecuda))
     end
     @show res
     ofname = joinpath(@__DIR__, "data", "$n.dat")

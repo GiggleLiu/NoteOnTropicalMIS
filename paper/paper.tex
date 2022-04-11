@@ -250,8 +250,6 @@ solution space property, tensor network, maximum independent set, independence p
 \end{AMS}
 
 
-\cyan{a comment} and \xcyan{a resolved comment}
-
 \section{Introduction}
 In graph theory and combinatorial optimization, there is an important class of problems that can be expressed as satisfiability problems involving constraints specified over %local sets of variables that typically consists of 
 a vertex and its neighborhood. These include, for example, the independent set problem, the cutting problem, the dominating set problem, the set packing problem, the vertex coloring problem, the K-SAT problem,
@@ -1206,7 +1204,7 @@ dynamic programming does not have a clear algebraic interpretation required by c
 %our algorithm to compute the independence polynomial can also be used to compute these graph polynomials.
 %By adapting to the style of generic programming, we can implement all the algorithms without much effort.
 
-The source code in Julia language for this paper can be found in our Github repository~\cite{GraphTensorNetworks}. 
+The source code in Julia language for this paper can be found in our Github repository~\cite{GenericTensorNetworks}. 
 There is also a short introduction to this repository as well a gist to show how it works in the Appendix~\ref{sec:technical}.
 We expect our tool can be used to understand and study many interesting applications of independent sets and beyond.
 We also hope the toolkit we built, including tensor network contraction order optimization and efficient tropical matrix multiplication, can be helpful to other scientific software.
@@ -1866,16 +1864,16 @@ It is nevertheless important to handle them properly in a practical implementati
 
 \section{Technical guides}\label{sec:technical}
 
-This appendix covers some technical guides for productivity, including an introduction to an open source package \href{https://github.com/Happy-Diode/GraphTensorNetworks.jl}{GraphTensorNetworks}~\cite{GraphTensorNetworks} implementing the algorithms in this paper and a gist about how this package is implemented.
-One can install \texttt{GraphTensorNetworks} a Julia REPL, by first type \colorbox{lightgray}{\texttt{]}} to enter the \texttt{pkg>} mode and then type
+This appendix covers some technical guides for productivity, including an introduction to an open source package \href{https://github.com/Happy-Diode/GenericTensorNetworks.jl}{GenericTensorNetworks}~\cite{GenericTensorNetworks} implementing the algorithms in this paper and a gist about how this package is implemented.
+One can install \texttt{GenericTensorNetworks} a Julia REPL, by first type \colorbox{lightgray}{\texttt{]}} to enter the \texttt{pkg>} mode and then type
 \begin{lstlisting}
-pkg> add GraphTensorNetworks
+pkg> add GenericTensorNetworks
 \end{lstlisting}
 followed by an \colorbox{lightgray}{\texttt{<ENTER>}} key.
 To use it for solving solution space properties, just go back to the normal mode (type \colorbox{lightgray}{\texttt{<BACKSPACE>}}) and type
 
 \begin{lstlisting}
-julia> using GraphTensorNetworks, Graphs
+julia> using GenericTensorNetworks, Graphs
 
 julia> # using CUDA
 
@@ -1899,7 +1897,7 @@ The problem instance takes four arguments to initialize, the only positional arg
 Here, we use \texttt{TreeSA} method as the tensor network optimizer, and leave \texttt{weights} and \texttt{openvertices} the default values. The \texttt{TreeSA} algorithm, which was invented in Ref.~\cite{Kalachev2021}, performs the best in most of our applications.
 The first execution of this function will be a bit slow due to Julia's just in time compiling.
 After that, the subsequent runs will be fast.
-The following diagram lists possible combinations of input arguments, where functions in the \texttt{Graph} are mainly defined in package \texttt{Graphs}, and the rest can be found in \texttt{GraphTensorNetworks}.
+The following diagram lists possible combinations of input arguments, where functions in the \texttt{Graph} are mainly defined in package \texttt{Graphs}, and the rest can be found in \texttt{GenericTensorNetworks}.
 
 \centerline{\includegraphics[width=0.8\textwidth, trim={0cm 1cm 0cm 1cm}, clip]{figures/fig7.pdf}}
 
@@ -1915,7 +1913,7 @@ It is worth mentioning that this project depends on multiple open source package
 	\item[\href{https://github.com/scheinerman/Mods.jl}{Mods} and \href{https://github.com/JuliaMath/Primes.jl}{Primes}] are packages providing finite field algebra and prime number manipulation.
 \end{description}
 
-They can be installed in a similar way to \texttt{GraphTensorNetworks}.
+They can be installed in a similar way to \texttt{GenericTensorNetworks}.
 After installing the required packages, one can open a Julia REPL, copy and paste the following code snippet into it.
 
 \lstinputlisting[breaklines]{../democode/demo.jl}

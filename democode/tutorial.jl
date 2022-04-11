@@ -1,4 +1,4 @@
-julia> using GraphTensorNetworks, Random, Graphs
+julia> using GenericTensorNetworks, Random, Graphs
 
 julia> graph = (Random.seed!(2); Graphs.smallgraph(:petersen))
 {10, 15} undirected simple Int64 graph

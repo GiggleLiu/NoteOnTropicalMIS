@@ -1,4 +1,4 @@
-using DelimitedFiles, GraphTensorNetworks
+using DelimitedFiles, GenericTensorNetworks
 
 function mis_configurations(n, seed; order, writefile, sc_target=12)
     folder = joinpath(homedir(), ".julia/dev/TropicalMIS", "project", "data", "configurations_L$(n)")

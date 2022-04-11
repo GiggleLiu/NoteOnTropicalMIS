@@ -1,8 +1,8 @@
-using GraphTensorNetworks, Random
-using Distributed, DelimitedFiles, GraphTensorNetworks.OMEinsumContractionOrders, GraphTensorNetworks.OMEinsum
+using GenericTensorNetworks, Random
+using Distributed, DelimitedFiles, GenericTensorNetworks.OMEinsumContractionOrders, GenericTensorNetworks.OMEinsum
 
 @everywhere begin
-using GraphTensorNetworks, Random, GraphTensorNetworks.OMEinsumContractionOrders, GraphTensorNetworks.OMEinsum
+using GenericTensorNetworks, Random, GenericTensorNetworks.OMEinsumContractionOrders, GenericTensorNetworks.OMEinsum
 using DelimitedFiles
 
 function do_work(f, jobs, results) # define work function everywhere

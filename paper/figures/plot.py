@@ -317,10 +317,10 @@ class PLT(object):
             plt.text(0.5, 0.7, "(b) Nine random three regular graphs of size 110.", ha="center", va="center", fontsize=20, family="Times New Roman")
             ax.axis("off")
 
-    def fig7(self):
+    def fig7(self, tp="pdf"):
         F1 = 10
         F2 = 12
-        with NoBoxPlt(figsize=(7,6), filename="fig7.pdf") as pl:
+        with NoBoxPlt(figsize=(7,6), filename="fig7.%s"%tp) as pl:
             grid = viznet.Grid((1.0,1.0))
             node = viznet.NodeBrush('box', size=(0.2,0.2), color="none", roundness=0.1)
             edge = viznet.EdgeBrush('->', color='#000000', lw=1.5)

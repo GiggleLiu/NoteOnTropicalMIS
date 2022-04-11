@@ -1,4 +1,4 @@
-using GraphTensorNetworks, Random
+using GenericTensorNetworks, Random
 using CUDA
 CUDA.allowscalar(false)
 
