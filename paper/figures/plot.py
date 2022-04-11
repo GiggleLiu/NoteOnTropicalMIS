@@ -343,4 +343,12 @@ class PLT(object):
             edge >> (n2.pin("right"), n4)
             edge >> (n3.pin("right"), n4)
 
+    def fig8(self):
+        with NoBoxPlt(figsize=(12,7), filename="fig8.pdf") as pl:
+            for seed in range(1,10):
+                data = np.loadtxt("data/hamming-size60-seed%d-K3-n10000.dat"%seed)
+                ax = plt.subplot(330+seed)
+                ax.plot(np.arange(len(data)), data, lw=1)
+                ax.axis("off")
+
 fire.Fire(PLT())
