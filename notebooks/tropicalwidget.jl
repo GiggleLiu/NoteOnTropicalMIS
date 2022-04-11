@@ -106,7 +106,7 @@ md"""
 We use Tropical numbers and its variants for computing.
 Tropical number map `+` to `max`, `*` to `+`, its zero and one elements are changed correspondingly.
 
-Check [this paper](https://arxiv.org/abs/2008.06888) and this [note](https://github.com/Happy-Diode/NoteOnTropicalMIS/blob/master/paper/paper.pdf) for details.
+Check [this paper](https://arxiv.org/abs/2008.06888) and this [note](https://github.com/QuEraComputing/NoteOnTropicalMIS/blob/master/paper/paper.pdf) for details.
 """
 
 # ╔═╡ bb36b716-8357-11eb-1007-536e94c427c9
