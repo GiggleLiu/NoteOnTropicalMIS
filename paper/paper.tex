@@ -228,13 +228,13 @@ Listing \thelstlisting: #1\hfill%\hfill%
 %We introduce a tensor network algorithm %a method that combines generic programming and tensor network techniques 
 We introduce a unified framework to compute the solution space properties of a class of combinatorial optimization problems including the independent set problem, the maximum cut problem, the vertex coloring problem, the clique problem, the dominating set problem, the set packing problem, the set covering problem, and the satisfiability problem.
 %Let the independent set problem be an example, we show how to compute, for example, the maximum several independent set sizes, the counting of independent sets of a give size, the enumeration of independent sets of a given size.
-These solution space properties include, for example, finding one of the optimum solutions, counting the number of solutions of a given size, and enumeration and sampling of solutions of a given size.
+These solution space properties include finding one of the optimum solutions, counting the number of solutions of a given size, and enumeration and sampling of solutions of a given size.
 We use the independent set problem as an example and show how all these solution space properties can be computed in the unified approach of generic programming tensor networks.
 %By making use of generic programming, our algorithms are very simple to implement and one can in addition directly utilize recent advances in tensor network contraction techniques such as near-optimal contraction order finding and slicing to achieve high performance.
 %By using generic programming techniques, the same framework can be used to compute all of these properties. 
 %Our algorithm utilizes recent advances in tensor network contraction techniques to achieve high performance, including methods to quickly find a near-optimal contraction order and slicing.
 %The algorithmic complexity of this approach is two to the treewidth of the line graph of the tensor network graph.
-To demonstrate the versatility of this computational tool, we apply it to a few examples, including computing the entropy constant for hardcore lattice gases, studying the overlap gap properties, and analyzing the performance of quantum and classical algorithms for finding maximum independent sets.
+To demonstrate the versatility of this computational tool, we apply it to several  examples, including computing the entropy constant for hardcore lattice gases, studying the overlap gap properties, and analyzing the performance of quantum and classical algorithms for finding maximum independent sets.
 % including the calculations of the entropy constant for some hardcore lattice gases on 2D square lattices and the study of the overlap gap property on three regular graphs.
 %We show how our method helps to understand these hard problems on systems with hundreds of vertices.
 \end{abstract}
@@ -269,8 +269,8 @@ Finding an optimum solution for these problems is typically NP-hard~\cite{Hastad
 %\purple{Is MIS really the most studied NP-hard optimization problem? I would guess it is heavily studied, but not necessarily the most studied.}
 %\blue{Here, we haven't mentioned the independent set, here ``version'' means, e.g. counting, enumeration, devision. I think finding one of the largest/smallest set and its cardinality in the above mentioned problems is the most studied?}
 
-In this paper, we introduce a unified framework to compute a broader class of quantities associated with these problems, beyond just finding an optimum solution.
-We call them \textit{solution space properties}, which can be much harder to compute (e.g.\ \#P-complete), but they can be crucial for understanding hard combinatorial optimization problems.
+In this paper, we introduce a unified framework to compute a broad class of quantities associated with these problems, beyond just finding an optimum solution.
+We call them \textit{solution space properties}. In practice these can be much harder to compute (corresponding e.g.\ to \#P-complete class). However, these properties can be crucial for understanding detailed properties of hard combinatorial optimization problems.
 % In this paper, we focus on the less studied aspects of computing \textit{solution space properties}, which can be much harder to compute, %; for example, counting independent sets of a general graph is \#P-complete~\cite{Vadhan2001}, 
 % but they can be crucial towards understanding hard combinatorial optimization problems. 
 These \textit{solution space properties} can include not only the maximum or minimum set size but also the number of sets at a given size, enumeration of all sets at a given size, and direct sampling of such sets when they are too large to be fit into memory.
@@ -1232,7 +1232,7 @@ Let us characterize the independent set problem on graph $G=(V, E)$ as an energy
     \mathcal{E}(G, s) = -\sum_{i\in V} w_i s_i + \infty \sum_{\langle i,j\rangle \in E}s_i s_j
 \end{equation}
 where $s_i$ is a spin on vertex $i \in V$ and $w_i$ is an onsite energy term associated with it.
-The first part corresponds to the negative independent set size and the second part describes the independence constraint, which corresponds to the Rydberg blockade~\cite{Pichler2018, Ebadi2022} in cold atom arrays or the repulsive force in hardcore lattice model~\cite{Dyre2016, Fernandes2007}.
+The first part corresponds to the negative independent set size and the second part describes the independence constraint, which corresponds to the Rydberg blockade~\cite{Pichler2018, Ebadi2022} in cold atom arrays or the repulsive force in hardcore lattice models~\cite{Dyre2016, Fernandes2007}.
 The partition function is defined as
 \begin{equation}\label{eq:partition}
     \begin{split}
@@ -1255,11 +1255,11 @@ and an edge tensor on each bond
         1 & 0
     \end{matrix}\right),
 \end{equation}
-where the $0$ in the edge tensor comes from $e^{-\beta\infty}$ in the second term of \Eq{eq:eng}.
+where the $0$ in the edge tensor comes from $e^{-\beta\infty}$ in the second term of \Eq{eq:eng}, which is the independence constraint.
 By letting $x = e^{\beta}$, we get the tensor network for computing the independence polynomial as described by \Eq{eq:vertextensor} and \Eq{eq:edgetensor}.
 If we further let $w_i=1$, the second line of \Eq{eq:partition} is equivalent to the independence polynomial.
 
-\section{An example of contraction complexity increase due to using the standard tensor network notation}\label{sec:tensorbad}
+\section{An example of increased contraction complexity for the standard tensor network notation}\label{sec:tensorbad}
 
 In the standard Einstein's notation for tensor networks in physics, each index appears precisely twice: either both are in input tensors (which will be summed over) or one is in an input tensor and another in the output tensor.
 Hence a tensor network can be represented as an open simple graph, where an input tensor is mapped to a vertex, a label shared by two input tensors is mapped to an edge and a label that appears in the output tensor is mapped to an open edge.
@@ -1273,7 +1273,7 @@ A generalized tensor network can be converted to a standard one by adding a $\de
 \end{equation}
 
 In the following example, we will show this conversion might increase the contraction complexity of a tensor network.
-Let us consider the following King's graph.
+Let us consider the following King's graph. \\
 
 \centerline{\begin{tikzpicture}
     \def\r{0.2}
@@ -1352,7 +1352,7 @@ The generalized tensor network for solving the MIS problem on this graph has the
                     post length=0mm,pre length=0mm}}
     \draw [decorate] (2.7, 0.5) -- (2.7, 5.5);
 \end{tikzpicture}}
-Vertex tensors are not shown here because they can be absorbed into an edge tensor hence do not change the contraction complexity.
+Vertex tensors are not shown here because they can be absorbed into an edge tensor and hence do not change the contraction complexity.
 If we contract this tensor network in the column-wise order, the maximum intermediate tensor has rank $\sim L$, which can be seen by counting the number of colors at the cut.
 
 By adding $\delta$ tensors to hyperedges, we have the standard tensor network represented as the following simple graph.
@@ -1383,13 +1383,13 @@ By adding $\delta$ tensors to hyperedges, we have the standard tensor network re
 \end{tikzpicture}}
 
 In this diagram, the additional $\delta$ tensors can have ranks up to $8$.
-If we still contract this tensor network in a column-wise order, the maximum intermediate tensor has rank $\sim3L$, i.e. the space complexity is $\approx 2^{3L}$.
+If we still contract this tensor network in a column-wise order, the maximum intermediate tensor has rank $\sim3L$, i.e. the space complexity is $\approx 2^{3L}$, which has a larger complexity than using the generalized tensor network notation.
 
 \section{Hard problems and tensor networks}\label{sec:otherproblems}
 \subsection{Maximal independent sets and maximal cliques}\label{sec:maximal}
 In this section, we focus the discussion on the maximal independent sets problem since finding maximal cliques of a graph is equivalent to finding the maximal independent sets of the complement of the graph.
 Let $G=(V,E)$ be a graph, we denote the neighborhood of a vertex $v\in V$ as $N(v)$.
-A maximal independent set $I_m$ is an independent set that there does exist a vertex $v \in V$ such that $I_m \cap (\{v\} \cup N[v])  = \emptyset$, i.e. an independent set that can not become a larger one by adding a new vertex.
+A maximal independent set $I_m$ is an independent set such that no $v \in V$ satisfies $I_m \cap (\{v\} \cup N[v])  = \emptyset$, i.e.\ an independent set that cannot become a larger one by adding a new vertex.
 To characterize the maximal independence restriction, we defined a tensor on each $\{v\}\cup N(v)$ as
 \begin{equation}\label{eq:maximal}
     T(x_v, w_v)_{s_1,s_2,\ldots,s_{|N(v)|},s_v} = \begin{cases}
@@ -1398,7 +1398,7 @@ To characterize the maximal independence restriction, we defined a tensor on eac
     \end{cases}
 \end{equation}
 It means if none of the neighbours of $v$ are in $I_{m}$ ($ s_1=s_2=\ldots=s_{|N(v)|}=0$), then $v$ must be in $I_{m}$ and contribute a factor $x_{v}$, otherwise, if any of the neighbourhood vertices is in $I_{m}$, then $v$ cannot be in $I_{m}$.
-For a vertex $v$ having degree 2, this tensor has the following form
+For a vertex $v$ that has a degree 2, this tensor has the following form
 \begin{equation}
     T(x_v, w_v)=\left(\begin{matrix}
     \left(\begin{matrix}
@@ -1412,7 +1412,7 @@ For a vertex $v$ having degree 2, this tensor has the following form
     \end{matrix}\right).
 \end{equation}
  
-Let us consider the graph in Example~\ref{eg:tensorcontraction}, the corresponding tensor network structure for computing the maximal independent polynomial has the following hypergraph representation.
+Let us consider the graph in Example~\ref{eg:tensorcontraction}. The corresponding tensor network structure for computing the maximal independent polynomial has the following hypergraph representation. \\
 
     \centerline{\begin{tikzpicture}[
     dot/.style = {circle, fill, minimum size=#1,
@@ -1453,22 +1453,22 @@ The maximal independence polynomial is defined as
 D_{m}(G, x) = \sum_{k=0}^{\alpha(G)} b_k x^k,
 \end{equation}
 where $b_k$ is the number of maximal independent sets of size $k$.
-Comparing with the independence polynomial in \Eq{eq:idpdef}, we have $b_{k} \leq a_{k}$ and $b_{\alpha(G)} = a_{\alpha(G)}$. $D_m(G, 1)$ counts the total number of maximal independent sets~\cite{Gaspers2012, Manne2013},
-which to our knowledge, the best algorithm gives a time complexity $O(1.3642^{|V|})$~\cite{Gaspers2012}.
+Comparing with the independence polynomial in \Eq{eq:idpdef}, we have $b_{k} \leq a_{k}$ and $b_{\alpha(G)} = a_{\alpha(G)}$. $D_m(G, 1)$ counts the total number of maximal independent sets~\cite{Gaspers2012, Manne2013};
+to our knowledge, the best algorithm has a time complexity $O(1.3642^{|V|})$~\cite{Gaspers2012}.
 %If we want to find an MIS, $b_{k}$ can, in some cases, provide hints on the difficulty of finding the MIS using local algorithms~\cite{Ebadi2022}.
 %The uni-modality, log-concavity, and real-rootness properties of the maximal independence polynomial for special classes of graphs have also been studied~\cite{Hu2017}. 
 
 We show the benchmark of computing the maximal independent set properties on $3$-regular graphs in \Fig{fig:benchmark-maximal},
 including a comparison to the Bron-Kerbosch algorithm from Julia package \href{https://github.com/JuliaGraphs/Graphs.jl}{Graphs}~\cite{Graphs}.
-\Fig{fig:benchmark-maximal} (a) shows the space and time complexities of tensor contraction, which are typically larger than those for the independent set problem.
-In \Fig{fig:benchmark-maximal} (b), one can see counting maximal independent sets are much more efficient than enumerating them, while our generic tensor network approach runs slightly faster than the Bron-Kerbosch approach in enumerating all maximal independent sets.
+\Fig{fig:benchmark-maximal}(a) shows the space and time complexities of tensor contraction, which are typically larger than those for the independent set problem.
+In \Fig{fig:benchmark-maximal}(b), one can see counting maximal independent sets are much more efficient than enumerating them, while our generic tensor network approach runs slightly faster than the Bron-Kerbosch approach in enumerating all maximal independent sets.
 
 \begin{figure} 
     \centering
     \includegraphics[width=\textwidth, trim={0cm 0cm 0cm 0cm}, clip]{figures/fig2.pdf}
     \caption{Benchmarks of computing different solution space properties of the maximal independent sets (ISs) problem on random three regular graphs at different sizes.
     (a) time and space complexity of tensor network contraction. 
-    (b) The wall clock time for counting and enumeration of maximal ISs. The missing data is due to due to the memory limit.
+    (b) The wall clock time for counting and enumeration of maximal ISs. % The missing data is due to the memory limit.
     }
     \label{fig:benchmark-maximal}
 \end{figure}
@@ -1501,7 +1501,7 @@ Let $x_{\langle u,v\rangle}^{w_{\langle u,v\rangle}}=x$, the tensor network cont
 where $k$ is the size of an edge set, and a coefficient $c_k$ is the number of $k$-matchings.
 
 \subsection{Vertex coloring}
-Let $G=(V,E)$ be a graph, a vertex coloring is an assignment of colors to each vertex $v\in V$ such that no edge connects two identically colored vertices. 
+Let $G=(V,E)$ be a graph. A vertex coloring is an assignment of colors to each vertex $v\in V$ such that no edge connects two identically colored vertices. 
 In a $k$-coloring problem, the number of colors is limited to less or equal to $k$.
 Let us use the 3-coloring problem as an example to show how to reduce it to tensor contractions.
 We first map a vertex $v \in V$ to a degree of freedom $c_v\in\{0,1,2\}$.
@@ -1523,30 +1523,30 @@ and a bond tensor labelled by $(c_u, c_v) $ for each edge $(u, v) \in E$ as
 \end{equation}
 where $r_v$, $g_v$ and $b_v$ are colors for labeling the configurations. $B$ tensors are for specifying the coloring constraints and $W$ tensors are for labeling the solutions.
 %The number of possible colorings can be obtained by contracting this tensor network by setting $r_v, g_v$ and $b_v$ to $1$.
-Let $x^{w_{uv}} = x$ and $r_v = g_v = b_v = 1$, we have a graph polynomial,
+Let $x^{w_{uv}} = x$ and $r_v = g_v = b_v = 1$; we then have a graph polynomial,
 in which the $k$-th coefficient is the number of coloring that $k$ bonds satisfy constraints.
 If a graph is colorable, the maximum order of this polynomial should be equal to the number of edges in this graph.
 Similarly, one can define an edge coloring problem by defining the tensor network on the line graph of $G$.
 
 \subsection{Cutting problem}
 In graph theory, a cut is a partition of the vertices of a graph into two disjoint subsets,
-which is also known as the spin-glass problem in statistic physics.
-Let $G=(V,E)$ be a graph, we associate a weight $w_v$ to each $v\in V$. To reduce the cutting problem on $G$ to the contraction of a tensor network, we first define a Boolean degree of freedom $s_v\in\{0, 1\}$ for each vertex $v\in V$.
-Then for each edge $(u,v)\in E$, we define an edge matrix labelled by $(s_u, s_v)$ as
+which is also known as the spin-glass problem in statistical physics.
+Let $G=(V,E)$ be a graph. We associate a weight $w_v$ to each $v\in V$. To reduce the cutting problem on $G$ to the contraction of a tensor network, we first define a Boolean degree of freedom $s_v\in\{0, 1\}$ for each vertex $v\in V$.
+Then for each edge $(u,v)\in E$, we define an edge matrix labeled by $(s_u, s_v)$ as
 \begin{equation}
     B(x^{w_{uv}}_u, x^{w_{uv}}_v) = \left(\begin{matrix}
         1 & x_{v}^{w_{uv}}\\
         x_{u}^{w_{uv}} & 1
     \end{matrix}\right),
 \end{equation}
-where variables $x_u^{w_{uv}}$ and $x_v^{w_{uv}}$ are for a cut on this edge or a domain wall in a spin-glass.
-Let $x_u^{w_{uv}} = x_v^{w_{uv}} = x$, we have a graph polynomial similar to previous ones,
-in which the $k$th coefficient is two times the number of cut configurations having size $k$ (i.e. cutting $k$ edges).
+where variables $x_u^{w_{uv}}$ and $x_v^{w_{uv}}$ are for a cut on this edge or a domain wall in a spin glass problem.
+Let $x_u^{w_{uv}} = x_v^{w_{uv}} = x$; we have a graph polynomial similar to the previous ones,
+in which the $k$th coefficient is two times the number of cut configurations that have size $k$ (i.e.\ cutting $k$ edges).
 
 \subsection{Dominating Set}
 In graph theory, a dominating set for a graph $G = (V, E)$ is a subset $D \subseteq V$ such that every vertex not in $D$ is adjacent to at least one member of $D$.
 To reduce this problem to the contraction of a tensor network, we first map a vertex $v\in V$ to a Boolean degree of freedom $s_v\in\{0, 1\}$.
-Then for each vertex $v$ we define a tensor on its closed neighborhood $\{v\} \cup N(v)$ as
+Then for each vertex $v$, we define a tensor on its closed neighborhood $\{v\} \cup N(v)$ as
 \begin{equation}
 T(x^{w_v}_v)_{s_1,s_2,\ldots,s_{|N(v)|},s_v} = \begin{cases}
     0 & s_1=s_2=\ldots=s_{|N(v)|}=s_v=0,\\
@@ -1555,7 +1555,7 @@ T(x^{w_v}_v)_{s_1,s_2,\ldots,s_{|N(v)|},s_v} = \begin{cases}
 \end{cases}
 \end{equation}
 where $w_v$ is the weight associated with the vertex $v$.
-This tensor means a configurations having a closed neighborhood of $v$ not in $D$ ($s_1=s_2=\ldots=s_{|N(v)|}=s_v=0$) can not be a dominating set.
+This tensor implies a configuration having a closed neighborhood of $v$ not in $D$ ($s_1=s_2=\ldots=s_{|N(v)|}=s_v=0$) cannot be a dominating set.
 Otherwise, if $v$ is in $D$, this tensor contributes a multiplicative factor $x_v^{w_v}$ to the output.
 The graph polynomial for the dominating set problem is known as the domination polynomial~\cite{Alikhani2009}
 \begin{equation}
@@ -1564,8 +1564,8 @@ D(G, x) = \sum_{k=0}^{\gamma(G)} d_k x^k,
 where $d_k$ is the number of dominating sets of size $k$.
 
 \subsection{Boolean satisfiability Problem}
-The Boolean satisfiability problem is the problem of determining if there exists an interpretation that satisfies a given Boolean formula.
-One can specify a satisfiable problem in the conjunctive normal form (CNF), i.e. a conjunction of clauses (or disjunctions of Boolean literals).
+The Boolean satisfiability problem is the problem of determining if there exists an assignment that satisfies a given Boolean formula.
+One can specify a satisfiable problem in the conjunctive normal form (CNF), i.e.\ a conjunction of clauses (or disjunctions of Boolean literals).
 To reduce the problem of solving a CNF to a tensor network contraction, we first map a Boolean literal $a$ and its negation $\neg a$ to the same degree of freedom $s_a \in \{0, 1\}$.
 $s_a = 0$ stands for variable $a$ having value \texttt{false} while $s_a=1$ stands for having value \texttt{true}.
 Then we map a clause to a tensor. For example, a $k$-th clause $\neg a \vee b \vee \neg c$ can be mapped to a tensor labeled by $(s_a, s_b, s_c)$.
@@ -1599,7 +1599,7 @@ To solve the set packing problem, we generalize the edge tensor in \Eq{eq:edgete
 Given a collection of elements, the set covering problem aims to find the minimum number of sets that incorporate (cover) all of these elements.
 In the set covering problem, two sets are given: a set $U$ of elements and a set $S$ of subsets of the set $U$. The union of all the subsets covers the set $U$. For each set $s \in S$, we associate it with weight $w_s$ to it.
 To get the generic tensor network representation, we first map a set $s\in S$ to a Boolean degree of freedom $l_s\in\{0, 1\}$.
-For each set $s$, we defined a parameterized rank-one tensor indexed by $l_s$ as
+For each set $s$, we define a parameterized rank-one tensor indexed by $l_s$ as
 \begin{equation}
 W(x_s^{w_s}) = \left(\begin{matrix}
     1 \\
@@ -1620,7 +1620,7 @@ If a subset of $S$ does not include any sets containing element $a$, then this c
 \begin{figure}
     \centering
     \includegraphics[width=0.9\textwidth, trim={0cm 0cm 0cm 0cm}, clip]{figures/masktree.pdf}
-    \caption{Bounded enumeration of maximum independent sets. In these graphs, a circle is a tensor, an arrow specifies the execution direction of a function and $\circ$ is the Hadamard (element-wise) multiplication. $\overline A$ means the Boolean mask of $A$. (a) is the forward pass with algebra \Eq{eq:tropical} for computing $\alpha(G)$.
+    \caption{Bounded enumeration of maximum independent sets. In these graphs, a circle is a tensor, an arrow specifies the execution direction of a function, and $\circ$ is the Hadamard (element-wise) multiplication. $\overline A$ means the Boolean mask of $A$. (a) is the forward pass with algebra \Eq{eq:tropical} for computing $\alpha(G)$.
      (b) is the backward pass for computing Boolean gradients as masks.
      (c) is the masked forward pass with algebra \Eq{eq:countingtropicalset} for enumerating configurations.}
      \label{fig:bounding}
@@ -1732,7 +1732,7 @@ All computations are done with integers of fixed-width $W$ except the last step 
 \section{The discrete Fourier transform approach to computing the independence polynomial}\label{sec:fft}
 
 In  \App{sec:finitefield}, we show that the independence polynomial can be obtained by solving the linear equation \Eq{eq:lineareq} using the finite field algebra.
-One drawback of using finite field algebra is its matrix multiplication is less computational efficient compared with floating-point matrix multiplication.
+One drawback of using finite field algebra is that its matrix multiplication is less computationally efficient compared with floating-point matrix multiplication.
 Here, we show an alternative method with standard number types but with controllable round-off errors.
 Instead of choosing $x_{i}$ as random numbers, we can choose them such that they form a geometric sequence in the complex domain $x_j = r\omega^j$, where $r \in \mathbb{R}$ and $\omega = e^{-2\pi i/( \alpha(G)+1)}$. The linear equation thus becomes
 \begin{equation}
@@ -1756,7 +1756,7 @@ By choosing different $r$, one can obtain better precision for small $j$ by choo
 \section{Integer sequence formed by the number of independent sets}
 
 We computed the number of independent sets on square lattices and King's graphs with our generic tensor network contraction algorithm on GPUs.
-The tensor element type is finite-field algebra so that we can reach arbitrary precision.
+The tensor element type is the finite-field algebra so that we can reach an arbitrary precision.
 We also computed the independence polynomial for these lattices up to size $30\times 30$ in our \href{https://github.com/GiggleLiu/NoteOnTropicalMIS/tree/master/data}{Github repository}.
 
 
@@ -1781,9 +1781,9 @@ Here we only include two updated entries for $L=38,39$, which, to our knowledge,
 \section{Computing maximum sum combination}\label{sec:maxsum}
 Given two sets $A$ and $B$ of the same size $n$.
 It is known that the maximum $n$ sum combination of $A$ and $B$ can be computed in time $O(n\log(n))$.
-The standard approach to solve the sum combination problem requires storing the variables in a heap - a highly dynamic binary tree structure that can be much slower to manipulate than arrays.
+The standard approach to solve the sum combination problem requires storing the variables in a heap --- a highly dynamic binary tree structure that can be much slower to manipulate than arrays.
 In the following, we show an algorithm with roughly the same complexity but does not need a heap.
-This algorithm first sorts both $A$ and $B$, then uses the bisection to find the $n$-th largest value in the sum combination.
+This algorithm first sorts both $A$ and $B$ and then uses the bisection to find the $n$-th largest value in the sum combination.
 The key point is we can count the number of entries greater than a specific value
 in the sum combination of $A$ and $B$ in linear time.
 As long as the data range is not exponentially large, the bisection can be done in $O(\log(n))$ steps, giving the time complexity $O(n\log(n))$.
@@ -1877,15 +1877,15 @@ We summarize the algorithm as in Algorithm~\ref{alg:sumcombination}.
 \end{algorithm}
 
 In this algorithm, function \texttt{collect\_geq} is similar the \texttt{count\_geq} except the counting is replace by collecting the items to a set.
-Inside the function \texttt{count\_geq}, variable $k$ monotoneously increase while $q$ monotoneously decrease in each iteration,
+Inside the function \texttt{count\_geq}, variable $k$ monotoneously increase while $q$ monotoneously decrease in each iteration and
 the total number of iterations is upper bounded by $2n$.
 Here for simplicity, we do not handle the special element $-\infty$ in $A$ and $B$ and the potential degeneracy in the sums.
 It is nevertheless important to handle them properly in a practical implementation.
 
 \section{Technical guides}\label{sec:technical}
 
-This appendix covers some technical guides for productivity, including an introduction to an open-source package \href{https://github.com/QuEraComputing/GenericTensorNetworks.jl}{GenericTensorNetworks}~\cite{GenericTensorNetworks} implementing the algorithms in this paper and the gist about how this package is implemented.
-One can install \texttt{GenericTensorNetworks} a Julia REPL, by first type \colorbox{lightgray}{\texttt{]}} to enter the \texttt{pkg>} mode and then type
+This appendix covers some technical guides for efficiency, including an introduction to an open-source package \href{https://github.com/QuEraComputing/GenericTensorNetworks.jl}{GenericTensorNetworks}~\cite{GenericTensorNetworks} implementing the algorithms in this paper and the gist about how this package is implemented.
+One can install \texttt{GenericTensorNetworks} in a Julia REPL, by first typing \colorbox{lightgray}{\texttt{]}} to enter the \texttt{pkg>} mode and then typing
 \begin{lstlisting}
 pkg> add GenericTensorNetworks
 \end{lstlisting}
@@ -1911,18 +1911,18 @@ julia> solve(
 Polynomial(1 + 20*x + 160*x^2 + 659*x^3 + 1500*x^4 + 1883*x^5 + 1223*x^6 + 347*x^7 + 25*x^8)
 \end{lstlisting}
 
-Here the main function \texttt{solve} takes three inputs, the problem instance of type \texttt{IndependentSet}, the property instance of type \texttt{GraphPolynomial} and an optional key word argument \texttt{usecuda} to decide use GPU or not.
+Here the main function \texttt{solve} takes three inputs: the problem instance of type \texttt{IndependentSet}, the property instance of type \texttt{GraphPolynomial} and an optional key word argument \texttt{usecuda} to decide to use GPU or not.
 If one wants to use GPU to accelerate the computation, ``\texttt{using CUDA}'' must be uncommented.
-The problem instance takes four arguments to initialize, the only positional argument is the graph instance one wants to solve, the keyword argument \texttt{optimizer} is for specifying the tensor network optimization algorithm, the keyword argument \texttt{weights} is for specifying the weights of vertices as either a vector or \texttt{NoWeight()} and the keyword argument \texttt{openvertices} is for specifying the degrees of freedom not summed over.
-Here, we use \texttt{TreeSA} method as the tensor network optimizer, and leave \texttt{weights} and \texttt{openvertices} the default values. The \texttt{TreeSA} algorithm, which was invented in Ref.~\cite{Kalachev2021}, performs the best in most of our applications.
-The first execution of this function will be a bit slow due to Julia's just-in-time compiling.
-After that, the subsequent runs will be fast.
-The following diagram lists possible combinations of input arguments, where functions in the \texttt{Graph} are mainly defined in package \texttt{Graphs}, and the rest can be found in \texttt{GenericTensorNetworks}.
+The problem instance takes four arguments to initialize: the only positional argument is the graph instance one wants to solve, the keyword argument \texttt{optimizer} is for specifying the tensor network optimization algorithm, the keyword argument \texttt{weights} is for specifying the weights of vertices as either a vector or \texttt{NoWeight()}, and the keyword argument \texttt{openvertices} is for specifying the degrees of freedom not summed over.
+Here, we use the \texttt{TreeSA} method as the tensor network optimizer, and leave \texttt{weights} and \texttt{openvertices} as  default values. The \texttt{TreeSA} algorithm, which was invented in Ref.~\cite{Kalachev2021}, performs the best in most of our applications.
+The first execution of this function will be a bit slow due to Julia's just-in-time compilation.
+After that, the subsequent runs will be faster.
+The following diagram lists possible combinations of input arguments, where functions in the \texttt{Graph} are mainly defined in the package \texttt{Graphs}, and the rest can be found in \texttt{GenericTensorNetworks}.
 
 \centerline{\includegraphics[width=0.8\textwidth, trim={0cm 1cm 0cm 1cm}, clip]{figures/fig7.pdf}}
 
-The code we will show below is a gist of how the above package is implemented, which is mainly for pedagogical purpose.
-It covers most of the topics in the paper without caring much about the performance.
+The code we will show below is a gist of how the above package was implemented, which is mainly for pedagogical purpose.
+It covers most of the topics in the paper without caring much about performance.
 It is worth mentioning that this project depends on multiple open source packages in the Julia ecosystem:
 
 \begin{description}
