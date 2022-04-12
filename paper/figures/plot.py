@@ -325,9 +325,9 @@ class PLT(object):
             node = viznet.NodeBrush('box', size=(0.2,0.2), color="none", roundness=0.1)
             edge = viznet.EdgeBrush('->', color='#000000', lw=1.5)
             n0 = node >> grid[-1:1, 0:1]
-            n1 = node >> grid[-1:1, 2.25:3.25]
+            n1 = node >> grid[-1:1, 2.5:3.5]
             n2 = node >> grid[2:3.5, -1.4:1]
-            n3 = node >> grid[2:3.5, 2:3.5]
+            n3 = node >> grid[2:3.5, 2:4]
             n4 = node >> grid[5:6, 1.5:1.5]
             n0.text("Optimizers", "top", weight=800, fontsize=F1)
             n0.text("TreeSA\nGreedyMethod\nKaHyBipartite\nSABipartite\n$\ldots$", fontsize=F2, family="Ubuntu mono")
@@ -336,7 +336,7 @@ class PLT(object):
             n2.text("Property", "top", weight=800, fontsize=F1)
             n2.text("SizeMax\nSizeMin\n\nCountingAll\nCountingMax\nCountingMin\nGraphPolynomial\n\nSingleConfigMax\nSingleConfigMin\nConfigsMax\nConfigsMin\nConfigsAll", fontsize=F2, family="Ubuntu mono")
             n3.text("Problem", "top", weight=800, fontsize=F1)
-            n3.text("IndependentSet\nMaximalIS\nDominatingSet\nColoring\nMaxCut\nMatching\nSatisfiability\nPaintShop", fontsize=F2, family="Ubuntu mono")
+            n3.text("IndependentSet\nMaximalIS\nDominatingSet\nColoring\nMaxCut\nMatching\nSatisfiability\nPaintShop\nSetPacking\nSetCovering", fontsize=F2, family="Ubuntu mono")
             n4.text("solve", fontsize=F2, family="Ubuntu mono")
             edge >> (n1, n3)
             edge >> (n0, n3)
