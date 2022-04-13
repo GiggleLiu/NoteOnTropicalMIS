@@ -41,7 +41,7 @@ class PLT(object):
 
             ax=plt.subplot(222)   # size
             cornertex("(b)", ax, offset=(0,0))
-            for k,(prefix, l) in enumerate([("counting_sum", r"counting ISs (${\rm \mathbb{R}}$"), ("size_max", "MIS size (T"), ("counting_max", "counting MISs (P1"), ("counting_max2", r"counting ISs of size $\alpha(G)$ and $\alpha(G)-1$ (P2"),
+            for k,(prefix, l) in enumerate([("size_max", "MIS size (T"), ("counting_sum", r"counting ISs (${\rm \mathbb{R}}$"), ("counting_max", "counting MISs (P1"), ("counting_max2", r"counting ISs of size $\alpha(G)$ and $\alpha(G)-1$ (P2"),
                 ("spectrum_max100", "largest 100 sizes (T100")]):
                 for device in ["CPU", "GPU"]:
                     datafile = "../../benchmarks/data/"+prefix+"-r3-"+device+".dat"
@@ -59,7 +59,7 @@ class PLT(object):
             ax = plt.subplot(223)   # IDP
             cornertex("(c)", ax, offset=(0,0))
             for k,(prefix, l) in enumerate([
-                ("counting_all", "direct (PN"),
+                ("counting_all", "polynomial number (PN"),
                 ("counting_all_(finitefield)", r"finite field fitting (GF$(p)$"),
                 ("counting_all_(fft)", r"fourier transform (${\rm \mathbb{C}}$"),
                 ]):
@@ -78,9 +78,9 @@ class PLT(object):
 
             ax = plt.subplot(224)  # configurations
             cornertex("(d)", ax, offset=(0,0))
-            for k,(prefix, l) in enumerate([("config_max", "one MIS (P1+S1"), ("config_max_(bounded)", "one MIS (T+bounding"), ("configs_max_(bounded)", "MISs (P1+SN+bounding"), ("configs_max", "MISs (P1+SN"),
-                ("configs_max2", r"ISs of size $\alpha(G)$ and $\alpha(G)-1$ (P2+SN"),
+            for k,(prefix, l) in enumerate([("config_max", "single MIS (P1+S1"), ("config_max_(bounded)", "single MIS (T+bounding"), ("configs_max_(bounded)", "MISs (P1+SN+bounding"), ("configs_max", "MISs (P1+SN"),
                 ("configs_all", "ISs (PN+SN"),
+                ("configs_max2", r"ISs of size $\alpha(G)$ and $\alpha(G)-1$ (P2+SN"),
                 ("configs_max2_tree", r"ISs of size $\alpha(G)$ and $\alpha(G)-1$ (P2+SPT"),
                 ]):
                 datafile = "../../benchmarks/data/"+prefix+"-r3-"+device+".dat"
