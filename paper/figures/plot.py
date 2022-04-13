@@ -105,7 +105,7 @@ class PLT(object):
         ALPHA = 0.5
         nw = [(10, 6, 9.49), (20, 8, 12.40), (30, 9, 13.35), (40, 11, 15.14), (50, 16, 21.26), (60, 17, 22.58), (70, 16, 21.50), (80, 20, 27.48), (90, 26, 35.04), (100, 26, 35.06)]
         ns = [x[0] for x in nw]
-        FS = 8
+        FS = 7
         with DataPlt(filename="fig2.%s"%tp, figsize=(8,3)) as dp:
             ax = plt.subplot(121)   # treewidth
             cornertex("(a)", ax, offset=(-0.02,0))
