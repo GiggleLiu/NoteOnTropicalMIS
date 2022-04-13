@@ -291,6 +291,7 @@ class PLT(object):
 
             gs = plt.GridSpec(8, 10)
             ratios = [0.9, 0.95, 0.975]
+            C = "#2588EF"
 
             for i, d in enumerate([d1, d2, d3]):
                 ax = pl.fig.add_subplot(gs[i,0])
@@ -298,7 +299,8 @@ class PLT(object):
                 ax.axis("off")
                 for seed in range(9):
                     ax = pl.fig.add_subplot(gs[i,1+seed])
-                    ax.plot(np.arange(d.shape[0]), d[:,seed], lw=1)
+                    ax.plot(d[::2,seed], lw=1)
+                    ax.fill(d[::2,seed], color=C)
                     ax.axis("off")
             ax = pl.fig.add_subplot(gs[3,:])
             plt.text(0.5, 0.7, "(a) Nine King's graphs of size 20 ×20, 0.8 filling.", ha="center", va="center", fontsize=20, family="Times New Roman")
@@ -311,7 +313,8 @@ class PLT(object):
                 ax.axis("off")
                 for seed in range(9):
                     ax = pl.fig.add_subplot(gs[i+4,1+seed])
-                    ax.plot(np.arange(d.shape[0]), d[:,seed], lw=1)
+                    ax.plot(d[::2,seed], lw=1)
+                    ax.fill(d[::2,seed], color=C)
                     ax.axis("off")
             ax = pl.fig.add_subplot(gs[7,:])
             plt.text(0.5, 0.7, "(b) Nine random three regular graphs of size 110.", ha="center", va="center", fontsize=20, family="Times New Roman")
