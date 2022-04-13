@@ -1059,9 +1059,8 @@ The main goal of this section is to show the relative computation time for calcu
     (b) The computation time for calculating the MIS size and for counting the number of all independent sets (ISs), the number of MISs,
         the number of independent sets having size $\alpha(G)$ and $\alpha(G)-1$, and finding $100$ largest set sizes.
     (c) The computation time for calculating the independence polynomials with different approaches.
-    (d) The computation time for configuration enumeration, includinga single MIS configuration, the enumeration of all independent set configurations, all MIS configurations,
-    all independent set configurations having size $\alpha(G)$ and $\alpha(G)-1$, and all independent set configurations having size $\alpha(G)$ and $\alpha(G)-1$ in the sum-product expression tree format,
-    with or without bounding the enumeration space.
+    (d) The computation time for configuration enumeration, including single MIS configuration, the enumeration of all independent set configurations, all MIS configurations, all independent sets,
+    and all independent set configurations having size $\alpha(G)$ and $\alpha(G)-1$.
     }
     \label{fig:benchmark}
 \end{figure}
@@ -1625,9 +1624,9 @@ If a subset of $S$ does not include any sets containing element $a$, then this c
 \begin{figure}
     \centering
     \includegraphics[width=0.9\textwidth, trim={0cm 0cm 0cm 0cm}, clip]{figures/masktree.pdf}
-    \caption{Bounded enumeration of maximum independent sets. In these graphs, a circle is a tensor, an arrow specifies the execution direction of a function, and $\circ$ is the Hadamard (element-wise) multiplication. $\overline A$ means the Boolean mask of $A$. (a) is the forward pass with algebra \Eq{eq:tropical} for computing $\alpha(G)$.
-     (b) is the backward pass for computing Boolean gradients as masks.
-     (c) is the masked forward pass with algebra \Eq{eq:countingtropicalset} for enumerating configurations.}
+    \caption{Bounded enumeration of maximum independent sets. Here, a circle is a tensor, an arrow specifies the execution direction of a function, $\overline A$ is the Boolean mask for $A$ and $\circ$ is the Hadamard (element-wise) multiplication. (a) is the forward pass with tropical algebra (\Eq{eq:tropical}) for computing $\alpha(G)$.
+     (b) is the backward pass for computing Boolean gradient masks.
+     (c) is the masked tensor network contraction with tropical algebra combined with sets (\Eq{eq:countingtropicalset}) for enumerating configurations.}
      \label{fig:bounding}
 \end{figure}
 
