@@ -210,13 +210,16 @@ Listing \thelstlisting: #1\hfill%\hfill%
 %\externaldocument{ex_supplement}
 
 \title{Computing solution space properties of combinatorial optimization problems by generic programming tensor networks
-\thanks{\funding{...}}
+%\thanks{\funding{...}}
 }
 
-\author{XXX\thanks{XXX 
-  (\email{email}, \url{website}).}
-\and YYY\thanks{yyyyy 
-  (\email{yyyy}, \email{email}).}
+\author{
+Jin-Guo Liu\footnote{JIN-GUO LIU and XUN GAO contributed equally to this paper.}\thanks{Department of Physics, Harvard University, Cambridge, Massachusetts 02138, USA; QuEra Computing Inc., 1284 Soldiers Field Road, Boston, MA, 02135, USA %\thanks{QuEra Computing Inc., 1284 Soldiers Field Road, Boston, MA, 02135, USA}
+    (\email{jinguoliu@g.harvard.edu}).}
+\and {Xun Gao}\thanks{Department of Physics, Harvard University, Cambridge, Massachusetts 02138, USA (\email{xungao@g.harvard.edu}).}
+\and Madelyn Cain\thanks{Department of Physics, Harvard University, Cambridge, Massachusetts 02138, USA}
+\and Mikhail D. Lukin\thanks{Department of Physics, Harvard University, Cambridge, Massachusetts 02138, USA}
+\and Sheng-Tao Wang\thanks{QuEra Computing Inc., 1284 Soldiers Field Road, Boston, MA, 02135, USA}
 }
 
 \begin{document}
@@ -523,7 +526,7 @@ Similarly, for each edge $(u, v) \in E$, we define a matrix $B$ indexed by $s_u$
 \end{equation}
 which encodes the independent set constraint since $B_{11} = 0$, meaning the two vertices cannot be both in the independent set. 
 
-The corresponding tensor network contraction cab be defined as
+The corresponding tensor network contraction can be defined as
 \begin{equation}\label{eq:idp}
     P(G, \{x_1^{w_1}, x_{2}^{w_2}, \ldots,x_{|V|}^{w_{|V|}}\}) = \sum\limits_{s_1, s_2, \ldots, s_{|V|} = 0}^{1} \prod\limits_{v\in V} W(x_v^{w_v})_{s_v} \prod\limits_{(u,v) \in E} B_{s_u s_v},
 \end{equation}
@@ -810,8 +813,8 @@ The algebra of the exponents becomes the max-plus tropical algebra~\cite{Maclaga
 Algebra \Eq{eq:tropical} and \Eq{eq:countingtropical} are the same as those used in Liu et al.~\cite{Liu2021} to compute the spin glass ground state energy and its degeneracy.
 For independent set calculations here, the vertex tensor and edge tensor becomes:
 \begin{equation}
-    W^{\rm T} = \left(\begin{matrix}
-        \mymathbb{1} \\
+    W^{\rm T}(w_v) = \left(\begin{matrix}
+        w_v \\
         \infty
     \end{matrix}\right),   
     \qquad \qquad
@@ -905,9 +908,9 @@ The combined operations become:
 \end{equation}
 Clearly, the vertex tensor and edge tensor become
 \begin{equation}
-    W^{\rm P1+SN}(\{\boldsymbol{e}_{i}\}\infty^1) = \left(\begin{matrix}
+    W^{\rm P1+SN}(\{\boldsymbol{e}_{i}\}\infty^{w_v}) = \left(\begin{matrix}
         \mymathbb{1} \\
-        \{\boldsymbol{e}_{i}\}\infty^1
+        \{\boldsymbol{e}_{i}\}\infty^{w_v}
     \end{matrix}\right),   
     \qquad \qquad
         B^{\rm P1+SN} = \left(\begin{matrix}
@@ -1024,7 +1027,7 @@ The computation of $s \odot t$ is a maximum sum combination problem that can be 
 An efficient algorithm for computing the maximum sum combination problem can be found in \App{sec:maxsum}.
 The vertex tensor and edge tensor become
 \begin{equation}
-    W^{{\rm T}k}(-\infty^{\otimes k-1} \otimes 1, w_v) = \left(\begin{matrix}
+    W^{{\rm T}k}(-\infty^{\otimes k-1} \otimes w_v) = \left(\begin{matrix}
         \mymathbb{1} \\
         -\infty^{\otimes k-1} \otimes w_v
     \end{matrix}\right),   
@@ -1215,10 +1218,12 @@ We also hope the toolkit we built, including tensor network contraction order op
 We would like to thank Pan Zhang for sharing his python code for optimizing contraction orders of a tensor network.
 We acknowledge Sepehr Ebadi and Leo Zhou for coming up with many interesting questions about independent sets and their questions strongly motivated the development of this project.
 We thank Benjamin Schiffer for providing helpful feedback on the writing of this manuscript.
-We thank Chris Elord for helping us write the fastest matrix multiplication library for tropical numbers, TropicalGEMM.jl. % he is a man of speed!
+We thank Chris Elord for helping us write the fastest matrix multiplication library for tropical numbers, TropicalGEMM.jl. 
 We would also like to thank a number of open-source software developers, including Roger Luo, Time Besard, Edward Scheinerman, and Katharine Hyatt
 for actively maintaining their packages and resolving related issues voluntarily.
-\blue{funding information, need to mention the AWS}
+We acknowledge financial support from the DARPA ONISQ program (grant no.\ W911NF2010021), the Center for Ultracold Atoms, the National Science Foundation, the Vannevar Bush Faculty Fellowship, the U.S. Department of Energy (DE-SC0021013 and DOE Quantum Systems Accelerator Center (contract no.\ 7568717), 
+%the Office of Naval Research, 
+the Army Research Office MURI. We acknowledge the computation credits provided by Amazon Web Services for running the benchmarks and case studies. Jinguo Liu acknowledges funding support provided by QuEra Computing Inc.\ through a sponsored research program.
 
 \bibliographystyle{siamplain}
 \bibliography{refs}
@@ -1229,7 +1234,7 @@ for actively maintaining their packages and resolving related issues voluntarily
 
 Let us characterize the independent set problem on graph $G=(V, E)$ as an energy model with two parts
 \begin{equation}\label{eq:eng}
-    \mathcal{E}(G, s) = -\sum_{i\in V} w_i s_i + \infty \sum_{\langle i,j\rangle \in E}s_i s_j
+    \mathcal{E}(G, s) = -\sum_{i\in V} w_i s_i + \infty \sum_{(i,j) \in E}s_i s_j
 \end{equation}
 where $s_i$ is a spin on vertex $i \in V$ and $w_i$ is an onsite energy term associated with it.
 The first part corresponds to the negative independent set size and the second part describes the independence constraint, which corresponds to the Rydberg blockade~\cite{Pichler2018, Ebadi2022} in cold atom arrays or the repulsive force in hardcore lattice models~\cite{Dyre2016, Fernandes2007}.
@@ -1392,15 +1397,15 @@ Let $G=(V,E)$ be a graph, we denote the neighborhood of a vertex $v\in V$ as $N(
 A maximal independent set $I_m$ is an independent set such that no $v \in V$ satisfies $I_m \cap (\{v\} \cup N[v])  = \emptyset$, i.e.\ an independent set that cannot become a larger one by adding a new vertex.
 To characterize the maximal independence restriction, we defined a tensor on each $\{v\}\cup N(v)$ as
 \begin{equation}\label{eq:maximal}
-    T(x_v, w_v)_{s_1,s_2,\ldots,s_{|N(v)|},s_v} = \begin{cases}
+    T(x_v^{w_v})_{s_1,s_2,\ldots,s_{|N(v)|},s_v} = \begin{cases}
         s_vx_v^{w_v} & s_1=s_2=\ldots=s_{|N(v)|}=0,\\
         1-s_v& \text{otherwise}.\\
     \end{cases}
 \end{equation}
 It means if none of the neighbours of $v$ are in $I_{m}$ ($ s_1=s_2=\ldots=s_{|N(v)|}=0$), then $v$ must be in $I_{m}$ and contribute a factor $x_{v}$, otherwise, if any of the neighbourhood vertices is in $I_{m}$, then $v$ cannot be in $I_{m}$.
-For a vertex $v$ that has a degree 2, this tensor has the following form
+For a vertex $v$ that has a degree 2, the tensor has the following form
 \begin{equation}
-    T(x_v, w_v)=\left(\begin{matrix}
+    T(x_v^{w_v})=\left(\begin{matrix}
     \left(\begin{matrix}
         ~~0 &~1 \\
         ~~1 &~1
@@ -1577,7 +1582,7 @@ x_a^{w_k} & x_{ab}^{w_k}
 \end{matrix}\right) \\
 \left(\begin{matrix}
 x_{c}^{w_k} & x_{bc}^{w_k} \\
-1_{ac} & x_{abc}^{w_k}
+1 & x_{abc}^{w_k}
 \end{matrix}\right)
 \end{matrix}\right),
 \end{equation}
@@ -1586,8 +1591,8 @@ Let $x^{w_k}_{\ldots} = x$, one can get a polynomial, in which the $k$-th coeffi
 
 \subsection{Set packing}
 Suppose one has a finite set $S$ and a list of subsets of $S$. Then, the set packing problem asks if some $k$ subsets in the list are pairwise disjoint.
-It is the hypergraph generalization of the maximum independent set problem, where a set corresponds to a vertex and an element corresponds to a hyperedge.
-To solve the set packing problem, we generalize the edge tensor in \Eq{eq:edgetensor} as
+It is the hypergraph generalization of the independent set problem, where a set corresponds to a vertex and an element corresponds to a hyperedge.
+The generic tensor network for the set packing problem has a similar form as that for the independent set problem, where the vertex tensor is same as \Eq{eq:vertextensor}, while the edge tensor generalizes \Eq{eq:edgetensor} to higher dimensions
 \begin{equation}
     B_{s_u,s_v,\ldots, s_w} = \begin{cases}
         1, & s_u+s_v+\ldots+s_w\leq 1,\\
