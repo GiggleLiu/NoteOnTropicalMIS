@@ -209,16 +209,17 @@ Listing \thelstlisting: #1\hfill%\hfill%
 
 %\externaldocument{ex_supplement}
 
-\title{Computing solution space properties of combinatorial optimization problems by generic programming tensor networks
+\title{Computing solution space properties of combinatorial optimization problems via generic %programming 
+tensor networks
 %\thanks{\funding{...}}
 }
 
-\author{
-Jin-Guo Liu\footnote{JIN-GUO LIU and XUN GAO contributed equally to this paper.}\thanks{Department of Physics, Harvard University, Cambridge, Massachusetts 02138, USA; QuEra Computing Inc., 1284 Soldiers Field Road, Boston, MA, 02135, USA %\thanks{QuEra Computing Inc., 1284 Soldiers Field Road, Boston, MA, 02135, USA}
+\author{\footnote{Jin-Guo Liu and Xun Gao contributed equally to this work.}
+Jin-Guo Liu\thanks{Department of Physics, Harvard University, Cambridge, Massachusetts 02138, USA; QuEra Computing Inc., 1284 Soldiers Field Road, Boston, MA, 02135, USA  %\thanks{QuEra Computing Inc., 1284 Soldiers Field Road, Boston, MA, 02135, USA}
     (\email{jinguoliu@g.harvard.edu}).}
 \and {Xun Gao}\thanks{Department of Physics, Harvard University, Cambridge, Massachusetts 02138, USA (\email{xungao@g.harvard.edu}).}
-\and Madelyn Cain\thanks{Department of Physics, Harvard University, Cambridge, Massachusetts 02138, USA}
-\and Mikhail D. Lukin\thanks{Department of Physics, Harvard University, Cambridge, Massachusetts 02138, USA}
+\and Madelyn Cain\footnotemark[2]
+\and Mikhail D. Lukin\footnotemark[2]
 \and Sheng-Tao Wang\thanks{QuEra Computing Inc., 1284 Soldiers Field Road, Boston, MA, 02135, USA}
 }
 
@@ -229,22 +230,26 @@ Jin-Guo Liu\footnote{JIN-GUO LIU and XUN GAO contributed equally to this paper.}
 \begin{abstract}
 %We introduce a method that uses generic programming tensor networks to compute various properties of a class of hard graph problems that can be decribed by local constraints.
 %We introduce a tensor network algorithm %a method that combines generic programming and tensor network techniques 
-We introduce a unified framework to compute the solution space properties of a class of combinatorial optimization problems including the independent set problem, the maximum cut problem, the vertex coloring problem, the clique problem, the dominating set problem, the set packing problem, the set covering problem, and the satisfiability problem.
+We introduce a unified framework to compute the solution space properties of a broad class of combinatorial optimization problems.
+%including the independent set problem, the maximum cut problem, the vertex coloring problem, the clique problem, the dominating set problem, the set packing problem, the set covering problem, and the satisfiability problem.
 %Let the independent set problem be an example, we show how to compute, for example, the maximum several independent set sizes, the counting of independent sets of a give size, the enumeration of independent sets of a given size.
-These solution space properties include finding one of the optimum solutions, counting the number of solutions of a given size, and enumeration and sampling of solutions of a given size.
-We use the independent set problem as an example and show how all these solution space properties can be computed in the unified approach of generic programming tensor networks.
+These 
+%solution space 
+properties include finding one of the optimum solutions, counting the number of solutions of a given size, and enumeration and sampling of solutions of a given size. Using 
+%We use 
+the independent set problem as an example, we show how all these solution space properties can be computed in the unified approach of generic tensor networks.
 %By making use of generic programming, our algorithms are very simple to implement and one can in addition directly utilize recent advances in tensor network contraction techniques such as near-optimal contraction order finding and slicing to achieve high performance.
 %By using generic programming techniques, the same framework can be used to compute all of these properties. 
 %Our algorithm utilizes recent advances in tensor network contraction techniques to achieve high performance, including methods to quickly find a near-optimal contraction order and slicing.
 %The algorithmic complexity of this approach is two to the treewidth of the line graph of the tensor network graph.
-To demonstrate the versatility of this computational tool, we apply it to several  examples, including computing the entropy constant for hardcore lattice gases, studying the overlap gap properties, and analyzing the performance of quantum and classical algorithms for finding maximum independent sets.
+We demonstrate the versatility of this computational tool by applying it to several  examples, including computing the entropy constant for hardcore lattice gases, studying the overlap gap properties, and analyzing the performance of quantum and classical algorithms for finding maximum independent sets.
 % including the calculations of the entropy constant for some hardcore lattice gases on 2D square lattices and the study of the overlap gap property on three regular graphs.
 %We show how our method helps to understand these hard problems on systems with hundreds of vertices.
 \end{abstract}
 
 % REQUIRED
 \begin{keywords}
-solution space property, tensor network, maximum independent set, independence polynomial, generic programming, combinatorial optimization problems
+solution space property, tensor networks, maximum independent set, independence polynomial, generic programming, combinatorial optimization 
 \end{keywords}
 
 % REQUIRED
@@ -254,11 +259,13 @@ solution space property, tensor network, maximum independent set, independence p
 \end{AMS}
 
 \section{Introduction}
-In graph theory and combinatorial optimization, there is an important class of problems that can be expressed as satisfiability problems involving constraints specified over a vertex and its neighborhood.
-These include, for example, the independent set problem, the cutting problem, the dominating set problem, the set packing problem, the set covering problem, the vertex coloring problem, the K-SAT problem, the clique problem, and the vertex cover problem~\cite{Moore2011}.
-They have a wide range of applications in scheduling, logistics,
-wireless networks and telecommunication, computer vision, etc.~\cite{Butenko2003, Wu2015}.
-Finding an optimum solution for these problems is typically NP-hard~\cite{Hastad1996}, which implies it is unlikely to be solved in a time polynomial with the size of the problem.
+
+An important class of problems in graph theory and combinatorial optimization  can be formulated as satisfiability problems involving constraints specified over a vertex and its neighborhood.
+These include, for example, the independent set, the cutting problem, the dominating set, the set packing and  the set covering, the vertex coloring problem, the K-SAT,  the clique problem, and the vertex cover problem~\cite{Moore2011}.
+These problems have a wide range of applications in scheduling, logistics,
+wireless networks and telecommunication, and computer vision, among others~\cite{Butenko2003, Wu2015}.
+Finding an optimum solution for these problems is typically NP-hard~\cite{Hastad1996}.
+%, which implies they can not to be solved in a time that scales polynomialy  with the size of the problem.
 
 % The most studied aspect of these problems is to find an optimum solution, 
 %The most studied version of the above problems is finding an optimal solution maximum/minimum set satisfying the contraints and the corresponding set size,
@@ -272,29 +279,34 @@ Finding an optimum solution for these problems is typically NP-hard~\cite{Hastad
 %\purple{Is MIS really the most studied NP-hard optimization problem? I would guess it is heavily studied, but not necessarily the most studied.}
 %\blue{Here, we haven't mentioned the independent set, here ``version'' means, e.g. counting, enumeration, devision. I think finding one of the largest/smallest set and its cardinality in the above mentioned problems is the most studied?}
 
-In this paper, we introduce a unified framework to compute a broad class of quantities associated with these problems, beyond just finding an optimum solution.
-We call them \textit{solution space properties}. In practice these can be much harder to compute (corresponding e.g.\ to \#P-complete class). However, these properties can be crucial for understanding detailed properties of hard combinatorial optimization problems.
+In this Article, we introduce a unified framework to compute a broad class of properties 
+associated with the solutions of these problems, beyond just finding an optimum solution.
+We call them \textit{solution space properties}. In practice, these can be much harder to compute (corresponding e.g.\ to \#P-complete class~\cite{Moore2011}). However, these properties can be crucial for understanding detailed properties of hard combinatorial optimization problems.
 % In this paper, we focus on the less studied aspects of computing \textit{solution space properties}, which can be much harder to compute, %; for example, counting independent sets of a general graph is \#P-complete~\cite{Vadhan2001}, 
 % but they can be crucial towards understanding hard combinatorial optimization problems. 
 These \textit{solution space properties} can include not only the maximum or minimum set size but also the number of sets at a given size, enumeration of all sets at a given size, and direct sampling of such sets when they are too large to be fit into memory.
 % For the weighted version of the above problems, it also includes finding the largest or smallest $k$ sets and their sizes.
 %are many interesting and hard computational problems concerning various properties of independent sets.
 %Solution space property computation allows us to understand the solution space better.
-They can be used to understand the hardness of finding an optimum solution for a problem instance and the performance of a solver in computing the solution for the given instance.
+They can be used to understand the hardness of finding an optimum solution for a given problem instance and the performance of a specific solver.  
+%in computing the solution for the given instance.
 For example, the number of configurations at different sizes can inform how likely a simulated annealing algorithm will be trapped in local minima at certain sizes~\cite{Xu2018}.
 %In the past, people use the counting of configurations at different sizes to tell how likely the simulated annealing will be trapped in certain size in the strong defensive alliance problem~\cite{Xu2018}, 
-The pair-wise Hamming distance distribution of configurations at a given size can indicate the presence or absence of the overlap gap property~\cite{Gamarnik2013, Gamarnik2019}, which can be used to bound the performance of local search algorithms.
+The pair-wise Hamming distance distribution of configurations at a given size can indicate the presence or absence of the overlap gap property~\cite{Gamarnik2013, Gamarnik2019}, which can be used to bound the performance of local optimization algorithms.
 %a no-go theorem about when the solution space geometry is formidably
 %hard for any local search algorithm.
-In a recent experiment based on a Rydberg atom array quantum computer, the authors use the counting and the configuration space connectivity information to find maximum independent set (MIS) problem instances that are hard for simulated annealing \cite{Ebadi2022}.
+In a recent experiment based on a Rydberg atom array quantum computer, 
+%the authors use 
+the counting and the configuration space connectivity information was used to find maximum independent set (MIS) problem instances that are hard for simulated annealing and to evaluate the corresponding quantum algorithm performance \cite{Ebadi2022}.
 % In a recent experiment using a Rydberg atom array quantum simulator to find maximum independent sets (MIS) of a graph~\cite{Ebadi2022}, the authors use the counting information and the configuration space connectivity to find instances hard for simulated annealing. %and design better quantum algorithms 
 %to solve these instances faster, 
-The need to understand this experiment motivates us to find methodologies to compute these solution space properties.
+The need for understanding these important aspects of combinatorial optimization motivates us to find methodologies to compute these solution space properties.
 %\purple{I would give examples of why we want to compute solution space properties.
 %For instance, in statistical physics, computing thermal states and
 %observables via the partition function. In complexity theory, proving limits on local algorithms (OGP).}\blue{now?}
 
-With \textit{generic tensor networks}, we show how to solve all of these seemingly unrelated properties in a unified approach. Tensor networks are a computational model widely used in condensed matter physics~\cite{Orus2014}, quantum computing~\cite{Markov2008}, big data~\cite{Cichocki2014} and mathematics~\cite{Oseledets2011}.
+To this end, we show how to obtain all of these seemingly unrelated properties in a unified approach using
+\textit{generic tensor networks}. Tensor networks are a computational model widely used in condensed matter physics~\cite{Orus2014}, quantum computing~\cite{Markov2008}, big data~\cite{Cichocki2014} and mathematics~\cite{Oseledets2011}.
 They are also known as the sum-product networks in probabilistic modeling~\cite{Bishop2006} or \texttt{einsum} in linear algebra libraries such as NumPy~\cite{Harris2020}.
 %\purple{I’d write out $2^{{\rm tw}(G)}$}\blue{I feel it is hard to explain line graph without texts.}
 Recent progress in simulating quantum circuits with tensor networks~\cite{Gray2021, Pan2021, Kalachev2021} makes it possible to contract a randomly structured sparse tensor network with up to thousands of tensors in a reasonable time.
@@ -305,15 +317,16 @@ Here, we extend to \textit{generic tensor networks} by generalizing the tensor e
 %Dynamic programming is more general purpose, while a tensor network has a richer algebraic structure, and this structure is crucial for solution space property computation.
 %\purple{Not clear how first part and second part of sentence are related}\blue{now? or maybe just removing the comparison with dynamic programming?}
 %For sparse graphs, the treewidth is usually much smaller than the number of vertices~\cite{Fomin2006}. Our algorithms, on the other hand, are much more versatile than traditional methods and can be used to compute many other properties than just the MIS size.
-
 %The independent set problem is related to physics applications such as in the hard-core lattice gas model~\cite{Dyre2016, Fernandes2007}
 %in statistical mechanics and the Rydberg hamiltonian with neutral atoms~\cite{Pichler2018, Ebadi2022};
 %Property computation can, for example, be used to understand phase transitions~\cite{Dyre2016, Fernandes2007},
 %to identify harder graphs in an ensemble of graphs~\cite{Ebadi2022} and to analyze the presence of the overlap gap property~\cite{Gamarnik2013, Gamarnik2019} related to the clustering phenomenon of large independent sets.
 %However, there is a lack of general and versatile tool to compute these different properties of independent sets.
-
-To keep the discussion focused, we mainly study the independent set problem in the main text, and show how to compute the solution space properties for other combinatorial optimization problems in  \App{sec:otherproblems}, which include the cutting problem, the matching problem, the vertex coloring problem, the satisfiability problem, the dominating set problem, the set packing problem, the set covering problem, and the clique problem.
+%To keep the discussion focused, 
+In what follows, for clarity of presentation, we focus on the independent set problem in the main text, and show how to compute the solution space properties for other combinatorial optimization problems in  \App{sec:otherproblems}. The latter include cutting, matching, vertex coloring, satisfiability,  dominating set,  set packing,  set covering, and the clique problem.
 %\xpurple{More details on which combinatorial optimization problems this applies to?}
+
+
 The paper is organized as follows.
 We first introduce the basic concepts of tensor networks and generic programming in \Sec{sec:tn} and \Sec{sec:generic}.
 Then we show how to reduce the independent set problem to a tensor network contraction problem in \Sec{sec:tnmap}. 
@@ -1080,10 +1093,10 @@ but it may suffer from round-off errors (\App{sec:fft}). The finite field (GF$(p
 In figure~\ref{fig:benchmark}(d), one can see the technique to bound the enumeration space in \App{sec:bounding} improves the performance for more than one order of magnitude in enumerating the MISs.
 The bounding technique can also reduce the memory usage significantly, without which the largest computable graph size is only $\sim150$ on a device with 32GB main memory.
 
-\section{Example case studies} \label{sec:examples}
+\section{Example applications} \label{sec:examples}
 %In this section, we give a few examples where the different properties of independence sets are used.
 
-\subsection{Number of independent sets and entropy constant for some hardcore lattice gases}\label{sec:entropy}
+\subsection{Number of independent sets and entropy constant for hardcore lattice gases}\label{sec:entropy}
 We compute the counting of all independent sets for graphs shown in Figure~\ref{fig:lattices}, where vertices are all placed on square lattices of dimensions $L \times L$.
 The types of graphs include: the square lattice graphs (Figure~\ref{fig:lattices}(a)); the square lattice graphs with a filling factor $p=0.8$, which means $\lfloor pL^{2} \rceil$ sites are occupied with vertices  (Figure~\ref{fig:lattices}(b));
 the King's graphs  (Figure~\ref{fig:lattices}(c)); the King's graphs with a filling factor $p = 0.8$  (Figure~\ref{fig:lattices}(d)), which is the ensemble of graphs used in Ref.~\cite{Ebadi2022} to benchmark quantum algorithms on a Rydberg atom array quantum computer. 
@@ -1092,9 +1105,9 @@ The number of independent sets for square lattice graphs of size $L \times L$ fo
 We computed the integer sequence for $L=38$ and $L=39$, which is, to the best of our knowledge, not known before.
 In the computation, we used finite-field algebra for contracting integer tensor networks with arbitrarily high precision. 
 
-A theoretically interesting number that can be computed using the number of independent sets is the entropy constant, which can tell us the thermodynamic properties of hard-core lattice gases at the high-temperature limit.
+A theoretically interesting number that can be computed using the number of independent sets is the entropy constant, which can describe the thermodynamic properties of hard-core lattice gases at the high-temperature limit.
 For the square lattice graphs, this number is called the \textit{hard square entropy constant} (\href{https://oeis.org/A085850}{OEIS A085850}), which is defined as $\lim_{L\rightarrow \infty} F(L,L)^{1/L^2}$, where $F(L,L)$ is the number of independent sets of a given lattice dimensions $L \times L$.
-This quantity arises in statistical mechanics of hard-square lattice gases~\cite{Baxter1980, Pearce1988} and is used to understand phase transitions for these systems. This entropy constant is not known to have an exact representation, but it is accurately known in many digits. Similarly, we can define entropy constants for other lattice gases. In \Fig{fig:hardsquare}, we look at how $F(L,L)^{1/\lfloor pL^2\rceil}$ scales as a function of the grid size $L$ for all types of graphs shown in Figure~\ref{fig:lattices}. Our results match the known results for the non-disordered square lattice and King's graphs. For disordered square lattice and King's graphs with a filling factor $p=0.8$, we randomly sample 1000 graph instances. To our knowledge, the entropy constants for these disordered graphs have not been studied before. They may be used to study phase transitions for disordered lattices, which are typically much harder to understand. Interestingly, the variations due to different random instances are negligible for this entropy quantity. 
+This quantity arises in statistical mechanics of hard-square lattice gases~\cite{Baxter1980, Pearce1988} and is used to understand phase transitions for these systems. This entropy constant is not known to have an exact representation, but it is accurately known in many digits. Similarly, we can define entropy constants for other lattice gases. In \Fig{fig:hardsquare}, we look at how $F(L,L)^{1/\lfloor pL^2\rceil}$ scales as a function of the grid size $L$ for all types of graphs shown in Figure~\ref{fig:lattices}. Our results match the known results for the non-disordered square lattice and King's graphs. For disordered square lattice and King's graphs with a filling factor $p=0.8$, we randomly sample 1000 graph instances. To our knowledge, the entropy constants for these disordered graphs have not been studied before. They may be used to study phase transitions for disordered lattices, which are typically much harder to understand. Interestingly, the variations due to different random instances are negligible for this quantity. 
 % \blue{@Shengtao We either keep this example simple by keeping only square and king's graphs, or explain better why we care about entropy constants at filling 0.8.}
 
 \begin{figure}[t] 
@@ -1124,16 +1137,16 @@ it implies that large independent sets are clustered together.
 This clustering property has been used to rigorously prove upper bounds on the performance of local search algorithms~\cite{Gamarnik2013, Gamarnik2019}.
 To investigate the overlap gap property, we compute pair-wise Hamming distance distributions of large independent sets as they are good indicators of the presence or absence of overlap gap properties.
 We inspect two types of graphs that are particularly interesting, the King's graphs with defects and $3$-regular graphs.
-It was known that the MIS problem on a general graph can be mapped to the King's graph with defects~\cite{Ebadi2022}. However, it is not clear whether the MIS problem defined on a randomly generated King's graph with defects can have the overlap gap property.
-It was known that finding MISs of a $d$-regular graphs has the overlap gap property~\cite{Rahman2017,Gamarnik2021} when both $d$ and the graph sizes are large, but, it is not known whether, for small $d$, e.g.\ for $3$-regular graphs, this statement remains true.
+It is known that the MIS problem on a general graph can be mapped to the King's graph with defects~\cite{Garey1977,Ebadi2022}. However, it is not clear whether the MIS problem defined on a randomly generated King's graph with defects can have the overlap gap property.
+It is known that finding MISs of a $d$-regular graphs has the overlap gap property~\cite{Rahman2017,Gamarnik2021} when both $d$ and the graph sizes are large, but, it is not known whether, for small $d$, e.g.\ for $3$-regular graphs, this statement remains true.
 We randomly generated $9$ instances for each category of King's graph at $0.8$ filling with size $20\times 20$ ($320$ vertices) and $3$-regular graphs with size $110$.
 At this problem size, independent sets are too many to fit into any storage, hence we combine the truncated polynomial and sum-product expression tree to directly sample from the target configuration space.
 For each instance $G$, we sample $10^4$ pairs of configurations from the independent sets of sizes $\geq \lceil \gamma \times \alpha(G)\rceil$ and show the pair-wise Hamming distance distribution in \Fig{fig:hamming}.
-We observed a clear single peak structure at a fixed distance normalized by the MIS size for the King's graphs, indicating the absence of the overlap gap property in a random King's graph at $0.8$ filling.
-Given the fact that the MIS problem on an arbitrary graph can be mapped to a King's graph at a certain filling, this result is highly nontrivial.
-We argue that the King's graphs with defects mapped from hard MIS instances might have a very small measure in the total defected King's graph space.
-Very different pair-wise Hamming distributions are shown in \Fig{fig:hamming}(b), where we observed the multiple peak structure when the control parameter $\gamma$ is big enough. It indicates the existence of disconnected clusters in the configuration space of the MIS problem on $3$-regular graphs.
-We expect our numerical tool can be used to understand this phenomenon better and to further investigate the graph properties and the geometry of the configuration spaces for a variety of graph instances.
+We observe a clear single peak structure at a fixed distance normalized by the MIS size for the King's graphs, indicating the absence of the overlap gap property in a random King's graph at $0.8$ filling.
+Since the MIS problem on an arbitrary graph can be mapped to a King's graph at a certain filling, this result is highly nontrivial. It likely implies 
+that the King's graphs with defects mapped from hard MIS instances have a very small measure in the total defected King's graph space. In contrast, 
+very different pair-wise Hamming distributions are obtained in \Fig{fig:hamming}(b), where we observed the multiple peak structure when the control parameter $\gamma$ is big enough. It indicates the existence of disconnected clusters in the configuration space of the MIS problem on $3$-regular graphs.
+We expect this numerical tool can be used to understand this phenomenon better and to further investigate the graph properties and the geometry of the configuration spaces for a variety of graph instances.
 \begin{figure} 
     % \begin{subfigure}[t]{\textwidth}
     %     \centering
@@ -1159,7 +1172,7 @@ We expect our numerical tool can be used to understand this phenomenon better an
 \end{figure}
 
 %\subsection{Visualizing experimental quantum algorithm outputs for solving Maximum Independent Set}
-\subsection{Analyzing quantum and classical algorithms for solving Maximum Independent Set}
+\subsection{Analyzing quantum and classical algorithms for Maximum Independent Set}
 \begin{figure} 
     \centering
     \includegraphics[width=.65\textwidth, trim={0cm 0cm 0cm 0cm}, clip]{figures/exp_configurations.pdf}
@@ -1167,29 +1180,36 @@ We expect our numerical tool can be used to understand this phenomenon better an
     Each vertex represents an independent set, and each edge represents a pair of independent sets that differ by a swap operation or a vertex addition.}
     \label{fig:exp_configuratoins}
 \end{figure}
-The ability to enumerate configurations and compute independence polynomials was critical in understanding the performance of quantum and classical algorithms for MIS in a recent experiment on a Rydberg atom quantum computer~\cite{Ebadi2022}.
-In this work, the authors found that on King's graphs with $0.8$ filling, the hardest instances for classical simulated annealing could be accurately predicted from the independence polynomial, which gave information about the density of local minima at different independent set sizes.
-On the hardest graph instances for simulated annealing studied in the experiment, a high density of local minima were present at independent set sizes of $\alpha(G)-1,$ which the algorithm became trapped in instead of finding the optimum solution of size $\alpha(G)$.
-Initially, it was suspected that simulated annealing trapped certain clusters of these local minima in the solution space. However, by enumerating the configurations, it was then found that there was no clustering in the solution space as in Sec.~\ref{sec:overlap-gap}, and instead simulated annealing randomly explores the independent sets of size $\alpha(G)-1$ until an optimum solution is found.
-Therefore, it was the large ratio of local to global minima that prevents simulated annealing from efficiently finding the MIS.
+In a recent work, 
+the ability to enumerate configurations and compute independence polynomials was critical in understanding the performance of quantum optimization algorithms for the MIS problem on a Rydberg atom quantum computer~\cite{Ebadi2022}. This work focused on 
+%, the authors found that
+exploring King's graphs with $0.8$ filling.   The hardest instances for classical simulated annealing could be accurately predicted from the independence polynomial, which gave information about the density of local minima at different independent set sizes.
+On the hardest graph instances for simulated annealing studied in the experiment, a high density of local minima were found at independent set sizes of $\alpha(G)-1,$ which the algorithm became trapped in instead of finding the optimal solution of size $\alpha(G)$.
+%Initially, it was suspected that simulated annealing trapped certain clusters of these local minima in the solution space. However, 
+By enumerating the configurations using techniques described in the present work, we found that %n found that there was no clustering in the solution space as in Sec.~\ref{sec:overlap-gap}, and instead 
+simulated annealing randomly explores the independent sets of size $\alpha(G)-1$ until an optimum solution is found.
+Therefore, the large ratio of local to global minima  prevents simulated annealing from efficiently finding an MIS.
 %and studying the solution space properties for independent sets of size $\alpha(G)$ and $\alpha(G)-1$, we gained detailed insights to performance of both the quantum algorithm and simulated annealing, and could determine if these algorithm were likely to return independent sets from certain clusters of local or global minima in the solution space. Instead, we found that simulated annealing becomes trapped in independent sets of size $\alpha(G)-1$ uniformly at random, which is related to observation that there are no disconnected clusters in the solution space for King's graphs in Sec.~\ref{sec:overlap-gap}.
 
-Although the performance of the quantum algorithm was more challenging to understand due to the inherent difficulty in studying quantum systems, the authors were able to gain significant insights by visualizing the experimental outputs of a quantum algorithm over the solution space, as shown in Figure~\ref{fig:exp_configuratoins} for instances with $39$ nodes~\cite{Ebadi2022}.
+Although the performance of the quantum algorithm is more challenging to understand due to the inherent difficulty in studying quantum systems, the present methods allow one 
+to gain significant insights by visualizing the experimental outputs of a quantum algorithm over the solution space, as shown in Figure~\ref{fig:exp_configuratoins} for instances with $39$ nodes~\cite{Ebadi2022}.
 Here, the structure of the solution space is shown on a graph where each vertex represents a large independent set. Each edge represents a pair of independent sets that differ by a swap operation or a vertex addition to the set, which are the operations naturally present in the effective dynamics at the end of the quantum algorithm. 
 %The quantum algorithm either finds the MIS with size $\alpha(G)$ with high probability, or returns a suboptimal independent set, usually with size $\alpha(G)-1.$
 The solution space graph is well-connected by local changes to the spin configurations, has a small diameter, and the degree of each node appears to concentrate. 
-From this visualization, the authors inferred that the quantum algorithm does not appear to return solely local minima with a large Hamming distance from the MISs as suggested for adiabatic algorithms by Ref.~\cite{altshuler2010}, which would appear as a long path on the solution space graph from the sampled local minima to the MIS. Rather, the quantum algorithm samples from local minima across the solution space graph with a wide range of Hamming distances from the MISs.
+This visualization makes it clear that 
+%the authors inferred that 
+the quantum algorithm does not appear to return solely local minima with a large Hamming distance from the MISs as suggested for adiabatic algorithms e.g. by Ref.~\cite{altshuler2010}  which would appear as a long path on the solution space graph from the sampled local minima to the MIS. Instead, the quantum algorithm samples from local minima across the solution space graph with a wide range of Hamming distances from the MISs. In the case where a large superposition state of local minima is created during the coherent evolution, the quantum algorithm achieves a quadratic speedup over simulated annealing.
 %Consistent with Sec.~\ref{sec:overlap-gap}, there are no disconnected clusters in the solution space for this King's graph.
 Looking forward, we expect these tools can be applied to understanding the performance of quantum and classical algorithms on a wide class of NP-hard combinatorial optimization problems.
 
 \section{Discussion and conclusion}
-In conclusion, in this paper, we introduce a unified framework using generic tensor networks to compute different solution space properties of a certain class of NP-hard combinatorial optimization problems.
-These solution space properties include the best several solutions, the number of solutions of a given size, and the enumeration and sampling of solutions of a given size.
-For each solution space property, we compute it with the same tensor network by replacing the tensor elements with those having an algebra designed for it.
+In this work, we introduced a framework that uses generic tensor networks to compute different solution space properties of a certain class of NP-hard combinatorial optimization problems.
+%These solution space properties include the best several solutions, the number of solutions of a given size, and the enumeration and sampling of solutions of a given size.
+Each solution space property is computed using the same tensor network with different tensor element algebra.
 % This technique can further be generalized to computing solution space properties beyond the examples given in this paper. % such as the largest several independent sets sizes, the number of independent sets of a given size, and the enumeration of independent sets of a given size.
 %With different algebras, the contraction of the same tensor network gives us the different properties.
 The different data types introduced in the main text to compute these properties are summarized in the diagram in \Fig{fig:venn-diagram}.
-The class of problems solvable by a tensor network includes but is not limited to maximal independent sets and a variety of other combinatorial problems such as the matching problem, the k-coloring problem, the max-cut problem, the set packing problem, and the set covering problem, as detailed in \App{sec:otherproblems}. 
+The class of problems solvable by a tensor network includes but is not limited to maximum independent sets and a variety of other combinatorial problems such as the matching problem, the k-coloring problem, the max-cut problem, the set packing problem, and the set covering problem, as detailed in \App{sec:otherproblems}. 
 
 %Other than the case with real numbers, we have polynomials and truncated polynomials.
 %We combine them with the bit string algebra, the set algebra, and sum-product expression tree algebra for finding, enumerating, and sampling of independent sets at a given size. Three examples are shown to demonstrate how our method can be used to understand the solution space better.
@@ -1197,15 +1217,15 @@ The class of problems solvable by a tensor network includes but is not limited t
 %In the second example, we analyze the pairwise Hamming distances from configurations directly sampled from large independent sets of King's graphs at $0.8$ filling and three regular graphs. We show the strongest numeric evidence so far of the absence of overlap gap property in King's graph and the existence of Overlap Gap properties in three regular graphs.
 %In the last example, we show how our algorithm helps people to understand the performance of a quantum variational algorithms on Rydberg atom arrays to find maximum independent sets. This is a research frontier that understanding which can help people design better quantum algorithms to beat its classical counterpart.
 
-It would be interesting to generalize the idea of generic programming to other algorithms that have certain algebraic structures such as those using the inclusion-exclusion principle or subset convolution~\cite{Fomin2013} and explore what new properties can be computed.
-To this end, it is worth mentioning the dynamic programming~\cite{Courcelle1990, Fomin2013} approaches.
+Looking ahead, it could be possible to generalize the idea of generic programming to other algorithms that have certain algebraic structures such as those using the inclusion-exclusion principle or subset convolution~\cite{Fomin2013} and explore what new properties can be computed.
+To this end, dynamic programming~\cite{Courcelle1990, Fomin2013} approaches could be considered.
 Dynamic programming is closely related to a tropical tensor network~\cite{Liu2021}; for example, the Viterbi algorithm for finding the most probable configuration in a hidden Markov model can be interpreted as a matrix product state featured with tropical algebra, and the tropical tensor network in the main text is potentially equivalent to dynamic programming in finding an optimum solution.
-However, while having broader applications, dynamic programming does not have a clear algebraic interpretation required by computing solution space properties beyond finding an optimum solution.
+Since dynamic programming has much broader applications, it would be interesting to extend the ideas from this paper to provide an algebraic interpretation for dynamic programming so that it can be used to compute other solution space properties beyond just finding an optimum solution.
 %Moreover, since the independence polynomial is closely related to the matching polynomial~\cite{Levit2005}, the clique polynomial~\cite{Hoede1994}, and the vertex cover polynomial~\cite{Akbari2013},
 %our algorithm to compute the independence polynomial can also be used to compute these graph polynomials.
 %By adapting to the style of generic programming, we can implement all the algorithms without much effort.
 
-The source code in Julia language for this paper can be found in our Github repository~\cite{GenericTensorNetworks}. 
+The source code in Julia language for this paper can be found in the Github repository~\cite{GenericTensorNetworks}. 
 There is a short introduction to this repository as well a gist to show how it works in Appendix~\ref{sec:technical}.
 We expect our tool can be used to understand and study many interesting applications of independent sets and beyond.
 We also hope the toolkit we built, including tensor network contraction order optimization and efficient tropical matrix multiplication, can be helpful to the development of other scientific software.
