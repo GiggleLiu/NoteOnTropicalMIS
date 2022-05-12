@@ -4,11 +4,19 @@ authors = ["GiggleLiu <cacate0129@gmail.com>"]
 version = "0.1.0"
 
 [deps]
+BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
+CUDA = "052768ef-5323-5732-b1bb-66c8b64840ba"
+Comonicon = "863f3e99-da2a-4334-8734-de3dacbe5542"
+DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
+GenericTensorNetworks = "3521c873-ad32-4bb4-b63d-f4f178f42b49"
+Graphs = "86223c79-3864-5bf0-83f7-82e725a168b6"
 LightGraphs = "093fc24a-ae57-5d10-9952-331d41423f4d"
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 MethodAnalysis = "85b6ec6f-f7df-4429-9514-a64bcd9ee824"
 Mods = "7475f97c-0381-53b1-977b-4c60186c8d62"
 Primes = "27ebfcd6-29c5-5fa9-bf4b-fb8fc14df3ae"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
+TropicalGEMM = "a4ad3063-64a7-4bad-8738-34ed09bc0236"
 
 [compat]
 LightGraphs = "1.3"

@@ -1,4 +1,9 @@
-## About the workflow of paper
+# Paper: Computing solution space properties of combinatorial optimization problems via generic tensor networks
+
+## Notes on benchmarks
+Please check folder [benchmarks](benchmarks/)
+
+## About the workflow of paper writing
 
 ### Basics of Git
 we do not use git branches, we push everything into the master branch directly, so the following tutorial might be enough.

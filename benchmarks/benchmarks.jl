@@ -69,10 +69,6 @@ end
 
 function generate_instances(nmax::Int, maxsc::Int)
     cases = [case_r3(n, 3; seed=2, maxsc=maxsc) for n=10:10:nmax]
-            # [case_r3(n, 3; seed=2, treewidth=s) for (n, s) in [
-           # (10, 3), (20, 4), (40, 5), (50, 8), (60, 8), (70, 8), (80, 10), (90, 13), (100, 13),
-           # (110, 15), (120, 15), (130, 13), (140, 17), (150, 18), (160, 20), (170, 19), (180, 24), (190, 24), (200, 25),
-           #]]
     return cases
 end
 
