@@ -2,7 +2,7 @@ using OMEinsum, OMEinsumContractionOrders
 using Graphs
 using Random
 
-# generate a random regular graph of size 100, degree 3
+# generate a random regular graph of size 50, degree 3
 graph = (Random.seed!(2); Graphs.random_regular_graph(50, 3))
 
 # generate einsum code, i.e. the labels of tensors
