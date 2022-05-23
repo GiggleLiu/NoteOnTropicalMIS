@@ -323,7 +323,7 @@ Lastly, we benchmark our algorithms in \Sec{sec:benchmark} and provide three exa
 %a maximal independent set is an independent set that is not a subset of any other independent set, but its size may not be the maximum. 
 
 \section{Tensor networks}\label{sec:tn}
-A tensor network~\cite{Cirac2020, Orus2014} is composed of a collection of tensors, a collection of labels associated with tensor dimensions, and an indicator of which tensor is the output.
+A tensor network~\cite{Cirac2021, Orus2014} is composed of a collection of tensors, a collection of labels associated with tensor dimensions, and an indicator of which tensor is the output.
 The operation to evaluate a tensor network is called \textit{contraction}, which is defined as a summation of tensor element products over the labels not appearing in the output tensor.
 For example, the matrix multiplication is a special tensor network that can be represented as $C_{ik} = A_{ij}B_{jk}$, where $A, B$ and $C$ are matrices (two-dimensional tensors), $ik,ij$ and $ik$ are labels associated with them, and ``$=$'' is the indicator of $C$ being the output, while its contraction is defined as $C_{ik} = \sum_j A_{ij}B_{jk}$.
 %can be viewed as a generalization of binary matrix multiplication to nary tensor contraction.
@@ -1221,6 +1221,7 @@ We would like to thank Pan Zhang for sharing his python code for optimizing cont
 We acknowledge Sepehr Ebadi and Leo Zhou for coming up with many interesting questions about independent sets and their questions strongly motivated the development of this project.
 We thank Benjamin Schiffer for providing helpful feedback on the writing of this manuscript.
 We thank Chris Elord for helping us write the fastest matrix multiplication library for tropical numbers, TropicalGEMM.jl. 
+We thank Jacob Miller for helpful discussions. 
 We would also like to thank a number of open-source software developers, including Roger Luo, Time Besard, Edward Scheinerman, and Katharine Hyatt
 for actively maintaining their packages and resolving related issues voluntarily.
 We acknowledge financial support from the DARPA ONISQ program (grant no.\ W911NF2010021), the Center for Ultracold Atoms, the National Science Foundation, the Vannevar Bush Faculty Fellowship, the U.S. Department of Energy (DE-SC0021013 and DOE Quantum Systems Accelerator Center (contract no.\ 7568717), 
