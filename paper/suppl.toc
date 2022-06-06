@@ -1,0 +1,7 @@
+\babel@toc {english}{}\relax 
+\contentsline {section}{Performance benchmarks}{2}{section*.2}%
+\contentsline {section}{An example of increased contraction complexity for the standard tensor network notation}{4}{section*.4}%
+\contentsline {section}{Bounding the MIS enumeration space}{5}{section*.5}%
+\contentsline {section}{The discrete Fourier transform approach to computing the independence polynomial}{7}{section*.7}%
+\contentsline {section}{Computing maximum sum combination}{8}{section*.8}%
+\contentsline {section}{Technical guides}{8}{section*.10}%
