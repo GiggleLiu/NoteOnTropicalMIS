@@ -1,226 +1,11 @@
 \documentclass[onefignum, onetabnum]{siamart190516}
-%\usepackage{natbib}
-%\usepackage[sort]{cite}
-\pdfoutput=1
-%\usepackage[colorlinks=true,urlcolor=blue,citecolor=blue,linkcolor=blue]{hyperref}
-\usepackage[english]{babel}
-\usepackage[utf8]{inputenc}
-\usepackage[T1]{fontenc}
-\usepackage{amssymb}
-\usepackage{tabularx}
-\usepackage{quoting}
-\usepackage{upquote}
-\usepackage{subcaption}
-\usepackage{multicol}
-\usepackage{cancel}
-\usepackage[framemethod=TikZ]{mdframed}
-\usetikzlibrary{shapes}
-\usetikzlibrary{snakes}
-\usetikzlibrary{shapes.geometric}
-\usepackage{wrapfig}
-%\usepackage{caption}
-%\usepackage[plain]{algorithmic}
+
 \usepackage[linesnumbered, ruled, vlined, algo2e]{algorithm2e}
-\usepackage{algpseudocode}
-\usepackage{rotating}
-%\usepackage{cite}
-\usepackage{booktabs}
-%\usepackage{unicode-math}
-%\usepackage{algorithm}% http://ctan.org/pkg/algorithm
-%\usepackage{algpseudocode}% http://ctan.org/pkg/algpseudocode
-\usepackage{xcolor}% http://ctan.org/pkg/xcolor
-\makeatletter
-\newsavebox{\@brx}
-\newcommand{\llangle}[1][]{\savebox{\@brx}{\(\m@th{#1\langle}\)}%
-  \mathopen{\copy\@brx\kern-0.5\wd\@brx\usebox{\@brx}}}
-\newcommand{\rrangle}[1][]{\savebox{\@brx}{\(\m@th{#1\rangle}\)}%
-  \mathclose{\copy\@brx\kern-0.5\wd\@brx\usebox{\@brx}}}
-\makeatother
-\usepackage{bbm}
-\usepackage{jlcode}
-\usepackage{graphicx}
-\usepackage{amsmath,color}
-\usepackage{mathrsfs}
-\usepackage{float}
-\usepackage[normalem]{ulem}
-\usepackage{makecell}
-\usepackage{indentfirst}
-\usepackage{txfonts}
-%\usepackage[epsilon, tsrm, altpo]{backnaur}
+\input{shared}
 
-\makeatletter
-\def\parsept#1#2#3{%
-    \def\nospace##1{\zap@space##1 \@empty}%
-    \def\rawparsept(##1,##2){%
-        \edef#1{\nospace{##1}}%
-        \edef#2{\nospace{##2}}%
-    }%
-    \expandafter\rawparsept#3%
-}
-\makeatother
-\DeclareMathAlphabet{\mymathbb}{U}{BOONDOX-ds}{m}{n}
-\newcommand{\listingcaption}[1]%
-{%
-\refstepcounter{lstlisting}\hfill%
-Listing \thelstlisting: #1\hfill%\hfill%
-}%
-\newcolumntype{b}{X}
-\newcolumntype{s}{>{\hsize=.7\hsize}X}
-\usepackage{listings}
-\lstset{
-    language=Julia,
-    basicstyle=\ttfamily\scriptsize,
-    numberstyle=\scriptsize,
-    % numbers=left,
-    backgroundcolor=\color{gray!7},
-    %backgroundcolor=\color{white},
-    %frame=single,
-    xleftmargin=2em,
-    tabsize=2,
-    rulecolor=\color{black!15},
-    %title=\lstname,
-    escapeinside={(*}{*)},
-    breaklines=true,
-    %breakatwhitespace=true,
-    %framextopmargin=2pt,
-    %framexbottommargin=2pt,
-    frame=bt,
-    extendedchars=true,
-    inputencoding=utf8,
-    columns=fullflexible,
-    %escapeinside={(*@}{@*)},
-}
+\title{Computing solution space properties of combinatorial optimization problems via generic tensor networks}
 
-\tolerance=1
-\emergencystretch=\maxdimen
-\hyphenpenalty=1000
-\hbadness=1000
-
-\makeatletter
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% User specified LaTeX commands.
-
-%Journal reference.  Comma sets off: name, vol, page, year
-\def\journal #1, #2, #3, 1#4#5#6{{\sl #1~}{\bf #2}, #3 (1#4#5#6) }
-\def\pr{\journal Phys. Rev., }
-\def\prb{\journal Phys. Rev. B, }
-\def\prl{\journal Phys. Rev. Lett., }
-\def\pl{\journal Phys. Lett., }
-%\def\np{\journal Nucl. Phys., }
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-%\usepackage[colorlinks, citecolor=blue]{hyperref}
-\DeclareMathOperator*{\argmax}{arg\,max}
-
-\newcommand{\eqname}[1]{\stepcounter{equation}\tag{\theequation : #1}}
-%%%%%% Shortcut related
-\newcommand{\<}{\langle}
-\renewcommand{\>}{\rangle}
-\newcommand{\out}{{\vx^L}}
-\newcommand{\inp}{{\vx^0}}
-\newcommand{\cquad}{{{ }_{\quad}}}
-\newcommand{\pluseq}{\mathrel{+}=}
-\newcommand{\minuseq}{\mathrel{-}=}
-\newcommand{\vx}{{\mathbf{x}}}
-\newcommand{\vg}{{\mathbf{g}}}
-\newcommand{\vp}{{\mathbf{p}}}
-\newcommand{\vy}{{\mathbf{y}}}
-\newcommand{\Var}{{\mathrm{Var}}}
-\newcommand{\Mean}{{\mathrm{E}}}
-\newcommand{\vvalue}{{\texttt{value}}}
-\newcommand{\grad}{{\texttt{grad}}}
-\newcommand{\parameter}{{\texttt{parameter}}}
-%%%%%% Convention related
-\newcommand{\SWAP}{{\rm SWAP}}
-\newcommand{\CNOT}{{\rm CNOT}}
-\newcommand{\bigO}{{\mathcal{O}}}
-\newcommand{\X}{{\rm X}}
-\renewcommand{\H}{{\rm H}}
-\newcommand{\Rx}{{\rm Rx}}
-\renewcommand{\v}[1]{{\bf #1}}
-\newcommand{\dataset}{{\mathcal{D}}}
-\newcommand{\wfunc}{{\psi}}
-\newcommand{\SU}{{\rm SU}}
-\newcommand{\UU}{{\rm U}}
-\newcommand{\thetav}{{\boldsymbol{\theta}}}
-\newcommand{\gammav}{{\boldsymbol{\gamma}}}
-\newcommand{\thetai}{{\theta^\alpha_l}}
-\newcommand{\Expect}{{\mathbb{E}}}
-\newcommand{\Tr}{{\rm Tr}}
-\newcommand{\etc}{{\it etc~}}
-\newcommand{\etal}{{\it etal~}}
-\newcommand{\xset}{\mathbf{X}}
-\newcommand{\fl}{\texttt{fl}}
-\newcommand{\pdata}{\mathbf{\pi}}
-\newcommand{\q}{\mathbf{q}}
-\newcommand{\epdata}{\mathbf{\hat{\pi}}}
-\newcommand{\gammaset}{\boldsymbol{\Gamma}}
-\newcommand{\ei}{{\mathbf{e}_l^\alpha}}
-\newcommand{\vtheta}{{\boldsymbol{\theta}}}
-\newcommand{\sigmag}{{\nu}}
-\newcommand{\sigmai}[2]{{\sigma^{#2}_{#1}}}
-\newcommand{\qi}[1]{{q^{\alpha_{#1}}_{#1}}}
-\newcommand{\BAS}{Bars-and-Stripes}
-\newcommand{\circled}[1]{\raisebox{.5pt}{\textcircled{\raisebox{-.9pt} {#1}}}}
-\newcommand{\qexpect}[1]{{\left\langle #1\right\rangle}}
-\newcommand{\expect}[2]{{\mathop{\mathbb{E}}\limits_{\substack{#2}}\left[#1\right]}}
-\newcommand{\var}[2]{{\mathop{\mathrm{Var}}\limits_{\substack{#2}}\left(#1\right)}}
-\newcommand{\pshift}[1]{{p_{\thetav+#1}}}
-\newcommand{\upcite}[1]{\textsuperscript{\cite{#1}}}
-\newcommand{\Eq}[1]{Eq.~(\ref{#1})}
-\newcommand{\Fig}[1]{Fig.~\ref{#1}}
-\newcommand{\Lst}[1]{Listing.~\ref{#1}}
-\newcommand{\Tbl}[1]{Table~\ref{#1}}
-\newcommand{\Sec}[1]{Sec.~\ref{#1}}
-\newcommand{\App}[1]{Appendix~\ref{#1}}
-\newcommand{\bra}[1]{\mbox{$\left\langle #1 \right|$}}
-\newcommand{\ket}[1]{\mbox{$\left| #1 \right\rangle$}}
-\newcommand{\braket}[2]{\mbox{$\left\langle #1 | #2 \right\rangle$}}
-\newcommand{\tr}[1]{\mathrm{tr}\mbox{$\left[ #1\right]$}}
-
-\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
-
-%%%%%% Comment related
-\newcommand{\red}[1]{[{\bf  \color{red}{ST: #1}}]}
-\newcommand{\xred}[1]{[{\bf  \color{red}{\sout{ST: #1}}}]}
-\newcommand{\green}[1]{[{\bf  \color{green}{XG: #1}}]}
-\newcommand{\xgreen}[1]{[{\bf  \color{green}{\sout{XG: #1}}}]}
-\newcommand{\blue}[1]{[{\bf  \color{blue}{JG: #1}}]}
-\newcommand{\xblue}[1]{[{\bf  \color{blue}{\sout{JG: #1}}}]}
-\newcommand{\cyan}[1]{[{\bf  \color{cyan}{ML: #1}}]}
-\newcommand{\xcyan}[1]{[{\bf  \color{cyan}{\sout{ML: #1}}}]}
-\newcommand{\purple}[1]{[{\bf  \color{purple}{MC: #1}}]}
-\newcommand{\xpurple}[1]{[{\bf  \color{purple}{\sout{MC: #1}}}]}
-\newcommand{\material}[1]{\iffalse[{\bf  \color{cyan}{Material: #1}}]\fi}
-
-\newcounter{example}
-\newenvironment{example}[1][]{\refstepcounter{example}\par\medskip
-   \noindent \textbf{Example~\theexample. #1} \rmfamily}{\medskip}
-
-%\newtheorem{theorem}{\textit{Theorem}}
-%\newtheorem{corollary}{\textit Branching Rule}
-%\theoremstyle{definition}\newtheorem{definition}{\textit{Definition}}
-%\newtheorem{defin}[thm]{Definition}
-
-\makeatother
-
-%\externaldocument{ex_supplement}
-
-\title{Computing solution space properties of combinatorial optimization problems via generic tensor networks
-%\thanks{\funding{...}}
-}
-
-\author{
-Jin-Guo Liu\thanks{Department of Physics, Harvard University, Cambridge, Massachusetts 02138, USA; QuEra Computing Inc., 1284 Soldiers Field Road, Boston, MA, 02135, USA  %\thanks{QuEra Computing Inc., 1284 Soldiers Field Road, Boston, MA, 02135, USA}
-    (\email{jinguoliu@g.harvard.edu}).}
-\and {Xun Gao}\thanks{Department of Physics, Harvard University, Cambridge, Massachusetts 02138, USA (\email{xungao@g.harvard.edu}, contributed equally with Jin-Guo Liu to this work.).}
-\and Madelyn Cain\footnotemark[2]
-\and Mikhail D. Lukin\footnotemark[2]
-\and Sheng-Tao Wang\thanks{QuEra Computing Inc., 1284 Soldiers Field Road, Boston, MA, 02135, USA}
-}
+\externaldocument{suppl}
 
 \begin{document}
 
@@ -306,17 +91,17 @@ Here, we extend to \textit{generic tensor networks} by generalizing the tensor e
 %to identify harder graphs in an ensemble of graphs~\cite{Ebadi2022} and to analyze the presence of the overlap gap property~\cite{Gamarnik2013, Gamarnik2019} related to the clustering phenomenon of large independent sets.
 %However, there is a lack of general and versatile tool to compute these different properties of independent sets.
 %To keep the discussion focused, 
-In what follows, for clarity of presentation, we focus on the independent set problem in the main text, and show how to compute the solution space properties for other combinatorial optimization problems in  \App{sec:otherproblems}. The latter include cutting, matching, vertex coloring, satisfiability,  dominating set,  set packing,  set covering, and the clique problem.
+In what follows, for clarity of presentation, we focus on the independent set problem in the main text, and show how to compute the solution space properties for other combinatorial optimization problems in \Cref{sec:otherproblems}. The latter include cutting, matching, vertex coloring, satisfiability,  dominating set,  set packing,  set covering, and the clique problem.
 %\xpurple{More details on which combinatorial optimization problems this applies to?}
 
 
 The paper is organized as follows.
-We first introduce the basic concepts of tensor networks and generic programming in \Sec{sec:tn} and \Sec{sec:generic}.
-Then we show how to reduce the independent set problem to a tensor network contraction problem in \Sec{sec:tnmap}. 
-Subsequently, we explain how to engineer the element types to compute various solution space properties in \Sec{sec:counting}, \Sec{sec:enumeration}, and \Sec{sec:weighted}. % to count independent sets at a given size, enumerate/sample independent sets at a given size and find largest set sizes in weighted graphs, respectively.
+We first introduce the basic concepts of tensor networks and generic programming in \Cref{sec:tn} and \Cref{sec:generic}.
+Then we show how to reduce the independent set problem to a tensor network contraction problem in \Cref{sec:tnmap}. 
+Subsequently, we explain how to engineer the element types to compute various solution space properties in \Cref{sec:counting}, \Cref{sec:enumeration}, and \Cref{sec:weighted}. % to count independent sets at a given size, enumerate/sample independent sets at a given size and find largest set sizes in weighted graphs, respectively.
 % by computing a number of independent set properties of certain sparse graphs on central processing units (CPUs) and graphics processing units (GPUs) and show its good performance.
-Lastly, we provide three example applications in \Sec{sec:examples} to demonstrate the versatility of our tool.
-A benchmark to demonstrate the performance of our algorithms can be found in both the supplementary material and the code repository.
+Lastly, we provide three example applications in \Cref{sec:examples} to demonstrate the versatility of our tool.
+A benchmark to demonstrate the performance of our algorithms can be found in both the \Cref{sec:benchmark} and the code repository.
 %In the first example, we show how our method can help computing the entropy constant for some hardcore lattice gases on 2D square lattices. We compute the 2D generalization of Fibonacci integer sequence up to size $39$, which is larger than the previous record $37$.
 %In the second example, we analyze the pairwise Hamming distances from configurations directly sampled from large independent sets of King's graphs at $0.8$ filling and three regular graphs. We show the strongest numeric evidence so far of the absence of overlap gap property in King's graph and the existence of Overlap Gap properties in three regular graphs.
 %In the last example, we show how our algorithm helps people to understand the performance of a quantum variational algorithms on Rydberg atom arrays to find maximum independent sets. This is a research frontier that understanding which can help people design better quantum algorithms to beat its classical counterpart.
@@ -339,9 +124,9 @@ For example, the matrix multiplication is a special tensor network that can be r
 % In this work, we adopt a more general form of tensor networks that do not restrict how many times a label can appear in tensors. 
 The graphical representation of a tensor network is an open (meaning an edge can connect to external vertices) hypergraph, where an input tensor is mapped to a vertex and a label is mapped to a hyperedge that can connect an arbitrary number of vertices, while the labels appearing in the output tensor are open.
 Our notation is a minor generalization of the standard tensor network notation used in physics as we do not restrict the number of times a label can appear in the tensors. 
-While this generalized form is equivalent in representation power, it can have smaller contraction complexity as will be illustrated in the supplementary material.
+While this generalized form is equivalent in representation power, it can have smaller contraction complexity as will be illustrated in \Cref{sec:tensorbad}.
 % because one can easily translate a generalized tensor network to the standard notation by adding $\delta$ tensors, a high dimensional equivalence of the identity matrix.
-%However, introducing $\delta$ tensors may significantly increase the complexity of the tensor contraction. We illustrate this subtle point in \App{sec:tensorbad}.
+%However, introducing $\delta$ tensors may significantly increase the complexity of the tensor contraction. We illustrate this subtle point in \Cref{sec:tensorbad}.
 
 \begin{example}
 $C_{ijk} = A_{jkm} B_{mil} V_{jm}$ is a tensor network that can be evaluated as $C_{ijk} = \sum_{ml}A_{jkm} B_{mil} V_{jm}$.
@@ -444,7 +229,7 @@ a \odot \mymathbb{0} = \mymathbb{0} \odot a = \mymathbb{0}
 \end{align*}
 %We require the algebra being multiplicative commutative because the contraction order optimizer will change the multiplication order of elements, while we require that the contraction order does not change the contraction results.
 In the following sections, we will show how to compute solution space properties of independent sets using the same tensor network contraction algorithm by engineering tensor element algebra.
-The Venn diagram in \Fig{fig:venn-diagram} shows the different types of algebra we will introduce in the main text and their relation, and Table~\ref{tbl:generictypes} summarizes which solution space properties can be computed by which tensor element types.
+The Venn diagram in \Cref{fig:venn-diagram} shows the different types of algebra we will introduce in the main text and their relation, and \Cref{tbl:generictypes} summarizes which solution space properties can be computed by which tensor element types.
 
 
 
@@ -473,7 +258,7 @@ The Venn diagram in \Fig{fig:venn-diagram} shows the different types of algebra 
 
     \caption{The tensor network element types used in this work and their relations.
     The overlap between two ellipses indicates that a new algebra can be created by combining those two types of algebra. ``Largest order'' and ``Largest 2 orders'' mean truncating the polynomial by only keeping its largest or largest two orders.
-    The purposes of these element types can be found in \Tbl{tbl:generictypes}.}
+    The purposes of these element types can be found in \Cref{tbl:generictypes}.}
      \label{fig:venn-diagram}
 \end{figure}
 
@@ -484,14 +269,14 @@ The Venn diagram in \Fig{fig:venn-diagram} shows the different types of algebra 
             \hline
    \textbf{Element type}     & \textbf{Solution space property} \\
    {$\mathbbm{R}$}     & {Counting of all independent sets} \\
-   {Polynomial} (\Eq{eq:polynomial})     & {Independence polynomial} \\
-   {Tropical (\Eq{eq:tropical})}    & {Maximum independent set size} \\
-   {Extended tropical of order $k$ (\Eq{eq:ext-tropical})}    & {Largest $k$ independent set sizes} \\
-   {Polynomial truncated to $k$-th order (\Eq{eq:countingtropical} and \Eq{eq:max2poly})}     & {$k$ largest independent sizes and their degeneracy} \\
-   {Set} (\Eq{eq:set})     & {Enumeration of independent sets} \\
-   {Sum-Product expression tree} (\Eq{eq:expr})     & {Sampling of independent sets} \\
-   {Polynomial truncated to largest order combined with bit string} (\Eq{eq:singleconfig})     & {Maximum independent set size and one of such configurations} \\
-   {Polynomial truncated to $k$-th order combined with set} (\Eq{eq:countingtropicalset})    & {$k$ largest independent set sizes and their enumeration} \\
+   {Polynomial} (\Cref{eq:polynomial})     & {Independence polynomial} \\
+   {Tropical (\Cref{eq:tropical})}    & {Maximum independent set size} \\
+   {Extended tropical of order $k$ (\Cref{eq:ext-tropical})}    & {Largest $k$ independent set sizes} \\
+   {Polynomial truncated to $k$-th order (\Cref{eq:countingtropical} and \Cref{eq:max2poly})}     & {$k$ largest independent sizes and their degeneracy} \\
+   {Set} (\Cref{eq:set})     & {Enumeration of independent sets} \\
+   {Sum-Product expression tree} (\Cref{eq:expr})     & {Sampling of independent sets} \\
+   {Polynomial truncated to largest order combined with bit string} (\Cref{eq:singleconfig})     & {Maximum independent set size and one of such configurations} \\
+   {Polynomial truncated to $k$-th order combined with set} (\Cref{eq:countingtropicalset})    & {$k$ largest independent set sizes and their enumeration} \\
             \bottomrule
         \end{tabularx}
     \caption{Tensor element types and the independent set properties that can be computed using them.}\label{tbl:generictypes}
@@ -500,7 +285,7 @@ The Venn diagram in \Fig{fig:venn-diagram} shows the different types of algebra 
 
 \section{Tensor network representation of independent sets} \label{sec:tnmap}
 This section describes the reduction of the independent set problem to a tensor network contraction problem.
-An alternative interpretation, perhaps more accessible to physicists, can be found in \App{sec:energymodel}, where we introduce the reduction from the energy model of hardcore lattice gases~\cite{Dyre2016, Fernandes2007}.
+An alternative interpretation, perhaps more accessible to physicists, can be found in \Cref{sec:energymodel}, where we introduce the reduction from the energy model of hardcore lattice gases~\cite{Dyre2016, Fernandes2007}.
 Let $G=(V,E)$ be an undirected graph with each vertex $v\in V$ being associated with a weight $w_v$.
 An independent set $I \subseteq V$ is a set of vertices that for any vertex pair $u,v \in I$, we have $(u, v) \not\in E$.
 To reduce the independent set problem on $G$ to a tensor network contraction, we first map a vertex $v\in V$ to a label $s_v \in \{0, 1\}$ of dimension $2$, where we use $0$ ($1$) to denote a vertex is absent (present) in the set.
@@ -579,7 +364,7 @@ The contraction of this tensor network has the following form:
 The resulting polynomial represents 3 different independent sets $\{\}$, $\{a\}$, and $\{b\}$, with weights being $0$, $w_a$, and $w_b$ respectively.
 \end{example}
  
-For a general graph, it is computationally inefficient to evaluate \Eq{eq:idp} by directly summing up the $2^{|V|}$ products.
+For a general graph, it is computationally inefficient to evaluate \Cref{eq:idp} by directly summing up the $2^{|V|}$ products.
 A better approach to evaluate a tensor network is: to find a good pair-wise tensor contraction order as a binary tree and then contract two tensors at a time by this order.
 Let us denote the line graph of the hypergraph representation of a tensor network as $G'$.
 A contraction order of this tensor network corresponds to a tree decomposition of $G'$ and the largest intermediate tensor has a rank equal to the width of this tree decomposition~\cite{Markov2008}.
@@ -715,18 +500,18 @@ One can easily check the largest tensor in contraction has a space complexity $O
 \end{example}
 
 \section{Independence polynomial}\label{sec:indpoly}
-Let $x_i = x$ and $w_i = 1$, \Eq{eq:idp} corresponds to the independence polynomial~\cite{Harvey2018,Ferrin2014}:
+Let $x_i = x$ and $w_i = 1$, \Cref{eq:idp} corresponds to the independence polynomial~\cite{Harvey2018,Ferrin2014}:
 \begin{equation}\label{eq:idpdef}
 I(G, x) = \sum_{k=0}^{\alpha(G)} a_k x^k,
 \end{equation}
 where $a_k$ is the number of independent sets of size $k$, $\alpha(G) \equiv \max_{I}\sum_{v\in I}w_v$ is the size of a maximum independent set and it is also called the independence number.
 An independence polynomial is a useful graph characteristic related to, for example, the partition functions~\cite{Lee1952,Yang1952} and Euler characteristics of the independence complex~\cite{Bousquet2008, Levit2009}.
-%Its connection to \Eq{eq:idp} can be understood as follows: the product over vertex tensor elements produces a factor $x^k$, where $k=\sum_i s_i$ counts the set size,
+%Its connection to \Cref{eq:idp} can be understood as follows: the product over vertex tensor elements produces a factor $x^k$, where $k=\sum_i s_i$ counts the set size,
 %and the product over edge tensor elements gives a factor $1$ for a configuration being in an independent set and $0$ otherwise. The summation counts the number of independent sets of size $k$. 
 By assigning a real number to $x$, one can evaluate this independence polynomial for this specific value directly using tensor network contraction.
 For example, the total number of independent sets can be evaluated as $I(G, 1)$.
 However, instead of evaluating this polynomial for a certain value, we are more interested in knowing the coefficients of this polynomial, because this quantity tells us the counting of independent sets at different sizes.
-%first elevate the tensor elements $0$s and $1$s in tensors $W(x)$ and $B$ from the standard number types to the additive identity, $\mymathbb{0}$, and multiplicative identity, $\mymathbb{1}$, of a commutative semiring as discussed in Sec.~\ref{sec:generic}.
+%first elevate the tensor elements $0$s and $1$s in tensors $W(x)$ and $B$ from the standard number types to the additive identity, $\mymathbb{0}$, and multiplicative identity, $\mymathbb{1}$, of a commutative semiring as discussed in \Cref{sec:generic}.
 %\purple{I'd
 %say that you're about to describe this semiring, otherwise it seems like you're going to
 %use the general definition of the semiring rather than a specific type of semiring}\blue{from $1$ to $\mymathbb{1}$ and $0$ to $\mymathbb{0}$ applies for a general semiring, I haven't change this part, let's discuss to make sure I understand your point.}\purple{Perhaps start the sentence with: Our semiring elements are a polynomial type...}
@@ -745,7 +530,7 @@ The algebra between the polynomials number $a$ of order $k_a$ and $b$ of order $
 \end{equation}
 where $\oplus$ and $\odot$ are the standard polynomial addition and multiplication operations.
 The multiplication can be evaluated in time $O(k\log(k))$ using the convolution theorem~\cite{Schonhage1971}, where $k=\max(k_a, k_b)$.
-The tensors $W$ and $B$, which are introduced in the previous section (Sec.~\ref{sec:tnmap}), can thus be written as 
+The tensors $W$ and $B$, which are introduced in the previous section (\Cref{sec:tnmap}), can thus be written as 
 \begin{equation}
     W^{\rm PN} = \left(\begin{matrix}
         \mymathbb{1} \\
@@ -765,7 +550,7 @@ This seemingly more time and space-efficient approach suffer from precision issu
 The data ranges of standard integer types are too small to cover many practical use cases,
 while the floating-point numbers may have round-off errors that are much larger than the value itself.
 These are because the number of independent sets at different sizes may vary by tens or even hundreds of orders of magnitude.
-For practical methods to evaluate these coefficients, we refer readers to \App{sec:finitefield}, where we provide an accurate and memory-efficient method to find the polynomial by contracting and fitting on finite field algebra.
+For practical methods to evaluate these coefficients, we refer readers to \Cref{sec:finitefield}, where we provide an accurate and memory-efficient method to find the polynomial by contracting and fitting on finite field algebra.
 For simplicity, we use this less efficient polynomial algebra for the discussion in the main text.
 
 % the purpose of discussion in the main text, let us stick to this less efficient polynomial algebra.
@@ -806,7 +591,7 @@ The algebra of the exponents becomes the max-plus tropical algebra~\cite{Maclaga
         \mymathbb{1} &= 0.
     \end{split}\label{eq:tropical}
 \end{equation}
-Algebra \Eq{eq:tropical} and \Eq{eq:countingtropical} are the same as those used in Liu et al.~\cite{Liu2021} to compute the spin glass ground state energy and its degeneracy.
+Algebra \Cref{eq:tropical} and \Cref{eq:countingtropical} are the same as those used in Liu et al.~\cite{Liu2021} to compute the spin glass ground state energy and its degeneracy.
 For independent set calculations here, the vertex tensor and edge tensor becomes:
 \begin{equation}
     W^{\rm T}(w_v) = \left(\begin{matrix}
@@ -822,7 +607,7 @@ For independent set calculations here, the vertex tensor and edge tensor becomes
 
 \subsection{Truncated polynomial algebra for counting independent sets of large size}
 Instead of counting just the MISs, one may also be interested in counting the independent sets with the largest several sizes.
-For example, if one is interested in counting only $a_{\alpha(G)}$ and $a_{\alpha(G)-1}$, we can define a truncated polynomial algebra by keeping only the largest two coefficients in the polynomial in \Eq{eq:polynomial} as:
+For example, if one is interested in counting only $a_{\alpha(G)}$ and $a_{\alpha(G)-1}$, we can define a truncated polynomial algebra by keeping only the largest two coefficients in the polynomial in \Cref{eq:polynomial} as:
 \begin{equation}
     \eqname{P2}
     \begin{split}
@@ -842,7 +627,7 @@ As will be shown below, this algebra can also be extended to enumerate those lar
 
 \subsection{Set algebra for configuration enumeration}
 The configuration enumeration of independent sets include, for example, the enumeration of all independent sets, the enumeration of all MISs, and the enumeration of independent sets with the largest several sizes.
-Recall that in the definition of a vertex tensor in \Eq{eq:vertextensor}, variables carry labels, so that one can read out all independent sets directly from the output polynomials.
+Recall that in the definition of a vertex tensor in \Cref{eq:vertextensor}, variables carry labels, so that one can read out all independent sets directly from the output polynomials.
 The multiplication between labeled variables is commutative while the summation of labeled variables forms a set.
 Intuitively, one can use a bit string as the representation of a labeled variable and use the bit-wise or $\lor^\circ$ as the multiplication operation.
 For example, in a 5-vertex graph, $x_2$ and $x_5$ can be represented as $01000$ and $00001$ respectively and their multiplication $x_2x_5$ can be represented as $01000 \lor^\circ 00001 = 01001$.
@@ -885,9 +670,9 @@ The vertex and edge tensors are thus
     \end{matrix}\right).
 \end{equation}
 
-This set algebra can serve as the coefficients in \Eq{eq:polynomial} to enumerate independent sets of all different sizes, \Eq{eq:countingtropical} to enumerate all MISs, or \Eq{eq:max2poly} to enumerate all independent sets of sizes $\alpha(G)$ and $\alpha(G)-1$.
+This set algebra can serve as the coefficients in \Cref{eq:polynomial} to enumerate independent sets of all different sizes, \Cref{eq:countingtropical} to enumerate all MISs, or \Cref{eq:max2poly} to enumerate all independent sets of sizes $\alpha(G)$ and $\alpha(G)-1$.
 As long as the coefficients in a truncated polynomial are members of a commutative semiring, the polynomial itself is a commutative semiring.
-For example, to enumerate only the MISs, we can define a combined element type $s_{k}\infty^k$, where the coefficients follow the algebra in \Eq{eq:set} and the exponents follow the max-plus tropical algebra.
+For example, to enumerate only the MISs, we can define a combined element type $s_{k}\infty^k$, where the coefficients follow the algebra in \Cref{eq:set} and the exponents follow the max-plus tropical algebra.
 The combined operations become: 
 \begin{equation}
 \eqname{P1+SN}
@@ -916,12 +701,12 @@ Clearly, the vertex tensor and edge tensor become
 \end{equation}
 The enumeration of all MIS configurations corresponds to the contraction of this tensor network.
 However, direct contraction might have significant space overheads for keeping too many intermediate states irrelevant to the final maximum independent sets.
-We introduce the bounding technique in \App{sec:bounding} to avoid this issue.
+We introduce the bounding technique in \Cref{sec:bounding} to avoid this issue.
 One may also be interested in the more studied maximal independent sets~\cite{Bron1973, Eppstein2010, Johnson1988} enumeration.
-It will be discussed in \App{sec:maximal} since it requires using a different tensor network structure.
+It will be discussed in \Cref{sec:maximal} since it requires using a different tensor network structure.
 
 If one is interested in obtaining only one MIS configuration, they can just keep one configuration in each tensor element to save the computational effort.
-By replacing the sets of bit strings in \Eq{eq:set} with a single bit string, we have the following algebra
+By replacing the sets of bit strings in \Cref{eq:set} with a single bit string, we have the following algebra
 
 \begin{equation}
 \eqname{S1}
@@ -938,7 +723,7 @@ In most cases, it is completely fine for the \texttt{select} function to pick a 
 
 \subsection{Sampling extremely large configuration space}
 When the problem scale becomes larger, a set of all bitstrings might be impossible to fit into any type of storage.
-To get something meaningful out of the configuration space, we use a binary sum-product expression tree as a compact representation of a set of configurations, i.e.\ instead of directly computing a set using the algebra in \Eq{eq:set}, we store the process of computing it.
+To get something meaningful out of the configuration space, we use a binary sum-product expression tree as a compact representation of a set of configurations, i.e.\ instead of directly computing a set using the algebra in \Cref{eq:set}, we store the process of computing it.
 Each node in this tree is a quadruple $(type, data, left, right)$, where $type$ is one of \texttt{LEAF}, \texttt{ZERO}, \texttt{SUM} and \texttt{PROD}, $data$ is a bit string as the content in a \texttt{LEAF} node, and $left$ and $right$ are left and right operands of a \texttt{SUM} or \texttt{PROD} node.
 
 \begin{equation}
@@ -963,7 +748,7 @@ The vertex tensor and edge tensor become
     \end{matrix}\right).
 \end{equation}
 
-This algebra is a commutative semiring because we define the equivalence of two sum-product expression trees by comparing their expanded (using \Eq{eq:set}) forms rather than their storage.
+This algebra is a commutative semiring because we define the equivalence of two sum-product expression trees by comparing their expanded (using \Cref{eq:set}) forms rather than their storage.
 Except using the sum-product expression tree directly as tensor elements, one can also let it be the coefficients of a (truncated) polynomial to compute such trees for independent sets with the largest several sizes.
 Although likely, one cannot collect all configurations represented by a sum-product expression tree into a vector due to its extremely large size,
 they can draw unbiased samples from it by direct sampling.
@@ -1020,7 +805,7 @@ They can be computed by the extended tropical algebra, which is a natural genera
 \end{equation}
 where $\texttt{largest}(s, k)$ means truncating the set $s$ by only keeping its $k$ largest values.
 The computation of $s \odot t$ is a maximum sum combination problem that can be done in time $O(k\log(k))$.
-An efficient algorithm for computing the maximum sum combination problem can be found in the supplementary material.
+An efficient algorithm for computing the maximum sum combination problem can be found in \Cref{sec:maxsum}.
 The vertex tensor and edge tensor become
 \begin{equation}
     W^{{\rm T}k}(-\infty^{\otimes k-1} \otimes w_v) = \left(\begin{matrix}
@@ -1034,16 +819,16 @@ The vertex tensor and edge tensor become
     \end{matrix}\right),
 \end{equation}
 where we have used the equation $(-\infty^{\otimes k-1} \otimes 1)^{w_v} = -\infty^{\otimes k-1} \otimes w_v$.
-To find solutions corresponding to the largest $k$ sizes, one can combine the extended tropical algebra with the bit string algebra (\Eq{eq:singleconfig}).
+To find solutions corresponding to the largest $k$ sizes, one can combine the extended tropical algebra with the bit string algebra (\Cref{eq:singleconfig}).
 Since the $\oplus$ operation of the configuration sampler will not be used in the combined algebra, the resulting configurations are deterministic and complete.
 
 \section{Example applications} \label{sec:examples}
 %In this section, we give a few examples where the different properties of independence sets are used.
 
 \subsection{Number of independent sets and entropy constant for hardcore lattice gases}\label{sec:entropy}
-We compute the counting of all independent sets for graphs shown in Figure~\ref{fig:lattices}, where vertices are all placed on square lattices of dimensions $L \times L$.
-The types of graphs include: the square lattice graphs (Figure~\ref{fig:lattices}(a)); the square lattice graphs with a filling factor $p=0.8$, which means $\lfloor pL^{2} \rceil$ sites are occupied with vertices  (Figure~\ref{fig:lattices}(b));
-the King's graphs  (Figure~\ref{fig:lattices}(c)); the King's graphs with a filling factor $p = 0.8$  (Figure~\ref{fig:lattices}(d)), which is the ensemble of graphs used in Ref.~\cite{Ebadi2022} to benchmark quantum algorithms on a Rydberg atom array quantum computer. 
+We compute the counting of all independent sets for graphs shown in \Cref{fig:lattices}, where vertices are all placed on square lattices of dimensions $L \times L$.
+The types of graphs include: the square lattice graphs (\Cref{fig:lattices}(a)); the square lattice graphs with a filling factor $p=0.8$, which means $\lfloor pL^{2} \rceil$ sites are occupied with vertices  (\Cref{fig:lattices}(b));
+the King's graphs  (\Cref{fig:lattices}(c)); the King's graphs with a filling factor $p = 0.8$  (\Cref{fig:lattices}(d)), which is the ensemble of graphs used in Ref.~\cite{Ebadi2022} to benchmark quantum algorithms on a Rydberg atom array quantum computer. 
 
 The number of independent sets for square lattice graphs of size $L \times L$ form a well-known integer sequence (\href{https://oeis.org/A006506}{OEIS A006506}), which is thought as a two-dimensional generalization of the Fibonacci numbers.
 We computed the integer sequence for $L=38$ and $L=39$, which is, to the best of our knowledge, not known before.
@@ -1051,13 +836,13 @@ In the computation, we used finite-field algebra for contracting integer tensor 
 
 A theoretically interesting number that can be computed using the number of independent sets is the entropy constant, which can describe the thermodynamic properties of hard-core lattice gases at the high-temperature limit.
 For the square lattice graphs, this number is called the \textit{hard square entropy constant} (\href{https://oeis.org/A085850}{OEIS A085850}), which is defined as $\lim_{L\rightarrow \infty} F(L,L)^{1/L^2}$, where $F(L,L)$ is the number of independent sets of a given lattice dimensions $L \times L$.
-This quantity arises in statistical mechanics of hard-square lattice gases~\cite{Baxter1980, Pearce1988} and is used to understand phase transitions for these systems. This entropy constant is not known to have an exact representation, but it is accurately known in many digits. Similarly, we can define entropy constants for other lattice gases. In \Fig{fig:hardsquare}, we look at how $F(L,L)^{1/\lfloor pL^2\rceil}$ scales as a function of the grid size $L$ for all types of graphs shown in Figure~\ref{fig:lattices}. Our results match the known results for the non-disordered square lattice and King's graphs. For disordered square lattice and King's graphs with a filling factor $p=0.8$, we randomly sample 1000 graph instances. To our knowledge, the entropy constants for these disordered graphs have not been studied before. They may be used to study phase transitions for disordered lattices, which are typically much harder to understand. Interestingly, the variations due to different random instances are negligible for this quantity. 
+This quantity arises in statistical mechanics of hard-square lattice gases~\cite{Baxter1980, Pearce1988} and is used to understand phase transitions for these systems. This entropy constant is not known to have an exact representation, but it is accurately known in many digits. Similarly, we can define entropy constants for other lattice gases. In \Cref{fig:hardsquare}, we look at how $F(L,L)^{1/\lfloor pL^2\rceil}$ scales as a function of the grid size $L$ for all types of graphs shown in \Cref{fig:lattices}. Our results match the known results for the non-disordered square lattice and King's graphs. For disordered square lattice and King's graphs with a filling factor $p=0.8$, we randomly sample 1000 graph instances. To our knowledge, the entropy constants for these disordered graphs have not been studied before. They may be used to study phase transitions for disordered lattices, which are typically much harder to understand. Interestingly, the variations due to different random instances are negligible for this quantity. 
 % \blue{@Shengtao We either keep this example simple by keeping only square and king's graphs, or explain better why we care about entropy constants at filling 0.8.}
 
 \begin{figure}[t] 
     \centering
     \includegraphics[width=\textwidth, trim={0cm 1cm 0cm 1cm}, clip]{figures/lattices.pdf}
-    \caption{The types of graphs used in the case study in section \ref{sec:entropy}.
+    \caption{The types of graphs used in the case study in \Cref{sec:entropy}.
     The lattice dimensions are $L\times L$. (a) square lattice graphs. (b) square lattice graphs with a filling factor $p=0.8$.
     (c) King's graphs. (d) King's graphs with a filling factor $p=0.8$.}
     \label{fig:lattices}
@@ -1066,7 +851,7 @@ This quantity arises in statistical mechanics of hard-square lattice gases~\cite
 \begin{figure}[t] 
     \centering
     \includegraphics[width=\textwidth, trim={0cm 0cm 0cm 0cm}, clip]{figures/fig5.pdf}
-    \caption{Mean entropy for lattice gases on graphs defined in \Fig{fig:lattices}.
+    \caption{Mean entropy for lattice gases on graphs defined in \Cref{fig:lattices}.
     We sampled $1000$ instances for $p=0.8$ lattices and the error bar is too small to be visible.
     The horizontal black dashed lines are for $\lim_{L\rightarrow \infty} F(L,L)^{1/L^2}$ for the corresponding non-disordered square lattice and King's graphs.
     }
@@ -1085,11 +870,11 @@ It is known that the MIS problem on a general graph can be mapped to the King's 
 It is known that finding MISs of a $d$-regular graphs has the overlap gap property~\cite{Rahman2017,Gamarnik2021} when both $d$ and the graph sizes are large, but, it is not known whether, for small $d$, e.g.\ for $3$-regular graphs, this statement remains true.
 We randomly generated $9$ instances for each category of King's graph at $0.8$ filling with size $20\times 20$ ($320$ vertices) and $3$-regular graphs with size $110$.
 At this problem size, independent sets are too many to fit into any storage, hence we combine the truncated polynomial and sum-product expression tree to directly sample from the target configuration space.
-For each instance $G$, we sample $10^4$ pairs of configurations from the independent sets of sizes $\geq \lceil \gamma \times \alpha(G)\rceil$ and show the pair-wise Hamming distance distribution in \Fig{fig:hamming}.
+For each instance $G$, we sample $10^4$ pairs of configurations from the independent sets of sizes $\geq \lceil \gamma \times \alpha(G)\rceil$ and show the pair-wise Hamming distance distribution in \Cref{fig:hamming}.
 We observe a clear single peak structure at a fixed distance normalized by the MIS size for the King's graphs, indicating the absence of the overlap gap property in a random King's graph at $0.8$ filling.
 Since the MIS problem on an arbitrary graph can be mapped to a King's graph at a certain filling, this result is highly nontrivial. It likely implies 
 that the King's graphs with defects mapped from hard MIS instances have a very small measure in the total defected King's graph space. In contrast, 
-very different pair-wise Hamming distributions are obtained in \Fig{fig:hamming}(b), where we observed the multiple peak structure when the control parameter $\gamma$ is big enough. It indicates the existence of disconnected clusters in the configuration space of the MIS problem on $3$-regular graphs.
+very different pair-wise Hamming distributions are obtained in \Cref{fig:hamming}(b), where we observed the multiple peak structure when the control parameter $\gamma$ is big enough. It indicates the existence of disconnected clusters in the configuration space of the MIS problem on $3$-regular graphs.
 We expect this numerical tool can be used to understand this phenomenon better and to further investigate the graph properties and the geometry of the configuration spaces for a variety of graph instances.
 \begin{figure} 
     % \begin{subfigure}[t]{\textwidth}
@@ -1130,20 +915,20 @@ the ability to enumerate configurations and compute independence polynomials was
 exploring King's graphs with $0.8$ filling.   The hardest instances for classical simulated annealing could be accurately predicted from the independence polynomial, which gave information about the density of local minima at different independent set sizes.
 On the hardest graph instances for simulated annealing studied in the experiment, a high density of local minima were found at independent set sizes of $\alpha(G)-1,$ which the algorithm became trapped in instead of finding the optimal solution of size $\alpha(G)$.
 %Initially, it was suspected that simulated annealing trapped certain clusters of these local minima in the solution space. However, 
-By enumerating the configurations using techniques described in the present work, we found that %n found that there was no clustering in the solution space as in Sec.~\ref{sec:overlap-gap}, and instead 
+By enumerating the configurations using techniques described in the present work, we found that %n found that there was no clustering in the solution space as in \Cref{sec:overlap-gap}, and instead 
 simulated annealing randomly explores the independent sets of size $\alpha(G)-1$ until an optimum solution is found.
 Therefore, the large ratio of local to global minima  prevents simulated annealing from efficiently finding an MIS.
-%and studying the solution space properties for independent sets of size $\alpha(G)$ and $\alpha(G)-1$, we gained detailed insights to performance of both the quantum algorithm and simulated annealing, and could determine if these algorithm were likely to return independent sets from certain clusters of local or global minima in the solution space. Instead, we found that simulated annealing becomes trapped in independent sets of size $\alpha(G)-1$ uniformly at random, which is related to observation that there are no disconnected clusters in the solution space for King's graphs in Sec.~\ref{sec:overlap-gap}.
+%and studying the solution space properties for independent sets of size $\alpha(G)$ and $\alpha(G)-1$, we gained detailed insights to performance of both the quantum algorithm and simulated annealing, and could determine if these algorithm were likely to return independent sets from certain clusters of local or global minima in the solution space. Instead, we found that simulated annealing becomes trapped in independent sets of size $\alpha(G)-1$ uniformly at random, which is related to observation that there are no disconnected clusters in the solution space for King's graphs in \Cref{sec:overlap-gap}.
 
 Although the performance of the quantum algorithm is more challenging to understand due to the inherent difficulty in studying quantum systems, the present methods allow one 
-to gain significant insights by visualizing the experimental outputs of a quantum algorithm over the solution space, as shown in Figure~\ref{fig:exp_configuratoins} for instances with $39$ nodes~\cite{Ebadi2022}.
+to gain significant insights by visualizing the experimental outputs of a quantum algorithm over the solution space, as shown in \Cref{fig:exp_configuratoins} for instances with $39$ nodes~\cite{Ebadi2022}.
 Here, the structure of the solution space is shown on a graph where each vertex represents a large independent set. Each edge represents a pair of independent sets that differ by a swap operation or a vertex addition to the set, which are the operations naturally present in the effective dynamics at the end of the quantum algorithm. 
 %The quantum algorithm either finds the MIS with size $\alpha(G)$ with high probability, or returns a suboptimal independent set, usually with size $\alpha(G)-1.$
 The solution space graph is well-connected by local changes to the spin configurations, has a small diameter, and the degree of each node appears to concentrate. 
 This visualization makes it clear that 
 %the authors inferred that 
 the quantum algorithm does not appear to return solely local minima with a large Hamming distance from the MISs as suggested for adiabatic algorithms e.g. by Ref.~\cite{altshuler2010}  which would appear as a long path on the solution space graph from the sampled local minima to the MIS. Instead, the quantum algorithm samples from local minima across the solution space graph with a wide range of Hamming distances from the MISs. In the case where a large superposition state of local minima is created during the coherent evolution, the quantum algorithm achieves a quadratic speedup over simulated annealing.
-%Consistent with Sec.~\ref{sec:overlap-gap}, there are no disconnected clusters in the solution space for this King's graph.
+%Consistent with \Cref{sec:overlap-gap}, there are no disconnected clusters in the solution space for this King's graph.
 Looking forward, we expect these tools can be applied to understanding the performance of quantum and classical algorithms on a wide class of NP-hard combinatorial optimization problems.
 
 \section{Discussion and conclusion}
@@ -1152,8 +937,8 @@ In this work, we introduced a framework that uses generic tensor networks to com
 Each solution space property is computed using the same tensor network with different tensor element algebra.
 % This technique can further be generalized to computing solution space properties beyond the examples given in this paper. % such as the largest several independent sets sizes, the number of independent sets of a given size, and the enumeration of independent sets of a given size.
 %With different algebras, the contraction of the same tensor network gives us the different properties.
-The different data types introduced in the main text to compute these properties are summarized in the diagram in \Fig{fig:venn-diagram}.
-The class of problems solvable by a tensor network includes but is not limited to maximum independent sets and a variety of other combinatorial problems such as the matching problem, the k-coloring problem, the max-cut problem, the set packing problem, and the set covering problem, as detailed in \App{sec:otherproblems}. 
+The different data types introduced in the main text to compute these properties are summarized in the diagram in \Cref{fig:venn-diagram}.
+The class of problems solvable by a tensor network includes but is not limited to maximum independent sets and a variety of other combinatorial problems such as the matching problem, the k-coloring problem, the max-cut problem, the set packing problem, and the set covering problem, as detailed in \Cref{sec:otherproblems}. 
 
 %Other than the case with real numbers, we have polynomials and truncated polynomials.
 %We combine them with the bit string algebra, the set algebra, and sum-product expression tree algebra for finding, enumerating, and sampling of independent sets at a given size. Three examples are shown to demonstrate how our method can be used to understand the solution space better.
@@ -1171,7 +956,7 @@ It is also possible to extend this idea to other algebras. For example, generic 
 %By adapting to the style of generic programming, we can implement all the algorithms without much effort.
 
 The source code in Julia language for this paper can be found in the Github repository~\cite{GenericTensorNetworks}. 
-There is a short introduction to this repository as well a gist to show how it works in the supplementary material as well.
+There is a short introduction to this repository as well a gist to show how it works in \Cref{sec:technical} as well.
 We expect our tool can be used to understand and study many interesting applications of independent sets and beyond.
 We also hope the toolkit we built, including tensor network contraction order optimization and efficient tropical matrix multiplication, can be helpful to the development of other scientific software.
 
@@ -1224,9 +1009,9 @@ and an edge tensor on each bond
         1 & 0
     \end{matrix}\right),
 \end{equation}
-where the $0$ in the edge tensor comes from $e^{-\beta\infty}$ in the second term of \Eq{eq:eng}, which is the independence constraint.
-By letting $x = e^{\beta}$, we get the tensor network for computing the independence polynomial as described by \Eq{eq:vertextensor} and \Eq{eq:edgetensor}.
-If we further let $w_i=1$, the second line of \Eq{eq:partition} is equivalent to the independence polynomial.
+where the $0$ in the edge tensor comes from $e^{-\beta\infty}$ in the second term of \Cref{eq:eng}, which is the independence constraint.
+By letting $x = e^{\beta}$, we get the tensor network for computing the independence polynomial as described by \Cref{eq:vertextensor} and \Cref{eq:edgetensor}.
+If we further let $w_i=1$, the second line of \Cref{eq:partition} is equivalent to the independence polynomial.
 
 \section{Hard problems and tensor networks}\label{sec:otherproblems}
 \subsection{Maximal independent sets and maximal cliques}\label{sec:maximal}
@@ -1255,7 +1040,7 @@ For a vertex $v$ that has a degree 2, the tensor has the following form
     \end{matrix}\right).
 \end{equation}
  
-Let us consider the graph in Example~\ref{eg:tensorcontraction}. The corresponding tensor network structure for computing the maximal independent polynomial has the following hypergraph representation. \\
+Let us consider the graph in \Cref{eg:tensorcontraction}. The corresponding tensor network structure for computing the maximal independent polynomial has the following hypergraph representation. \\
 
     \centerline{\begin{tikzpicture}[
     dot/.style = {circle, fill, minimum size=#1,
@@ -1296,12 +1081,12 @@ The maximal independence polynomial is defined as
 D_{m}(G, x) = \sum_{k=0}^{\alpha(G)} b_k x^k,
 \end{equation}
 where $b_k$ is the number of maximal independent sets of size $k$.
-Comparing with the independence polynomial in \Eq{eq:idpdef}, we have $b_{k} \leq a_{k}$ and $b_{\alpha(G)} = a_{\alpha(G)}$. $D_m(G, 1)$ counts the total number of maximal independent sets~\cite{Gaspers2012, Manne2013};
+Comparing with the independence polynomial in \Cref{eq:idpdef}, we have $b_{k} \leq a_{k}$ and $b_{\alpha(G)} = a_{\alpha(G)}$. $D_m(G, 1)$ counts the total number of maximal independent sets~\cite{Gaspers2012, Manne2013};
 to our knowledge, the best algorithm has a time complexity $O(1.3642^{|V|})$~\cite{Gaspers2012}.
 %If we want to find an MIS, $b_{k}$ can, in some cases, provide hints on the difficulty of finding the MIS using local algorithms~\cite{Ebadi2022}.
 %The uni-modality, log-concavity, and real-rootness properties of the maximal independence polynomial for special classes of graphs have also been studied~\cite{Hu2017}. 
 
-The benchmark of computing the maximal independent set properties on $3$-regular graphs is shown in the supplementary material.
+The benchmark of computing the maximal independent set properties on $3$-regular graphs is shown in \Cref{sec:benchmark}.
 
 \subsection{Matching problem}
 A $k$-matching in a graph $G=(V,E)$ is a set of $k$ edges that no two of which have a vertex in common.
@@ -1416,7 +1201,7 @@ Let $x^{w_k}_{\ldots} = x$, one can get a polynomial, in which the $k$-th coeffi
 \subsection{Set packing}
 Suppose one has a finite set $S$ and a list of subsets of $S$. Then, the set packing problem asks if some $k$ subsets in the list are pairwise disjoint.
 It is the hypergraph generalization of the independent set problem, where a set corresponds to a vertex and an element corresponds to a hyperedge.
-The generic tensor network for the set packing problem has a similar form as that for the independent set problem, where the vertex tensor is same as \Eq{eq:vertextensor}, while the edge tensor generalizes \Eq{eq:edgetensor} to higher dimensions
+The generic tensor network for the set packing problem has a similar form as that for the independent set problem, where the vertex tensor is same as \Cref{eq:vertextensor}, while the edge tensor generalizes \Cref{eq:edgetensor} to higher dimensions
 \begin{equation}
     B_{s_u,s_v,\ldots, s_w} = \begin{cases}
         1, & s_u+s_v+\ldots+s_w\leq 1,\\
@@ -1449,17 +1234,17 @@ If a subset of $S$ does not include any sets containing element $a$, then this c
 \begin{figure}
     \centering
     \includegraphics[width=0.9\textwidth, trim={0cm 0cm 0cm 0cm}, clip]{figures/masktree.pdf}
-    \caption{Bounded enumeration of maximum independent sets. Here, a circle is a tensor, an arrow specifies the execution direction of a function, $\overline A$ is the Boolean mask for $A$ and $\circ$ is the Hadamard (element-wise) multiplication. (a) is the forward pass with tropical algebra (\Eq{eq:tropical}) for computing $\alpha(G)$.
+    \caption{Bounded enumeration of maximum independent sets. Here, a circle is a tensor, an arrow specifies the execution direction of a function, $\overline A$ is the Boolean mask for $A$ and $\circ$ is the Hadamard (element-wise) multiplication. (a) is the forward pass with tropical algebra (\Cref{eq:tropical}) for computing $\alpha(G)$.
      (b) is the backward pass for computing Boolean gradient masks.
-     (c) is the masked tensor network contraction with tropical algebra combined with sets (\Eq{eq:countingtropicalset}) for enumerating configurations.}
+     (c) is the masked tensor network contraction with tropical algebra combined with sets (\Cref{eq:countingtropicalset}) for enumerating configurations.}
      \label{fig:bounding}
 \end{figure}
 
-When using the algebra in \Eq{eq:countingtropicalset} to enumerate all MISs, the program often stores significantly more intermediate configurations than necessary.
+When using the algebra in \Cref{eq:countingtropicalset} to enumerate all MISs, the program often stores significantly more intermediate configurations than necessary.
 To reduce the space overhead, we will show how to bound the searching space using the MIS size $\alpha(G)$.
-The bounded contraction consists of three stages as shown in \Fig{fig:bounding}. (a) We first compute the value of $\alpha(G)$ with tropical algebra and cache all intermediate tensors.
+The bounded contraction consists of three stages as shown in \Cref{fig:bounding}. (a) We first compute the value of $\alpha(G)$ with tropical algebra and cache all intermediate tensors.
 (b) Then, we compute a Boolean mask for each cached tensor, where we use a Boolean \texttt{true} to represent a tensor element having a contribution to the MIS and Boolean \texttt{false} otherwise.
-(c) Finally, we perform masked tensor network contraction (i.e.\ discarding elements masked \texttt{false}) using the element type with the algebra in \Eq{eq:countingtropicalset} to obtain all MIS configurations.
+(c) Finally, we perform masked tensor network contraction (i.e.\ discarding elements masked \texttt{false}) using the element type with the algebra in \Cref{eq:countingtropicalset} to obtain all MIS configurations.
 The crucial part is computing the masks in step (b). Note that these masks correspond to tensor elements with non-zero gradients to the MIS size; we can compute these masks by back-propagating the gradients.
 To derive the back-propagation rule for tropical tensor contraction,
 we first reduce the problem to finding the back-propagation rule of a tropical matrix multiplication $C = A B$.
@@ -1506,7 +1291,7 @@ a_0 \\ a_1 \\ \vdots \\ a_{\alpha(G)}
 y_0 \\ y_1 \\ \vdots \\ y_{\alpha(G)}
 \end{matrix}\right).\label{eq:lineareq}
 \end{equation}
-Unlike using the polynomial numbers in \Eq{eq:polynomial},  the fitting approach does not have the linear overhead in space.
+Unlike using the polynomial numbers in \Cref{eq:polynomial},  the fitting approach does not have the linear overhead in space.
 However, since the independence polynomial coefficients can have a huge order-of-magnitude range, the round-off errors can be larger than the value itself when using floating-point numbers in computation.
 To avoid using the arbitrary precision number that can be very slow and is incompatible with GPU devices, we introduce the following finite-field algebra $\text{GF}(p)$ approach:
 \begin{equation}
@@ -1520,14 +1305,14 @@ To avoid using the arbitrary precision number that can be very slow and is incom
 \end{equation}
 Regarding the finite-field algebra, we have the following observations:
 \begin{enumerate}
-    \item One can use Gaussian elimination~\cite{Golub2013} to solve the linear equation \Eq{eq:lineareq} since it is a generic algorithm that works for any elements with field algebra. The multiplicative inverse of a finite-field algebra can be computed with the extended Euclidean algorithm.
+    \item One can use Gaussian elimination~\cite{Golub2013} to solve the linear equation \Cref{eq:lineareq} since it is a generic algorithm that works for any elements with field algebra. The multiplicative inverse of a finite-field algebra can be computed with the extended Euclidean algorithm.
     \item Given the remainders of a larger unknown integer $x$ over a set of co-prime integers $\{p_1, p_2, \ldots, p_n\}$,
     $x \pmod {p_1 \times p_2 \times \ldots \times p_n}$ can be computed using the Chinese remainder theorem. With this, one can infer big integers from small integers.
 \end{enumerate}
-With these observations, we develop Algorithm~\ref{alg:finitefield} to compute the independence polynomial exactly without introducing space overheads.
+With these observations, we develop \Cref{alg:finitefield} to compute the independence polynomial exactly without introducing space overheads.
 The algorithm iterates over a sequence of large prime numbers until convergence.
 In each iteration, we choose a large prime number $p$, and contract the tensor networks to evaluate the polynomial for each variable $\chi = (x_{0}, x_{1}, \ldots, x_{\alpha(G)})$ on ${\rm GF}(p)$ and denote the outputs as $(y_0, y_1, \ldots, y_{\alpha(G)}) \pmod p$.
-Then we solve \Eq{eq:lineareq} using Gaussian elimination on ${\rm GF}(p)$ to find the coefficient modulo $p$, $A_p \equiv (a_0, a_1, \ldots, a_{\alpha(G)})\pmod p$.
+Then we solve \Cref{eq:lineareq} using Gaussian elimination on ${\rm GF}(p)$ to find the coefficient modulo $p$, $A_p \equiv (a_0, a_1, \ldots, a_{\alpha(G)})\pmod p$.
 As the last step of each iteration, we apply the Chinese remainder theorem to update $A \pmod P $ to $ A \pmod {P\times p}$, where $P$ is a product of all prime numbers chosen in previous iterations.
 If this number does not change compared with the previous iteration, it indicates the convergence of the result and the program terminates.
 All computations are done with integers of fixed-width $W$ except the last step of applying the Chinese remainder theorem, where we use arbitrary precision integers to represent the counting.
@@ -1557,7 +1342,7 @@ All computations are done with integers of fixed-width $W$ except the last step 
     }\caption{Computing the independence polynomial exactly without integer overflow}\label{alg:finitefield} 
 \end{algorithm}
 
-Alternatively, one can use a faster but less accurate Fourier transformation based method to fit this polynomial, which is detailed and benchmarked in the supplementary material.
+Alternatively, one can use a faster but less accurate Fourier transformation based method to fit this polynomial, which is detailed and benchmarked in \Cref{sec:benchmark}.
 
 \section{Integer sequence formed by the number of independent sets}
 
