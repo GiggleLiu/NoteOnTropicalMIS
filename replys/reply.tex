@@ -1,0 +1,226 @@
+%\documentclass[]{article}
+%\usepackage[colorlinks=true,urlcolor=blue,citecolor=blue,linkcolor=blue]{hyperref}
+\documentclass[longbibliography]{article}
+\usepackage[colorlinks=true,urlcolor=blue,citecolor=blue,linkcolor=blue]{hyperref}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage[affil-it]{authblk}
+\usepackage{graphicx} % Include figure files
+%\usepackage{subfig}
+\usepackage{subcaption}
+\usepackage{bm}% bold math
+\usepackage{color}
+%\bibliographystyle{pnas2009}
+\usepackage{fullpage}
+\newcommand{\s}{\mathbf{s}}
+
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\else % if luatex or xelatex
+\ifxetex
+\usepackage{mathspec}
+\else
+\usepackage{fontspec}
+\fi
+\defaultfontfeatures{Ligatures=TeX,Scale=MatchLowercase}
+\fi
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{%
+\usepackage[]{microtype}
+\UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\PassOptionsToPackage{hyphens}{url} % url is loaded by hyperref
+%\usepackage[unicode=true]{hyperref}
+%\hypersetup{
+%            pdfborder={0 0 0},
+%            breaklinks=true}
+\urlstyle{same}  % don't use monospace font for urls
+\IfFileExists{parskip.sty}{%
+\usepackage{parskip}
+}{% else
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+}
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+\setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{0}
+% Redefines (sub)paragraphs to behave more like sections
+\ifx\paragraph\undefined\else
+\let\oldparagraph\paragraph
+\renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+\let\oldsubparagraph\subparagraph
+\renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+\definecolor{or}{rgb}{0.9,0.3,0.1}
+
+% set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{skull}
+\usepackage[affil-it]{authblk}
+\usepackage{graphicx}% Include figure files
+%\usepackage{subfig}
+\usepackage{subcaption}
+\usepackage{bm}% bold math
+\usepackage{color}
+%\bibliographystyle{pnas2009}
+\usepackage{fullpage}
+\usepackage{enumitem}
+\usepackage{booktabs}       % professional-quality tables
+
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{%
+\usepackage[]{microtype}
+\UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\PassOptionsToPackage{hyphens}{url} % url is loaded by hyperref
+%\usepackage[unicode=true]{hyperref}
+%\hypersetup{
+%            pdfborder={0 0 0},
+%            breaklinks=true}
+\urlstyle{same}  % don't use monospace font for urls
+\IfFileExists{parskip.sty}{%
+\usepackage{parskip}
+}{% else
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{0}
+% Redefines (sub)paragraphs to behave more like sections
+\ifx\paragraph\undefined\else
+\let\oldparagraph\paragraph
+\renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+\let\oldsubparagraph\subparagraph
+\renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+%\definecolor{or}{rgb}{0.0,0.5,0.9}
+\definecolor{or}{rgb}{0.9,0.3,0.1}
+%\definecolor{gr}{gray}{0.4}
+
+% set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+
+%%%%%% Comment related
+\newcommand{\red}[1]{[{\bf  \color{red}{ST: #1}}]}
+\newcommand{\xred}[1]{[{\bf  \color{red}{\sout{ST: #1}}}]}
+\newcommand{\green}[1]{[{\bf  \color{green}{XG: #1}}]}
+\newcommand{\xgreen}[1]{[{\bf  \color{green}{\sout{XG: #1}}}]}
+\newcommand{\blue}[1]{[{\bf  \color{blue}{JG: #1}}]}
+\newcommand{\xblue}[1]{[{\bf  \color{blue}{\sout{JG: #1}}}]}
+\newcommand{\cyan}[1]{[{\bf  \color{cyan}{ML: #1}}]}
+\newcommand{\xcyan}[1]{[{\bf  \color{cyan}{\sout{ML: #1}}}]}
+\newcommand{\purple}[1]{[{\bf  \color{purple}{MC: #1}}]}
+\newcommand{\xpurple}[1]{[{\bf  \color{purple}{\sout{MC: #1}}}]}
+\newcommand{\material}[1]{\iffalse[{\bf  \color{cyan}{Material: #1}}]\fi}
+
+
+\date{}
+
+\begin{document}
+
+\subsection{Letter to the Editor}\label{header-n558}
+
+Dear Dr. Oseledets,
+
+Thank you for your handling and careful consideration of our manuscript ``Computing solution space properties of combinatorial optimization problems via generic tensor networks'', MS\#M150178, for sending it for in-depth review, and for giving us the opportunity to address the reviewer's comments and to refine our manuscript. 
+%We would also like to thank reviewers for their thorough reading of our manuscript and for their constructive suggestions that have helped us improve our manuscript.
+%We thank the referee for their careful readings and constructive questions which
+%helped us deepen understandings on the topic and improve the presentation of the manuscript.
+We are very excited that you also read through the paper and give a possitive feedback.
+
+We have revised the manuscript according to the reviewers' constructive suggestions.
+Below, we provide detailed point-to-point response to all of the reviewers' comments, as well as a summary of the changes we have introduced in the main text, figures, and supplementary materials. Thank you again for your consideration! \\
+
+Best Wishes,\\
+Jin-Guo Liu, Xun Gao, Madelyn Cain, Mikhail D. Lukin and Sheng-Tao Wang
+
+%\newpage
+
+\subsection{List of Main Modifications in the Manuscript}\label{header-n30}
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item The Section ...
+\item A new figure, ...
+\item We have added a paragraph at the ...
+\item In the revised Supplementary Material, a Section ...
+\item In the revised Supplementary Material, the Section ...
+\item The section ...
+\end{enumerate}
+
+
+
+\subsection{Responses to the Referee}
+
+\begin{enumerate}[start=0]
+
+\referee{
+This is a review for "Computing solution space properties of combinatorial optimization problems via generic tensor networks" by Jin-Guo Liu, Xun Gao, Madelyn Cain, Mikhail Lukin, and Sheng-Tao Wang. The main contribution of the paper is claimed to be "introduction of a unified framework to compute solution space properties of a broad class of combinatorial optimization problems."
+}
+
+{\bf Response:}
+
+\referee{
+Comments:
+1) line 85, combinatoric problems → combinatorial problems.
+
+2) line 120, "commutative semiring is a field that needs not to have an additive inverse and multiplicative inverse"
+
+I feel the authors meant "need not have" as having the additive inverse and multiplicative inverse does not violate the properties of a commutative semiring. Also, every field has multiplicative and additive inverse by definition so technically a commutative semiring is not a field. Maybe the authors could rephrase the statement to make more sense.
+
+3) line 129, $\oplus$ resembles XOR, it may not be the best notation in my opinion in the context of computer science.
+
+4) line 154, "we map a vertex $v \in V$ to a label $s_v \in {0,1}$ of dimension 2 where we use 0(1) to denote a vertex is absent(present) in the set"
+
+which set? I? there is no label for the set also the type of the map(domain and co-domain) for $s_v$ is not specified, from the context and the word dimension it seems to be a pair for each v i.e. $sv:V\rightarrow{0,1}\times2$ but from the description it seems to be a single number i.e. an element of the set ${0,1}$.
+
+5) Line 156-157, equation (4.1) is said to be indexed by $s_v$ but $s_v$ does not appear in the equation.
+
+6) Line 158-159, " $x_v$ is a variable associated with $v$".
+
+What kind of variable? What does raising it to an exponent mean in line 159?
+}
+
+{\bf Response:}
+
+\referee{
+A lot of effort seems to have been put in making the paper but due to the informal style of narration from the very beginning, misinterpretation is very likely, especially for a newcomer in the field, and can be quite confusing for specialists as well. The basic definitions for e.g. of tensor networks, contractions etc. could be formulated more rigorously to avoid ambiguity which would aid smoother reading of the paper. I would suggest specifying the types for the maps and variables wherever possible as there are plenty of them.
+At present, the work has the flavor of a review paper. In order to address this, the main results obtained could be formulated as theorems or propositions to make them clearly visible in the body of the text as it's hard to locate them at the moment.
+ }
+
+{\bf Response:}
+
+\referee{
+Also, I recommend the authors better compare with prior work on this topic for e.g. https://arxiv.org/pdf/1405.7375.pdf and relevant references therein.
+}
+
+{\bf Response:}
+~\cite{Biamonte2017}
+
+
+\end{enumerate}
+
+\bibliographystyle{unsrt}
+\bibliography{refs}
+
+
+\end{document}

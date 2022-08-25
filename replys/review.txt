@@ -1,0 +1,24 @@
+This is a review for "Computing solution space properties of combinatorial optimization problems via generic tensor networks" by Jin-Guo Liu, Xun Gao, Madelyn Cain, Mikhail Lukin, and Sheng-Tao Wang. The main contribution of the paper is claimed to be "introduction of a unified framework to compute solution space properties of a broad class of combinatorial optimization problems."
+Comments:
+1) line 85, combinatoric problems → combinatorial problems.
+
+2) line 120, "commutative semiring is a field that needs not to have an additive inverse and multiplicative inverse"
+
+I feel the authors meant "need not have" as having the additive inverse and multiplicative inverse does not violate the properties of a commutative semiring. Also, every field has multiplicative and additive inverse by definition so technically a commutative semiring is not a field. Maybe the authors could rephrase the statement to make more sense.
+
+3) line 129, ⊕ resembles XOR, it may not be the best notation in my opinion in the context of computer science.
+
+4) line 154, "we map a vertex v ∈ V to a label s_v ∈ {0,1} of dimension 2 where we use 0(1) to denote a vertex is absent(present) in the set"
+
+which set? I? there is no label for the set also the type of the map(domain and co-domain) for s_v is not specified, from the context and the word dimension it seems to be a pair for each v i.e. sv:V→{0,1}×2 but from the description it seems to be a single number i.e. an element of the set {0,1}.
+
+5) Line 156-157, equation (4.1) is said to be indexed by s_v but s_v does not appear in the equation.
+
+6) Line 158-159, " x_v is a variable associated with v".
+
+What kind of variable? What does raising it to an exponent mean in line 159?
+
+
+A lot of effort seems to have been put in making the paper but due to the informal style of narration from the very beginning, misinterpretation is very likely, especially for a newcomer in the field, and can be quite confusing for specialists as well. The basic definitions for e.g. of tensor networks, contractions etc. could be formulated more rigorously to avoid ambiguity which would aid smoother reading of the paper. I would suggest specifying the types for the maps and variables wherever possible as there are plenty of them.
+At present, the work has the flavor of a review paper. In order to address this, the main results obtained could be formulated as theorems or propositions to make them clearly visible in the body of the text as it's hard to locate them at the moment.
+Also, I recommend the authors better compare with prior work on this topic for e.g. https://arxiv.org/pdf/1405.7375.pdf and relevant references therein.

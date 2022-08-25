@@ -1,0 +1,17 @@
+Index of Supplementary Materials
+
+Title of paper: Computing solution space properties of combinatorial optimization problems via generic tensor networks
+
+
+Authors: Jin-Guo Liu, Xun Gao, Madelyn Cain, Mikhail D. Lukin, and Sheng-Tao Wang
+
+File: suppl.pdf
+
+Type: PDF document
+
+Contents:
+* A benchmark about the performance.
+* An example of increased contraction complexity for the standard tensor network notation.
+* The discrete Fourier transform approach to computing the independence polynomial.
+* Computing maximum sum combination efficiently.
+* A technical guide for code repository and a gist about the implementation.
