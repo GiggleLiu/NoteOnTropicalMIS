@@ -132,6 +132,7 @@
 \newcommand{\purple}[1]{[{\bf  \color{purple}{MC: #1}}]}
 \newcommand{\xpurple}[1]{[{\bf  \color{purple}{\sout{MC: #1}}}]}
 \newcommand{\material}[1]{\iffalse[{\bf  \color{cyan}{Material: #1}}]\fi}
+\newcommand{\referee}[1]{\item {\color{or}{#1}}}
 
 
 \date{}
@@ -143,13 +144,10 @@
 Dear Dr. Oseledets,
 
 Thank you for your handling and careful consideration of our manuscript ``Computing solution space properties of combinatorial optimization problems via generic tensor networks'', MS\#M150178, for sending it for in-depth review, and for giving us the opportunity to address the reviewer's comments and to refine our manuscript. 
-%We would also like to thank reviewers for their thorough reading of our manuscript and for their constructive suggestions that have helped us improve our manuscript.
-%We thank the referee for their careful readings and constructive questions which
-%helped us deepen understandings on the topic and improve the presentation of the manuscript.
 We are very excited that you also read through the paper and give a possitive feedback.
 
-We have revised the manuscript according to the reviewers' constructive suggestions.
-Below, we provide detailed point-to-point response to all of the reviewers' comments, as well as a summary of the changes we have introduced in the main text, figures, and supplementary materials. Thank you again for your consideration! \\
+We have revised the manuscript according to the reviewer's constructive suggestions.
+Below, we provide detailed point-to-point response to all of the reviewer's comments, as well as a summary of the changes we have introduced in the main text, figures, and supplementary materials. Thank you again for your consideration! \\
 
 Best Wishes,\\
 Jin-Guo Liu, Xun Gao, Madelyn Cain, Mikhail D. Lukin and Sheng-Tao Wang
@@ -175,11 +173,7 @@ Jin-Guo Liu, Xun Gao, Madelyn Cain, Mikhail D. Lukin and Sheng-Tao Wang
 
 \referee{
 This is a review for "Computing solution space properties of combinatorial optimization problems via generic tensor networks" by Jin-Guo Liu, Xun Gao, Madelyn Cain, Mikhail Lukin, and Sheng-Tao Wang. The main contribution of the paper is claimed to be "introduction of a unified framework to compute solution space properties of a broad class of combinatorial optimization problems."
-}
 
-{\bf Response:}
-
-\referee{
 Comments:
 1) line 85, combinatoric problems → combinatorial problems.
 
@@ -201,6 +195,8 @@ What kind of variable? What does raising it to an exponent mean in line 159?
 }
 
 {\bf Response:}
+Thank you for the careful reading and constructive comments on notations. We applied the most of the suggested changes accordingly in the main text to make it more readable except the comment 3).
+We can not find a better symbol to replace the existing one, so we emphasised this notation is different from the XOR in computer science when we first introduce it.
 
 \referee{
 A lot of effort seems to have been put in making the paper but due to the informal style of narration from the very beginning, misinterpretation is very likely, especially for a newcomer in the field, and can be quite confusing for specialists as well. The basic definitions for e.g. of tensor networks, contractions etc. could be formulated more rigorously to avoid ambiguity which would aid smoother reading of the paper. I would suggest specifying the types for the maps and variables wherever possible as there are plenty of them.
@@ -208,14 +204,18 @@ At present, the work has the flavor of a review paper. In order to address this,
  }
 
 {\bf Response:}
+Thanks the Referee for acknologying the effort we put in making the paper. The Referee not only points out the problem in writing, but also provide constructive comments to help the paper present better.
+We re-organized the contents in the definition, theorem, proposition style to make the key points more clear to readers in the field of theoretical computational complexity and applied mathematics.
 
 \referee{
 Also, I recommend the authors better compare with prior work on this topic for e.g. https://arxiv.org/pdf/1405.7375.pdf and relevant references therein.
 }
 
 {\bf Response:}
-~\cite{Biamonte2017}
-
+Thank the Referee for pointing out a work that we did not notice before.
+In the introduction, we cited a review paper from the same author~\cite{Biamonte2017}.
+It is definitely better to cite and compare this earlier work as you suggested as well.
+We also added more discussion about the work you mentioned in the Appendix B.6, where we constructed the tensor network for the satisfiability problem to credit the work you mentioned properly.
 
 \end{enumerate}
 
