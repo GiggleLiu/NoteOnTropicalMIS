@@ -110,7 +110,7 @@ A benchmark to demonstrate the performance of our algorithms can be found in bot
 
 \section{Tensor networks}\label{sec:tn}
 \begin{definition}[Tensor Network~\cite{Cirac2021, Orus2014}]
-    A tensor network is a triple of $\mathcal{N} = (\Tensors, \Inputs, \Output)$ where $\Tensors = (\Tensors_1, \ldots, \Tensors_m)$ is a vector of tensors, $\Inputs$ is a map from tensor to a vector of labels $\Inputs: \Tensors_j \mapsto \mathbf{l}_j$, $(\mathbf{l}_j)_i \in \Sigma, i=1,\ldots, \rm{rank}(\Tensors_j)$.
+    A tensor network is a quadruple of $\mathcal{N} = (\Tensors, \Inputs, \Output, \Sigma)$ where $\Sigma$ is a the alphabet of labels, $\Tensors = (\Tensors_1, \ldots, \Tensors_m)$ is a vector of tensors, $\Inputs$ is a map from tensor to a vector of labels $\Inputs: \Tensors_j \mapsto \mathbf{l}_j$, $(\mathbf{l}_j)_i \in \Sigma, i=1,\ldots, \rm{rank}(\Tensors_j)$.
     $\Output$ is a vector of labels for specifying the output.
 \end{definition}
 A tensor network is composed of a collection of tensors, a collection of labels associated with tensor dimensions, and an indicator of which tensor is the output.
@@ -216,18 +216,18 @@ We find that as long as the tensor elements are members of a commutative semirin
 Compared to a field, a commutative semiring does not need not to have an additive inverse and a multiplicative inverse.
 Giving up these nice properties of fields has significant implications for tensor computation: tensor network compression algorithms might not be applicable because matrix factorization is NP-hard for commutative semirings~\cite{Shitov2014} and matrix multiplication faster than $O(n^3)$ does not exist for an algebra without an additive inverse~\cite{Kerr1970}.
 Here, we only use the commutative properties of an algebra for optimizing the tensor network contraction order.
-To define a commutative semiring with the addition operation $\OPLUS$ (not the logical \texttt{XOR} operation in computer science) and the multiplication operation $\odot$ on a set $S$, the following relations must hold for any arbitrary three elements $a, b, c \in S$.
+To define a commutative semiring with the addition operation $\oplus$\footnote{The $\oplus$ operator in the main text means the generic addition, which different from the logical \texttt{XOR} in computer science} and the multiplication operation $\odot$ on a set $S$, the following relations must hold for any arbitrary three elements $a, b, c \in S$.
 \begin{align*}
-(a \OPLUS b) \OPLUS c = a \OPLUS (b \OPLUS c) & \hspace{5em}\text{$\triangleright$ commutative monoid $\OPLUS$ with identity $\mymathbb{0}$}\\
-a \OPLUS \mymathbb{0} = \mymathbb{0} \OPLUS a = a &\\
-a \OPLUS b = b \OPLUS a &\\
+(a \oplus b) \oplus c = a \oplus (b \oplus c) & \hspace{5em}\text{$\triangleright$ commutative monoid $\oplus$ with identity $\mymathbb{0}$}\\
+a \oplus \mymathbb{0} = \mymathbb{0} \oplus a = a &\\
+a \oplus b = b \oplus a &\\
 &\\
 (a \odot b) \odot c = a \odot (b \odot c)  &   \hspace{5em}\text{$\triangleright$ commutative monoid $\odot$ with identity $\mymathbb{1}$}\\
 a \odot  \mymathbb{1} =  \mymathbb{1} \odot a = a &\\
 a \odot b = b \odot a &\\
 &\\
-a \odot (b\OPLUS c) = a\odot b \OPLUS a\odot c  &  \hspace{5em}\text{$\triangleright$ left and right distributive}\\
-(a\OPLUS b) \odot c = a\odot c \OPLUS b\odot c &\\
+a \odot (b\oplus c) = a\odot b \oplus a\odot c  &  \hspace{5em}\text{$\triangleright$ left and right distributive}\\
+(a\oplus b) \odot c = a\odot c \oplus b\odot c &\\
 &\\
 a \odot \mymathbb{0} = \mymathbb{0} \odot a = \mymathbb{0}
 \end{align*}
@@ -506,9 +506,12 @@ One can easily check the largest tensor in contraction has a space complexity $O
 \section{Independence polynomial}\label{sec:indpoly}
 
 \begin{theorem}
-    The independence polynomial of a graph $G = (V, E)$ can be computed in time $O(|V|^22^{{\rm tw}(G)})$.
+    The independence polynomial~\cite{Harvey2018,Ferrin2014} of a graph $G = (V, E)$ can be computed in time $O(|V|^22^{{\rm tw}(G)})$.
 \end{theorem}
-Let $x_i = x$ and $w_i = 1$, \Cref{eq:idp} corresponds to the independence polynomial~\cite{Harvey2018,Ferrin2014}:
+\begin{proof}
+    By contracting 
+\end{proof}
+Let $x_i = x$ and $w_i = 1$, \Cref{eq:idp} corresponds to the independence polynomial:
 \begin{equation}\label{eq:idpdef}
 I(G, x) = \sum_{k=0}^{\alpha(G)} a_k x^k,
 \end{equation}
@@ -530,13 +533,13 @@ The algebra between the polynomials number $a$ of order $k_a$ and $b$ of order $
 \begin{equation}
     \eqname{PN}
     \begin{split}
-    a \OPLUS b &= (a_0 + b_0, a_1 + b_1, \ldots, a_{\max(k_a, k_b)} + b_{\max(k_a, k_b)}),\\
+    a \oplus b &= (a_0 + b_0, a_1 + b_1, \ldots, a_{\max(k_a, k_b)} + b_{\max(k_a, k_b)}),\\
     a \odot b &= (a_0 + b_0, a_1b_0 + a_0b_1, a_{2}b_{0} + a_{1}b_{1} + a_{0}b_{2},  \ldots, a_{k_a} b_{k_b}),\\
     \mymathbb{0} &= (),  \\
     \mymathbb{1} &= (1), \label{eq:polynomial}
     \end{split}
 \end{equation}
-where $\OPLUS$ and $\odot$ are the standard polynomial addition and multiplication operations.
+where $\oplus$ and $\odot$ are the standard polynomial addition and multiplication operations.
 The multiplication can be evaluated in time $O(k\log(k))$ using the convolution theorem~\cite{Schonhage1971}, where $k=\max(k_a, k_b)$.
 The tensors $W$ and $B$, which are introduced in the previous section (\Cref{sec:tnmap}), can thus be written as 
 \begin{equation}
@@ -581,7 +584,7 @@ From this, we can define a new algebra as
 \begin{equation}
     \eqname{P1}
 \begin{split}
-    a_x\infty^x \OPLUS a_y\infty^y &= \begin{cases}
+    a_x\infty^x \oplus a_y\infty^y &= \begin{cases}
         (a_x + a_y)\infty^{\max(x,y)}, & x = y\\
         a_y\infty^{\max(x,y)}, & x < y\\
         a_x\infty^{\max(x,y)}, & x > y
@@ -599,7 +602,7 @@ If one is only interested in finding the MIS size, one can drop the counting fie
 The algebra of the exponents becomes the max-plus tropical algebra~\cite{Maclagan2015, Moore2011}:
 \begin{equation}\eqname{T}
     \begin{split}
-        x \OPLUS y &= \max(x,y)\\
+        x \oplus y &= \max(x,y)\\
         x \odot y &= x + y\\
         \mymathbb{0} &= -\infty\\
         \mymathbb{1} &= 0.
@@ -625,7 +628,7 @@ For example, if one is interested in counting only $a_{\alpha(G)}$ and $a_{\alph
 \begin{equation}
     \eqname{P2}
     \begin{split}
-    a \OPLUS b &= (a_{\max(k_a, k_b)-1} + b_{\max(k_a, k_b)-1}, a_{\max(k_a, k_b)} + b_{\max(k_a, k_b)}),\\
+    a \oplus b &= (a_{\max(k_a, k_b)-1} + b_{\max(k_a, k_b)-1}, a_{\max(k_a, k_b)} + b_{\max(k_a, k_b)}),\\
     a \odot b &= (a_{k_a-1} b_{k_b}+a_{k_a} b_{k_b-1}, a_{k_a} b_{k_b}),\\
     \mymathbb{0} &= (), \\
     \mymathbb{1} &= (1).\label{eq:max2poly}
@@ -654,7 +657,7 @@ To enumerate all independent sets, we designed an algebra on sets of bit strings
 \begin{equation}
 \eqname{SN}
 \begin{split}
-    s \OPLUS t &= s \cup t\\
+    s \oplus t &= s \cup t\\
     s \odot t &= \{\sigma \lor^\circ \tau \, | \, \sigma \in s, \tau \in t\}\\
     \mymathbb{0} &= \{\}\\
     \mymathbb{1} &= \{0^{\otimes |V|}\},
@@ -665,8 +668,8 @@ where $s$ and $t$ are each a set of $|V|$-bit strings.
     For elements being bit strings of length $5$, we have the following set algebra
 \begin{equation*}
 \begin{split}
-    &\{00001\} \OPLUS \{01110, 01000\} = \{01110, 01000\} \OPLUS \{00001\} = \{00001,01110, 01000\}\\
-    &\{00001\} \OPLUS \{\} = \{00001\}\\
+    &\{00001\} \oplus \{01110, 01000\} = \{01110, 01000\} \oplus \{00001\} = \{00001,01110, 01000\}\\
+    &\{00001\} \oplus \{\} = \{00001\}\\
 &\\
     &\{00001\} \odot \{01110, 01000\} = \{01110, 01000\} \odot \{00001\} = \{01111, 01001\}\\
     &\{00001\} \odot \{\} = \{\}\\
@@ -696,7 +699,7 @@ The combined operations become:
 \begin{equation}
 \eqname{P1+SN}
 \begin{split}
-    s_x\infty^x \OPLUS s_y\infty^y &= \begin{cases}
+    s_x\infty^x \oplus s_y\infty^y &= \begin{cases}
         (s_x \cup s_y)\infty^{\max(x,y)}, & x = y\\
         s_y\infty^{\max(x,y)}, & x < y\\
         s_x\infty^{\max(x,y)}, & x > y
@@ -730,7 +733,7 @@ By replacing the sets of bit strings in \Cref{eq:set} with a single bit string, 
 \begin{equation}
 \eqname{S1}
 \begin{split}
-    \sigma \OPLUS \tau &= \texttt{select}(\sigma, \tau), \\
+    \sigma \oplus \tau &= \texttt{select}(\sigma, \tau), \\
     \sigma \odot \tau &= (\sigma\lor^\circ \tau),\\
     \mymathbb{0} &= 1^{\otimes |V|}, \\
     \mymathbb{1} &= 0^{\otimes |V|}.
@@ -752,7 +755,7 @@ Each node in this tree is a quadruple $(type, data, left, right)$, where $type$ 
 \begin{equation}
 \eqname{EXPR}
 \begin{split}
-    s \OPLUS t &= (\texttt{SUM}, /, s, t)\\
+    s \oplus t &= (\texttt{SUM}, /, s, t)\\
     s \odot t &= (\texttt{PROD}, /, s, t)\\
     \mymathbb{0} &= (\texttt{ZERO}, /, /, /)\\
     \mymathbb{1} &= (\texttt{LEAF}, 0^{\otimes |V|}, /, /).
@@ -794,8 +797,8 @@ This sum-product expression tree can be represented diagrammatically as the foll
     \def\b{0.5};
     \def\ya{-1.0};
     \def\yb{-0.8};
-    \node[] at (\dx, 0) (P1) {$\OPLUS$};
-    \node[] at (\dx+\a, \ya) (P2) {$\OPLUS$};
+    \node[] at (\dx, 0) (P1) {$\oplus$};
+    \node[] at (\dx+\a, \ya) (P2) {$\oplus$};
     \node[] at (\dx-\a, \ya) (M1) {$\odot$};
     \node[] at (\dx-\a-\b, \ya+\yb) (A) {$A$};
     \node[] at (\dx-\a+\b, \ya+\yb) (B) {$B$};
@@ -824,7 +827,7 @@ They can be computed by the extended tropical algebra, which is a natural genera
 \begin{equation}
 \eqname{T$k$}
 \begin{split}
-    s \OPLUS t &= \texttt{largest}(s \cup t, k)\\
+    s \oplus t &= \texttt{largest}(s \cup t, k)\\
     s \odot t &= \texttt{largest}(\{a+b | a \in s, b\in t\}, k)\\
     \mymathbb{0} &= -\infty^{\otimes k}\\
     \mymathbb{1} &= -\infty^{\otimes k-1} \otimes 0
@@ -847,7 +850,7 @@ The vertex tensor and edge tensor become
 \end{equation}
 where we have used the equation $(-\infty^{\otimes k-1} \otimes 1)^{w_v} = -\infty^{\otimes k-1} \otimes w_v$.
 To find solutions corresponding to the largest $k$ sizes, one can combine the extended tropical algebra with the bit string algebra (\Cref{eq:singleconfig}).
-Since the $\OPLUS$ operation of the configuration sampler will not be used in the combined algebra, the resulting configurations are deterministic and complete.
+Since the $\oplus$ operation of the configuration sampler will not be used in the combined algebra, the resulting configurations are deterministic and complete.
 
 \section{Example applications} \label{sec:examples}
 %In this section, we give a few examples where the different properties of independence sets are used.
@@ -1207,7 +1210,7 @@ where $d_k$ is the number of dominating sets of size $k$.
 \subsection{Boolean satisfiability Problem}
 The Boolean satisfiability problem is the problem of determining if there exists an assignment that satisfies a given Boolean formula.
 One can specify a satisfiable problem in the conjunctive normal form (CNF), i.e.\ a conjunction of clauses (or disjunctions of Boolean literals).
-To reduce the problem of solving a CNF to a tensor network contraction, we first map a Boolean literal $a$ and its negation $\neg a$ to the same degree of freedom $s_a \in \{0, 1\}$.
+The standard tensor network can be used to study the counting version of the satisfiability problem~\cite{Biamonte2015}, while in the following, we will show a generic reduction from the problem of solving a CNF to a tensor network contraction for solving more solution space properties. We first map a Boolean literal $a$ and its negation $\neg a$ to the same degree of freedom $s_a \in \{0, 1\}$.
 $s_a = 0$ stands for variable $a$ having value \texttt{false} while $s_a=1$ stands for having value \texttt{true}.
 Then we map a clause to a tensor. For example, a $k$-th clause $\neg a \vee b \vee \neg c$ can be mapped to a tensor labeled by $(s_a, s_b, s_c)$.
 \begin{equation}
@@ -1275,7 +1278,7 @@ The bounded contraction consists of three stages as shown in \Cref{fig:bounding}
 The crucial part is computing the masks in step (b). Note that these masks correspond to tensor elements with non-zero gradients to the MIS size; we can compute these masks by back-propagating the gradients.
 To derive the back-propagation rule for tropical tensor contraction,
 we first reduce the problem to finding the back-propagation rule of a tropical matrix multiplication $C = A B$.
-Since $ C_{ik} = \bigOPLUS_{j} \ A_{ij} \odot B_{jk} = \max_{j} \ A_{ij} \odot B_{jk}$ with tropical algebra, we have the following inequality
+Since $ C_{ik} = \bigoplus_{j} \ A_{ij} \odot B_{jk} = \max_{j} \ A_{ij} \odot B_{jk}$ with tropical algebra, we have the following inequality
 \begin{equation}
     A_{ij} \odot B_{jk} \leq C_{ik}.
 \end{equation}
@@ -1290,7 +1293,7 @@ Since $A_{ij} \odot B_{jk} = A_{ij} + B_{jk}$, one can move $B_{jk}$ to the righ
 where ${}^{\circ -1}$ is the element-wise multiplicative inverse on tropical algebra (which is the additive inverse on real numbers).
 The inequality still holds if we take the minimum over $k$: 
 \begin{equation}
-    A_{ij} \leq \min_{k}(C_{ik} \odot B_{jk}^{\circ -1}) = \left(\max_{k} \left(C_{ik}^{\circ -1} \odot B_{jk} \right) \right)^{\circ -1} = \left(\bigOPLUS_{k} \left(C_{ik}^{\circ -1} \odot B_{jk} \right) \right)^{\circ -1} = \left( C^{\circ-1} B^{\mathsf{T}} \right)^{\circ -1}_{ij}.
+    A_{ij} \leq \min_{k}(C_{ik} \odot B_{jk}^{\circ -1}) = \left(\max_{k} \left(C_{ik}^{\circ -1} \odot B_{jk} \right) \right)^{\circ -1} = \left(\bigoplus_{k} \left(C_{ik}^{\circ -1} \odot B_{jk} \right) \right)^{\circ -1} = \left( C^{\circ-1} B^{\mathsf{T}} \right)^{\circ -1}_{ij}.
 \end{equation}
 On the right-hand side, we transform the operation into a tropical matrix multiplication so that we can utilize the fast tropical BLAS routines~\cite{TropicalGEMM}.
 Again, the equality holds if and only if the element $A_{ij}$ has a contribution to $C$ (i.e.\ having a non-zero gradient).
@@ -1324,7 +1327,7 @@ To avoid using the arbitrary precision number that can be very slow and is incom
 \begin{equation}
 \eqname{GF$(p)$}
 \begin{split}
-    x ~\OPLUS~ y &= x+y\pmod p,\\
+    x ~\oplus~ y &= x+y\pmod p,\\
     x ~\odot~ y &= xy\pmod p,\\
     \mymathbb{0} &= 0,\\
     \mymathbb{1} &= 1.
