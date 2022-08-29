@@ -310,40 +310,39 @@ This section describes the reduction of the independent set problem to a tensor 
 An alternative interpretation, perhaps more accessible to physicists, can be found in \Cref{sec:energymodel}, where we introduce the reduction from the energy model of hardcore lattice gases~\cite{Dyre2016, Fernandes2007}.
 Let $G=(V,E)$ be an undirected graph with each vertex $v\in V$ being associated with a weight $w_v$.
 An independent set $I \subseteq V$ is a set of vertices that for any vertex pair $u,v \in I$, we have $(u, v) \not\in E$.
-To reduce the independent set problem on $G$ to a tensor network contraction, we first map each vertex $v\in V$ to a label $s_v \in \{0, 1\}$ of dimension $2$, where we use $0$ ($1$) to denote a vertex is absent (present) in $I$.
-For each label $s_v$, we define a parameterized rank-one tensor associated with it as
+To the independent set problem on $G$ can be encoded as a tensor network $\mathcal{N}_{\rm IS}(G)$
+\begin{equation}\label{eq:mistensornetwork}
+\begin{split}
+    \mathcal{T} &= \{W^{(v)} | v\in V\} \cup \{B^{(u, v)} | (u, v) \in E\} \cup \{P\},\\
+    \Sigma &= \{s_v | v \in V\},\\
+    O &= P,\\
+    \lambda &= T \mapsto \begin{cases}
+                    (s_v), &T = W^{(v)}\\
+                    (s_u, s_v), &T = B^{(u, v)}\\
+                    (), & T = P
+                    \end{cases},
+    \end{split}
+\end{equation}
+where for each vertex $v$, we define a parameterized rank-one tensor associated with it as
 \begin{equation}
     W^{(v)} = \left(\begin{matrix}
         1 \\
         x_v^{w_v}
     \end{matrix}\right),\label{eq:vertextensor}
 \end{equation}
-where $x_v$ is a variable associated with $v$.
-Tensor elements can be indexed by $s_v$, e.g.\ $W^{(v)}_0=1$ is the first element associated with $s_v=0$ and $W^{(v)}_1=x_v^{w_v}$ is the second element associated with $s_v=1$.
-Similarly, for each edge $(u, v) \in E$, we define a matrix $B$ indexed by $s_u$ and $s_v$ as
+and for each edge $(u, v) \in E$, we define a matrix $B$ indexed by $s_u$ and $s_v$ as
 \begin{equation}
     \qquad \quad 
        B^{(u, v)} = \left(\begin{matrix}
         1  & 1\\
         1 & 0
-    \end{matrix}\right), \label{eq:edgetensor}
+    \end{matrix}\right). \label{eq:edgetensor}
 \end{equation}
-which encodes the independent set constraint since $B_{11} = 0$, meaning the two vertices cannot be both in the independent set. 
-The corresponding tensor network $\mathcal{N}_{\rm IS}(G)$ is
-\begin{equation}\label{eq:mistensornetwork}
-\begin{split}
-    \mathcal{T} &= \{W^{(v)} | v\in V\} \cup \{B^{(u, v)} | (u, v) \in E\} \cup \{P\}\\
-    \Sigma &= \{s_v | v \in V\}\\
-    O &= P\\
-    \lambda &= T \mapsto \begin{cases}
-                    (s_v), &T = W^{(v)}\\
-                    (s_u, s_v), &T = B^{(u, v)}\\
-                    (), & T = P
-                    \end{cases}
-    \end{split}
-\end{equation}
-where we use the superscripts to denote which vertex or edge a tensor is associated to.
+We map each vertex $v\in V$ to a label $s_v \in \{0, 1\}$ of dimension $2$, where we use $0$ ($1$) to denote a vertex is absent (present) in $I$.
+%We use the superscripts to denote which vertex or edge a tensor is associated to.
+These labels can be used as subscripts of tensors to index tensor elements, e.g.\ $W^{(v)}_0=1$ is the first element associated with $s_v=0$ and $W^{(v)}_1=x_v^{w_v}$ is the second element associated with $s_v=1$, where $x_v$ is a variable associated with vertex $v$.
 $P$ is the output tensor of rank $0$, i.e. a scalar.
+The independence constraint is encoded in the edge tensors, where we use $B_{11} = 0$ to denote two vertices connected by an edge cannot be both in the independent set. 
 The contraction of this tensor network is
 \begin{equation}\label{eq:idp}
     P(G) = \sum\limits_{s_1, s_2, \ldots, s_{|V|} = 0}^{1} \prod\limits_{v\in V} W^{(v)}_{s_v} \prod\limits_{(u,v) \in E} B^{(u,v)}_{s_u s_v},
@@ -582,12 +581,12 @@ where $\oplus$ and $\odot$ are the standard polynomial addition and multiplicati
 By doing the following replacement of tensor elements from the standard number type to the polynomial number type
 \begin{equation}
     \begin{cases}
-    1 \rightarrow \mymathbb{1}\\
-    0 \rightarrow \mymathbb{0}\\
-    x_v^{w_v} \rightarrow (0, 1)
+    1 &\rightarrow \mymathbb{1},\\
+    0 &\rightarrow \mymathbb{0},\\
+    x_v^{w_v} &\rightarrow (0, 1),
     \end{cases}
 \end{equation}
-The tensors $W$ and $B$, which are introduced in the previous section (\Cref{sec:tnmap}), can thus be written as 
+the tensors $W$ and $B$, which are introduced in the previous section (\Cref{sec:tnmap}), can thus be written as 
 \begin{equation}
     \left(W^{\rm PN}\right)^{(v)} = \left(\begin{matrix}
         \mymathbb{1} \\
