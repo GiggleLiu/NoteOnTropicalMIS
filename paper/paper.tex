@@ -109,13 +109,16 @@ A benchmark to demonstrate the performance of our algorithms can be found in bot
 %a maximal independent set is an independent set that is not a subset of any other independent set, but its size may not be the maximum. 
 
 \section{Tensor networks}\label{sec:tn}
+A tensor network is composed of a collection of tensors $\mathcal{T}$, an indicator of which tensor is the output, and a map $\lambda$ from tensor to labels associated with tensor dimensions.
 \begin{definition}[Tensor Network~\cite{Cirac2021, Orus2014}]
-    A tensor network is a quadruple of $\mathcal{N} = (\Tensors, \Inputs, \Output, \Sigma)$ where $\Sigma$ is a the alphabet of labels, $\Tensors = (\Tensors_1, \ldots, \Tensors_m)$ is a vector of tensors, $\Inputs$ is a map from tensor to a vector of labels $\Inputs: \Tensors_j \mapsto \mathbf{l}_j$, $(\mathbf{l}_j)_i \in \Sigma, i=1,\ldots, \rm{rank}(\Tensors_j)$.
-    $\Output$ is a vector of labels for specifying the output.
+    A tensor network is a quadruple of $\mathcal{N} = (\Tensors, \Sigma, O \in \Tensors, \Inputs : \mathcal{T} \rightarrow \Sigma^k)$. $\Tensors$ is a set of tensors and $O$ is the output tensor. $\Sigma$ is a the alphabet of labels. $\Inputs$ is a map from a tensor to a vector of labels with the vector length the same as the tensor rank.
 \end{definition}
-A tensor network is composed of a collection of tensors, a collection of labels associated with tensor dimensions, and an indicator of which tensor is the output.
 The operation to evaluate a tensor network is called \textit{contraction}, which is defined as a summation of tensor element products over the labels not appearing in the output tensor.
-For example, the matrix multiplication is a special tensor network that can be represented as $C_{ik} = A_{ij}B_{jk}$, where $A, B$ and $C$ are matrices (two-dimensional tensors), $ik,ij$ and $ik$ are labels associated with them, and ``$=$'' is the indicator of $C$ being the output, while its contraction is defined as $C_{ik} = \sum_j A_{ij}B_{jk}$.
+For example, the matrix multiplication is a special tensor network
+\begin{equation}
+\mathcal{N}_{\rm matmul} = (\{A, B, C\}, C, T \mapsto \begin{cases} (i,j), T = A\\(j, k), T=B\\ (i, k), T=C\end{cases}, \{i,j,k\}),
+\end{equation}
+where $A, B$ and $C$ are matrices (two-dimensional tensors), among which $C$ is the output tensor, $(i,k),(i,j)$ and $(i,k)$ are labels associated with them. The contraction is defined as $C_{ik} = \sum_j A_{ij}B_{jk}$, where the subscripts are for tensor indexing, and the tensor dimensions with a same label must have the same size.
 %can be viewed as a generalization of binary matrix multiplication to nary tensor contraction.
 %Generalized Einstein's notation is often used to represent a tensor network, where we use a label in the subscript to represent a degree of freedom.
 %One can enumerate these degrees of freedom and accumulate the product of tensor elements to the output tensor.
@@ -133,7 +136,21 @@ While this generalized form is equivalent in representation power, it can have s
 %However, introducing $\delta$ tensors may significantly increase the complexity of the tensor contraction. We illustrate this subtle point in \Cref{sec:tensorbad}.
 
 \begin{example}
-$C_{ijk} = A_{jkm} B_{mil} V_{jm}$ is a tensor network that can be evaluated as $C_{ijk} = \sum_{ml}A_{jkm} B_{mil} V_{jm}$.
+\blue{maybe remove this example?}
+\begin{equation}
+\begin{split}
+    \mathcal{T} &= \{A, B, V, C\},\\
+    \Sigma &= \{i,j,k,l,m\},\\
+    O &= C,\\
+    \lambda &= T \mapsto \begin{cases}
+    (j, k, m), &T = A\\
+    (m, i, l), &T = B \\
+    (j, m), &T = V \\
+    (i, j, k), &T= C
+    \end{cases}
+    \end{split}
+\end{equation}
+is a tensor network that can be evaluated as $C_{ijk} = \sum_{ml}A_{jkm} B_{mil} V_{jm}$.
 Its hypergraph representation is shown below, where we use different colors to represent different hyperedges.
 
 \vspace{1em}
@@ -293,32 +310,46 @@ An alternative interpretation, perhaps more accessible to physicists, can be fou
 Let $G=(V,E)$ be an undirected graph with each vertex $v\in V$ being associated with a weight $w_v$.
 An independent set $I \subseteq V$ is a set of vertices that for any vertex pair $u,v \in I$, we have $(u, v) \not\in E$.
 To reduce the independent set problem on $G$ to a tensor network contraction, we first map each vertex $v\in V$ to a label $s_v \in \{0, 1\}$ of dimension $2$, where we use $0$ ($1$) to denote a vertex is absent (present) in $I$.
-For each label $s_v$, we define a parameterized rank-one tensor indexed by it as
+For each label $s_v$, we define a parameterized rank-one tensor associated with it as
 \begin{equation}
-    W(x_v^{w_v})_{s_v} = \left(\begin{matrix}
+    W^{(v)} = \left(\begin{matrix}
         1 \\
         x_v^{w_v}
-    \end{matrix}\right)_{s_v},\label{eq:vertextensor}
+    \end{matrix}\right),\label{eq:vertextensor}
 \end{equation}
 where $x_v$ is a variable associated with $v$.
-Tensor elements can be indexed by subscripts, e.g.\ $W(x_v^{w_v})_0=1$ is the first element associated with $s_v=0$ and $W(x_v^{w_v})_1=x_v^{w_v}$ is the second element associated with $s_v=1$.
+Tensor elements can be indexed by $s_v$, e.g.\ $W^{(v)}_0=1$ is the first element associated with $s_v=0$ and $W^{(v)}_1=x_v^{w_v}$ is the second element associated with $s_v=1$.
 Similarly, for each edge $(u, v) \in E$, we define a matrix $B$ indexed by $s_u$ and $s_v$ as
 \begin{equation}
     \qquad \quad 
-       B = \left(\begin{matrix}
+       B^{(u, v)} = \left(\begin{matrix}
         1  & 1\\
         1 & 0
     \end{matrix}\right), \label{eq:edgetensor}
 \end{equation}
 which encodes the independent set constraint since $B_{11} = 0$, meaning the two vertices cannot be both in the independent set. 
-
-The corresponding tensor network contraction can be defined as
+The corresponding tensor network $\mathcal{N}_{\rm IS}(G)$ is
+\begin{equation}\label{eq:mistensornetwork}
+\begin{split}
+    \mathcal{T} &= \{W^{(v)} | v\in V\} \cup \{B^{(u, v)} | (u, v) \in E\} \cup \{P\}\\
+    \Sigma &= \{s_v | v \in V\}\\
+    O &= P\\
+    \lambda &= T \mapsto \begin{cases}
+                    (s_v), &T = W^{(v)}\\
+                    (s_u, s_v), &T = B^{(u, v)}\\
+                    (), & T = P
+                    \end{cases}
+    \end{split}
+\end{equation}
+where we use the superscripts to denote which vertex or edge a tensor is associated to.
+$P$ is the output tensor of rank $0$, i.e. a scalar.
+The contraction of this tensor network is
 \begin{equation}\label{eq:idp}
-    P(G, \{x_1^{w_1}, x_{2}^{w_2}, \ldots,x_{|V|}^{w_{|V|}}\}) = \sum\limits_{s_1, s_2, \ldots, s_{|V|} = 0}^{1} \prod\limits_{v\in V} W(x_v^{w_v})_{s_v} \prod\limits_{(u,v) \in E} B_{s_u s_v},
+    P(G) = \sum\limits_{s_1, s_2, \ldots, s_{|V|} = 0}^{1} \prod\limits_{v\in V} W^{(v)}_{s_v} \prod\limits_{(u,v) \in E} B^{(u,v)}_{s_u s_v},
 \end{equation}
 where the summation runs over all $2^{|V|}$ vertex configurations $\{s_1, s_{2}, \ldots,s_{|V|}\}$ and accumulates the product of tensor elements to the output $P$. 
 % It is easy to see that an edge tensor element $B_{s_us_v}$ encodes the independent set constraint. It zeros out the product whenever both $u$ and $v$ are in the independent set.
-A vertex tensor element $W(x_v^{w_v})_{s_v}$ contributes a multiplicative factor $x_v^{w_v}$ whenever $v$ is in the set.
+A vertex tensor element $W^{(v)}_{s_v}$ contributes a multiplicative factor $x_v^{w_v}$ whenever $v$ is in the set.
 
 \begin{example}\label{eg:twonode}
 Here, we show a minimum example of mapping the independent problem of a 2-vertex complete graph K2 (left) to a tensor network (right).
@@ -338,12 +369,12 @@ dot/.default = 6pt  % size of the circle diameter
     \def\dx{5};
     \def\r{0.25cm}
     \foreach \x/\y/\e in {1.25/0/ab}
-        \node[color=black,fill=black,dot=2*\r] at (\x+\dx,\y) (\e) {\scriptsize \color{white}{B}};
+        \node[color=black,fill=black,dot=2.5*\r] at (\x+\dx,\y) (\e) {\scriptsize \color{white}{$B^{(a, b)}$}};
     \foreach \x/\y/\v in {0.3/0/a, 2.2/0/b}
         \node[color=black] at (\x+\dx,\y) (s\v) {$s_\v$};
     \foreach \x/\y/\v in {-0.5/0/a, 3.0/0.0/b}{
         \node[dot=\wr, color=black] at (\x+\dx,\y) (w\v) {};
-        \node at (\x+\dx,\y+0.5) () {\scriptsize \color{black}{$W(x_\v^{w_\v})$}};
+        \node at (\x+\dx,\y+0.5) () {\scriptsize \color{black}{$W^{(v)}$}};
     }
     \draw [cyan,thick] (wa) -- (sa);
     \draw [cyan,thick] (sa) -- (ab);
@@ -358,7 +389,7 @@ Tensors sharing the same degree of freedom are connected by the same hyperedge.
 The contraction of this tensor network has the following form:
 \begin{equation}
     \begin{split}
-    P({\rm K2},\{x_a^{w_a}, x_b^{w_b}\}) &=
+    P({\rm K2}) &=
     \left(\begin{matrix} 1 & x_a^{w_a} \end{matrix}\right)
     \left(\begin{matrix} 1 & 1\\ 1  & 0 \end{matrix}\right)
     \left(\begin{matrix} 1 \\ x_b^{w_b} \end{matrix}\right)\\
@@ -370,10 +401,17 @@ The resulting polynomial represents 3 different independent sets $\{\}$, $\{a\}$
  
 For a general graph, it is computationally inefficient to evaluate \Cref{eq:idp} by directly summing up the $2^{|V|}$ products.
 A better approach to evaluate a tensor network is: to find a good pair-wise tensor contraction order as a binary tree and then contract two tensors at a time by this order.
-Let us denote the line graph of the hypergraph representation of a tensor network as $G'$.
-A contraction order of this tensor network corresponds to a tree decomposition of $G'$ and the largest intermediate tensor has a rank equal to the width of this tree decomposition~\cite{Markov2008}.
-Therefore, an optimal (in terms of space complexity) contraction order corresponds to the tree decomposition of $G'$ with the smallest width (or the treewidth ${\rm tw}(G')$).
-In the independent set problem, the treewidth of $G'$ is the same as the treewidth of the graph this tensor network is mapped from. 
+\begin{theorem}\label{thm:complexreal}
+    If the addition and multiplication of tensor elements can be computed in time $O(1)$,
+    the optimal time complexity for contracting the tensor network in \Cref{eq:mistensornetwork} for the independent set problem on graph $G = (V,E)$ is $O(|E|)2^{O({\rm tw}(G))}$.
+\end{theorem}
+\begin{proof}
+Let us denote the line graph, a graph obtained by mapping an edge in the original graph to a vertex and connect two vertices if and only if their associated edges in the original original graph share a common vertex, of the hypergraph representation of a tensor network $\mathcal{N}$ as $L(\mathcal{N})$.
+A contraction order of $\mathcal{N}$ corresponds to a tree decomposition of $L(\mathcal{N})$ and the largest intermediate tensor has a rank equal to the width of its tree decomposition~\cite{Markov2008}.
+Therefore, an optimal (in terms of space complexity) contraction order corresponds to the tree decomposition of $L(\mathcal{N})$ with the smallest width (or the treewidth ${\rm tw}(L(\mathcal{N})$). The contraction complexity is $O(|\mathcal{N}|)2^{O({\rm tw}(L(\mathcal{N})))}$, where $|\mathcal{N}|$ is the number of tensors in $\mathcal{N}$.
+For the independent set problem on graph $G = (V, E)$, the line graph of the hypergraph representation of the tensor network in \Cref{eq:mistensornetwork} is the same as the graph $G$ up to some isolated vertices, hence the contraction complexity of this tensor network with an optimal contraction order is $O(|E|)2^{O({\rm tw}(G))}$.
+\end{proof}
+ 
 In practice, it is difficult to find an optimal contraction order for large tensor networks because finding the treewidth is a well-known NP-hard problem.
 However, it is easy to find a close-to-optimal contraction order within typically a few minutes with a heuristic algorithm~\cite{Kourtis2019, Kalachev2021}.
 %The pairwise tensor contraction also makes it possible to utilize basic linear algebra subprograms (BLAS) functions to speed up the computation for certain tensor element types.
@@ -381,6 +419,7 @@ For large-scale applications, it is also possible to slice over certain degrees 
 loop and accumulate over certain degrees of freedom so that one can have a smaller tensor network inside the loop due to the removal of these degrees of freedom.
 
 \begin{example}\label{eg:tensorcontraction}
+\blue{maybe remove this example too?}
 In this example, we map a 5-vertex graph (left) to a tensor network (right) and show how the contraction order reduces the time and space complexities.
     
 \centerline{\begin{tikzpicture}[
@@ -408,14 +447,14 @@ dot/.default = 6pt  % size of the circle diameter
     \node[color=white] at (2.5+\dx,2.5) {e};
     \def\dx{5};
     \def\r{0.25cm}
-    \foreach \x/\y/\e in {0.75/0/ac, 0/0.75/ab, 1.5/0.75/cd, 0.75/1.5/bd, 0.75/0.75/bc, 2/2/de}
-        \node[color=white,fill=black,dot=2*\r] at (\x+\dx,\y) (\e) {\scriptsize B};
+    \foreach \x/\y/\u/\v in {0.75/0/a/c, 0/0.75/a/b, 1.5/0.75/c/d, 0.75/1.5/b/d, 0.75/0.75/b/c, 2/2/d/e}
+        \node[color=white,fill=black,dot=2.5*\r] at (\x+\dx,\y) (\u\v) {\scriptsize $B^{(\u,\v)}$};
     \foreach \x/\y/\v in {0/0/a, 0/1.5/b, 1.5/0/c, 1.5/1.5/d, 2.5/2.5/e}
         \node[color=black] at (\x+\dx,\y) (\v) {$s_\v$};
     \foreach \x/\y/\v in {-0.5/-0.5/a, -0.5/2.0/b, 2.0/-0.5/c, 2.0/1.0/d, 3.0/2.0/e}
         \node[color=white,fill=black,dot=\r] at (\x+\dx,\y) (\v\v) {};
     \foreach \x/\y/\v in {-0.5/-0.5/a, -0.5/2.0/b, 2.0/-0.5/c, 2.0/1.0/d, 3.0/2.0/e}
-        \node[color=black] at (\x+\dx+0.6,\y) {\scriptsize $W(x_\v^{w_\v})$};
+        \node[color=black] at (\x+\dx+0.6,\y) {\scriptsize $W^{(\v)}$};
     \draw [cyan,thick] (a) -- (aa);
     \draw [cyan,thick] (a) -- (ab);
     \draw [cyan,thick] (a) -- (ac);
@@ -505,12 +544,6 @@ One can easily check the largest tensor in contraction has a space complexity $O
 
 \section{Independence polynomial}\label{sec:indpoly}
 
-\begin{theorem}
-    The independence polynomial~\cite{Harvey2018,Ferrin2014} of a graph $G = (V, E)$ can be computed in time $O(|V|^22^{{\rm tw}(G)})$.
-\end{theorem}
-\begin{proof}
-    By contracting 
-\end{proof}
 Let $x_i = x$ and $w_i = 1$, \Cref{eq:idp} corresponds to the independence polynomial:
 \begin{equation}\label{eq:idpdef}
 I(G, x) = \sum_{k=0}^{\alpha(G)} a_k x^k,
@@ -540,20 +573,36 @@ The algebra between the polynomials number $a$ of order $k_a$ and $b$ of order $
     \end{split}
 \end{equation}
 where $\oplus$ and $\odot$ are the standard polynomial addition and multiplication operations.
-The multiplication can be evaluated in time $O(k\log(k))$ using the convolution theorem~\cite{Schonhage1971}, where $k=\max(k_a, k_b)$.
+
+\begin{theorem}\label{thm:complexpoly}
+    The independence polynomial~\cite{Harvey2018,Ferrin2014} of a graph $G = (V, E)$ can be computed in time $O(|V|\log(|V|)|E|)2^{O({\rm tw}(G))}$.
+\end{theorem}
+\begin{proof}
+By doing the following replacement of tensor elements from the standard number type to the polynomial number type
+\begin{equation}
+    \begin{cases}
+    1 \rightarrow \mymathbb{1}\\
+    0 \rightarrow \mymathbb{0}\\
+    x_v^{w_v} \rightarrow (0, 1)
+    \end{cases}
+\end{equation}
 The tensors $W$ and $B$, which are introduced in the previous section (\Cref{sec:tnmap}), can thus be written as 
 \begin{equation}
-    W^{\rm PN} = \left(\begin{matrix}
+    \left(W^{\rm PN}\right)^{(v)} = \left(\begin{matrix}
         \mymathbb{1} \\
         (0,1)
     \end{matrix}\right),   
     \qquad \qquad
-        B^{\rm PN} = \left(\begin{matrix}
+        \left(B^{\rm PN}\right)^{(u, v)} = \left(\begin{matrix}
         \mymathbb{1}  & \mymathbb{1} \\
         \mymathbb{1} & \mymathbb{0}
     \end{matrix}\right).
 \end{equation}
 By contracting the tensor network with this polynomial type, we have the exact representation of the independence polynomial.
+In \Cref{eq:polynomial}, the addition can be computed in time $O(k)$, where $k=\max(k_a, k_b)$, and the multiplication can be evaluated in time $O(k\log(k))$ using the convolution theorem~\cite{Schonhage1971}.
+Since $k$ is upper bounded by the maximum independent set size $\alpha(G) \leq |V|$, the time complexity of element-wise addition and multiplication operation is upper bounded by $|V|\log(|V|)$. Combining with \Cref{thm:complexreal}, the a overall time complexity is $O(|V|\log(|V|)|E|)2^{O({\rm tw}(G))}$.
+\end{proof}
+
 In practice, using the polynomial type suffers a space overhead proportional to $\alpha(G)$ because each polynomial requires a vector of such size to store the coefficients. 
 One may argue that one can first evaluate this polynomial at different $x$ being a real number,
 and then apply the Gaussian elimination procedure to fit the coefficients of this polynomial.
@@ -568,12 +617,6 @@ For simplicity, we use this less efficient polynomial algebra for the discussion
 
 \section{Maximum independent sets and its counting}\label{sec:counting}
 \subsection{Tropical algebra for finding the MIS size and counting MISs}
-\begin{theorem}
-    Let $G = (V, E)$ be a graph, its maximum independent set size $\alpha(G)$ can be computed in time $O(|V|2^{{\rm tw}(G)})$.
-\end{theorem}
-\begin{theorem}
-    The number of $k$ independent sets of a graph $G = (V, E)$ can be computed in time $O(k|V|2^{{\rm tw}(G)})$.
-\end{theorem}
 %The method we use to count the MISs is based on the following observations:
 Let $x=\infty$, the independence polynomial in the previous section becomes
 \begin{equation}
@@ -609,19 +652,26 @@ The algebra of the exponents becomes the max-plus tropical algebra~\cite{Maclaga
     \end{split}\label{eq:tropical}
 \end{equation}
 Algebra \Cref{eq:tropical} and \Cref{eq:countingtropical} are the same as those used in Liu et al.~\cite{Liu2021} to compute the spin glass ground state energy and its degeneracy.
-For independent set calculations here, the vertex tensor and edge tensor becomes:
-\begin{equation}
-    W^{\rm T}(w_v) = \left(\begin{matrix}
-        w_v \\
-        \infty
+
+\begin{theorem}\label{thm:complextropical}
+    Let $G = (V, E)$ be a graph, its maximum independent set size $\alpha(G)$ can be computed in time $O(|E|)2^{O({\rm tw}(G))}$.
+\end{theorem}
+\begin{proof}
+By replacing the tensor elements from the standard number type to the tropical numbers in \Cref{eq:tropical}, the vertex and edge tensors transforms to
+\begin{equation}\label{eq:tensor-topical}
+    \left(W^{\rm T}\right)^{(v)} = \left(\begin{matrix}
+        1 \\
+        \infty^{w_v}
     \end{matrix}\right),   
     \qquad \qquad
-        B^{\rm T} = \left(\begin{matrix}
+        \left(B^{\rm T}\right)^{(u, v)} = \left(\begin{matrix}
         \mymathbb{1}  & \mymathbb{1} \\
         \mymathbb{1} & \mymathbb{0}
     \end{matrix}\right).
 \end{equation}
-
+The maximum independent set can be obtained by contracting a tensor network with the above vertex tensors and edge tensors.
+Since the element-wise addition and multiplication can be computed in $O(1)$ time, the complexity of contracting this tensor network is $O(|E|)2^{O({\rm tw}(G))}$ by \Cref{thm:complexreal}.
+\end{proof}
 \subsection{Truncated polynomial algebra for counting independent sets of large size}
 Instead of counting just the MISs, one may also be interested in counting the independent sets with the largest several sizes.
 For example, if one is interested in counting only $a_{\alpha(G)}$ and $a_{\alpha(G)-1}$, we can define a truncated polynomial algebra by keeping only the largest two coefficients in the polynomial in \Cref{eq:polynomial} as:
@@ -640,11 +690,12 @@ Similarly, one can also truncate the polynomial and keep only its smallest sever
 It can be used, for example, to count the maximal independent sets with the smallest cardinality, where a maximal independent set is an independent set that cannot be made larger by adding a new vertex into it without violating the independence constraint.
 As will be shown below, this algebra can also be extended to enumerate those large-size independent sets.
 
+\begin{lemma}
+    The number of the largest $k$ independent sets of a graph $G = (V, E)$ can be computed in time $O(K\log K|E|)2^{O({\rm tw}(G))}$.
+\end{lemma}
+The proof is similar to proving \Cref{thm:complexpoly}, except only $k$ largest coefficients are involved in the addition and multiplication.
+
 \section{Enumerating and sampling independent sets}\label{sec:enumeration}
-\begin{theorem}
-    Let $G = (V, E)$ be a graph and $M$ be the number of independent sets with size $>\alpha(G)-k$.
-    The independent sets with size $>\alpha(G)-k$ of $G$ can be computed in time $O(M|V|2^{{\rm tw}(G)})$.
-\end{theorem}
 
 \subsection{Set algebra for configuration enumeration}
 
@@ -678,22 +729,32 @@ where $s$ and $t$ are each a set of $|V|$-bit strings.
 \end{equation*}
 \end{example}
 
-To enumerate all independent sets,  we initialize variable $x_{i}$ in the vertex tensor to $x_i = \{\boldsymbol{e}_{i}\}$, where $\boldsymbol{e}_i$ is a basis bit string of size $|V|$ that has only one non-zero value at location $i$.
+\begin{theorem}\label{thm:complexset}
+    Let $G = (V, E)$ be a graph and $I$ be its independent sets.
+    $I$ can be computed in time $O(|I||V||E|)2^{O({\rm tw}(G))}$.
+\end{theorem}
+\begin{proof}
+To enumerate over $I$,  we initialize variable $x_{i}$ in the vertex tensor to $x_i = \{\boldsymbol{e}_{i}\}$, where $\boldsymbol{e}_i$ is a basis bit string of size $|V|$ that has only one non-zero value at location $i$.
 The vertex and edge tensors are thus
 \begin{equation}
-    W^{\rm SN}(\{\boldsymbol{e}_{i}\}) = \left(\begin{matrix}
+    \left(W^{\rm SN}\right)^{(v)} = \left(\begin{matrix}
         \mymathbb{1} \\
         \{\boldsymbol{e}_{i}\}
     \end{matrix}\right),   
     \qquad \qquad
-        B^{\rm SN} = \left(\begin{matrix}
+        \left(B^{\rm SN}\right)^{(u, v)} = \left(\begin{matrix}
         \mymathbb{1}  & \mymathbb{1} \\
         \mymathbb{1} & \mymathbb{0}
     \end{matrix}\right).
 \end{equation}
+The contraction of this tensor network is a set with its elements being all independent set configurations. The time complexity of element-wise addition and multiplication is upper bounded by $|I||V|$, where $|V|$ comes from the linear cost of representing a $|V|$-vertex configuration. Combining with \Cref{thm:complexreal}, the overall time complexity is $O(|I||V||E|)2^{O({\rm tw}(G))}$.
+In practise, the huge multiplicative factor $|I|$ only appear in the last step of tensor contraction.
+This complexity only upper bounds the actually performance of the algorithm.
+\end{proof}
 
 This set algebra can serve as the coefficients in \Cref{eq:polynomial} to enumerate independent sets of all different sizes, \Cref{eq:countingtropical} to enumerate all MISs, or \Cref{eq:max2poly} to enumerate all independent sets of sizes $\alpha(G)$ and $\alpha(G)-1$.
 As long as the coefficients in a truncated polynomial are members of a commutative semiring, the polynomial itself is a commutative semiring.
+
 For example, to enumerate only the MISs, we can define a combined element type $s_{k}\infty^k$, where the coefficients follow the algebra in \Cref{eq:set} and the exponents follow the max-plus tropical algebra.
 The combined operations become: 
 \begin{equation}
@@ -709,23 +770,40 @@ The combined operations become:
     \mymathbb{1} &= \{0^{\otimes |V|}\}\infty^{0}. \label{eq:countingtropicalset}
 \end{split}
 \end{equation}
-Clearly, the vertex tensor and edge tensor become
+
+\begin{theorem}\label{thm:complexmis}
+    Let $G = (V, E)$ be a graph and $\mathcal{I}_\alpha$ be its maximum independent sets.
+    $I_\alpha$ can be computed in time $O(|\mathcal{I}_\alpha||V||E|)2^{O({\rm tw}(G))}$.
+\end{theorem}
+\begin{proof}
+By replacing the tensor elements in \Cref{sec:tnmap} with the number type defined in \Cref{eq:countingtropicalset}, with variable $x_v^{w_v} = \{\boldsymbol{e}_{v}\}\infty^{w_v}$, the vertex tensor and edge tensor become
 \begin{equation}
-    W^{\rm P1+SN}(\{\boldsymbol{e}_{i}\}\infty^{w_v}) = \left(\begin{matrix}
+    \left(W^{\rm P1+SN}\right)^{(v)} = \left(\begin{matrix}
         \mymathbb{1} \\
-        \{\boldsymbol{e}_{i}\}\infty^{w_v}
+        \{\boldsymbol{e}_{v}\}\infty^{w_v}
     \end{matrix}\right),   
     \qquad \qquad
-        B^{\rm P1+SN} = \left(\begin{matrix}
+        \left(B^{\rm P1+SN}\right)^{(u, v)} = \left(\begin{matrix}
         \mymathbb{1}  & \mymathbb{1} \\
         \mymathbb{1} & \mymathbb{0}
     \end{matrix}\right).
 \end{equation}
-The enumeration of all MIS configurations corresponds to the contraction of this tensor network.
+The enumeration of all MIS configurations corresponds to the contraction of this tensor network. The time complexity of element-wise addition and multiplication is upper bounded by the number of independent sets $|\mathcal{I}_\alpha|$. Combining with \Cref{thm:complexreal}, the overall time complexity is $O(|\mathcal{I}_\alpha||V||E|)2^{O({\rm tw}(G))}$.
+\end{proof}
 However, direct contraction might have significant space overheads for keeping too many intermediate states irrelevant to the final maximum independent sets.
 We introduce the bounding technique in \Cref{sec:bounding} to avoid this issue.
 One may also be interested in the more studied maximal independent sets~\cite{Bron1973, Eppstein2010, Johnson1988} enumeration.
 It will be discussed in \Cref{sec:maximal} since it requires using a different tensor network structure.
+
+\begin{theorem}\label{thm:complexsetk}
+    Let $G = (V, E)$ be a graph and $\mathcal{I}_k$ be the set of independent sets with size $k$.
+    The independent sets with size $k > \alpha(G)-K$ of $G$ can be computed in time $O(|E||V|\sum_{k=\alpha(G)-K+1}^{\alpha(G)}|\mathcal{I}_k|)2^{O({\rm tw}(G))}$.
+\end{theorem}
+\begin{proof}
+This can proved by combining the set algebra \Cref{eq:set} with the polynomial number truncated to largest $K$ orders (\Cref{eq:max2poly}).
+The number of bitstring operations in the addition and multiplication of the joint algebra is upper bounded by the elements in the sets $\sum_{k=\alpha(G)-K+1}^{\alpha(G)}|\mathcal{I}_k|$.
+Combining with \Cref{thm:complexreal}, the overall time complexity of contracting this tensor network is $O(|E||V|\sum_{k=\alpha(G)-K+1}^{\alpha(G)}|\mathcal{I}_k|)2^{O({\rm tw}(G))}$.
+\end{proof}
 
 If one is interested in obtaining only one MIS configuration, they can just keep one configuration in each tensor element to save the computational effort.
 By replacing the sets of bit strings in \Cref{eq:set} with a single bit string, we have the following algebra
@@ -743,11 +821,26 @@ The \texttt{select} function picks one of $\sigma$ and $\tau$ by some criteria.
 It can be picking the one smaller in the lexicographical order such that the addition operation is commutative and associative.
 In most cases, it is completely fine for the \texttt{select} function to pick a random one (not commutative and associative anymore) to generate a random MIS.
 
-\subsection{Sampling extremely large configuration space}
 \begin{theorem}
-    Let $G = (V, E)$ be a graph, its independent sets with size $>\alpha(G)-k$ of can be unbiasedly sampled in time $O(|V|2^{{\rm tw}(G)}) + O(|V|M)$, where $M$ is the number of samples.
+    Let $G = (V, E)$ be a graph, one of its maximum independent set can be computed in time $O(|E||V|)2^{O({\rm tw}(G))}$.
 \end{theorem}
+The proof is similar to \Cref{thm:complexmis}, except the set algebra is replace by the one in \Cref{eq:singleconfig}, and the time complexity of element-wise addition and multiplication no longer depends on $|\mathcal{I}_\alpha|$.
+The linear dependency of $|V|$ in the time complexity can be remove using the back propagation technique, at the cost of additional space.
+\begin{theorem}
+    Let $G = (V, E)$ be a graph, one of its maximum independent set can be computed in time $O(|E|)2^{O({\rm tw}(G))}$.
+\end{theorem}
+\begin{proof}
+    Let $\alpha(G) = \max\limits_{s \in I} \sum_{v} s_v$ be the maximum independent set size. The optimal configuration can be obtained by differentiating over vertex tensors as
+    \begin{equation}
+    \begin{cases}
+        1, &\frac{\partial \alpha(G)}{\partial s_v} = 1\\
+        0, &\frac{\partial \alpha(G)}{\partial s_v} = 0
+    \end{cases}.
+    \end{equation}
+    It can be numerically computed by differentiating over the process of the tropical tensor network contraction, where the backward rules can be found in \Cref{sec:bounding}. The time overhead of computing single optimal solution is constant comparing to only computing the contraction. Thus the computing time complexity should be the same as in \Cref{thm:complextropical}.
+\end{proof}
 
+\subsection{Sampling extremely large configuration space}
 When the problem scale becomes larger, a set of all bitstrings might be impossible to fit into any type of storage.
 To get something meaningful out of the configuration space, we use a binary sum-product expression tree as a compact representation of a set of configurations, i.e.\ instead of directly computing a set using the algebra in \Cref{eq:set}, we store the process of computing it.
 Each node in this tree is a quadruple $(type, data, left, right)$, where $type$ is one of \texttt{LEAF}, \texttt{ZERO}, \texttt{SUM} and \texttt{PROD}, $data$ is a bit string as the content in a \texttt{LEAF} node, and $left$ and $right$ are left and right operands of a \texttt{SUM} or \texttt{PROD} node.
@@ -761,23 +854,44 @@ Each node in this tree is a quadruple $(type, data, left, right)$, where $type$ 
     \mymathbb{1} &= (\texttt{LEAF}, 0^{\otimes |V|}, /, /).
 \end{split}\label{eq:expr}
 \end{equation}
-The vertex tensor and edge tensor become
+
+This algebra is a commutative semiring because we define the equivalence of two sum-product expression trees by comparing their expanded (using \Cref{eq:set}) forms rather than their storage.
+Except using the sum-product expression tree directly as tensor elements, one can also let it be the coefficients of a (truncated) polynomial to compute such trees for independent sets with the largest several sizes.
+
+\begin{theorem}\label{thm:complexexpr}
+        The independent sets $I$ of a graph $G=(V,E)$ can be enumerated in time $O(|E|)2^{O({\rm tw}(G))} + O(|V||I|)$.
+\end{theorem}
+\begin{proof}
+By replacing the tensor elements with the number type in \Cref{eq:expr} with $x_v^{w_v}$ mapped to $(\texttt{LEAF},\boldsymbol{e}_i,/,/)$, the vertex tensor and edge tensor become
 \begin{equation}
-    W^{\rm EXPR}((\texttt{LEAF},\boldsymbol{e}_i,/,/)) = \left(\begin{matrix}
+    \left(W^{\rm EXPR}\right)^{(v)} = \left(\begin{matrix}
         \mymathbb{1} \\
         (\texttt{LEAF},\boldsymbol{e}_i,/,/)
     \end{matrix}\right),   
     \qquad
-        B^{\rm EXPR} = \left(\begin{matrix}
+        \left(B^{\rm EXPR}\right)^{(u, v)} = \left(\begin{matrix}
         \mymathbb{1}  & \mymathbb{1} \\
         \mymathbb{1} & \mymathbb{0}
     \end{matrix}\right).
 \end{equation}
+The contraction of such tensor network corresponds to a sum-product expression tree of the set of independent sets, which costs time $O(|E|)2^{O({\rm tw}(G))}$ by \Cref{thm:complexreal} since the computing time of expression tree addition and multiplication are $O(1)$.
+The time complexity to evaluating this expression tree is $O(|V||I|)$, where $|V|$ comes from the number of bits to represent a configuration.
+\end{proof}
 
-This algebra is a commutative semiring because we define the equivalence of two sum-product expression trees by comparing their expanded (using \Cref{eq:set}) forms rather than their storage.
-Except using the sum-product expression tree directly as tensor elements, one can also let it be the coefficients of a (truncated) polynomial to compute such trees for independent sets with the largest several sizes.
+Similarly, we have the following lemma by combining the sum-product expression tree algebra with the truncated polynomial.
+
+\begin{lemma}\label{thm:complexexpr}
+        Let $G = (V, E)$ be a graph and $\mathcal{I}_k$ be the number of independent sets with size $k$. The independent sets with size $k > \alpha(G)-K$ of can be computed in time $O(K\log K|E|)2^{O({\rm tw}(G))} + O(|V|\sum_{k=\alpha(G)-K+1}^{\alpha(G)}|\mathcal{I}_k|)$.
+\end{lemma}
+
 Although likely, one cannot collect all configurations represented by a sum-product expression tree into a vector due to its extremely large size,
 they can draw unbiased samples from it by direct sampling.
+\begin{theorem}
+    Let $G = (V, E)$ be a graph, its independent sets with size $k > \alpha(G)-K$ of can be unbiasedly sampled in time $O(|E|)2^{O({\rm tw}(G))} + O(|V|^2 M)$, where $M$ is the number of samples.
+\end{theorem}
+\begin{proof}
+Similar to the proof of \Cref{thm:complexexpr}, we first obtain a sum-product tree representation of the configurations in time $O(|E|)2^{O({\rm tw}(G))}$.
+Then we show to generate a sample, the cost is $O(|V|^2)$.
 The sampling program starts from the root node and descends this tree recursively to the left and right siblings.
 If a node has type \texttt{SUM}, the program draws samples from the left and right siblings with a probability decided by the size of each sub-tree and returns the union of samples.
 Otherwise, if a node has type \texttt{PROD}, the program draws two sets of samples of equal sizes from its left and right siblings and returns the element-wise multiplication ($\lor^\circ$) of them.
@@ -816,10 +930,15 @@ The left and right siblings of the root node have sizes $|A|\times |B|$ and $|C|
 The sizes of $A, B, C$, and $D$ can be computed recursively until the program meets either a \texttt{LEAF} node or a \texttt{ZERO} node, which has a known size of $1$ or $0$.
 \end{example}
 
+Since the depth of the expression tree is $|V|$ and the cost of each arithmetic operation is $O(|V|)$, the overall time complexity to generate a sample is $O(|V|^2)$.
+\end{proof}
+
+Similarly, if one is only interested in obtaining independent sets with largest $K$ sizes, we have the following lemma.
+\begin{lemma}
+    Let $G = (V, E)$ be a graph, its independent sets with size $k > \alpha(G)-K$ of can be unbiasedly sampled in time $O(K\log K|E|)2^{O({\rm tw}(G))} + O(|V|^2 M)$, where $M$ is the number of samples.
+\end{lemma}
+
 \section{Weighted graphs}\label{sec:weighted}
-\begin{theorem}
-    Let $G = (V, E, W)$ be a weighted graph, its $k$ largest independent sets can be computed in time $O(k|V|2^{{\rm tw}(G)})$.
-\end{theorem}
 
 All the solution space properties and the corresponding algebra on unweighted graphs still hold for integer-weighted graphs, while for general weighted graphs, the independence polynomial is not well defined anymore.
 For general weighted graphs, it is more useful to know the $k$ maximum weighted sets and their sizes.
@@ -834,21 +953,32 @@ They can be computed by the extended tropical algebra, which is a natural genera
 \end{split}\label{eq:ext-tropical}
 \end{equation}
 where $\texttt{largest}(s, k)$ means truncating the set $s$ by only keeping its $k$ largest values.
-The computation of $s \odot t$ is a maximum sum combination problem that can be done in time $O(k\log(k))$.
-An efficient algorithm for computing the maximum sum combination problem can be found in \Cref{sec:maxsum}.
-The vertex tensor and edge tensor become
+
+
+\begin{theorem}
+    Let $G = (V, E, W)$ be a weighted graph, its $K$ largest independent sets sizes can be computed in time $O(K\log K|E|)2^{O({\rm tw}(G))}$.
+\end{theorem}
+\begin{proof}
+$k$ largest independent sets can be computed by contracting a tensor network with extended tropical numbers. The vertex tensor and edge tensor are
 \begin{equation}
-    W^{{\rm T}k}(-\infty^{\otimes k-1} \otimes w_v) = \left(\begin{matrix}
+    \left(W^{{\rm T}k}\right)^{(v)} = \left(\begin{matrix}
         \mymathbb{1} \\
         -\infty^{\otimes k-1} \otimes w_v
     \end{matrix}\right),   
     \qquad
-        B^{{\rm T}k} = \left(\begin{matrix}
+        \left(B^{{\rm T}k}\right)^{(u, v)} = \left(\begin{matrix}
         \mymathbb{1}  & \mymathbb{1} \\
         \mymathbb{1} & \mymathbb{0}
     \end{matrix}\right),
 \end{equation}
-where we have used the equation $(-\infty^{\otimes k-1} \otimes 1)^{w_v} = -\infty^{\otimes k-1} \otimes w_v$.
+where we have used $x_v^{w_v} = (-\infty^{\otimes k-1} \otimes 1)^{w_v} = -\infty^{\otimes k-1} \otimes w_v$.
+
+The computation of $s \odot t$ is a maximum sum combination problem that can be done in time $O(k\log(k))$ using the algorithm in \Cref{sec:maxsum}. Hence the overall time complexity of contracting the tensor network is $O(K\log K|E|)2^{O({\rm tw}(G))}$.
+\end{proof}
+
+\begin{lemma}
+    Let $G = (V, E, W)$ be a weighted graph, its $K$ largest independent sets can be computed in time $O(K\log K|E||V|)2^{O({\rm tw}(G))}$.
+\end{lemma}
 To find solutions corresponding to the largest $k$ sizes, one can combine the extended tropical algebra with the bit string algebra (\Cref{eq:singleconfig}).
 Since the $\oplus$ operation of the configuration sampler will not be used in the combined algebra, the resulting configurations are deterministic and complete.
 
@@ -1025,16 +1155,16 @@ The partition function is defined as
     \end{split}
 \end{equation}
 where $\mathcal{I}(G)$ is the set of independent sets of graph $G$, $\alpha(G)$ is the absolute value of the minimum energy (maximum independent set size), $a(k)$ is the number of spin configurations with energy $-k$ (independent sets of size $k$).
-The partition function can be expressed as a tensor network by placing a vertex tensor on each spin $i$
+The partition function can be expressed as a tensor network by placing a vertex tensor on each spin $i \in V$
 \begin{equation}
-    W(e^{\beta w_i}) = \left(\begin{matrix}
+    W^{(i)} = \left(\begin{matrix}
         1 \\
         e^{\beta w_i}
     \end{matrix}\right),
 \end{equation}
-and an edge tensor on each bond
+and an edge tensor on each bond $(u, v) \in E$
 \begin{equation}
-       B = \left(\begin{matrix}
+       B^{(u, v)} = \left(\begin{matrix}
         1  & 1\\
         1 & 0
     \end{matrix}\right),
@@ -1048,17 +1178,19 @@ If we further let $w_i=1$, the second line of \Cref{eq:partition} is equivalent 
 In this section, we focus the discussion on the maximal independent sets problem since finding maximal cliques of a graph is equivalent to finding the maximal independent sets of the complement of the graph.
 Let $G=(V,E)$ be a graph, we denote the neighborhood of a vertex $v\in V$ as $N(v)$.
 A maximal independent set $I_m$ is an independent set such that no $v \in V$ satisfies $I_m \cap (\{v\} \cup N[v])  = \emptyset$, i.e.\ an independent set that cannot become a larger one by adding a new vertex.
-To characterize the maximal independence restriction, we defined a tensor on each $\{v\}\cup N(v)$ as
+To characterize the maximal independence restriction, we defined a tensor for each $v \in V$ and its neighbor $N(v)$ as
 \begin{equation}\label{eq:maximal}
-    T(x_v^{w_v})_{s_1,s_2,\ldots,s_{|N(v)|},s_v} = \begin{cases}
-        s_vx_v^{w_v} & s_1=s_2=\ldots=s_{|N(v)|}=0,\\
-        1-s_v& \text{otherwise}.\\
+    T^{(v)}_{s_{N(v, 1)},s_{N(v, 2)},\ldots,s_{N(v, d(v))},s_v} = \begin{cases}
+        s_vx_v^{w_v} & s_{N(v, 1)}=s_{N(v, 2)}=\ldots=s_{N(v, d(v))}=0,\\
+        1-s_v& \text{otherwise}.
     \end{cases}
 \end{equation}
-It means if none of the neighbours of $v$ are in $I_{m}$ ($ s_1=s_2=\ldots=s_{|N(v)|}=0$), then $v$ must be in $I_{m}$ and contribute a factor $x_{v}$, otherwise, if any of the neighbourhood vertices is in $I_{m}$, then $v$ cannot be in $I_{m}$.
-For a vertex $v$ that has a degree 2, the tensor has the following form
+where $N(v, k)$ is the $k$th vertex in $N(v)$ and $d(v) = |N(v)|$ is the degree of vertex $v$.
+If $s_v = 1$, then none of its neighbours can be a member of $I_{m}$ by the independence constraint, contributing a factor $x_v^{w_v}$.
+If $s_v = 0$, then at least on of its neighbors must be in $I_{m}$ by the maximal constraint, contributing a unit factor.
+For a degree 2 vertex $v$, the tensor has the following form
 \begin{equation}
-    T(x_v^{w_v})=\left(\begin{matrix}
+    T^{(v)}=\left(\begin{matrix}
     \left(\begin{matrix}
         ~~0 &~1 \\
         ~~1 &~1
@@ -1069,7 +1201,19 @@ For a vertex $v$ that has a degree 2, the tensor has the following form
     \end{matrix}\right)
     \end{matrix}\right).
 \end{equation}
- 
+The corresponding tensor network $\mathcal{N}_{\rm mIS}(G)$ can be defined as
+\begin{equation}\label{eq:maxistensornetwork}
+\begin{split}
+    \mathcal{T} &= \{T^{(v)} | v\in V\} \cup \{P\},\\
+    \Sigma &= \{s_v | v \in V\},\\
+    O &= P,\\
+    \lambda &= S \mapsto \begin{cases}
+                    (s_{N(v,1)}, \ldots, s_{N(v,d(v))}, s_v), & S = T^{(v)}\\
+                    (), & S = P
+                    \end{cases}.
+\end{split}
+\end{equation}
+
 Let us consider the graph in \Cref{eg:tensorcontraction}. The corresponding tensor network structure for computing the maximal independent polynomial has the following hypergraph representation. \\
 
     \centerline{\begin{tikzpicture}[
@@ -1121,23 +1265,35 @@ The benchmark of computing the maximal independent set properties on $3$-regular
 \subsection{Matching problem}
 A $k$-matching in a graph $G=(V,E)$ is a set of $k$ edges that no two of which have a vertex in common.
 We map an edge $(u, v) \in E$ to a degree of freedom $\langle u, v\rangle \in \{0, 1\}$ in a tensor network, where $1$ means an edge is in the set and $0$ otherwise.
-To characterize the matching constraint, we define a tensor for each $N(v)=\{n_1, n_2,\ldots, n_{d(v)}\}$ as
+To characterize the matching constraint, we define a tensor for each $N(v)$ as
 \begin{equation}
-    W_{\langle v, n_1\rangle, \langle v, n_2 \rangle, \ldots, \langle v, n_{d(v)}\rangle} = \begin{cases}
-        1, & \sum_{i=1}^{d(v)} \langle v, n_i \rangle \leq 1,\\
+    W^{(v)}_{\langle v, N(v, 1)\rangle, \langle v, N(v, 2) \rangle, \ldots, \langle v, N(v,d(v))\rangle} = \begin{cases}
+        1, & \sum_{i=1}^{d(v)} \langle v, N(v, i) \rangle \leq 1,\\
         0, & \text{otherwise},
     \end{cases}
 \end{equation}
 and a tensor for each bond as
 \begin{equation}
-    B(x^{w_{\langle u,v \rangle}}_{\langle u,v\rangle})_{\langle u, v\rangle} = \begin{cases}
+    B^{(u, v)}_{\langle u, v\rangle} = \begin{cases}
     1, & \langle u, v \rangle = 0 \\
     x^{w_{\langle u,v \rangle}}_{\langle u, v\rangle}, & \langle u, v \rangle = 1,
 \end{cases}
 \end{equation}
-where a label $\langle v, u \rangle$ is equivalent to $\langle u,v\rangle$.
-$W$ tensor specifies the constraint that a vertex cannot be shared by two edges in the edge set,
-and an edge tensor carries the weights.
+where $N(v, k)$ is the $k$th vertex in $N(v)$ and $d(v) = |N(v)|$ is the degree of vertex $v$, a label $\langle v, u \rangle$ is equivalent to $\langle u,v\rangle$.
+$W$ tensor specifies the constraint that a vertex cannot be shared by two edges in the edge set, and an edge tensor carries the weights. The tensor network can be defined as
+\begin{equation}\label{eq:matchtensornetwork}
+\begin{split}
+    \mathcal{T} &= \{W^{(v)} | v\in V\} \cup \{B^{(u, v)} | (u, v) \in E\} \cup \{P\},\\
+    \Sigma &= \{\langle u,v\rangle | (u, v) \in E\},\\
+    O &= P,\\
+    \lambda &= S \mapsto \begin{cases}
+                    (\langle v, N(v, 1)\rangle, \langle v, N(v,2) \rangle, \ldots, \langle v, N(v, d(v))\rangle), & S = W^{(v)}\\
+                    (\langle u,v\rangle), & S = B^{(u, v)}\\
+                    (), & S = P
+                    \end{cases}.
+\end{split}
+\end{equation}
+
 Let $x_{\langle u,v\rangle}^{w_{\langle u,v\rangle}}=x$, the tensor network contraction corresponds to the matching polynomial
 \begin{equation}
     M(G, x) = \sum\limits_{k=1}^{|V|/2} c_k x^k,
@@ -1151,7 +1307,7 @@ Let us use the 3-coloring problem as an example to show how to reduce it to tens
 We first map a vertex $v \in V$ to a degree of freedom $c_v\in\{0,1,2\}$.
 Then we define a tensor labeled by $c_v$ for each vertex $v$ as
 \begin{equation}
-    W = \left(\begin{matrix}
+    W^{(v)} = \left(\begin{matrix}
         r_v\\
         g_v\\
         b_v
@@ -1159,14 +1315,28 @@ Then we define a tensor labeled by $c_v$ for each vertex $v$ as
 \end{equation}
 and a bond tensor labelled by $(c_u, c_v) $ for each edge $(u, v) \in E$ as
 \begin{equation}
-    B(x^{w_{uv}}) = \left(\begin{matrix}
+    B^{(u, v)} = \left(\begin{matrix}
         0 & x^{w_{uv}} & x^{w_{uv}}\\
         x^{w_{uv}} & 0 & x^{w_{uv}}\\
         x^{w_{uv}} & x^{w_{uv}} & 0
     \end{matrix}\right),
 \end{equation}
-where $r_v$, $g_v$ and $b_v$ are colors for labeling the configurations. $B$ tensors are for specifying the coloring constraints and $W$ tensors are for labeling the solutions.
+where $r_v$, $g_v$ and $b_v$ are colors for labeling the configurations. $B$ tensors are for specifying the coloring constraints and $W$ tensors are for labeling the solutions. The tensor network can be defined as
 %The number of possible colorings can be obtained by contracting this tensor network by setting $r_v, g_v$ and $b_v$ to $1$.
+
+\begin{equation}\label{eq:colortensornetwork}
+\begin{split}
+    \mathcal{T} &= \{W^{(v)} | v\in V\} \cup \{B^{(u, v)} | (u, v) \in E\} \cup \{P\},\\
+    \Sigma &= \{c_v | v \in V\},\\
+    O &= P,\\
+    \lambda &= S \mapsto \begin{cases}
+                    (c_v), & S = W^{(v)}\\
+                    (c_u, c_v), & S = B^{(u, v)}\\
+                    (), & S = P
+                    \end{cases}
+\end{split}
+\end{equation}
+
 Let $x^{w_{uv}} = x$ and $r_v = g_v = b_v = 1$; we then have a graph polynomial,
 in which the $k$-th coefficient is the number of coloring that $k$ bonds satisfy constraints.
 If a graph is colorable, the maximum order of this polynomial should be equal to the number of edges in this graph.
@@ -1178,12 +1348,25 @@ which is also known as the spin-glass problem in statistical physics.
 Let $G=(V,E)$ be a graph. We associate a weight $w_v$ to each $v\in V$. To reduce the cutting problem on $G$ to the contraction of a tensor network, we first define a Boolean degree of freedom $s_v\in\{0, 1\}$ for each vertex $v\in V$.
 Then for each edge $(u,v)\in E$, we define an edge matrix labeled by $(s_u, s_v)$ as
 \begin{equation}
-    B(x^{w_{uv}}_u, x^{w_{uv}}_v) = \left(\begin{matrix}
+    B^{(u, v)} = \left(\begin{matrix}
         1 & x_{v}^{w_{uv}}\\
         x_{u}^{w_{uv}} & 1
     \end{matrix}\right),
 \end{equation}
-where variables $x_u^{w_{uv}}$ and $x_v^{w_{uv}}$ are for a cut on this edge or a domain wall in a spin glass problem.
+where variables $x_u^{w_{uv}}$ and $x_v^{w_{uv}}$ are for a cut on this edge or a domain wall in a spin glass problem. The tensor network can be defined as
+
+\begin{equation}\label{eq:cuttensornetwork}
+\begin{split}
+    \mathcal{T} &= \{B^{(u, v)} | (u, v) \in E\} \cup \{P\},\\
+    \Sigma &= \{s_v | v \in V\},\\
+    O &= P,\\
+    \lambda &= S \mapsto \begin{cases}
+                    (s_u, s_v), & S = B^{(u, v)}\\
+                    (), & S = P
+                    \end{cases}
+\end{split}
+\end{equation}
+
 Let $x_u^{w_{uv}} = x_v^{w_{uv}} = x$; we have a graph polynomial similar to the previous ones,
 in which the $k$th coefficient is two times the number of cut configurations that have size $k$ (i.e.\ cutting $k$ edges).
 
@@ -1192,15 +1375,27 @@ In graph theory, a dominating set for a graph $G = (V, E)$ is a subset $D \subse
 To reduce this problem to the contraction of a tensor network, we first map a vertex $v\in V$ to a Boolean degree of freedom $s_v\in\{0, 1\}$.
 Then for each vertex $v$, we define a tensor on its closed neighborhood $\{v\} \cup N(v)$ as
 \begin{equation}
-T(x^{w_v}_v)_{s_1,s_2,\ldots,s_{|N(v)|},s_v} = \begin{cases}
-    0 & s_1=s_2=\ldots=s_{|N(v)|}=s_v=0,\\
+T^{(v)}_{s_{N(v, 1)},s_{N(v, 2)},\ldots,s_{N(v, d(v))},s_v} = \begin{cases}
+    0 & s_{N(v, 1)}=s_{N(v, 2)}=\ldots=s_{N(v, d(v))}=s_v=0,\\
     1 & s_v=0,\\
     x^{w_v}_v & \text{otherwise},
 \end{cases}
 \end{equation}
-where $w_v$ is the weight associated with the vertex $v$.
-This tensor implies a configuration having a closed neighborhood of $v$ not in $D$ ($s_1=s_2=\ldots=s_{|N(v)|}=s_v=0$) cannot be a dominating set.
-Otherwise, if $v$ is in $D$, this tensor contributes a multiplicative factor $x_v^{w_v}$ to the output.
+where $w_v$ is the weight associated with the vertex $v$, $N(v, k)$ is the $k$th vertex in $N(v)$ and $d(v) = |N(v)|$ is the degree of vertex $v$.
+This tensor implies a configuration having a closed neighborhood of $v$ not in $D$ ($s_{N(v, 1)}=s_{N(v, 2)}=\ldots=s_{N(v, d(v))}=s_v=0$) cannot be a dominating set.
+Otherwise, if $v$ is in $D$, this tensor contributes a multiplicative factor $x_v^{w_v}$ to the output. The tensor network can be defined as
+
+\begin{equation}\label{eq:domtensornetwork}
+\begin{split}
+    \mathcal{T} &= \{T^{(v)} | v\in V\} \cup \{P\},\\
+    \Sigma &= \{s_v | v \in V\},\\
+    O &= P,\\
+    \lambda &= S \mapsto \begin{cases}
+                    (s_{N(v,1)}, \ldots, s_{N(v,d(v))}, s_v), & S = T^{(v)}\\
+                    (), & S = P
+                    \end{cases}
+\end{split}
+\end{equation}
 The graph polynomial for the dominating set problem is known as the domination polynomial~\cite{Alikhani2009}
 \begin{equation}
 D(G, x) = \sum_{k=0}^{\gamma(G)} d_k x^k,
@@ -1210,55 +1405,115 @@ where $d_k$ is the number of dominating sets of size $k$.
 \subsection{Boolean satisfiability Problem}
 The Boolean satisfiability problem is the problem of determining if there exists an assignment that satisfies a given Boolean formula.
 One can specify a satisfiable problem in the conjunctive normal form (CNF), i.e.\ a conjunction of clauses (or disjunctions of Boolean literals).
+Given the alphabet of Boolean variables $V$, a CNF can be formally defined as
+\begin{equation}
+    {\rm CNF} = \bigwedge_{k=1}^{M} \bigvee_{i=1}^{|C^{(k)}|} C^{(k)}_i
+\end{equation}
+where $M$ is the number of clauses, $C^{(k)}$ is the $k$th clause and $C^{(k)}_i \in V \cup \{\neg v | v \in V\}$ is the $i$th literal in it.
 The standard tensor network can be used to study the counting version of the satisfiability problem~\cite{Biamonte2015}, while in the following, we will show a generic reduction from the problem of solving a CNF to a tensor network contraction for solving more solution space properties. We first map a Boolean literal $a$ and its negation $\neg a$ to the same degree of freedom $s_a \in \{0, 1\}$.
 $s_a = 0$ stands for variable $a$ having value \texttt{false} while $s_a=1$ stands for having value \texttt{true}.
 Then we map a clause to a tensor. For example, a $k$-th clause $\neg a \vee b \vee \neg c$ can be mapped to a tensor labeled by $(s_a, s_b, s_c)$.
 \begin{equation}
-C_{k} = \left(\begin{matrix}
+T^{(k)} = \left(\begin{matrix}
 \left(\begin{matrix}
-x^{w_k} & x_{b}^{w_k} \\
-x_a^{w_k} & x_{ab}^{w_k}
+x^{w_k} & x^{w_k} \\
+x^{w_k} & x^{w_k}
 \end{matrix}\right) \\
 \left(\begin{matrix}
-x_{c}^{w_k} & x_{bc}^{w_k} \\
-1 & x_{abc}^{w_k}
+x^{w_k} & x^{w_k} \\
+1 & x^{w_k}
 \end{matrix}\right)
 \end{matrix}\right),
 \end{equation}
-where $w_k$ is a weight associated with a clause. There is only one entry $(s_a, s_b, s_c) = (1, 0, 1)$ that makes this clause unsatisfied.
-Let $x^{w_k}_{\ldots} = x$, one can get a polynomial, in which the $k$-th coefficient gives the number of assignments that $k$ clauses are satisfied.
+where $w_k$ is a weight associated with a clause. There is only one entry $(s_a, s_b, s_c) = (1, 0, 1)$ that makes this clause unsatisfied. The tensor network representation is
 
-\subsection{Set packing}
-Suppose one has a finite set $S$ and a list of subsets of $S$. Then, the set packing problem asks if some $k$ subsets in the list are pairwise disjoint.
-It is the hypergraph generalization of the independent set problem, where a set corresponds to a vertex and an element corresponds to a hyperedge.
-The generic tensor network for the set packing problem has a similar form as that for the independent set problem, where the vertex tensor is same as \Cref{eq:vertextensor}, while the edge tensor generalizes \Cref{eq:edgetensor} to higher dimensions
+\begin{equation}\label{eq:domtensornetwork}
+\begin{split}
+    \mathcal{T} &= \{W^{(v)} | v \in V\} \cup \{T^{(k)} | k=1,\ldots,M\} \cup \{P\},\\
+    \Sigma &= \{s_v | v \in V\},\\
+    O &= P,\\
+    \lambda &= S \mapsto \begin{cases}
+                    (s_{l(k,1)}, s_{l(k, 2)}, s_{l(k,3))}), & S = C^{(k)}\\
+                    (), & S = P
+                    \end{cases},
+\end{split}
+\end{equation}
+where a tensor defined on literal $v \in V$ is
 \begin{equation}
-    B_{s_u,s_v,\ldots, s_w} = \begin{cases}
-        1, & s_u+s_v+\ldots+s_w\leq 1,\\
+    W^{(v)} = \left(\begin{matrix}
+    1\\
+    1_v
+    \end{matrix}\right)
+\end{equation}
+and a tensor defined on caluse $C^{(k)}$ is
+\begin{equation}
+T^{(k)}_{s_{N(k, 1)}, s_{N(k, 2)}, \ldots, s_{N(k, d(k))}} = \begin{cases}
+    x^{}, &C^{k} ~is~ satisfied ~by~ (s_{N(k, 1)}, s_{N(k, 2)}, \ldots, s_{N(k, d(k))})\\
+    1, &{\rm otherwise}
+\end{cases},
+\end{equation}
+where $N(k, i)$ is the $i$th boolean variables in $C^{(k)}$ and $d(k)$ is the number of boolean variables in it.
+Let $x^{w_k} = x$ and $1_v = 1$, one can get a polynomial, in which the $k$-th coefficient gives the number of assignments that $k$ clauses are satisfied.
+\blue{polish}
+\subsection{Set packing}
+Suppose one has a finite set $S$ and a list of subsets of $S$, denoted as $\mathcal{V}$. Then, the set packing problem asks if some $k$ subsets in $\mathcal{V}$ are pairwise disjoint.
+It is the hypergraph generalization of the independent set problem, where a set corresponds to a vertex and an element corresponds to a hyperedge.
+The generic tensor network for the set packing problem has a similar form as that for the independent set problem, where the vertex tensor is same as \Cref{eq:vertextensor}, while the edge tensor generalizes \Cref{eq:edgetensor} to higher dimensions such that for each $\sigma \in S$, we have the constraints on set $N(\sigma) = \{s| s\in \mathcal{V} \wedge \sigma \in s\}$
+\begin{equation}
+    B^{(\sigma)}_{N(\sigma, 1), N(\sigma, 2),\ldots, N(\sigma, d(\sigma))} = \begin{cases}
+        1, & s_{N(\sigma, 1)}+ s_{N(\sigma, 2)} + \ldots + s_{N(\sigma, d(\sigma))}\leq 1,\\
         0, & \text{otherwise}.
     \end{cases}
+\end{equation}
+where $N(\sigma, k)$ is the $k$th element in $N(\sigma)$ and $d(\sigma) = |N(\sigma)|$ is the number of elements in $N(\sigma)$. The tensor network representation for the set packing problem is
+
+\begin{equation}\label{eq:packtensornetwork}
+\begin{split}
+    \mathcal{T} &= \{W^{(v)} | v\in V\} \cup \{B^{(\sigma)} | \sigma \in \mathcal{S}\} \cup \{P\},\\
+    \Sigma &= \{s_v | v \in V\},\\
+    O &= P,\\
+    \lambda &= T \mapsto \begin{cases}
+                    (s_v), & T = W^{(v)}\\
+                    (s_{N(\sigma, 1)}, \ldots, s_{N(\sigma, d(\sigma))}), & T = B^{(\sigma)}\\
+                    (), & T = P
+                    \end{cases}
+\end{split}
 \end{equation}
 
 \subsection{Set covering}
 Given a collection of elements, the set covering problem aims to find the minimum number of sets that incorporate (cover) all of these elements.
-In the set covering problem, two sets are given: a set $U$ of elements and a set $S$ of subsets of the set $U$. The union of all the subsets covers the set $U$. For each set $s \in S$, we associate it with an possitive integer weight $w_s$.
-To get the generic tensor network representation, we first map a set $s\in S$ to a Boolean degree of freedom $l_s\in\{0, 1\}$.
-For each set $s$, we define a parameterized rank-one tensor indexed by $l_s$ as
+In the set covering problem, two sets are given: a set $\mathcal{V}$ of elements and a set $S$ of subsets of $\mathcal{V}$. The union of all the subsets covers $\mathcal{V}$. Each set $s \in S$ is associated with an positive integer weight $w_s$.
+To get the generic tensor network representation, we first map a set $\sigma \in S$ to a Boolean degree of freedom $s_\sigma\in\{0, 1\}$.
+For each $s_\sigma$, we define a parameterized rank-one tensor indexed by it as
 \begin{equation}
-W(x_s^{w_s}) = \left(\begin{matrix}
+W^{(\sigma)} = \left(\begin{matrix}
     1 \\
-    x_s^{w_s}
+    x_\sigma^{w_\sigma}
     \end{matrix}\right)
 \end{equation}
-where $x_s$ is a generic typed variable associated with $s$ and the positive integer power of which can be define by the repeated multiplication.
-For each unique element $a \in U$, we can define a constraint over all $s \in S$ containing this element, i.e. $N(a) = \{s | s \in S \land a\in s\}$, as
+where $x_\sigma$ is a generic typed variable associated with $\sigma$ and the positive integer power of which can be define by the repeated multiplication.
+For each element $v \in \mathcal{V}$, we can define a constraint over all $s \in S$ containing this element, i.e. $N(v) = \{s | s \in S \land v\in s\}$, as
 \begin{equation}
-B_{l_1,l_2,\ldots,l_{|N(a)|}} = \begin{cases}
-    0 & l_1=l_2=\ldots=l_{|N(a)|}=0,\\
-    1 & \text{otherwise}.
+B^{(v)}_{s_{N(v, 1)}, s_{N(v, 2)}, \ldots, s_{N(v, d(v))}} = \begin{cases}
+    0, & s_{N(v, 1)}=s_{N(v, 2)}=\ldots=s_{N(v, d(v))}=0,\\
+    1, & \text{otherwise}.
 \end{cases}
 \end{equation}
-If a subset of $S$ does not include any sets containing element $a$, then this configuration has zero contribution to the contraction result.
+where $N(v, k)$ is the $k$th element in $N(v)$ and $d(v) = |N(v)|$ is the number of elements in $N(v)$. 
+If a subset of $S$ does not include any sets containing element $v$, then the corresponding entry is zero.
+The tensor network representation for the set packing problem is
+\begin{equation}\label{eq:covertensornetwork}
+\begin{split}
+    \mathcal{T} &= \{W^{(\sigma)} | \sigma \in S\} \cup \{B^{(v)} | v \in \mathcal{V}\} \cup \{P\},\\
+    \Sigma &= \{s_\sigma | \sigma \in \mathcal{S}\},\\
+    O &= P,\\
+    \lambda &= T \mapsto \begin{cases}
+                    (s_\sigma), & T = W^{(\sigma)}\\
+                    (s_{N(v, 1)},s_{N(v, 2)},\ldots,s_{N(\sigma, d(v))}), & T = B^{(v)}\\
+                    (), & T = P
+                    \end{cases}
+\end{split}
+\end{equation}
 
 \section{Bounding the MIS enumeration space}\label{sec:bounding}
 \begin{figure}
