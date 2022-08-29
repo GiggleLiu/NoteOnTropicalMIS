@@ -731,8 +731,7 @@ where $s$ and $t$ are each a set of $|V|$-bit strings.
 \end{example}
 
 \begin{theorem}\label{thm:complexset}
-    Let $G = (V, E)$ be a graph and $I$ be its independent sets.
-    $I$ can be computed in time $O(|I||E|)\cc$.
+    The independent sets of graph $G = (V, E)$ be a graph can be enumerated in time $O(|I|)\cc$, where $|I|$ is the number of independent sets.
 \end{theorem}
 \begin{proof}
 To enumerate over $I$,  we initialize variable $x_{i}$ in the vertex tensor to $x_i = \{\boldsymbol{e}_{i}\}$, where $\boldsymbol{e}_i$ is a basis bit string of size $|V|$ that has only one non-zero value at location $i$.
