@@ -1498,13 +1498,13 @@ $w_k$ is the weight associated with clause $C^{(k)}$.
     The tensor network representation of a CNF defined in \Cref{eq:sattensornetwork} can be contracted in time $cc(\mathcal{N}_{CNF}) = O(M)2^{O({\rm tw}(H))}$, where $M$ is the number of clauses,
     $H$ is a hypergraph constructed by mapping a variables $v\in V$ to a vertex and the $k$th clause $C^{(k)}$ to a hyperedge connecting $\{N(k, i)|i=1,\ldots, d(k)\}$.
 \end{theorem}
-This can be proved by showing the hypergraph $H$ is exactly the line graph of $\mathcal{N}_{CNF}$.
+This can be proved by showing the hypergraph $H$ is the line graph of $\mathcal{N}_{CNF}$.
 Let $x^{w_k} = x$ and $1_v = 1$, one can get a polynomial, in which the $k$-th coefficient gives the number of assignments that $k$ clauses are satisfied.
 
 \subsection{Set packing}
 Suppose one has a finite set $V$ and a list of subsets of $V$, denoted as $S$. Then, the set packing problem asks if some $k$ subsets in $S$ are pairwise disjoint.
 It is the hypergraph generalization of the independent set problem, where a set corresponds to a vertex and an element corresponds to a hyperedge.
-The generic tensor network for the set packing problem also has a similar form as that for the independent set problem
+The generic tensor network for the set packing problem $\mathcal{N}_{pack}$ also has a similar form as that for the independent set problem
 \begin{equation}\label{eq:packtensornetwork}
 \begin{split}
     \mathcal{T} &= \{B^{(v)} | v\in V\} \cup \{W^{(\sigma)} | \sigma \in S\} \cup \{P\},\\
@@ -1533,11 +1533,18 @@ and the vertex tensor for each $\sigma \in S$
 \end{equation}
 where $N(v, k)$ is the $k$th element in $N(v)$ and $d(v) = |N(v)|$ is the number of elements in $N(v)$.
 
+\begin{theorem}\label{thm:packcomplex}
+    If the addition and multiplication of tensor elements can be computed in time $O(1)$,
+    The tensor network representation of a set packing problem defined in \Cref{eq:packtensornetwork} can be contracted in time $cc(\mathcal{N}_{pack}) = O(|S|)2^{O({\rm tw}(H))}$, where $|S|$ is the number of sets,
+    $H$ is a hypergraph constructed by mapping a set $\sigma\in S$ to a vertex and element $v \in V$ to a hyperedge connecting sets containing it $N(v)$.
+\end{theorem}
+This can be proved by showing the hypergraph $H$ is the line graph of $\mathcal{N}_{cover}$.
+
 \subsection{Set covering}
 Suppose one has a finite set $V$ and a list of subsets of $V$, denoted as $S$.
 The set covering problem aims to find the minimum number of sets in $S$ that incorporate (cover) all of elements in $V$.
 To get the generic tensor network representation, we first map a set $\sigma \in S$ to a Boolean degree of freedom $s_\sigma\in\{0, 1\}$.
-Then the tensor network representation for the set packing problem can be expressed as
+Then the tensor network representation for the set covering problem $\mathcal{N}_{pack}$ can be expressed as
 \begin{equation}\label{eq:covertensornetwork}
 \begin{split}
     \mathcal{T} &= \{W^{(\sigma)} | \sigma \in S\} \cup \{B^{(v)} | v \in V\} \cup \{P\},\\
@@ -1567,6 +1574,13 @@ B^{(v)}_{s_{N(v, 1)}, s_{N(v, 2)}, \ldots, s_{N(v, d(v))}} = \begin{cases}
 \end{equation}
 where $N(v, k)$ is the $k$th element in $N(v)$ and $d(v) = |N(v)|$ is the number of elements in $N(v)$. 
 If a subset of $S$ does not include any sets containing element $v$, then the corresponding entry is zero.
+
+\begin{theorem}\label{thm:covercomplex}
+    If the addition and multiplication of tensor elements can be computed in time $O(1)$,
+    The tensor network representation of a set covering problem defined in \Cref{eq:covertensornetwork} can be contracted in time $cc(\mathcal{N}_{cover}) = O(|S|)2^{O({\rm tw}(H))}$, where $|S|$ is the number of sets,
+    $H$ is a hypergraph constructed by mapping a set $\sigma\in S$ to a vertex and element $v \in V$ to a hyperedge connecting sets containing it $N(v)$.
+\end{theorem}
+This can be proved by showing the hypergraph $H$ is the line graph of $\mathcal{N}_{cover}$.
 
 \section{Bounding the MIS enumeration space}\label{sec:bounding}
 \begin{figure}
