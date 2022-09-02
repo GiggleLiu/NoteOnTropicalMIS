@@ -690,9 +690,9 @@ Similarly, one can also truncate the polynomial and keep only its smallest sever
 It can be used, for example, to count the maximal independent sets with the smallest cardinality, where a maximal independent set is an independent set that cannot be made larger by adding a new vertex into it without violating the independence constraint.
 As will be shown below, this algebra can also be extended to enumerate those large-size independent sets.
 
-\begin{lemma}
+\begin{theorem}
     The number of the largest $k$ independent sets of a graph $G = (V, E)$ can be computed in time $O(K\log K)\cc$.
-\end{lemma}
+\end{theorem}
 The proof is similar to proving \Cref{thm:complexpoly}, except only $k$ largest coefficients are involved in the addition and multiplication.
 
 \section{Enumerating and sampling independent sets}\label{sec:enumeration}
@@ -877,11 +877,11 @@ The contraction of such tensor network corresponds to a sum-product expression t
 The time complexity to evaluating this expression tree is $O(|V||I|)$, where $|V|$ comes from the number of bits to represent a configuration.
 \end{proof}
 
-Similarly, we have the following lemma by combining the sum-product expression tree algebra with the truncated polynomial.
+Similarly, we have the following theorem by combining the sum-product expression tree algebra with the truncated polynomial.
 
-\begin{lemma}\label{thm:complexexprk}
+\begin{theorem}\label{thm:complexexprk}
         Let $G = (V, E)$ be a graph and $\mathcal{I}_k$ be the number of independent sets with size $k$. The independent sets with size $k > \alpha(G)-K$ of can be computed in time $O(K\log K)\cc + O(|V|\sum_{k=\alpha(G)-K+1}^{\alpha(G)}|\mathcal{I}_k|)$.
-\end{lemma}
+\end{theorem}
 
 Although likely, one cannot collect all configurations represented by a sum-product expression tree into a vector due to its extremely large size,
 they can draw unbiased samples from it by direct sampling.
@@ -932,10 +932,10 @@ The sizes of $A, B, C$, and $D$ can be computed recursively until the program me
 Since the depth of the expression tree is $|V|$ and the cost of each arithmetic operation is $O(|V|)$, the overall time complexity to generate a sample is $O(|V|^2)$.
 \end{proof}
 
-Similarly, if one is only interested in obtaining independent sets with largest $K$ sizes, we have the following lemma.
-\begin{lemma}
+Similarly, if one is only interested in obtaining independent sets with largest $K$ sizes, we have the following theorem.
+\begin{theorem}
     Let $G = (V, E)$ be a graph, its independent sets with size $k > \alpha(G)-K$ of can be unbiasedly sampled in time $O(K\log K)\cc + O(|V|^2 M)$, where $M$ is the number of samples.
-\end{lemma}
+\end{theorem}
 
 \section{Weighted graphs}\label{sec:weighted}
 
@@ -955,7 +955,7 @@ where $\texttt{largest}(s, k)$ means truncating the set $s$ by only keeping its 
 
 
 \begin{theorem}
-    Let $G = (V, E, W)$ be a weighted graph, its $K$ largest independent sets sizes can be computed in time $O(K\log K)\cc$.
+    Let $G = (V, E)$ be a weighted graph, its $K$ largest independent sets sizes can be computed in time $O(K\log K)\cc$.
 \end{theorem}
 \begin{proof}
 $k$ largest independent sets can be computed by contracting a tensor network with extended tropical numbers. The vertex tensor and edge tensor are
@@ -975,9 +975,9 @@ where we have used $x_v^{w_v} = (-\infty^{\otimes k-1} \otimes 1)^{w_v} = -\inft
 The computation of $s \odot t$ is a maximum sum combination problem that can be done in time $O(k\log(k))$ using the algorithm in \Cref{sec:maxsum}. Hence the overall time complexity of contracting the tensor network is $O(K\log K)\cc$.
 \end{proof}
 
-\begin{lemma}
-    Let $G = (V, E, W)$ be a weighted graph, its $K$ largest independent sets can be computed in time $O(K\log K|V|)\cc$.
-\end{lemma}
+\begin{theorem}
+    Let $G = (V, E)$ be a weighted graph, its $K$ largest independent sets can be computed in time $O(K\log K|V|)\cc$.
+\end{theorem}
 To find solutions corresponding to the largest $k$ sizes, one can combine the extended tropical algebra with the bit string algebra (\Cref{eq:singleconfig}).
 Since the $\oplus$ operation of the configuration sampler will not be used in the combined algebra, the resulting configurations are deterministic and complete.
 
