@@ -109,15 +109,17 @@ A benchmark to demonstrate the performance of our algorithms can be found in bot
 %a maximal independent set is an independent set that is not a subset of any other independent set, but its size may not be the maximum. 
 
 \section{Tensor networks}\label{sec:tn}
-A tensor network is composed of a collection of tensors $\mathcal{T}$, an indicator of which tensor is the output, and a map $\lambda$ from tensor to labels associated with tensor dimensions.
+A tensor network is a multi-linear map composed of a collection of labelled tensors $\mathcal{T}$ and an indicator for the output tensor. It is formally defined as follows.
 \begin{definition}[Tensor Network~\cite{Cirac2021, Orus2014}]
-    A tensor network is a quadruple of $\mathcal{N} = (\Tensors, \Sigma, O \in \Tensors, \Inputs : \mathcal{T} \rightarrow \Sigma^k)$. $\Tensors$ is a set of tensors, among which $O$ is the output tensor.
-    $\Sigma$ is an alphabet of labels. $\Inputs$ is a map from a tensor to a vector of labels with the vector length the same as the tensor rank.
+    A tensor network is a triple of $\mathcal{N} = (\Sigma, \Tensors, O)$.
+    $\Sigma$ is an alphabet of labels.
+    $\Tensors$ is a set of labelled tensors as the inputs, each $T_{\boldsymbol{\sigma}} \in \mathcal{T}$ is labeled by a vector of labels $\boldsymbol{\sigma} \in \Sigma^{r(T)}$, where $r(T)$ the rank of $T$.
+    $O$ is a labbeled tensor as the output.
 \end{definition}
 The operation to evaluate a tensor network is called \textit{contraction}, which is defined as a summation of tensor element products over the labels not appearing in the output tensor.
 For example, the matrix multiplication is a special tensor network
 \begin{equation}
-\mathcal{N}_{\rm matmul} = \left(\{A, B, C\}, \{i,j,k\}, C, T \mapsto \begin{cases} (i,j), T = A\\(j, k), T=B\\ (i, k), T=C\end{cases}\right),
+\mathcal{N}_{\rm matmul} = \left(\{i,j,k\}, \{A_{ij}, B_{jk}\}, C_{ik}\right),
 \end{equation}
 where $A, B$ and $C$ are matrices (two-dimensional tensors), among which $C$ is the output tensor, $(i,k),(i,j)$ and $(i,k)$ are labels associated with them. The contraction is defined as $C_{ik} = \sum_j A_{ij}B_{jk}$, where the subscripts are for tensor indexing, and the tensor dimensions with a same label must have the same size.
 %can be viewed as a generalization of binary matrix multiplication to nary tensor contraction.
@@ -140,15 +142,9 @@ While this generalized form is equivalent in representation power, it can have s
 \blue{maybe remove this example?}
 \begin{equation}
 \begin{split}
-    \mathcal{T} &= \{A, B, V, C\},\\
     \Sigma &= \{i,j,k,l,m\},\\
-    O &= C,\\
-    \lambda &= T \mapsto \begin{cases}
-    (j, k, m), &T = A\\
-    (m, i, l), &T = B \\
-    (j, m), &T = V \\
-    (i, j, k), &T= C
-    \end{cases}
+    \mathcal{T} &= \{A_{jkm}, B_{mil}, V_{jm}\},\\
+    O &= C_{ijk},\\
     \end{split}
 \end{equation}
 is a tensor network that can be evaluated as $C_{ijk} = \sum_{ml}A_{jkm} B_{mil} V_{jm}$.
@@ -313,14 +309,9 @@ An independent set $I \subseteq V$ is a set of vertices that for any vertex pair
 To the independent set problem on $G$ can be encoded as a tensor network $\mathcal{N}_{\rm IS}(G)$
 \begin{equation}\label{eq:mistensornetwork}
 \begin{split}
-    \mathcal{T} &= \{W^{(v)} | v\in V\} \cup \{B^{(u, v)} | (u, v) \in E\} \cup \{P\},\\
-    \Sigma &= \{s_v | v \in V\},\\
-    O &= P,\\
-    \lambda &= T \mapsto \begin{cases}
-                    (s_v), &T = W^{(v)}\\
-                    (s_u, s_v), &T = B^{(u, v)}\\
-                    (), & T = P
-                    \end{cases},
+    \Sigma &= \{s_v \mid v \in V\},\\
+    \mathcal{T} &= \{W^{(v)}_{v} \mid v\in V\} \cup \{B^{(u, v)}_{uv} \mid (u, v) \in E\},\\
+    O &= P,
     \end{split}
 \end{equation}
 where for each vertex $v$, we define a parameterized rank-one tensor associated with it as
@@ -402,8 +393,7 @@ The resulting polynomial represents 3 different independent sets $\{\}$, $\{a\}$
 For a general graph, it is computationally inefficient to evaluate \Cref{eq:idp} by directly summing up the $2^{|V|}$ products.
 A better approach to evaluate a tensor network is: to find a good pair-wise tensor contraction order as a binary tree and then contract two tensors at a time by this order.
 \begin{theorem}\label{thm:complexreal}
-    If the addition and multiplication of tensor elements can be computed in time $O(1)$,
-    the tensor network in \Cref{eq:mistensornetwork} for the independent set problem on graph $G = (V,E)$ can be contracted in time $\cc = O(|E|)2^{O({\rm tw}(G))}$.
+    The tensor network in \Cref{eq:mistensornetwork} for the independent set problem on graph $G = (V,E)$ can be contracted in $\cc = O(|E|)2^{O({\rm tw}(G))}$ number of additions and multiplications.
 \end{theorem}
 \begin{proof}
 Let us denote the line graph, a graph obtained by mapping an edge in the original graph to a vertex and connect two vertices if and only if their associated edges in the original original graph share a common vertex, of the hypergraph representation of a tensor network $\mathcal{N}$ as $L(\mathcal{N})$.
@@ -691,7 +681,7 @@ It can be used, for example, to count the maximal independent sets with the smal
 As will be shown below, this algebra can also be extended to enumerate those large-size independent sets.
 
 \begin{lemma}
-    The number of the largest $k$ independent sets of a graph $G = (V, E)$ can be computed in time $O(K\log K)\cc$.
+    The number of the largest $K$ independent sets of a graph $G = (V, E)$ can be computed in time $O(K\log K)\cc$.
 \end{lemma}
 The proof is similar to proving \Cref{thm:complexpoly}, except only $k$ largest coefficients are involved in the addition and multiplication.
 
@@ -709,7 +699,7 @@ To enumerate all independent sets, we designed an algebra on sets of bit strings
 \eqname{SN}
 \begin{split}
     s \oplus t &= s \cup t\\
-    s \odot t &= \{\sigma \lor^\circ \tau \, | \, \sigma \in s, \tau \in t\}\\
+    s \odot t &= \{\sigma \lor^\circ \tau \, \mid \, \sigma \in s, \tau \in t\}\\
     \mymathbb{0} &= \{\}\\
     \mymathbb{1} &= \{0^{\otimes |V|}\},
 \end{split}\label{eq:set}
@@ -730,7 +720,7 @@ where $s$ and $t$ are each a set of $|V|$-bit strings.
 \end{example}
 
 \begin{theorem}\label{thm:complexset}
-    The independent sets of graph $G = (V, E)$ be a graph can be enumerated in time $O(|I|)\cc$, where $|I|$ is the number of independent sets.
+    The independent sets of graph $G = (V, E)$ be a graph can be enumerated in time $O(|I||V|)\cc$, where $|I|$ is the number of independent sets.
 \end{theorem}
 \begin{proof}
 To enumerate over $I$,  we initialize variable $x_{i}$ in the vertex tensor to $x_i = \{\boldsymbol{e}_{i}\}$, where $\boldsymbol{e}_i$ is a basis bit string of size $|V|$ that has only one non-zero value at location $i$.
@@ -764,7 +754,7 @@ The combined operations become:
         s_y\infty^{\max(x,y)}, & x < y\\
         s_x\infty^{\max(x,y)}, & x > y
     \end{cases},\\
-    s_x\infty^x \odot s_y\infty^y &= \{\sigma \lor^\circ \tau | \sigma \in s_x, \tau \in s_y\}\infty^{x+y},\\
+    s_x\infty^x \odot s_y\infty^y &= \{\sigma \lor^\circ \tau \mid \sigma \in s_x, \tau \in s_y\}\infty^{x+y},\\
     \mymathbb{0} &= \{\}\infty^{-\infty},\\
     \mymathbb{1} &= \{0^{\otimes |V|}\}\infty^{0}. \label{eq:countingtropicalset}
 \end{split}
@@ -820,9 +810,9 @@ The \texttt{select} function picks one of $\sigma$ and $\tau$ by some criteria.
 It can be picking the one smaller in the lexicographical order such that the addition operation is commutative and associative.
 In most cases, it is completely fine for the \texttt{select} function to pick a random one (not commutative and associative anymore) to generate a random MIS.
 
-\begin{theorem}
+\begin{corollary}
     Let $G = (V, E)$ be a graph, one of its maximum independent set can be computed in time $O(|V|)\cc$.
-\end{theorem}
+\end{corollary}
 The proof is similar to \Cref{thm:complexmis}, except the set algebra is replace by the one in \Cref{eq:singleconfig}, and the time complexity of element-wise addition and multiplication no longer depends on $|\mathcal{I}_\alpha|$.
 The linear dependency of $|V|$ in the time complexity can be remove using the back propagation technique, at the cost of additional space.
 \begin{theorem}
@@ -946,7 +936,7 @@ They can be computed by the extended tropical algebra, which is a natural genera
 \eqname{T$k$}
 \begin{split}
     s \oplus t &= \texttt{largest}(s \cup t, k)\\
-    s \odot t &= \texttt{largest}(\{a+b | a \in s, b\in t\}, k)\\
+    s \odot t &= \texttt{largest}(\{a+b \mid a \in s, b\in t\}, k)\\
     \mymathbb{0} &= -\infty^{\otimes k}\\
     \mymathbb{1} &= -\infty^{\otimes k-1} \otimes 0
 \end{split}\label{eq:ext-tropical}
@@ -1174,24 +1164,20 @@ If we further let $w_i=1$, the second line of \Cref{eq:partition} is equivalent 
 
 \section{Hard problems and tensor networks}\label{sec:otherproblems}
 \subsection{Maximal independent sets and maximal cliques}\label{sec:maximal}
-In this section, we focus the discussion on the maximal independent sets problem since finding maximal cliques of a graph is equivalent to finding the maximal independent sets of the complement of the graph.
+In this section, we focus the discussion on the maximal independent sets problem since finding maximal cliques of a graph is equivalent to finding the maximal independent sets of its complement.
 Let $G=(V,E)$ be a graph, we denote the neighborhood of a vertex $v\in V$ as $N(v)$.
 A maximal independent set $I_m$ is an independent set such that no $v \in V$ satisfies $I_m \cap (\{v\} \cup N[v])  = \emptyset$, i.e.\ an independent set that cannot become a larger one by adding a new vertex.
 The corresponding tensor network $\mathcal{N}_{\rm mIS}(G)$ can be defined as
 \begin{equation}\label{eq:maxistensornetwork}
 \begin{split}
-    \mathcal{T} &= \{T^{(v)} | v\in V\} \cup \{P\},\\
-    \Sigma &= \{s_v | v \in V\},\\
+    \Sigma &= \{s_v \mid v \in V\},\\
+    \mathcal{T} &= \{T^{(v)}_{s_{N(v,1)} s_{N(v, 2)}\ldots s_{N(v,d(v))}s_v} \mid v\in V\},\\
     O &= P,\\
-    \lambda &= S \mapsto \begin{cases}
-                    (s_{N(v,1)}, \ldots, s_{N(v,d(v))}, s_v), & S = T^{(v)}\\
-                    (), & S = P
-                    \end{cases},
 \end{split}
 \end{equation}
 where we defined a tensor for each $v \in V$ and its neighborhood $N(v)$ as
 \begin{equation}\label{eq:maximal}
-    T^{(v)}_{s_{N(v, 1)},s_{N(v, 2)},\ldots,s_{N(v, d(v))},s_v} = \begin{cases}
+    T^{(v)}_{s_{N(v, 1)}s_{N(v, 2)}\ldots s_{N(v, d(v))}s_v} = \begin{cases}
         s_vx_v^{w_v} & s_{N(v, 1)}=s_{N(v, 2)}=\ldots=s_{N(v, d(v))}=0,\\
         1-s_v& \text{otherwise}.
     \end{cases}
@@ -1213,8 +1199,7 @@ For a degree 2 vertex $v$, the tensor has the following form
     \end{matrix}\right).
 \end{equation}
 \begin{theorem}\label{thm:miscomplex}
-    If the addition and multiplication of tensor elements can be computed in time $O(1)$,
-    The tensor network representation of a maximal independent set problem on graph $G=(V,E)$ defined in \Cref{eq:maxistensornetwork} can be contracted in time $cc(\mathcal{N}_{mIS}(G)) = O(|V|)2^{O({\rm tw}(G)\Delta)}$, where $\Delta$ is the maximum degree of vertices in $G$.
+    The tensor network representation of a maximal independent set problem on graph $G=(V,E)$ (\Cref{eq:maxistensornetwork}) can be contracted in $cc(\mathcal{N}_{mIS}(G)) = O(|V|)2^{O({\rm tw}(G)\Delta)}$ number of additions and multiplications, where $\Delta$ is the maximum degree of vertices in $G$.
 \end{theorem}
 \begin{proof}
     The prefactor $|V|$ comes from the number of tensors,
@@ -1280,19 +1265,14 @@ We map an edge $(u, v) \in E$ to a degree of freedom $\langle u, v\rangle \in \{
 The tensor network representation for the matching problem $\mathcal{N}_{match}$ can be defined as
 \begin{equation}\label{eq:matchtensornetwork}
 \begin{split}
-    \mathcal{T} &= \{W^{(v)} | v\in V\} \cup \{B^{(u, v)} | (u, v) \in E\} \cup \{P\},\\
-    \Sigma &= \{\langle u,v\rangle | (u, v) \in E\},\\
-    O &= P,\\
-    \lambda &= S \mapsto \begin{cases}
-                    (\langle v, N(v, 1)\rangle, \langle v, N(v,2) \rangle, \ldots, \langle v, N(v, d(v))\rangle), & S = W^{(v)}\\
-                    (\langle u,v\rangle), & S = B^{(u, v)}\\
-                    (), & S = P
-                    \end{cases},
+    \Sigma &= \{\langle u,v\rangle \mid (u, v) \in E\},\\
+    \mathcal{T} &= \{W^{(v)}_{\langle v, N(v, 1)\rangle \langle v, N(v,2) \rangle \ldots \langle v, N(v, d(v))\rangle} \mid v\in V\} \cup \{B^{(u, v)}_{\langle u,v\rangle} \mid (u, v) \in E\},\\
+    O &= P,
 \end{split}
 \end{equation}
 where for each $v\in V$, we define a vertex tensor over its neighborhood $N(v)$ as
 \begin{equation}
-    W^{(v)}_{\langle v, N(v, 1)\rangle, \langle v, N(v, 2) \rangle, \ldots, \langle v, N(v,d(v))\rangle} = \begin{cases}
+    W^{(v)}_{\langle v, N(v, 1)\rangle \langle v, N(v, 2) \rangle \ldots \langle v, N(v,d(v))\rangle} = \begin{cases}
         1, & \sum_{i=1}^{d(v)} \langle v, N(v, i) \rangle \leq 1,\\
         0, & \text{otherwise},
     \end{cases}
@@ -1308,8 +1288,7 @@ Here, $N(v, k)$ is the $k$th vertex in $N(v)$ and $d(v) = |N(v)|$ is the degree 
 $W$ tensor specifies the constraint that a vertex cannot be shared by two edges in the edge set, and an edge tensor carries the weights.
 
 \begin{theorem}\label{thm:matchcomplex}
-    If the addition and multiplication of tensor elements can be computed in time $O(1)$,
-    The tensor network representation of a matching problem on graph $G=(V,E)$ defined in \Cref{eq:matchtensornetwork} can be contracted in time $cc(\mathcal{N}_{match}(G)) = O(|V|)2^{O({\rm tw}(L(G))}$, $L(G)$ is the line graph of $G$.
+    The tensor network representation of a matching problem on graph $G=(V,E)$ (\Cref{eq:matchtensornetwork}) can be contracted in $cc(\mathcal{N}_{match}(G)) = O(|V|)2^{O({\rm tw}(L(G))}$ number of additions and multiplications, $L(G)$ is the line graph of $G$.
 \end{theorem}
 \begin{proof}
     To contract the tensor network, we first absorb edges tensors into the vertex tensors, which does not increase computational complexity.
@@ -1330,14 +1309,9 @@ We first map a vertex $v \in V$ to a degree of freedom $c_v\in\{0,1,2\}$.
 The tensor network for the vertex coloring problem $\mathcal{N}_{3-color}(G)$ can be formally defined as
 \begin{equation}\label{eq:colortensornetwork}
 \begin{split}
-    \mathcal{T} &= \{W^{(v)} | v\in V\} \cup \{B^{(u, v)} | (u, v) \in E\} \cup \{P\},\\
-    \Sigma &= \{c_v | v \in V\},\\
+    \Sigma &= \{c_v \mid v \in V\},\\
+    \mathcal{T} &= \{W^{(v)}_{c_v} \mid v\in V\} \cup \{B^{(u, v)}_{c_uc_v} \mid (u, v) \in E\},\\
     O &= P,\\
-    \lambda &= S \mapsto \begin{cases}
-                    (c_v), & S = W^{(v)}\\
-                    (c_u, c_v), & S = B^{(u, v)}\\
-                    (), & S = P
-                    \end{cases}
 \end{split}
 \end{equation}
 where for each vertex $v \in V$, we define a tensor labeled by $c_v$
@@ -1359,8 +1333,7 @@ and for each edge $(u, v) \in E$, we define a tensor labelled by $(c_u, c_v)$ as
 where subscripts $c_v = r$, $c_v = g$ and $c_v = b$ are for labeling the color configurations. $B$ tensors are for specifying the coloring constraints and $W$ tensors are for labeling the solutions.
 
 \begin{theorem}\label{thm:cutcomplex}
-    If the addition and multiplication of tensor elements can be computed in time $O(1)$,
-    The tensor network representation of a K-coloring problem on graph $G=(V,E)$ as defined in \Cref{eq:colortensornetwork} can be contracted in time $cc(\mathcal{N}_{K-color}(G)) = O(|E|)K^{O({\rm tw}(G))}$.
+    The tensor network representation of a K-coloring problem on graph $G=(V,E)$ (\Cref{eq:colortensornetwork}) can be contracted in $cc(\mathcal{N}_{K-color}(G)) = O(|E|)K^{O({\rm tw}(G))}$ number of additions and multiplications.
 \end{theorem}
 The proof is similar to that for \Cref{thm:complexreal} except the dimension of each degree of freedom is $K$.
 %The number of possible colorings can be obtained by contracting this tensor network by setting $r_v, g_v$ and $b_v$ to $1$.
@@ -1376,13 +1349,9 @@ Let $G=(V,E)$ be a graph. We associate a weight $w_v$ to each $v\in V$. To reduc
 The tensor network representation for the cutting problem $\mathcal{N}_{cut}$ can be formally defined as
 \begin{equation}\label{eq:cuttensornetwork}
 \begin{split}
-    \mathcal{T} &= \{B^{(u, v)} | (u, v) \in E\} \cup \{P\},\\
-    \Sigma &= \{s_v | v \in V\},\\
+    \mathcal{T} &= \{B^{(u, v)}_{s_us_v} \mid (u, v) \in E\},\\
+    \Sigma &= \{s_v \mid v \in V\},\\
     O &= P,\\
-    \lambda &= S \mapsto \begin{cases}
-                    (s_u, s_v), & S = B^{(u, v)}\\
-                    (), & S = P
-                    \end{cases}
 \end{split}
 \end{equation}
 where for each edge $(u,v)\in E$, we define an edge matrix labeled by $(s_u, s_v)$ as
@@ -1394,8 +1363,7 @@ where for each edge $(u,v)\in E$, we define an edge matrix labeled by $(s_u, s_v
 \end{equation}
 Here, variables $x_u^{w_{uv}}$ and $x_v^{w_{uv}}$ are for a cut on this edge or a domain wall in a spin glass problem.
 \begin{theorem}\label{thm:colorcomplex}
-    If the addition and multiplication of tensor elements can be computed in time $O(1)$,
-    The tensor network representation of a cuting problem on graph $G=(V,E)$ as defined in \Cref{eq:cuttensornetwork} can be contracted in time $cc(\mathcal{N}_{cut}(G)) = O(|E|)2^{O({\rm tw}(G))}$.
+    The tensor network representation of a cuting problem on graph $G=(V,E)$ (\Cref{eq:cuttensornetwork}) can be contracted in $cc(\mathcal{N}_{cut}(G)) = O(|E|)2^{O({\rm tw}(G))}$ number of additions and multiplications.
 \end{theorem}
 The proof is similar to that for \Cref{thm:complexreal}.
 Let $x_u^{w_{uv}} = x_v^{w_{uv}} = x$; we have a graph polynomial similar to the previous ones,
@@ -1407,18 +1375,14 @@ To reduce this problem to the contraction of a tensor network, we first map a ve
 The tensor network for the dominating set problem $\mathcal{N}_{dom}$ can be formally defined as
 \begin{equation}\label{eq:domtensornetwork}
 \begin{split}
-    \mathcal{T} &= \{T^{(v)} | v\in V\} \cup \{P\},\\
-    \Sigma &= \{s_v | v \in V\},\\
+    \Sigma &= \{s_v \mid v \in V\},\\
+    \mathcal{T} &= \{T^{(v)}_{s_{N(v,1)}s_{N(v, 2)} \ldots s_{N(v,d(v))}, s_v} \mid v\in V\},\\
     O &= P,\\
-    \lambda &= S \mapsto \begin{cases}
-                    (s_{N(v,1)}, \ldots, s_{N(v,d(v))}, s_v), & S = T^{(v)}\\
-                    (), & S = P
-                    \end{cases},
 \end{split}
 \end{equation}
 where for each vertex $v$, we define a tensor on its closed neighborhood $\{v\} \cup N(v)$ as
 \begin{equation}
-T^{(v)}_{s_{N(v, 1)},s_{N(v, 2)},\ldots,s_{N(v, d(v))},s_v} = \begin{cases}
+T^{(v)}_{s_{N(v, 1)}s_{N(v, 2)}\ldots s_{N(v, d(v))}s_v} = \begin{cases}
     0 & s_{N(v, 1)}=s_{N(v, 2)}=\ldots=s_{N(v, d(v))}=s_v=0,\\
     1 & s_v=0,\\
     x^{w_v}_v & \text{otherwise}.
@@ -1428,8 +1392,7 @@ Here, $w_v$ is the weight associated with the vertex $v$, $N(v, k)$ is the $k$th
 This tensor implies a configuration having a closed neighborhood of $v$ not in $D$ ($s_{N(v, 1)}=s_{N(v, 2)}=\ldots=s_{N(v, d(v))}=s_v=0$) cannot be a dominating set.
 Otherwise, if $v$ is in $D$, this tensor contributes a multiplicative factor $x_v^{w_v}$ to the output. 
 \begin{theorem}\label{thm:domcomplex}
-    If the addition and multiplication of tensor elements can be computed in time $O(1)$,
-    The tensor network representation of a dominating set problem on graph $G=(V,E)$ as defined in \Cref{eq:cuttensornetwork} can be contracted in time $cc(\mathcal{N}_{dom}(G)) = O(|V|)2^{O({\rm tw}(G)\Delta)}$.
+    The tensor network representation of a dominating set problem on graph $G=(V,E)$ (\Cref{eq:domtensornetwork}) can be contracted in $cc(\mathcal{N}_{dom}(G)) = O(|V|)2^{O({\rm tw}(G)\Delta)}$ number of additions and multiplications.
 \end{theorem}
 The proof is similar to that for \Cref{thm:miscomplex}.
 The graph polynomial for the dominating set problem is known as the domination polynomial~\cite{Alikhani2009}
@@ -1441,13 +1404,13 @@ where $d_k$ is the number of dominating sets of size $k$.
 \subsection{Boolean satisfiability Problem}
 The Boolean satisfiability problem is the problem of determining if there exists an assignment that satisfies a given Boolean formula.
 One can specify a satisfiable problem in the conjunctive normal form (CNF), i.e.\ a conjunction of clauses (or disjunctions of Boolean literals).
-Given the alphabet of Boolean variables $V$, a CNF can be formally defined as
+Given the alphabet of Boolean variables $V$ and its negation $\neg V = \{\neg v \mid v \in V\}$, a CNF can be formally defined as
 \begin{equation}
     {\rm CNF} = \bigwedge_{k=1}^{M} \bigvee_{i=1}^{|C^{(k)}|} C^{(k)}_i
 \end{equation}
-where $M$ is the number of clauses, $C^{(k)}$ is the $k$th clause and $C^{(k)}_i \in V \cup \{\neg v | v \in V\}$ is the $i$th literal in it.
+where $M$ is the number of clauses, $C^{(k)}$ is the $k$th clause and $C^{(k)}_i \in V \cup \neg V$ is the $i$th literal in it.
 The standard tensor network can be used to study the counting version of the satisfiability problem~\cite{Biamonte2015}, while in the following, we will show a generic reduction from the problem of solving a CNF to a tensor network contraction for solving more solution space properties.
-We first map a Boolean literal $v\in V$ and its negation $\neg v$ to the same degree of freedom $s_v \in \{0, 1\}$.
+We first map each Boolean literal $v\in V$ to a Boolean degree of freedom $s_v \in \{0, 1\}$.
 $s_v = 0$ stands for variable $v$ having value \texttt{false} while $s_a=1$ stands for having value \texttt{true}.
 % For example, a $k$-th clause $\neg a \vee b \vee \neg c$ can be mapped to a tensor labeled by $(s_a, s_b, s_c)$.
 % \begin{equation}
@@ -1466,13 +1429,9 @@ $s_v = 0$ stands for variable $v$ having value \texttt{false} while $s_a=1$ stan
 The tensor network $\mathcal{N}_{CNF}$ can be formally defined as
 \begin{equation}\label{eq:sattensornetwork}
 \begin{split}
-    \mathcal{T} &= \{W^{(v)} | v \in V\} \cup \{T^{(k)} | k=1,\ldots,M\} \cup \{P\},\\
-    \Sigma &= \{s_v | v \in V\},\\
+    \Sigma &= \{s_v \mid v \in V\},\\
+    \mathcal{T} &= \{W^{(v)}_v \mid v \in V\} \cup \{T^{(k)}_{s_{N(k,1)} s_{N(k, 2)} s_{N(k,3))}} \mid k=1,\ldots,M\},\\
     O &= P,\\
-    \lambda &= S \mapsto \begin{cases}
-                    (s_{l(k,1)}, s_{l(k, 2)}, s_{l(k,3))}), & S = C^{(k)}\\
-                    (), & S = P
-                    \end{cases},
 \end{split}
 \end{equation}
 where a tensor defined on literal $v \in V$ is
@@ -1484,17 +1443,16 @@ where a tensor defined on literal $v \in V$ is
 \end{equation}
 and a tensor defined on caluse $C^{(k)}$ is
 \begin{equation}
-T^{(k)}_{s_{N(k, 1)}, s_{N(k, 2)}, \ldots, s_{N(k, d(k))}} = \begin{cases}
+T^{(k)}_{s_{N(k, 1)} s_{N(k, 2)} \ldots s_{N(k, d(k))}} = \begin{cases}
     x^{}, &C^{(k)} ~is~ satisfied ~by~ (s_{N(k, 1)}, s_{N(k, 2)}, \ldots, s_{N(k, d(k))})\\
     1, &{\rm otherwise}
 \end{cases},
 \end{equation}
-where $N(k, i)$ is the $i$th boolean variables in $C^{(k)}$ and $d(k)$ is the number of boolean variables in it.
+where $N(k, i) = \begin{cases}\neg C^{(k)}_i, &C^{(k)}_i \in \neg V\\ C^{(k)}_i, & C^{(k)}_i \in V\end{cases}$ is the $i$th literal in $C^{(k)}$ with its negation sign removed and $d(k)$ is the number of boolean variables in it.
 $w_k$ is the weight associated with clause $C^{(k)}$.
 \begin{theorem}\label{thm:cnfcomplex}
-    If the addition and multiplication of tensor elements can be computed in time $O(1)$,
-    The tensor network representation of a CNF defined in \Cref{eq:sattensornetwork} can be contracted in time $cc(\mathcal{N}_{CNF}) = O(M)2^{O({\rm tw}(H))}$, where $M$ is the number of clauses,
-    $H$ is a hypergraph constructed by mapping a variables $v\in V$ to a vertex and the $k$th clause $C^{(k)}$ to a hyperedge connecting $\{N(k, i)|i=1,\ldots, d(k)\}$.
+    The tensor network representation of a CNF (\Cref{eq:sattensornetwork}) can be contracted in $cc(\mathcal{N}_{CNF}) = O(M)2^{O({\rm tw}(H))}$ number of additions and multiplications, where $M$ is the number of clauses,
+    $H$ is a hypergraph constructed by mapping a variables $v\in V$ to a vertex and the $k$th clause $C^{(k)}$ to a hyperedge connecting $\{N(k, i)\mid i=1,\ldots, d(k)\}$.
 \end{theorem}
 This can be proved by showing the hypergraph $H$ is the line graph of $\mathcal{N}_{CNF}$.
 Let $x^{w_k} = x$ and $1_v = 1$, one can get a polynomial, in which the $k$-th coefficient gives the number of assignments that $k$ clauses are satisfied.
@@ -1505,19 +1463,14 @@ It is the hypergraph generalization of the independent set problem, where a set 
 The generic tensor network for the set packing problem $\mathcal{N}_{pack}$ also has a similar form as that for the independent set problem
 \begin{equation}\label{eq:packtensornetwork}
 \begin{split}
-    \mathcal{T} &= \{B^{(v)} | v\in V\} \cup \{W^{(\sigma)} | \sigma \in S\} \cup \{P\},\\
-    \Sigma &= \{s_\sigma | \sigma \in S\},\\
-    O &= P,\\
-    \lambda &= T \mapsto \begin{cases}
-                    (s_\sigma), & T = W^{(\sigma)}\\
-                    (s_{N(v, 1)}, \ldots, s_{N(v, d(v))}), & T = B^{(v)}\\
-                    (), & T = P
-                    \end{cases},
+    \Sigma &= \{s_\sigma \mid \sigma \in S\},\\
+    \mathcal{T} &= \{B^{(v)}_{s_{N(v, 1)} \ldots s_{N(v, d(v))}} \mid v\in V\} \cup \{W^{(\sigma)}_{s_\sigma} \mid \sigma \in S\},\\
+    O &= P,
 \end{split}
 \end{equation}
-where for each $v \in V$, we have the constraints over sets containing it $N(v) = \{\sigma| \sigma\in S \wedge v \in \sigma\}$ as
+where for each $v \in V$, we have the constraints over sets containing it $N(v) = \{\sigma\mid \sigma\in S \wedge v \in \sigma\}$ as
 \begin{equation}
-    B^{(v)}_{N(v, 1), N(v, 2),\ldots, N(v, d(v))} = \begin{cases}
+    B^{(v)}_{N(v, 1) N(v, 2)\ldots N(v, d(v))} = \begin{cases}
         1, & s_{N(v, 1)}+ s_{N(v, 2)} + \ldots + s_{N(v, d(v))}\leq 1,\\
         0, & \text{otherwise}.
     \end{cases}
@@ -1532,8 +1485,7 @@ and the vertex tensor for each $\sigma \in S$
 where $N(v, k)$ is the $k$th element in $N(v)$ and $d(v) = |N(v)|$ is the number of elements in $N(v)$.
 
 \begin{theorem}\label{thm:packcomplex}
-    If the addition and multiplication of tensor elements can be computed in time $O(1)$,
-    The tensor network representation of a set packing problem defined in \Cref{eq:packtensornetwork} can be contracted in time $cc(\mathcal{N}_{pack}) = O(|S|)2^{O({\rm tw}(H))}$, where $|S|$ is the number of sets,
+    The tensor network representation of a set packing problem (\Cref{eq:packtensornetwork}) can be contracted in $cc(\mathcal{N}_{pack}) = O(|S|)2^{O({\rm tw}(H))}$ number of additions and multiplications, where $|S|$ is the number of sets,
     $H$ is a hypergraph constructed by mapping a set $\sigma\in S$ to a vertex and element $v \in V$ to a hyperedge connecting sets containing it $N(v)$.
 \end{theorem}
 This can be proved by showing the hypergraph $H$ is the line graph of $\mathcal{N}_{cover}$.
@@ -1545,14 +1497,9 @@ To get the generic tensor network representation, we first map a set $\sigma \in
 Then the tensor network representation for the set covering problem $\mathcal{N}_{pack}$ can be expressed as
 \begin{equation}\label{eq:covertensornetwork}
 \begin{split}
-    \mathcal{T} &= \{W^{(\sigma)} | \sigma \in S\} \cup \{B^{(v)} | v \in V\} \cup \{P\},\\
-    \Sigma &= \{s_\sigma | \sigma \in \mathcal{S}\},\\
-    O &= P,\\
-    \lambda &= T \mapsto \begin{cases}
-                    (s_\sigma), & T = W^{(\sigma)}\\
-                    (s_{N(v, 1)},s_{N(v, 2)},\ldots,s_{N(\sigma, d(v))}), & T = B^{(v)}\\
-                    (), & T = P
-                    \end{cases},
+    \Sigma &= \{s_\sigma \mid \sigma \in \mathcal{S}\},\\
+    \mathcal{T} &= \{W^{(\sigma)}_{s_\sigma} \mid \sigma \in S\} \cup \{B^{(v)}_{s_{N(v, 1)}s_{N(v, 2)}\ldots s_{N(\sigma, d(v))}} \mid v \in V\},\\
+    O &= P,
 \end{split}
 \end{equation}
 where for each $s_\sigma$, we define a parameterized rank-one tensor indexed by it as
@@ -1563,9 +1510,9 @@ W^{(\sigma)} = \left(\begin{matrix}
     \end{matrix}\right)
 \end{equation}
 where $x_\sigma$ is a generic typed variable associated with $\sigma$ and $w_\sigma$ is a positive integer as the weight.
-For each element $v \in V$, we can define a constraint over all $s \in S$ containing this element, i.e. $N(v) = \{s | s \in S \land v\in s\}$, as
+For each element $v \in V$, we can define a constraint over all $s \in S$ containing this element, i.e. $N(v) = \{s \mid s \in S \land v\in s\}$, as
 \begin{equation}
-B^{(v)}_{s_{N(v, 1)}, s_{N(v, 2)}, \ldots, s_{N(v, d(v))}} = \begin{cases}
+B^{(v)}_{s_{N(v, 1)} s_{N(v, 2)} \ldots s_{N(v, d(v))}} = \begin{cases}
     0, & s_{N(v, 1)}=s_{N(v, 2)}=\ldots=s_{N(v, d(v))}=0,\\
     1, & \text{otherwise}.
 \end{cases}
@@ -1574,8 +1521,7 @@ where $N(v, k)$ is the $k$th element in $N(v)$ and $d(v) = |N(v)|$ is the number
 If a subset of $S$ does not include any sets containing element $v$, then the corresponding entry is zero.
 
 \begin{theorem}\label{thm:covercomplex}
-    If the addition and multiplication of tensor elements can be computed in time $O(1)$,
-    The tensor network representation of a set covering problem defined in \Cref{eq:covertensornetwork} can be contracted in time $cc(\mathcal{N}_{cover}) = O(|S|)2^{O({\rm tw}(H))}$, where $|S|$ is the number of sets,
+    The tensor network representation of a set covering problem (\Cref{eq:covertensornetwork}) can be contracted in $cc(\mathcal{N}_{cover}) = O(|S|)2^{O({\rm tw}(H))}$ number of additions and multiplications, where $|S|$ is the number of sets,
     $H$ is a hypergraph constructed by mapping a set $\sigma\in S$ to a vertex and element $v \in V$ to a hyperedge connecting sets containing it $N(v)$.
 \end{theorem}
 This can be proved by showing the hypergraph $H$ is the line graph of $\mathcal{N}_{cover}$.
