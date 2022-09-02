@@ -891,11 +891,11 @@ Similarly, we have the following corollary by combining the sum-product expressi
 Again, the theorem can be proved by relating it with its set algebra version in \Cref{thm:complexsetk}. Although likely, one cannot collect all configurations represented by a sum-product expression tree into a vector due to its extremely large configuration space,
 one can draw samples unbiasedly from it by direct sampling.
 \begin{theorem}
-    Let $G = (V, E)$ be a graph, its independent sets with size $k > \alpha(G)-K$ of can be unbiasedly sampled in time $\cc + O(|V|^2 M)$, where $M$ is the number of samples.
+    Let $G = (V, E)$ be a graph, its independent sets with size $k > \alpha(G)-K$ of can be unbiasedly sampled in time $\cc + O(|V||E| M)$, where $M$ is the number of samples.
 \end{theorem}
 \begin{proof}
 Similar to the proof of \Cref{thm:complexexpr}, we first obtain a sum-product tree representation of the configurations in time $\cc$.
-Then we show to generate a sample, the cost is $O(|V|^2)$.
+Then we show to generate a sample, the cost is $O(|V||E|)$.
 The sampling program starts from the root node and descends this tree recursively to the left and right siblings.
 If a node has type \texttt{SUM}, the program draws samples from the left and right siblings with a probability decided by the size of each sub-tree and returns the union of samples.
 Otherwise, if a node has type \texttt{PROD}, the program draws two sets of samples of equal sizes from its left and right siblings and returns the element-wise multiplication ($\lor^\circ$) of them.
@@ -934,13 +934,13 @@ The left and right siblings of the root node have sizes $|A|\times |B|$ and $|C|
 The sizes of $A, B, C$, and $D$ can be computed recursively until the program meets either a \texttt{LEAF} node or a \texttt{ZERO} node, which has a known size of $1$ or $0$.
 \end{example}
 
-Since the depth of the expression tree is $O(|V|)$ and the cost of each arithmetic operation is also $O(|V|)$, the overall time complexity to generate a sample is $O(|V|^2)$.
+Since the depth of the expression tree is $O(|E|)$ and the cost of each arithmetic operation is $O(|V|)$, the overall time complexity to generate a sample is $O(|V||E|)$.
 Proving the theorem.
 \end{proof}
 
 Similarly, if one is only interested in obtaining independent sets with largest $K$ sizes, we have the following corollary.
 \begin{corollary}
-    Let $G = (V, E)$ be a graph, its independent sets with size $k > \alpha(G)-K$ of can be unbiasedly sampled in time $O(K\log K)\cc + O(|V|^2 M)$, where $M$ is the number of samples.
+    Let $G = (V, E)$ be a graph, its independent sets with size $k > \alpha(G)-K$ of can be unbiasedly sampled in time $O(K\log K)\cc + O(|V||E| M)$, where $M$ is the number of samples.
 \end{corollary}
 
 \section{Weighted graphs}\label{sec:weighted}
