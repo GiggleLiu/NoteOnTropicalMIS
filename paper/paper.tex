@@ -109,19 +109,27 @@ A benchmark to demonstrate the performance of our algorithms can be found in bot
 %a maximal independent set is an independent set that is not a subset of any other independent set, but its size may not be the maximum. 
 
 \section{Tensor networks}\label{sec:tn}
-A tensor network is a multi-linear map composed of a collection of labelled tensors $\mathcal{T}$ and an indicator for the output tensor. It is formally defined as follows.
+A tensor network is a multi-linear map from a collection of labelled tensors $\mathcal{T}$ to an output tensor.
+It is formally defined as follows.
 \begin{definition}[Tensor Network~\cite{Cirac2021, Orus2014}]
-    A tensor network is a triple of $\mathcal{N} = (\Sigma, \Tensors, O)$.
-    $\Sigma$ is an alphabet of labels.
-    $\Tensors$ is a set of labelled tensors as the inputs, each $T_{\boldsymbol{\sigma}} \in \mathcal{T}$ is labeled by a vector of labels $\boldsymbol{\sigma} \in \Sigma^{r(T)}$, where $r(T)$ the rank of $T$.
-    $O$ is a labbeled tensor as the output.
+    A tensor network a multi-linear map specified by a triple of $\mathcal{N} = (\Sigma, \Tensors, \boldsymbol{\sigma}_o)$,
+    where $\Sigma$ is an alphabet of labels,
+    $\Tensors = \{T^{(1)}_{\boldsymbol{\sigma}_1}, T^{(2)}_{\boldsymbol{\sigma}_2}, \ldots, T^{(M)}_{\boldsymbol{\sigma}_M}\}$ is a set of tensors as the inputs,
+    and $\boldsymbol{\sigma}_o$ is a string of labels for the output tensor.
+    Each $T^{(k)}_{\boldsymbol{\sigma_k}} \in \mathcal{T}$ is labelled by a string of labels $\boldsymbol{\sigma}_k \in \Sigma^{r(T^{(k)})}$, where $r(T^{(k)})$ the rank of $T^{(k)}$.
+    The multi-linear map or the \emph{contraction} on this triple is
+    \begin{equation}
+        O_{\boldsymbol{\sigma}_o} = \sum_{\Sigma \setminus \sigma_o} \prod_{k=1}^{M} T^{(k)}_{\boldsymbol{\sigma_k}},
+    \end{equation}
+    where the summation runs over all possible configurations over the set of labels absent in the output tensor.
 \end{definition}
-The operation to evaluate a tensor network is called \textit{contraction}, which is defined as a summation of tensor element products over the labels not appearing in the output tensor.
-For example, the matrix multiplication is a special tensor network
+%The operation to evaluate a tensor network is called \textit{contraction}, which is defined as a summation of tensor element products over the labels not appearing in the output tensor.
+For example, the matrix multiplication can be specified as a tensor network
 \begin{equation}
-\mathcal{N}_{\rm matmul} = \left(\{i,j,k\}, \{A_{ij}, B_{jk}\}, C_{ik}\right),
+\mathcal{N}_{\rm matmul} = \left(\{i,j,k\}, \{A_{ij}, B_{jk}\}, ik\right),
 \end{equation}
-where $A, B$ and $C$ are matrices (two-dimensional tensors), among which $C$ is the output tensor, $(i,k),(i,j)$ and $(i,k)$ are labels associated with them. The contraction is defined as $C_{ik} = \sum_j A_{ij}B_{jk}$, where the subscripts are for tensor indexing, and the tensor dimensions with a same label must have the same size.
+where $A_{ij}$ and $B_{jk}$ are input matrices (two-dimensional tensors), and $(i,k)$ are labels associated to the output.
+The contraction is defined as $O_{ik} = \sum_j A_{ij}B_{jk}$, where the subscripts are for tensor indexing, and the tensor dimensions with a same label must have the same size.
 %can be viewed as a generalization of binary matrix multiplication to nary tensor contraction.
 %Generalized Einstein's notation is often used to represent a tensor network, where we use a label in the subscript to represent a degree of freedom.
 %One can enumerate these degrees of freedom and accumulate the product of tensor elements to the output tensor.
@@ -139,15 +147,14 @@ While this generalized form is equivalent in representation power, it can have s
 %However, introducing $\delta$ tensors may significantly increase the complexity of the tensor contraction. We illustrate this subtle point in \Cref{sec:tensorbad}.
 
 \begin{example}
-\blue{maybe remove this example?}
 \begin{equation}
 \begin{split}
     \Sigma &= \{i,j,k,l,m\},\\
     \mathcal{T} &= \{A_{jkm}, B_{mil}, V_{jm}\},\\
-    O &= C_{ijk},\\
+    \boldsymbol{\sigma}_o &= ijk,\\
     \end{split}
 \end{equation}
-is a tensor network that can be evaluated as $C_{ijk} = \sum_{ml}A_{jkm} B_{mil} V_{jm}$.
+is a tensor network that can be evaluated as $O_{ijk} = \sum_{ml}A_{jkm} B_{mil} V_{jm}$.
 Its hypergraph representation is shown below, where we use different colors to represent different hyperedges.
 
 \vspace{1em}
@@ -310,8 +317,8 @@ To the independent set problem on $G$ can be encoded as a tensor network $\mathc
 \begin{equation}\label{eq:mistensornetwork}
 \begin{split}
     \Sigma &= \{s_v \mid v \in V\},\\
-    \mathcal{T} &= \{W^{(v)}_{v} \mid v\in V\} \cup \{B^{(u, v)}_{uv} \mid (u, v) \in E\},\\
-    O &= P,
+    \mathcal{T} &= \{W^{(v)}_{s_v} \mid v\in V\} \cup \{B^{(u, v)}_{s_us_v} \mid (u, v) \in E\},\\
+    \boldsymbol{\sigma}_o &= \varepsilon,
     \end{split}
 \end{equation}
 where for each vertex $v$, we define a parameterized rank-one tensor associated with it as
@@ -332,7 +339,7 @@ and for each edge $(u, v) \in E$, we define a matrix $B$ indexed by $s_u$ and $s
 We map each vertex $v\in V$ to a label $s_v \in \{0, 1\}$ of dimension $2$, where we use $0$ ($1$) to denote a vertex is absent (present) in $I$.
 %We use the superscripts to denote which vertex or edge a tensor is associated to.
 These labels can be used as subscripts of tensors to index tensor elements, e.g.\ $W^{(v)}_0=1$ is the first element associated with $s_v=0$ and $W^{(v)}_1=x_v^{w_v}$ is the second element associated with $s_v=1$, where $x_v$ is a variable associated with vertex $v$.
-$P$ is the output tensor of rank $0$, i.e. a scalar.
+The labels associated to the output tensor is an empty string $\varepsilon$, meaning this tensor has rank $0$, i.e. a scalar.
 The independence constraint is encoded in the edge tensors, where we use $B_{11} = 0$ to denote two vertices connected by an edge cannot be both in the independent set. 
 The contraction of this tensor network is
 \begin{equation}\label{eq:idp}
@@ -409,7 +416,6 @@ For large-scale applications, it is also possible to slice over certain degrees 
 loop and accumulate over certain degrees of freedom so that one can have a smaller tensor network inside the loop due to the removal of these degrees of freedom.
 
 \begin{example}\label{eg:tensorcontraction}
-\blue{maybe remove this example too?}
 In this example, we map a 5-vertex graph (left) to a tensor network (right) and show how the contraction order reduces the time and space complexities.
     
 \centerline{\begin{tikzpicture}[
@@ -552,7 +558,7 @@ However, instead of evaluating this polynomial for a certain value, we are more 
 To this end, let us create a polynomial number data type by representing a polynomial $a_0 + a_1 x + \ldots + a_k x^k$ as a coefficient vector $a = (a_0, a_1, \ldots, a_k) \in \mathbb{R}^k$, e.g. $x$ is represented as $(0, 1)$.
 Then we can define an algebra among coefficient vectors, including a redefinition of additive identity and multiplicative identity.
 To avoid potential confusion, let us denote the additive identity as $\mymathbb{0}$, and the multiplicative identity is $\mymathbb{1}$.
-The algebra between the polynomials number $a$ of order $k_a$ and $b$ of order $k_b$ is defined as
+The algebra between the polynomials number $a$ of order $k_a$ and $b$ of order $k_b$ is specified as
 \begin{equation}
     \eqname{PN}
     \begin{split}
@@ -705,8 +711,8 @@ The proof is similar to proving \Cref{thm:complexpoly}, except only $k$ largest 
 
 The configuration enumeration of independent sets include, for example, the enumeration of all independent sets, the enumeration of all MISs, and the enumeration of independent sets with the largest several sizes.
 Recall that in the definition of a vertex tensor in \Cref{eq:vertextensor}, variables carry labels, so that one can read out all independent sets directly from the output polynomials.
-The multiplication between labeled variables is commutative while the summation of labeled variables forms a set.
-Intuitively, one can use a bit string as the representation of a labeled variable and use the bit-wise or $\lor^\circ$ as the multiplication operation.
+The multiplication between labelled variables is commutative while the summation of labelled variables forms a set.
+Intuitively, one can use a bit string as the representation of a labelled variable and use the bit-wise or $\lor^\circ$ as the multiplication operation.
 For example, in a 5-vertex graph, $x_2$ and $x_5$ can be represented as $01000$ and $00001$ respectively and their multiplication $x_2x_5$ can be represented as $01000 \lor^\circ 00001 = 01001$.
 To enumerate all independent sets, we designed an algebra on sets of bit strings:
 \begin{equation}
@@ -1183,12 +1189,12 @@ If we further let $w_i=1$, the second line of \Cref{eq:partition} is equivalent 
 In this section, we focus the discussion on the maximal independent sets problem since finding maximal cliques of a graph is equivalent to finding the maximal independent sets of its complement.
 Let $G=(V,E)$ be a graph, we denote the neighborhood of a vertex $v\in V$ as $N(v)$.
 A maximal independent set $I_m$ is an independent set such that no $v \in V$ satisfies $I_m \cap (\{v\} \cup N[v])  = \emptyset$, i.e.\ an independent set that cannot become a larger one by adding a new vertex.
-The corresponding tensor network $\mathcal{N}_{\rm mIS}(G)$ can be defined as
+The corresponding tensor network $\mathcal{N}_{\rm mIS}(G)$ can be specified as
 \begin{equation}\label{eq:maxistensornetwork}
 \begin{split}
     \Sigma &= \{s_v \mid v \in V\},\\
     \mathcal{T} &= \{T^{(v)}_{s_{N(v,1)} s_{N(v, 2)}\ldots s_{N(v,d(v))}s_v} \mid v\in V\},\\
-    O &= P,\\
+    \boldsymbol{\sigma}_o &= \varepsilon,\\
 \end{split}
 \end{equation}
 where we defined a tensor for each $v \in V$ and its neighborhood $N(v)$ as
@@ -1278,12 +1284,12 @@ The benchmark of computing the maximal independent set properties on $3$-regular
 \subsection{Matching problem}
 A $k$-matching in a graph $G=(V,E)$ is a set of $k$ edges that no two of which have a vertex in common.
 We map an edge $(u, v) \in E$ to a degree of freedom $\langle u, v\rangle \in \{0, 1\}$ in a tensor network, where $1$ means an edge is in the set and $0$ otherwise.
-The tensor network representation for the matching problem $\mathcal{N}_{match}$ can be defined as
+The tensor network representation for the matching problem $\mathcal{N}_{match}$ can be specified as
 \begin{equation}\label{eq:matchtensornetwork}
 \begin{split}
     \Sigma &= \{\langle u,v\rangle \mid (u, v) \in E\},\\
     \mathcal{T} &= \{W^{(v)}_{\langle v, N(v, 1)\rangle \langle v, N(v,2) \rangle \ldots \langle v, N(v, d(v))\rangle} \mid v\in V\} \cup \{B^{(u, v)}_{\langle u,v\rangle} \mid (u, v) \in E\},\\
-    O &= P,
+    \boldsymbol{\sigma}_o &= \varepsilon,
 \end{split}
 \end{equation}
 where for each $v\in V$, we define a vertex tensor over its neighborhood $N(v)$ as
@@ -1322,15 +1328,15 @@ Let $G=(V,E)$ be a graph. A vertex coloring is an assignment of colors to each v
 In a $k$-coloring problem, the number of colors is limited to less or equal to $k$.
 Let us use the 3-coloring problem as an example to show how to reduce it to tensor contractions.
 We first map a vertex $v \in V$ to a degree of freedom $c_v\in\{0,1,2\}$.
-The tensor network for the vertex coloring problem $\mathcal{N}_{3-color}(G)$ can be formally defined as
+The tensor network for the vertex coloring problem $\mathcal{N}_{3-color}(G)$ can be specified as
 \begin{equation}\label{eq:colortensornetwork}
 \begin{split}
     \Sigma &= \{c_v \mid v \in V\},\\
     \mathcal{T} &= \{W^{(v)}_{c_v} \mid v\in V\} \cup \{B^{(u, v)}_{c_uc_v} \mid (u, v) \in E\},\\
-    O &= P,\\
+    \boldsymbol{\sigma}_o &= \varepsilon,\\
 \end{split}
 \end{equation}
-where for each vertex $v \in V$, we define a tensor labeled by $c_v$
+where for each vertex $v \in V$, we define a tensor labelled by $c_v$
 \begin{equation}
     W^{(v)} = \left(\begin{matrix}
         1_{c_{v} = r}\\
@@ -1362,15 +1368,15 @@ Similarly, one can define an edge coloring problem by defining the tensor networ
 In graph theory, a cut is a partition of the vertices of a graph into two disjoint subsets,
 which is also known as the spin-glass problem in statistical physics.
 Let $G=(V,E)$ be a graph. We associate a weight $w_v$ to each $v\in V$. To reduce the cutting problem on $G$ to the contraction of a tensor network, we first define a Boolean degree of freedom $s_v\in\{0, 1\}$ for each vertex $v\in V$.
-The tensor network representation for the cutting problem $\mathcal{N}_{cut}$ can be formally defined as
+The tensor network representation for the cutting problem $\mathcal{N}_{cut}$ can be specified as
 \begin{equation}\label{eq:cuttensornetwork}
 \begin{split}
     \mathcal{T} &= \{B^{(u, v)}_{s_us_v} \mid (u, v) \in E\},\\
     \Sigma &= \{s_v \mid v \in V\},\\
-    O &= P,\\
+    \boldsymbol{\sigma}_o &= \varepsilon,\\
 \end{split}
 \end{equation}
-where for each edge $(u,v)\in E$, we define an edge matrix labeled by $(s_u, s_v)$ as
+where for each edge $(u,v)\in E$, we define an edge matrix labelled by $(s_u, s_v)$ as
 \begin{equation}
     B^{(u, v)} = \left(\begin{matrix}
         1 & x_{v}^{w_{uv}}\\
@@ -1388,12 +1394,12 @@ in which the $k$th coefficient is two times the number of cut configurations tha
 \subsection{Dominating Set}
 In graph theory, a dominating set for a graph $G = (V, E)$ is a subset $D \subseteq V$ such that every vertex not in $D$ is adjacent to at least one member of $D$.
 To reduce this problem to the contraction of a tensor network, we first map a vertex $v\in V$ to a Boolean degree of freedom $s_v\in\{0, 1\}$.
-The tensor network for the dominating set problem $\mathcal{N}_{dom}$ can be formally defined as
+The tensor network for the dominating set problem $\mathcal{N}_{dom}$ can be specified as
 \begin{equation}\label{eq:domtensornetwork}
 \begin{split}
     \Sigma &= \{s_v \mid v \in V\},\\
-    \mathcal{T} &= \{T^{(v)}_{s_{N(v,1)}s_{N(v, 2)} \ldots s_{N(v,d(v))}, s_v} \mid v\in V\},\\
-    O &= P,\\
+    \mathcal{T} &= \{T^{(v)}_{s_{N(v,1)}s_{N(v, 2)} \ldots s_{N(v,d(v))} s_v} \mid v\in V\},\\
+    \boldsymbol{\sigma}_o &= \varepsilon,\\
 \end{split}
 \end{equation}
 where for each vertex $v$, we define a tensor on its closed neighborhood $\{v\} \cup N(v)$ as
@@ -1428,7 +1434,7 @@ where $M$ is the number of clauses, $C^{(k)}$ is the $k$th clause and $C^{(k)}_i
 The standard tensor network can be used to study the counting version of the satisfiability problem~\cite{Biamonte2015}, while in the following, we will show a generic reduction from the problem of solving a CNF to a tensor network contraction for solving more solution space properties.
 We first map each Boolean literal $v\in V$ to a Boolean degree of freedom $s_v \in \{0, 1\}$.
 $s_v = 0$ stands for variable $v$ having value \texttt{false} while $s_a=1$ stands for having value \texttt{true}.
-% For example, a $k$-th clause $\neg a \vee b \vee \neg c$ can be mapped to a tensor labeled by $(s_a, s_b, s_c)$.
+% For example, a $k$-th clause $\neg a \vee b \vee \neg c$ can be mapped to a tensor labelled by $(s_a, s_b, s_c)$.
 % \begin{equation}
 % T^{(k)} = \left(\begin{matrix}
 % \left(\begin{matrix}
@@ -1442,12 +1448,12 @@ $s_v = 0$ stands for variable $v$ having value \texttt{false} while $s_a=1$ stan
 % \end{matrix}\right),
 % \end{equation}
 % where $w_k$ is a weight associated with a clause. There is only one entry $(s_a, s_b, s_c) = (1, 0, 1)$ that makes this clause unsatisfied. The tensor network representation is
-The tensor network $\mathcal{N}_{CNF}$ can be formally defined as
+The tensor network $\mathcal{N}_{CNF}$ can be specified as
 \begin{equation}\label{eq:sattensornetwork}
 \begin{split}
     \Sigma &= \{s_v \mid v \in V\},\\
-    \mathcal{T} &= \{W^{(v)}_v \mid v \in V\} \cup \{T^{(k)}_{s_{N(k,1)} s_{N(k, 2)} s_{N(k,3))}} \mid k=1,\ldots,M\},\\
-    O &= P,\\
+    \mathcal{T} &= \{W^{(v)}_v \mid v \in V\} \cup \{T^{(k)}_{s_{N(k,1)} s_{N(k, 2)}\ldots s_{N(k,d(k)))}} \mid k=1,\ldots,M\},\\
+    \boldsymbol{\sigma}_o &= \varepsilon,\\
 \end{split}
 \end{equation}
 where a tensor defined on literal $v \in V$ is
@@ -1460,7 +1466,7 @@ where a tensor defined on literal $v \in V$ is
 and a tensor defined on caluse $C^{(k)}$ is
 \begin{equation}
 T^{(k)}_{s_{N(k, 1)} s_{N(k, 2)} \ldots s_{N(k, d(k))}} = \begin{cases}
-    x^{}, &C^{(k)} ~is~ satisfied ~by~ (s_{N(k, 1)}, s_{N(k, 2)}, \ldots, s_{N(k, d(k))})\\
+    x^{w_k}, &C^{(k)} ~is~ satisfied ~by~ (s_{N(k, 1)}, s_{N(k, 2)}, \ldots, s_{N(k, d(k))})\\
     1, &{\rm otherwise}
 \end{cases},
 \end{equation}
@@ -1481,7 +1487,7 @@ The generic tensor network for the set packing problem $\mathcal{N}_{pack}$ also
 \begin{split}
     \Sigma &= \{s_\sigma \mid \sigma \in S\},\\
     \mathcal{T} &= \{B^{(v)}_{s_{N(v, 1)} \ldots s_{N(v, d(v))}} \mid v\in V\} \cup \{W^{(\sigma)}_{s_\sigma} \mid \sigma \in S\},\\
-    O &= P,
+    \boldsymbol{\sigma}_o &= \varepsilon,
 \end{split}
 \end{equation}
 where for each $v \in V$, we have the constraints over sets containing it $N(v) = \{\sigma\mid \sigma\in S \wedge v \in \sigma\}$ as
@@ -1510,12 +1516,12 @@ This can be proved by showing the hypergraph $H$ is the line graph of $\mathcal{
 Suppose one has a finite set $V$ and a list of subsets of $V$, denoted as $S$.
 The set covering problem aims to find the minimum number of sets in $S$ that incorporate (cover) all of elements in $V$.
 To get the generic tensor network representation, we first map a set $\sigma \in S$ to a Boolean degree of freedom $s_\sigma\in\{0, 1\}$.
-Then the tensor network representation for the set covering problem $\mathcal{N}_{pack}$ can be expressed as
+Then the tensor network representation for the set covering problem $\mathcal{N}_{pack}$ can be specified as
 \begin{equation}\label{eq:covertensornetwork}
 \begin{split}
     \Sigma &= \{s_\sigma \mid \sigma \in \mathcal{S}\},\\
     \mathcal{T} &= \{W^{(\sigma)}_{s_\sigma} \mid \sigma \in S\} \cup \{B^{(v)}_{s_{N(v, 1)}s_{N(v, 2)}\ldots s_{N(\sigma, d(v))}} \mid v \in V\},\\
-    O &= P,
+    \boldsymbol{\sigma}_o &= \varepsilon,
 \end{split}
 \end{equation}
 where for each $s_\sigma$, we define a parameterized rank-one tensor indexed by it as
@@ -1560,7 +1566,7 @@ The bounded contraction consists of three stages as shown in \Cref{fig:bounding}
 The crucial part is computing the masks in step (b). Note that these masks correspond to tensor elements with non-zero gradients to the MIS size; we can compute these masks by back-propagating the gradients.
 To derive the back-propagation rule for tropical tensor contraction,
 we first reduce the problem to finding the back-propagation rule of a tropical matrix multiplication $C = A B$.
-Since $ C_{ik} = \bigoplus_{j} \ A_{ij} \odot B_{jk} = \max_{j} \ A_{ij} \odot B_{jk}$ with tropical algebra, we have the following inequality
+Since $ O_{ik} = \bigoplus_{j} \ A_{ij} \odot B_{jk} = \max_{j} \ A_{ij} \odot B_{jk}$ with tropical algebra, we have the following inequality
 \begin{equation}
     A_{ij} \odot B_{jk} \leq C_{ik}.
 \end{equation}
