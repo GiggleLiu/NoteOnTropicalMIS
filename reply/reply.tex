@@ -1,0 +1,245 @@
+%\documentclass[]{article}
+%\usepackage[colorlinks=true,urlcolor=blue,citecolor=blue,linkcolor=blue]{hyperref}
+\documentclass[longbibliography]{article}
+\usepackage[colorlinks=true,urlcolor=blue,citecolor=blue,linkcolor=blue]{hyperref}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage[affil-it]{authblk}
+\usepackage{graphicx} % Include figure files
+%\usepackage{subfig}
+\usepackage{subcaption}
+\usepackage{bm}% bold math
+\usepackage{color}
+%\bibliographystyle{pnas2009}
+\usepackage{fullpage}
+\newcommand{\s}{\mathbf{s}}
+
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\else % if luatex or xelatex
+\ifxetex
+\usepackage{mathspec}
+\else
+\usepackage{fontspec}
+\fi
+\defaultfontfeatures{Ligatures=TeX,Scale=MatchLowercase}
+\fi
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{%
+\usepackage[]{microtype}
+\UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\PassOptionsToPackage{hyphens}{url} % url is loaded by hyperref
+%\usepackage[unicode=true]{hyperref}
+%\hypersetup{
+%            pdfborder={0 0 0},
+%            breaklinks=true}
+\urlstyle{same}  % don't use monospace font for urls
+\IfFileExists{parskip.sty}{%
+\usepackage{parskip}
+}{% else
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+}
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+\setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{0}
+% Redefines (sub)paragraphs to behave more like sections
+\ifx\paragraph\undefined\else
+\let\oldparagraph\paragraph
+\renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+\let\oldsubparagraph\subparagraph
+\renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+\definecolor{or}{rgb}{0.9,0.3,0.1}
+
+% set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{skull}
+\usepackage[affil-it]{authblk}
+\usepackage{graphicx}% Include figure files
+%\usepackage{subfig}
+\usepackage{subcaption}
+\usepackage{bm}% bold math
+\usepackage{color}
+%\bibliographystyle{pnas2009}
+\usepackage{fullpage}
+\usepackage{enumitem}
+\usepackage{booktabs}       % professional-quality tables
+
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{%
+\usepackage[]{microtype}
+\UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\PassOptionsToPackage{hyphens}{url} % url is loaded by hyperref
+%\usepackage[unicode=true]{hyperref}
+%\hypersetup{
+%            pdfborder={0 0 0},
+%            breaklinks=true}
+\urlstyle{same}  % don't use monospace font for urls
+\IfFileExists{parskip.sty}{%
+\usepackage{parskip}
+}{% else
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{0}
+% Redefines (sub)paragraphs to behave more like sections
+\ifx\paragraph\undefined\else
+\let\oldparagraph\paragraph
+\renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+\let\oldsubparagraph\subparagraph
+\renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+%\definecolor{or}{rgb}{0.0,0.5,0.9}
+\definecolor{or}{rgb}{0.9,0.3,0.1}
+%\definecolor{gr}{gray}{0.4}
+
+% set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+
+%%%%%% Comment related
+\newcommand{\red}[1]{[{\bf  \color{red}{ST: #1}}]}
+\newcommand{\xred}[1]{[{\bf  \color{red}{\sout{ST: #1}}}]}
+\newcommand{\green}[1]{[{\bf  \color{green}{XG: #1}}]}
+\newcommand{\xgreen}[1]{[{\bf  \color{green}{\sout{XG: #1}}}]}
+% \newcommand{\blue}[1]{[{\bf  \color{blue}{JG: #1}}]}
+% \newcommand{\xblue}[1]{[{\bf  \color{blue}{\sout{JG: #1}}}]}
+\newcommand{\cyan}[1]{[{\bf  \color{cyan}{ML: #1}}]}
+\newcommand{\xcyan}[1]{[{\bf  \color{cyan}{\sout{ML: #1}}}]}
+\newcommand{\purple}[1]{[{\bf  \color{purple}{MC: #1}}]}
+\newcommand{\xpurple}[1]{[{\bf  \color{purple}{\sout{MC: #1}}}]}
+\newcommand{\material}[1]{\iffalse[{\bf  \color{cyan}{Material: #1}}]\fi}
+\newcommand{\referee}[1]{\item {\color{blue}{#1}}}
+
+
+\date{}
+
+\begin{document}
+
+\subsection{Letter to the Editor}\label{header-n558}
+
+Dear Dr. Oseledets,
+
+Thank you for your handling and careful consideration of our manuscript (MS\#M150178) titled ``Computing solution space properties of combinatorial optimization problems via generic tensor networks'' and offering us the opportunity to address the referee's comments and improve our manuscript. 
+We appreciate that you also spent time to read the manuscript and are delighted to hear that you deem it may merit publication after minor revision.
+
+We have revised the manuscript according to the referee's constructive suggestions.
+Below, we provide a detailed point-to-point response to all of the referee's comments, as well as a summary of the changes we have introduced in the main text, figures, and appendices. We thank the referee's feedback and we think these revisions improved our manuscript. We believe we have satisfactorily addressed all referee's questions and the manuscript will be a valuable contribution to the SISC journal.
+
+Thank you again for your consideration! \\
+
+Sincerely,\\
+Jin-Guo Liu, Xun Gao, Madelyn Cain, Mikhail D. Lukin and Sheng-Tao Wang
+
+%\newpage
+
+\subsection{List of Main Changes in the Manuscript}\label{header-n30}
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item We added a definition on tensor network in \textit{Definition 2.1}.
+\item We defined the tensor network representation for all combinatorial optimization problems rigorously in Eq.~4.3 and Appendix B.
+\item We restructured the manuscript and added several theorems and proofs to the main claims in the paper, including the computational complexity of solution space properties in the main text and tensor networks in Appendix B.
+\item We fixed a number of typos and sharpened some sentences according to the Referee's suggestions.
+\end{enumerate}
+
+\subsection{Responses to the Referee}
+
+\begin{enumerate}[start=0]
+
+\referee{
+\textbf{Referee's comments}: This is a review for "Computing solution space properties of combinatorial optimization problems via generic tensor networks" by Jin-Guo Liu, Xun Gao, Madelyn Cain, Mikhail Lukin, and Sheng-Tao Wang. The main contribution of the paper is claimed to be "introduction of a unified framework to compute solution space properties of a broad class of combinatorial optimization problems."}
+
+{\bf Response:}
+We thank the referee for a succinct summary of our main contributions.
+
+
+\referee{
+\textbf{Referee's comments}: Comments:
+1) line 85, combinatoric problems → combinatorial problems.}
+
+{\bf Response:}
+We've fixed the typo. Thanks the referee for pointing this point. 
+
+\referee{\textbf{Referee's comments}:
+2) line 120, "commutative semiring is a field that needs not to have an additive inverse and multiplicative inverse"
+
+I feel the authors meant "need not have" as having the additive inverse and multiplicative inverse does not violate the properties of a commutative semiring. Also, every field has multiplicative and additive inverse by definition so technically a commutative semiring is not a field. Maybe the authors could rephrase the statement to make more sense.}
+
+{\bf Response:}
+We thank the referee for pointing this out. We agree with the referee that the original sentence is not technically correct. We've changed the sentence to ``In contrast with a field, a commutative semiring does not need not to have an additive inverse and a multiplicative inverse”.
+
+\referee{\textbf{Referee's comments}:
+3) line 129, $\oplus$ resembles XOR, it may not be the best notation in my opinion in the context of computer science.}
+
+{\bf Response:}
+After some considerations, we did not find a better symbol than $\oplus$ to represent the generic plus, but we've added in the manuscript a footnote to emphasize this notation is different from the XOR in computer science when we first introduce the notation: ``We use the $\oplus$ operator throughout this paper to denote the generic addition, which is not the logical \texttt{XOR} operation, in which the symbol typically represents in computer science”. This should be able to reduce confusion from readers.
+
+\referee{\textbf{Referee's comments}:
+4) line 154, ``we map a vertex $v \in V$ to a label $s_v \in {0,1}$ of dimension 2 where we use 0(1) to denote a vertex is absent(present) in the set”
+
+which set? I? there is no label for the set also the type of the map(domain and co-domain) for $s_v$ is not specified, from the context and the word dimension it seems to be a pair for each v i.e. $sv:V\rightarrow{0,1}\times2$ but from the description it seems to be a single number i.e. an element of the set ${0,1}$.}
+
+{\bf Response:} We thank the referee for pointing out the confusion. We've revised the sentence to be the following: ``We map each vertex $v\in V$ to a label $s_v \in \{0, 1\}$, where we use $0$ or $1$ to denote a vertex is absent or present in $I$, respectively”. $s_v$ is a single number and an element of the set $\{0, 1\}$. We removed ``of dimension 2” as well to avoid confusion.
+
+\referee{\textbf{Referee's comments}:
+5) Line 156-157, equation (4.1) is said to be indexed by $s_v$ but $s_v$ does not appear in the equation.}
+
+{\bf Response:} We removed the reference to $s_v$ in the sentence. 
+
+\referee{\textbf{Referee's comments}:
+6) Line 158-159, " $x_v$ is a variable associated with $v$".
+
+What kind of variable? What does raising it to an exponent mean in line 159?
+}
+
+{\bf Response:} 
+We clarified this and changed the text to ``$x_v$ is an  element of some commutative semiring (e.g., listed in Table 1) associated with vertex $v$ and its power with an integer is defined by repeated multiplication.'' in the main text.
+
+\referee{
+\textbf{Referee's comments}: A lot of effort seems to have been put in making the paper but due to the informal style of narration from the very beginning, misinterpretation is very likely, especially for a newcomer in the field, and can be quite confusing for specialists as well. The basic definitions for e.g. of tensor networks, contractions etc. could be formulated more rigorously to avoid ambiguity which would aid smoother reading of the paper. I would suggest specifying the types for the maps and variables wherever possible as there are plenty of them.
+At present, the work has the flavor of a review paper. In order to address this, the main results obtained could be formulated as theorems or propositions to make them clearly visible in the body of the text as it's hard to locate them at the moment.
+ }
+
+{\bf Response:}
+We thank the referee for acknowledging our efforts in this work and appreciate 
+their constructive comments on how to reduce confusion from readers by improving the presentations of the paper. We followed the suggestions from the referee and added the definition of tensor networks in Definition 2.1. 
+More extensively, we reorganized the main results in the theorem-proof style to make them more clear to readers and specialists.
+
+\referee{
+\textbf{Referee's comments}: Also, I recommend the authors better compare with prior work on this topic for e.g. https://arxiv.org/pdf/1405.7375.pdf and relevant references therein.
+}
+
+{\bf Response:}
+We thank the referee for pointing out this relevant work. Besides citing and comparing with the paper the referee suggested, we have added another review paper in the introduction of section 3 from one of the authors of the suggested paper~\cite{Biamonte2017}.
+We have also added more discussion in Appendix B.6 about the work the referee mentioned, where we constructed the tensor network for the satisfiability problem.
+
+\end{enumerate}
+
+\bibliographystyle{unsrt}
+\bibliography{refs}
+
+
+\end{document}
