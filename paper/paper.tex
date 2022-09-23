@@ -263,7 +263,7 @@ and for each edge $(u, v) \in E$, we define a matrix $B$ as
 \end{equation}
 We map each vertex $v\in V$ to a label $s_v \in \{0, 1\}$, where we use $0$ or $1$ to denote a vertex is absent or present in $I$, respectively.
 These labels can be used as subscripts of tensors to index tensor elements, e.g.\ $W^{(v)}_0=1$ is the first element associated with $s_v=0$ and $W^{(v)}_1=x_v^{w_v}$ is the second element associated with $s_v=1$, where $x_v$ is an  element of some commutative semiring (e.g., listed in \Cref{tbl:generictypes}) associated with vertex $v$ and its power with an integer is defined by repeated multiplication.
-The labels associated to the output tensor is an empty string $\varepsilon$, meaning this tensor has rank $0$, i.e.~a scalar.
+The labels associated to the output tensor is an empty string $\varepsilon$, meaning this tensor has rank $0$, i.e.~the output is a scalar.
 The independence constraint is encoded in the edge tensors, where we use $B^{(u, v)}_{11} = 0$ to denote two vertices connected by an edge $(u, v)$ cannot be both in the independent set. 
 The contraction of this tensor network is
 \begin{equation}\label{eq:idp}
@@ -329,7 +329,7 @@ A better approach to evaluate a tensor network is: to find a good pair-wise tens
 Let us denote the line graph, a graph obtained by mapping an edge in the original graph to a vertex and connect two vertices if and only if their associated edges in the original graph share a common vertex, of the hypergraph representation of a tensor network $\mathcal{N}$ as $L(\mathcal{N})$.
 A contraction order of $\mathcal{N}$ corresponds to a tree decomposition of $L(\mathcal{N})$ and the largest intermediate tensor has a rank equal to the width of its tree decomposition~\cite{Markov2008}.
 Therefore, an optimal (in terms of space complexity) contraction order corresponds to the tree decomposition of $L(\mathcal{N})$ with the smallest width (or the treewidth ${\rm tw}(L(\mathcal{N})$). The contraction complexity is $O(|\mathcal{N}|)2^{O({\rm tw}(L(\mathcal{N})))}$, where $|\mathcal{N}|$ is the number of tensors in $\mathcal{N}$~\cite{Markov2008}.
-For the independent set problem on graph $G = (V, E)$, the line graph of the hypergraph representation of the tensor network in \Cref{eq:mistensornetwork} is the same as the graph $G$ up to some isolated vertices, hence the contraction complexity of this tensor network with an optimal contraction order is $O(|E|)2^{O({\rm tw}(G))}$.
+For the independent set problem on graph $G = (V, E)$, the line graph of the hypergraph representation of the tensor network in \Cref{eq:mistensornetwork} is isomorphic to the graph $G$ up to some isolated vertices, hence the contraction complexity of this tensor network with an optimal contraction order is $O(|E|)2^{O({\rm tw}(G))}$.
 \end{proof}
  
 In practice, it is difficult to find an optimal contraction order for large tensor networks because finding the treewidth is a well-known NP-hard problem.
@@ -575,7 +575,7 @@ Algebra \Cref{eq:tropical} and \Cref{eq:countingtropical} are the same as those 
 By replacing the tensor elements from the standard number type to the tropical numbers in \Cref{eq:tropical}, the vertex and edge tensors transforms to
 \begin{equation}\label{eq:tensor-topical}
     \left(W^{\rm T}\right)^{(v)} = \left(\begin{matrix}
-        1 \\
+        \mymathbb{1} \\
         \infty^{w_v}
     \end{matrix}\right),   
     \qquad \qquad
@@ -894,7 +894,7 @@ The computation of $s \odot t$ is a maximum sum combination problem that can be 
     Let $G = (V, E)$ be a weighted graph. Its $K$ largest independent sets can be computed in time $O(|V|* K\log K)\cc$.
 \end{corollary}
 To find solutions corresponding to the largest $K$ sizes, one can combine the extended tropical algebra with the bit-string algebra (\Cref{eq:singleconfig}).
-Since the $\oplus$ operation of the configuration sampler will not be used in the combined algebra, the resulting configurations are deterministic and complete.
+Since the $\oplus$ operation of the configuration sampler is not used in the combined algebra, the resulting configurations are deterministic and complete.
 
 \section{Example applications} \label{sec:examples}
 
