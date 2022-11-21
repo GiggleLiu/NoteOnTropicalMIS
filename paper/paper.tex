@@ -911,7 +911,7 @@ This quantity arises in statistical mechanics of hard-square lattice gases~\cite
 
 \begin{figure}[t] 
     \centering
-    \includegraphics[width=\textwidth, trim={0cm 1cm 0cm 1cm}, clip]{figures/lattices.pdf}
+    \includegraphics[width=\textwidth, trim={0cm 1cm 0cm 1cm}, clip]{lattices.pdf}
     \caption{The types of graphs used in the case study in \Cref{sec:entropy}.
     The lattice dimensions are $L\times L$. (a) square lattice graphs. (b) square lattice graphs with a filling factor $p=0.8$.
     (c) King's graphs. (d) King's graphs with a filling factor $p=0.8$.}
@@ -920,7 +920,7 @@ This quantity arises in statistical mechanics of hard-square lattice gases~\cite
 
 \begin{figure}[t] 
     \centering
-    \includegraphics[width=\textwidth, trim={0cm 0cm 0cm 0cm}, clip]{figures/fig5.pdf}
+    \includegraphics[width=\textwidth, trim={0cm 0cm 0cm 0cm}, clip]{fig5.pdf}
     \caption{Mean entropy for lattice gases on graphs defined in \Cref{fig:lattices}.
     We sampled $1000$ instances for $p=0.8$ lattices and the error bar is too small to be visible.
     The horizontal black dashed lines are for $\lim_{L\rightarrow \infty} F(L,L)^{1/L^2}$ for the corresponding non-disordered square lattice and King's graphs.
@@ -947,7 +947,7 @@ that the King's graphs with defects mapped from hard MIS instances have a very s
 very different pair-wise Hamming distributions are obtained in \Cref{fig:hamming}(b), where we observed the multiple peak structure when the control parameter $\gamma$ is big enough. It indicates the existence of disconnected clusters in the configuration space of the MIS problem on $3$-regular graphs.
 We expect this numerical tool can be used to understand this phenomenon better and to further investigate the graph properties and the geometry of the configuration spaces for a variety of graph instances.
 \begin{figure} 
-    \includegraphics[width=\textwidth, trim={0.0cm 1cm 0.0cm 0cm}, clip]{figures/fig6.pdf}
+    \includegraphics[width=\textwidth, trim={0.0cm 1cm 0.0cm 0cm}, clip]{fig6.pdf}
     \caption{Pairwise Hamming distances distribution for configurations sampled from independent sets with sizes $\geq \lceil\gamma \times \alpha(G)\rceil$.
     In each plot, the $x$-axis is the Hamming distance normalized by the total number of vertices and the $y$-axis is the probability.
     }
@@ -957,7 +957,7 @@ We expect this numerical tool can be used to understand this phenomenon better a
 \subsection{Analyzing quantum and classical algorithms for Maximum Independent Set}
 \begin{figure} 
     \centering
-    \includegraphics[width=.65\textwidth, trim={0cm 0cm 0cm 0cm}, clip]{figures/exp_configurations.pdf}
+    \includegraphics[width=.65\textwidth, trim={0cm 0cm 0cm 0cm}, clip]{exp_configurations.pdf}
     \caption{Visualization of experimental outputs of a quantum algorithm for solving the maximum independent set problem~\cite{Ebadi2022}.
     Each vertex represents an independent set, and each edge represents a pair of independent sets that differ by a swap operation or a vertex addition/removal.}
     \label{fig:exp_configuratoins}
@@ -1395,7 +1395,7 @@ This can be proved by showing the hypergraph $H$ is the line graph of $\mathcal{
 \section{Bounding the MIS enumeration space}\label{sec:bounding}
 \begin{figure}
     \centering
-    \includegraphics[width=0.9\textwidth, trim={0cm 0cm 0cm 0cm}, clip]{figures/masktree.pdf}
+    \includegraphics[width=0.9\textwidth, trim={0cm 0cm 0cm 0cm}, clip]{masktree.pdf}
     \caption{Bounded enumeration of maximum independent sets. Here, a circle is a tensor, an arrow specifies the execution direction of a function, $\overline A$ is the Boolean mask for $A$ and $\circ$ is the Hadamard (element-wise) multiplication. (a) is the forward pass with tropical algebra (\Cref{eq:tropical}) for computing $\alpha(G)$.
      (b) is the backward pass for computing Boolean gradient masks.
      (c) is the masked tensor network contraction with tropical algebra combined with sets (\Cref{eq:countingtropicalset}) for enumerating configurations.}
@@ -1540,7 +1540,7 @@ The main goal of this section is to show the relative computation time for calcu
 
 \begin{figure} 
     \centering
-    \includegraphics[width=\textwidth, trim={0cm 0cm 0cm 0cm}, clip]{figures/fig1.pdf}
+    \includegraphics[width=\textwidth, trim={0cm 0cm 0cm 0cm}, clip]{fig1.pdf}
     \caption{Benchmark results for computing different solution space properties of independent sets of random three-regular graphs with different tensor element types.
     The time in these plots only includes tensor network contraction, without taking into account the contraction order finding and just-in-time compilation time.
     Legends are properties, algebra, and devices that we used in the computation; one can find the corresponding computed solution space property in Table 1 in the main text.
@@ -1576,7 +1576,7 @@ In \Cref{fig:benchmark-maximal}(b), one can see counting maximal independent set
 
 \begin{figure} 
     \centering
-    \includegraphics[width=\textwidth, trim={0cm 0cm 0cm 0cm}, clip]{figures/fig2.pdf}
+    \includegraphics[width=\textwidth, trim={0cm 0cm 0cm 0cm}, clip]{fig2.pdf}
     \caption{Benchmarks of computing different solution space properties of the maximal independent sets (ISs) problem on random three regular graphs at different sizes.
     (a) time and space complexity of tensor network contraction. 
     (b) The wall clock time for counting and enumeration of maximal ISs. % The missing data is due to the memory limit.
@@ -1877,7 +1877,7 @@ The first execution of this function will be a bit slow due to Julia's just-in-t
 After that, the subsequent runs will be faster.
 The following diagram lists possible combinations of input arguments, where functions in the \texttt{Graph} are mainly defined in the package \texttt{Graphs}, and the rest can be found in \texttt{GenericTensorNetworks}.
 
-\centerline{\includegraphics[width=0.8\textwidth, trim={0cm 1cm 0cm 1cm}, clip]{figures/fig7.pdf}}
+\centerline{\includegraphics[width=0.8\textwidth, trim={0cm 1cm 0cm 1cm}, clip]{fig7.pdf}}
 
 The code we will show below is a gist of how the above package was implemented, which is mainly for pedagogical purpose.
 It covers most of the topics in the paper without caring much about performance.
@@ -1894,6 +1894,6 @@ It is worth mentioning that this project depends on multiple open source package
 They can be installed in a similar way to \texttt{GenericTensorNetworks}.
 After installing the required packages, one can open a Julia REPL, and copy-paste the following code snippet into it.
 
-\lstinputlisting[breaklines]{../democode/demo.jl}
+\lstinputlisting[breaklines]{demo.jl}
 
 \end{document}

@@ -9,14 +9,14 @@ function mis_configurations(n, seed; order, writefile, sc_target=12)
     mask = Matrix{Bool}(reshape(readdlm(fname)[seed+1,4:end], n, n))
     g = diagonal_coupled_graph(mask)
     gp = Independence(g; optimizer=GreedyMethod(), simplifier=MergeGreedy())
-    res_c = solve(gp, "counting max$order")[]
+    res_c = solve(gp, CountingMax(order))[]
     println("Graph $seed, n = $n, max2 count = $res_c")
     if sum(res_c.coeffs) > 10000000
         @warn "degeneracy too high!"
         return res_c, nothing
     end
     gp = Independence(g; optimizer=TreeSA(sc_target=sc_target), simplifier=MergeGreedy())
-    s2, configs = (res = solve(gp, "configs max$order (bounded)")[]; (res.maxorder, res.coeffs))
+    s2, configs = (res = solve(gp, ConfigsMax(order; bounded=true))[]; (res.maxorder, res.coeffs))
     @assert all(res_c.coeffs .== length.(configs))
     for i=1:order
         ofname = joinpath(folder, "$seed-$(i-1).dat")
@@ -62,7 +62,8 @@ for (n, seeds) in [
     #(10, 81:99)
     #(11, 0:99)
     #(12, 51:99)
-    (10, [156, 773, 105, 222, 417, 269, 309, 350, 786, 590, 109, 83, 243, 699, 425, 174, 925])
+    #(10, [156, 773, 105, 222, 417, 269, 309, 350, 786, 590, 109, 83, 243, 699, 425, 174, 925])
+    (9, [263])
     ]
     for seed in seeds
         @time mis_configurations(n, seed; order=2, writefile=true, sc_target=14)
