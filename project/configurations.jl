@@ -15,12 +15,12 @@ function mis_configurations(n, seed; order, writefile, sc_target=12)
         @warn "degeneracy too high!"
         return res_c, nothing
     end
-    gp = Independence(g; optimizer=TreeSA(sc_target=sc_target), simplifier=MergeGreedy())
-    s2, configs = (res = solve(gp, ConfigsMax(order; bounded=true))[]; (res.maxorder, res.coeffs))
+    gp = Independence(g; optimizer=TreeSA(sc_target=sc_target, ntrials=1, niters=10), simplifier=MergeGreedy())
+    s2, configs = (res = solve(gp, ConfigsMax(order; bounded=true, tree_storage=true))[]; (res.maxorder, res.coeffs))
     @assert all(res_c.coeffs .== length.(configs))
     for i=1:order
         ofname = joinpath(folder, "$seed-$(i-1).dat")
-        writefile && write(ofname, toMatrix(configs[order-i+1]))
+        writefile && write(ofname, toMatrix(ConfigEnumerator(collect(configs[order-i+1]))))
     end
     return res_c, configs
 end
@@ -63,7 +63,12 @@ for (n, seeds) in [
     #(11, 0:99)
     #(12, 51:99)
     #(10, [156, 773, 105, 222, 417, 269, 309, 350, 786, 590, 109, 83, 243, 699, 425, 174, 925])
-    (9, [263])
+    #(9, [263])
+    #(7, [189, 623, 354, 40, 323, 173, 661, 813, 156, 576, 345, 162, 35, 965, 762, 336, 870, 1, 901, 346, 418, 476, 258, 667, 593, 500, 761, 453, 343, 625, 582, 721, 862, 245, 860, 907, 718, 143, 874, 778, 716, 270, 887, 566, 322, 294, 745, 50, 899, 933])
+    #(8, [188, 970, 91, 100, 72, 316, 747, 216, 168, 852, 7, 743, 32, 573, 991, 957, 555, 936, 342, 950, 863, 489, 306, 398, 453, 923, 440, 817, 225, 574, 455, 763, 160, 118, 127, 810, 557, 862, 98, 359, 978, 64, 890, 711, 919, 592, 75, 998, 407, 597]),
+    #(9, [805, 144, 651, 560, 442, 234, 408, 866, 263, 873, 91, 99, 566, 64, 854, 57, 849, 953, 43, 210, 79, 240, 58, 655, 954, 988, 759, 605, 700, 297, 624, 836, 220, 586, 344, 843, 477, 261, 917, 573, 649, 875, 934, 335, 916, 827, 970, 537, 896, 812]),
+    (10, [983, 828, 61, 156, 773, 105, 222, 417, 269, 309, 350, 786, 590, 109, 83, 243, 699, 425, 174, 925, 410, 15, 3, 473, 583, 638, 408, 381, 200, 756, 217, 833, 1, 196, 375, 550, 683, 396, 595, 338, 28, 790, 25, 606, 192, 233, 966, 260, 466, 476]),
+    (11, [571, 808, 438, 748, 802, 454, 13, 401, 596, 126, 412, 645, 263, 977, 208, 622, 725, 971, 328, 895, 701, 338, 601, 505, 658, 159, 290, 456, 550, 457, 656, 780, 128, 165, 849, 796, 94, 723, 782, 935, 40, 169, 630, 353, 530, 525, 709, 61, 179, 358])
     ]
     for seed in seeds
         @time mis_configurations(n, seed; order=2, writefile=true, sc_target=14)
